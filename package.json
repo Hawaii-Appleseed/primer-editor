@@ -1,0 +1,13 @@
+{
+  "name": "primer-editor",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The docsync draft editor \u2014 a browser WYSIWYG editor that runs a report's real Python renderer via Pyodide. Ships with the Budget Primer as its demo + test fixture.",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

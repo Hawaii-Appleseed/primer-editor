@@ -1,0 +1,9 @@
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+report2027/web/__export-*.html
+/tmp/

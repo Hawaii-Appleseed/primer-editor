@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#2F3E46">
+<title>Draft editor — your reports</title>
+<!--
+  The app's front door. Before this there was no "open the app" — only a link
+  straight into one report's editor. This lists every report in projects.json
+  as a card and lets you start a new one; picking a card is exactly the
+  ?project= link edit.html already understands, so nothing about the editor
+  itself changed to make this work.
+
+  Named start.html, not index.html: that name is already taken by the actual
+  published report (built by CI from content.md) — this app and that report
+  are served from the same directory, and only one of them can be "index".
+-->
+<style>
+  :root { --ink:#2F3E46; --sage:#6B9E78; --deep:#52796F; --mint:#E8EDE6;
+          --pale:#D6E0D2; --line:#C9D6CD; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; min-height:100%; background:var(--mint);
+    font:14px/1.5 system-ui, sans-serif; color:var(--ink); }
+  header { display:flex; align-items:center; gap:12px; padding:16px 24px;
+    background:var(--ink); color:#fff; }
+  header h1 { font-size:16px; margin:0; letter-spacing:.3px; font-weight:600; }
+  header .sub { flex:1; font-size:12px; opacity:.75; }
+  #new { background:var(--sage); color:#fff; border:0; border-radius:6px;
+    padding:8px 16px; font:600 13px system-ui; cursor:pointer; }
+  #new:hover { background:var(--deep); }
+  #new:disabled { opacity:.5; cursor:default; }
+  .ghost { background:none; color:#fff; border:1px solid rgba(255,255,255,.45);
+    border-radius:6px; padding:8px 14px; font:600 13px system-ui; cursor:pointer; }
+  .ghost:hover { border-color:#fff; background:rgba(255,255,255,.08); }
+  .sec-h { font-size:13px; text-transform:uppercase; letter-spacing:.6px;
+    color:var(--deep); margin:34px 0 12px; }
+  .rfile { display:flex; align-items:center; gap:12px; background:#fff;
+    border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px; }
+  .rfile b { font-weight:600; }
+  .rfile .path { flex:1; color:#7A8E92; font-size:12px; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; }
+  .rfile button { border:1px solid var(--line); background:#fff; border-radius:6px;
+    padding:5px 12px; font:13px system-ui; cursor:pointer; }
+  .rfile button:hover { border-color:var(--sage); }
+  main { max-width:960px; margin:0 auto; padding:28px 24px 60px; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:18px; text-decoration:none; color:var(--ink); display:flex;
+    flex-direction:column; gap:8px; transition:box-shadow .15s, transform .15s; }
+  .card:hover { box-shadow:0 10px 26px rgba(47,62,70,.14); transform:translateY(-1px); }
+  .card .icon { width:34px; height:34px; border-radius:8px; background:var(--pale);
+    display:grid; place-items:center; color:var(--deep); font-size:16px; }
+  .card .name { font-weight:600; font-size:14px; }
+  .card .id { font:11px ui-monospace, monospace; color:#8B9A90; }
+  #empty { color:#5B6E66; padding:40px 0; text-align:center; }
+  #stat { padding:0 24px; font-size:12px; color:#5B6E66; min-height:16px; }
+
+  #modal-bg { position:fixed; inset:0; background:rgba(47,62,70,.45);
+    display:none; align-items:flex-start; justify-content:center; padding-top:14vh;
+    z-index:50; }
+  #modal-bg.open { display:flex; }
+  #modal { background:#fff; border-radius:10px; width:min(420px, 92vw);
+    box-shadow:0 20px 50px rgba(0,0,0,.28); overflow:hidden; }
+  #modal header { background:var(--ink); padding:12px 16px; }
+  #modal header h2 { margin:0; font-size:14px; color:#fff; }
+  #modal .body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+  #modal label { font-size:12px; color:#5B6E66; display:flex; flex-direction:column; gap:5px; }
+  #modal label[hidden] { display:none; }   /* the flex rule above beats [hidden]'s default */
+  #modal input, #modal select { font:14px system-ui; padding:8px 10px;
+    border:1px solid var(--line); border-radius:6px; background:#fff; }
+  #modal .row { display:flex; gap:8px; justify-content:flex-end; }
+  #modal button { font:600 13px system-ui; padding:7px 16px; border-radius:6px;
+    cursor:pointer; border:1px solid var(--line); background:#fff; color:var(--ink); }
+  #modal button.primary { background:var(--sage); border-color:var(--sage); color:#fff; }
+  #modal button.primary:hover { background:var(--deep); border-color:var(--deep); }
+  #modal button.primary:disabled { opacity:.5; cursor:default; }
+  #modal .err { color:#C2703A; font-size:12px; min-height:14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Draft editor</h1>
+  <span class="sub" id="hstat">loading your reports…</span>
+  <button id="open-html" class="ghost">Open HTML…</button>
+  <button id="adopt" class="ghost">Adopt existing…</button>
+  <button id="connect" class="ghost">Connect a repo…</button>
+  <button id="new" disabled>+ New report</button>
+</header>
+<main>
+  <div id="grid"></div>
+  <p id="empty" hidden>No reports yet — start one with "+ New report".</p>
+  <section id="recent-wrap" hidden>
+    <h2 class="sec-h">Recent files</h2>
+    <div id="recent"></div>
+  </section>
+</main>
+<p id="stat"></p>
+
+<div id="modal-bg">
+  <div id="modal">
+    <header><h2 id="np-title">New report</h2></header>
+    <div class="body">
+      <label>Repo (owner/name)
+        <input id="np-repo" placeholder="owner/repository" autocomplete="off" spellcheck="false">
+      </label>
+      <label>Deploy branch
+        <input id="np-branch" placeholder="main" autocomplete="off" spellcheck="false">
+      </label>
+      <label id="np-path-l" hidden>Path to the project in the repo
+        <input id="np-path" placeholder="docs/primer" autocomplete="off" spellcheck="false">
+      </label>
+      <label><span id="np-name-l">Title</span>
+        <input id="np-name" placeholder="e.g. Housing Report 2027" autocomplete="off">
+      </label>
+      <label id="np-slug-l">Short id (used in the URL and file paths)
+        <input id="np-slug" placeholder="housing-report-2027" autocomplete="off">
+      </label>
+      <label id="np-size-l">Page size
+        <select id="np-size">
+          <option value="letter" selected>Letter — 8.5 × 11 in</option>
+          <option value="a4">A4 — 8.27 × 11.69 in</option>
+          <option value="legal">Legal — 8.5 × 14 in</option>
+        </select>
+      </label>
+      <p class="err" id="np-err"></p>
+      <div class="row">
+        <button type="button" id="np-cancel">Cancel</button>
+        <button type="button" id="np-create" class="primary">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// --- registry ----------------------------------------------------------------
+let REGISTRY = {};
+async function loadRegistry() {
+  try { REGISTRY = JSON.parse(await (await fetch('projects.json', { cache: 'no-store' })).text()); }
+  catch (e) { REGISTRY = {}; }
+}
+
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+// --- opening a file from disk ------------------------------------------------
+// The File System Access API gives a real handle, not a one-shot copy: it can
+// be READ BACK later and stored in IndexedDB, which is what makes a genuine
+// "Recent files" list possible rather than a list of names you cannot reopen.
+// Permission does not survive a session, so reopening re-asks — quietly if the
+// browser still trusts the grant, with a click if not.
+//
+// Chromium only (as is the file_handlers manifest entry that lets the OS launch
+// this app WITH a document). Same browser the PDF path already assumes.
+const RECENT_KEY = 'ds-recent-files';
+const fsOk = () => typeof window.showOpenFilePicker === 'function';
+
+let idb = null;
+async function store() {
+  if (!idb) idb = await import('https://cdn.jsdelivr.net/npm/idb-keyval@6.3.0/+esm');
+  return idb;
+}
+async function recentList() {
+  try { return (await (await store()).get(RECENT_KEY)) || []; } catch (e) { return []; }
+}
+async function recentAdd(handle) {
+  try {
+    const kv = await store();
+    const list = (await kv.get(RECENT_KEY)) || [];
+    const same = await Promise.all(list.map(e => e.handle.isSameEntry
+      ? e.handle.isSameEntry(handle).catch(() => false) : false));
+    const kept = list.filter((_, i) => !same[i]);
+    kept.unshift({ name: handle.name, handle, at: Date.now() });
+    await kv.set(RECENT_KEY, kept.slice(0, 12));
+  } catch (e) { /* a Recent list that fails to record is not worth an error */ }
+  renderRecent();
+}
+
+async function renderRecent() {
+  const host = $('recent'), wrap = $('recent-wrap');
+  if (!fsOk()) { wrap.hidden = true; return; }
+  const list = await recentList();
+  if (!list.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  host.innerHTML = '';
+  list.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'rfile';
+    const when = new Date(entry.at);
+    row.innerHTML = `<b>${esc(entry.name)}</b>`
+      + `<span class="path">${when.toLocaleDateString()} ${when.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+    const open = document.createElement('button');
+    open.textContent = 'Open';
+    open.addEventListener('click', () => openHandle(entry.handle));
+    row.appendChild(open);
+    host.appendChild(row);
+  });
+}
+
+/** Re-granting permission on a stored handle. Chrome drops the grant between
+ *  sessions, so a Recent entry is a request, not a key. */
+async function ensureRead(handle) {
+  const opts = { mode: 'read' };
+  if ((await handle.queryPermission(opts)) === 'granted') return true;
+  return (await handle.requestPermission(opts)) === 'granted';
+}
+
+async function openHandle(handle) {
+  if (!await ensureRead(handle)) {
+    $('stat').textContent = 'permission denied for that file';
+    return;
+  }
+  if (handle.kind === 'directory') {
+    const index = await indexDir(handle);
+    const pages = [...index.keys()].filter(k => /\.html?$/i.test(k))
+      .sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b));
+    if (!pages.length) { $('stat').textContent = `no .html file under ${handle.name}`; return; }
+    let pick = pages[0];
+    if (pages.length > 1) {
+      const listed = pages.slice(0, 20).map((p, i) => `${i + 1}. ${p}`).join('\n');
+      const ans = prompt(`Which page?\n\n${listed}`, '1');
+      if (ans === null) return;
+      pick = pages[(parseInt(ans, 10) || 1) - 1] || pages[0];
+    }
+    await importHtmlFile(await index.get(pick).getFile(), index, pick);
+    return;
+  }
+  // A lone file has no folder to resolve its stylesheets against, so it
+  // traces unstyled — the folder picker is the path that works.
+  const file = await handle.getFile();
+  await importHtmlFile(file, null, file.name);
+}
+
+/** Index every file under a picked folder, so a page's own stylesheets and
+ *  images can resolve. This is not a nicety: an HTML file opened on its own
+ *  has no base to resolve `href="styles.css"` against, so it lays out
+ *  UNSTYLED — and the import traces whatever the browser laid out. Without
+ *  the folder, the trace is of a page nobody has ever seen. */
+async function indexDir(dir, prefix = '', out = new Map(), depth = 0) {
+  if (depth > 4) return out;                     // deep asset trees, not whole disks
+  for await (const [name, handle] of dir.entries()) {
+    const path = prefix ? `${prefix}/${name}` : name;
+    if (handle.kind === 'file') out.set(path, handle);
+    else if (!name.startsWith('.') && name !== 'node_modules') {
+      await indexDir(handle, path, out, depth + 1);
+    }
+  }
+  return out;
+}
+
+/** Point every relative reference at a blob: URL of the real file, so the
+ *  hidden frame lays the page out exactly as it would on disk. The reverse
+ *  map is what lets an imported image be traced back to its bytes: a blob:
+ *  URL stops meaning anything the moment the tab closes. */
+async function localizeHtml(html, index, htmlPath) {
+  const dir = htmlPath.includes('/') ? htmlPath.slice(0, htmlPath.lastIndexOf('/') + 1) : '';
+  const made = new Map();
+  const urlFor = async ref => {
+    const clean = ref.split('#')[0].split('?')[0];
+    if (!clean || /^(data:|https?:|blob:|mailto:|tel:|javascript:|#)/i.test(clean)) return null;
+    for (const cand of [dir + clean, clean, clean.replace(/^\.\//, ''), clean.replace(/^\//, '')]) {
+      const norm = cand.replace(/\/\.\//g, '/').replace(/[^/]+\/\.\.\//g, '');
+      const h = index.get(norm);
+      if (!h) continue;
+      const file = await h.getFile();
+      const u = URL.createObjectURL(file);
+      made.set(u, { path: norm, file });
+      return u;
+    }
+    return null;
+  };
+  const rewrite = async (text, re, build) => {
+    const parts = [];
+    let last = 0, m;
+    while ((m = re.exec(text))) {
+      const u = await urlFor(m[m.length - 1]);
+      if (!u) continue;
+      parts.push(text.slice(last, m.index), build(m, u));
+      last = m.index + m[0].length;
+    }
+    parts.push(text.slice(last));
+    return parts.join('');
+  };
+  let out = await rewrite(html, /\b(src|href)\s*=\s*["']([^"']+)["']/gi,
+                          (m, u) => `${m[1]}="${u}"`);
+  // CSS url(...) too — background images are as much of the design as <img>.
+  out = await rewrite(out, /url\(\s*["']?([^"')]+)["']?\s*\)/gi, (m, u) => `url("${u}")`);
+  return { html: out, made };
+}
+
+async function pickHtml() {
+  if (typeof window.showDirectoryPicker !== 'function') {
+    $('stat').textContent = 'opening files needs a Chromium browser (Chrome or Edge)';
+    return;
+  }
+  let dir;
+  try { dir = await window.showDirectoryPicker({ mode: 'read' }); }
+  catch (e) { return; }                          // the picker was dismissed
+  await recentAdd(dir);
+  await openHandle(dir);
+}
+
+/** Load the page in a hidden iframe at the design width and let the BROWSER
+ *  lay it out — then read the geometry back. The alternative is implementing
+ *  a CSS engine.
+ *
+ *  A file: URL has no base for its own relative CSS/images, so the markup is
+ *  served to the frame as a blob and given a <base> pointing at wherever the
+ *  editor is; anything the page pulls from its own folder will not resolve,
+ *  which the import reports rather than hides. */
+const DESIGN_W = 1200;
+let PENDING_ASSETS = [];
+const fileToB64 = file => new Promise((res, rej) => {
+  const fr = new FileReader();
+  fr.onload = () => res(String(fr.result).split(',')[1] || '');
+  fr.onerror = rej;
+  fr.readAsDataURL(file);
+});
+async function importHtmlFile(file, index, htmlPath) {
+  $('stat').textContent = `reading ${file.name}…`;
+  let html = await file.text();
+  let made = new Map();
+  if (index) ({ html, made } = await localizeHtml(html, index, htmlPath || file.name));
+
+  const frame = document.createElement('iframe');
+  frame.setAttribute('sandbox', 'allow-same-origin');   // no scripts: a static, deterministic DOM
+  frame.style.cssText = `position:fixed;left:-99999px;top:0;width:${DESIGN_W}px;height:2000px;border:0`;
+  document.body.appendChild(frame);
+  const done = new Promise(r => { frame.onload = r; });
+  frame.srcdoc = html;
+  await done;
+  await new Promise(r => setTimeout(r, 600));           // webfonts and images settle
+
+  const doc = frame.contentDocument;
+  // Grow the frame to the full document so nothing is measured while clipped.
+  const full = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+  frame.style.height = full + 'px';
+  await new Promise(r => setTimeout(r, 250));
+
+  const m = await import('./htmlimport.js');
+  const pageW = DESIGN_W / m.DPI;
+  const extracted = m.extractDoc(doc, { pageId: 1, pageW });
+  frame.remove();
+
+  // An imported image points at a blob: URL right now, which stops meaning
+  // anything the moment this tab closes. Trace each back to the file it came
+  // from, give it a stable assets/ name, and carry the BYTES along for the
+  // commit that creates the project.
+  const assets = [];
+  const renamed = new Map();
+  let seq = 0;
+  for (const [url, info] of made) {
+    if (!/\.(png|jpe?g|gif|svg|webp|avif)$/i.test(info.path)) continue;
+    const base = info.path.split('/').pop().toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+    let name = base;
+    while (assets.some(a => a.name === name)) name = `${++seq}-${base}`;
+    renamed.set(url, 'assets/' + name);
+    assets.push({ name, file: info.file });
+  }
+  extracted.boxes.forEach(b => {
+    if (!b.md) return;
+    renamed.forEach((to, from) => { b.md = b.md.split(from).join(to); });
+  });
+  // Only the assets something actually references are worth committing.
+  const used = new Set();
+  extracted.boxes.forEach(b => [...(b.md || '').matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)]
+    .forEach(mm => used.add(mm[1])));
+  const keep = assets.filter(a => used.has('assets/' + a.name));
+
+  const total = extracted.boxes.length + extracted.shapes.length + extracted.tables.length;
+  if (!total) {
+    $('stat').textContent = `${file.name}: nothing visible to import`;
+    return;
+  }
+  const title = (doc.title || file.name.replace(/\.html?$/i, '')).trim();
+  const { layout, content } = m.toProjectFiles(extracted, title);
+  sessionStorage.setItem('ds-import', JSON.stringify({
+    name: file.name, title, layout, content,
+    page: { w: pageW, h: extracted.heightIn },
+    counts: { boxes: extracted.boxes.length, shapes: extracted.shapes.length,
+              tables: extracted.tables.length, images: keep.length },
+  }));
+  // Bytes cannot ride sessionStorage; they wait in memory for the create step.
+  PENDING_ASSETS = await Promise.all(keep.map(async a =>
+    ({ name: a.name, b64: await fileToB64(a.file) })));
+  $('stat').textContent = `${file.name}: ${extracted.boxes.length} text, `
+    + `${extracted.shapes.length} shapes, ${extracted.tables.length} tables, `
+    + `${keep.length} images — ${extracted.heightIn.toFixed(1)}in tall. Name it to create.`;
+  openModal();
+  $('np-name').value = title;
+  $('np-slug').value = title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '').slice(0, 40) || 'imported-page';
+}
+
+$('open-html').addEventListener('click', pickHtml);
+
+// The OS launching this app WITH a file (double-click, or Open With) arrives
+// here — the manifest's file_handlers entry is what registers it.
+if ('launchQueue' in window && 'files' in LaunchParams.prototype) {
+  launchQueue.setConsumer(async params => {
+    if (!params.files || !params.files.length) return;
+    const handle = params.files[0];
+    await recentAdd(handle);
+    await openHandle(handle);
+  });
+}
+renderRecent();
+
+function renderGrid() {
+  const ids = Object.keys(REGISTRY);
+  $('grid').innerHTML = ids.map(id => {
+    const p = REGISTRY[id];
+    return `<a class="card" href="edit.html?project=${encodeURIComponent(id)}">
+      <span class="icon">▤</span>
+      <span class="name">${esc(p.name || id)}</span>
+      <span class="id">${esc(id)}</span>
+    </a>`;
+  }).join('');
+  $('empty').hidden = ids.length > 0;
+}
+
+// --- credentials ---------------------------------------------------------------
+// Deliberately the small, self-contained version: a pasted token, not the
+// device-flow sign-in edit.html offers. This page only ever makes ONE kind of
+// commit (scaffolding a brand-new project's files) — building the full
+// sign-in flow twice, in two files that could then drift apart, is a worse
+// outcome than asking whoever creates a report to paste a token, or (more
+// often) simply already having one: this page and edit.html share the same
+// origin, so a token saved from signing in there is already usable here.
+function currentRepo() {
+  const first = Object.values(REGISTRY)[0];
+  return (first && first.repo) || '';
+}
+async function askToken(repo) {
+  const tok = localStorage.getItem('docsync-pat');
+  if (tok) return tok;
+  const entered = prompt('Paste a GitHub fine-grained token to create a report\n\n' +
+    'github.com -> Settings -> Developer settings -> Fine-grained tokens\n' +
+    `Repository access: only ${repo}\n` +
+    'Permissions -> Repository permissions -> Contents: Read and WRITE\n\n' +
+    "Already signed in from the editor? That token works here too — this " +
+    "won't ask again.");
+  if (!entered) return null;
+  localStorage.setItem('docsync-pat', entered.trim());
+  return entered.trim();
+}
+async function gh(repo, path, opts = {}) {
+  const tok = localStorage.getItem('docsync-pat');
+  const r = await fetch(`https://api.github.com/repos/${repo}/${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${tok}`, Accept: 'application/vnd.github+json',
+               ...(opts.headers || {}) },
+  });
+  if (!r.ok) throw new Error(`GitHub ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  return r.json();
+}
+
+// --- scaffold a new report -----------------------------------------------------
+// One atomic commit creates everything a report needs: its true source
+// (projects/<slug>/…, alongside report2027/ at the repo root — the same
+// convention the Budget Primer itself uses) AND a matching staged copy under
+// docs/primer/projects/<slug>/engine/…, which is what the editor actually
+// fetches before any draft exists. Keeping the two in sync after this is the
+// same job build.yml already does for report2027 — extending it to a new
+// project is a follow-up, not part of creating one (see STANDALONE.md). Until
+// then: anyone actively editing always reads live from GitHub (a draft, once
+// started, never uses the staged copy), so staleness only touches a first-time
+// visitor with no draft in progress on a project whose staged copy hasn't been
+// refreshed since a publish.
+const PALETTE = ["#6B9E78","#95B7A2","#CAD2C5","#E8EDE6","#D6E0D2","#52796F","#354F52","#2F3E46","#FFFFFF"];
+
+// Page size is chosen ONCE, here, at creation — not something the editor lets
+// you change on an existing report. A brand-new report has nothing placed on
+// it yet, so a size is free to pick; the Budget Primer's own report has ~900
+// lines of pixel-precise figure layout built for Letter, and retrofitting a
+// resize onto THAT is real, uninspected work (STANDALONE.md) this stays out of.
+const PAGE_SIZES = {
+  letter: { w: 8.5, h: 11.0 },
+  a4:     { w: 8.27, h: 11.69 },
+  legal:  { w: 8.5, h: 14.0 },
+};
+
+function contentTemplate(title) {
+  return `<!--
+  This is your report's content, in the editor's own format.
+
+  [[key]] marks the block of text that follows it. The editor's "+ Section"
+  button adds and removes these for you — you rarely need to type one by
+  hand. [[sources]] is required, even with just the placeholder below: it is
+  where "Cite" and the Sources panel keep your citation list.
+-->
+
+[[title]]
+${title}
+
+[[extra.page1.intro]]
+Start writing here. Use the toolbar's "+ Section" button to add more.
+
+[[sources]]
+[example]: Replace or delete this placeholder source — https://example.com
+`;
+}
+
+// Page size lives here as literal constants, baked in at creation time — not
+// read from the manifest at render time. manifest.json is never staged into
+// the Pyodide filesystem (only the files this project's OWN manifest lists
+// under "files" are), so there is nothing on disk for this script to read it
+// from; the editor's own page.w/h (used for its drag/snap geometry) and this
+// template's CSS both come from the SAME choice made once, in this modal.
+function renderTemplate(w, h) {
+  return `"""Minimal renderer scaffolded by "New report" in the draft editor.
+
+Mirrors just enough of the Budget Primer's renderer to work with the same
+editor: any number of [[extra.page1.*]] sections (the editor's "+ Section"
+button adds these) plus the required [[sources]] block. Replace this with
+real page layout whenever the report needs more than "prose, in order" —
+nothing about the editor requires this particular design.
+
+Page size (${w}in x ${h}in) is fixed at creation time, in the CSS below —
+see the comment on PAGE_SIZES in start.html for why this project does not
+read it back out of the manifest at render time.
+"""
+from pathlib import Path
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent               # .../projects/<slug>/
+REPO = ROOT.parent.parent        # /repo, where the shared docsync/ package lives
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from docsync.content import Content
+
+C = Content(ROOT / "content.md")
+
+body = C.fn.resolve(C.extras("page1"))
+notes = C.fn.endnotes()
+endnotes = "".join(
+    f'<li id="en{i + 1}">{txt} <a href="{url}">{url}</a></li>'
+    for i, (txt, url) in enumerate(notes)
+)
+
+html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{C.text("title")}</title>
+<style>
+  :root {{ --page-w: ${w}in; --page-h: ${h}in; }}
+  body {{ margin:0; background:#D6E0D2; font:15px/1.6 system-ui, sans-serif; color:#2F3E46; }}
+  .page {{ width:var(--page-w); min-height:var(--page-h); margin:24px auto;
+           background:#fff; box-shadow:0 4px 18px rgba(0,0,0,.12);
+           padding:0.75in 0.62in; box-sizing:border-box; }}
+  h1 {{ font-size:28px; margin:0 0 .6em; }}
+  h2.sub {{ font-size:20px; margin:1.4em 0 .5em; }}
+  h3.sub2 {{ font-size:16px; margin:1.2em 0 .4em; }}
+  .endnotes {{ font-size:13px; color:#52796F; }}
+  @media print {{
+    @page {{ size: ${w}in ${h}in; margin: 0; }}
+    body {{ background:#fff; }}
+    .page {{ box-shadow:none; margin:0; width:${w}in; height:${h}in; }}
+  }}
+</style>
+</head>
+<body>
+<section class="page">
+<h1>{C.t("title")}</h1>
+{body}
+{f'<ol class="endnotes">{endnotes}</ol>' if endnotes else ''}
+</section>
+</body>
+</html>
+"""
+
+out = ROOT / "web" / "index.html"
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(html)
+`;
+}
+
+/** The renderer an IMPORTED document needs. renderTemplate above renders
+ *  prose in order, which is right for something written and wrong for
+ *  something traced: every word already has a place. This renders the
+ *  editor's other half — the one behind "+ Page" — and nothing else, so it
+ *  never changes as the document is edited. All of it comes from layout.json.
+ */
+function placedTemplate(w, h) {
+  return `"""Renderer for a PLACED document — content positioned, not flowing.
+
+Scaffolded by "Open HTML…" in the draft editor. Everything on the page is a
+shape, a text box or a table in layout.json, which is what the editor writes;
+content.md holds only the title and the citation list every project needs.
+
+Page size (${w}in x ${h}in) is the imported page's own measured size, baked in
+here at creation — see PAGE_SIZES in start.html for why a project does not
+read it back out of its manifest at render time.
+"""
+from pathlib import Path
+import os
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+REPO = ROOT.parent.parent
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from docsync.content import Content
+from docsync.layout import Layout
+
+_LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (ROOT / "layout.json"))
+_CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (ROOT / "content.md"))
+_OUT = Path(os.environ.get("DOCSYNC_OUT") or (ROOT / "web" / "index.html"))
+
+L = Layout(_LAYOUT, page=(${w}, ${h}))
+C = Content(_CONTENT, styles=L)
+
+PAGES = [1]
+
+body = "".join(
+    f'<section class="page" data-page="{pid}"{L.fill_attr(f"page.{pid}")}>'
+    f'{L.layer(pid)}{L.text_boxes(pid)}{L.tables_html(pid)}'
+    f'</section>'
+    for pid in PAGES
+)
+body = C.fn.resolve(body)
+
+notes = C.fn.endnotes()
+endnotes = "".join(
+    f'<li id="en{i + 1}">{txt} <a href="{url}">{url}</a></li>'
+    for i, (txt, url) in enumerate(notes)
+)
+
+html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{C.text("title")}</title>
+<style>
+  body {{ margin:0; background:#D6E0D2; font:15px/1.5 system-ui, sans-serif;
+         color:#2F3E46; }}
+  /* position:relative is load-bearing: every placed object is absolute
+     against its page, so the page must be the containing block or the whole
+     document stacks at the window's origin. */
+  .page {{ width:${w}in; min-height:${h}in; margin:24px auto; background:#fff;
+          box-shadow:0 4px 18px rgba(0,0,0,.12); position:relative;
+          overflow:hidden; box-sizing:border-box; }}
+  .ds-textbox p {{ margin:0 0 .5em; }}
+  .ds-textbox p:last-child {{ margin-bottom:0; }}
+  .ds-table {{ border-collapse:collapse; }}
+  .ds-table td, .ds-table th {{ border:1px solid #C9D6CD; padding:4px 7px;
+          text-align:left; }}
+  .endnotes {{ font-size:13px; color:#52796F; }}
+  @media print {{
+    @page {{ size: ${w}in ${h}in; margin: 0; }}
+    body {{ background:#fff; }}
+    .page {{ box-shadow:none; margin:0; page-break-after:always; }}
+  }}
+</style>
+</head>
+<body>
+{body}
+{f'<section class="page"><ol class="endnotes">{endnotes}</ol></section>' if endnotes else ''}
+</body>
+</html>
+"""
+
+_OUT.parent.mkdir(parents=True, exist_ok=True)
+_OUT.write_text(html)
+print(f"wrote {_OUT} ({len(html):,} bytes)")
+`;
+}
+
+function manifestTemplate(slug, repo, size, placed, branch) {
+  const files = {
+    "engine/docsync/content.py": "docsync/content.py",
+    "engine/docsync/normalise.py": "docsync/normalise.py",
+    "engine/docsync/layout.py": "docsync/layout.py",
+    [`engine/projects/${slug}/tools/render_report.py`]: `projects/${slug}/tools/render_report.py`,
+    [`engine/projects/${slug}/content.md`]: `projects/${slug}/content.md`,
+  };
+  // A placed document IS its layout.json — without it in the manifest the
+  // renderer would boot with nothing to draw.
+  if (placed) files[`engine/projects/${slug}/layout.json`] = `projects/${slug}/layout.json`;
+  return JSON.stringify({
+    id: slug,
+    repo,
+    branch: branch || 'main',
+    files,
+    render: `projects/${slug}/tools/render_report.py`,
+    content: `projects/${slug}/content.md`,
+    layout: placed ? `projects/${slug}/layout.json` : null,
+    out: `projects/${slug}/web/index.html`,
+    assets: `projects/${slug}/web/assets`,
+    page: size,
+    margins: { side: 0.62, top: 0.75 },
+    pages: [["page1", "Page 1"]],
+    palette: PALETTE,
+  }, null, 2) + '\n';
+}
+
+async function fetchText(url) {
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`HTTP ${r.status} — ${url}`);
+  return r.text();
+}
+
+// The registry (projects.json) is THIS editor's own file — it lives in, and is
+// served from, the host repo, whatever repo a given project's files live in.
+// So it always commits here, even when the project it names lives elsewhere.
+function hostBranch() {
+  const def = Object.values(REGISTRY).find(p => !(p.base || '')) || Object.values(REGISTRY)[0];
+  return (def && def.branch) || 'main';
+}
+async function commitRegistry(nextRegistry, message) {
+  const repo = currentRepo(), branch = hostBranch();
+  if (!await askToken(repo)) throw new Error('cancelled — no token');
+  const content = JSON.stringify(nextRegistry, null, 2) + '\n';
+  const base = (await gh(repo, `git/ref/heads/${branch}`)).object.sha;
+  const tree = await gh(repo, 'git/trees', { method: 'POST', body: JSON.stringify({
+    base_tree: (await gh(repo, `git/commits/${base}`)).tree.sha,
+    tree: [{ path: 'docs/primer/projects.json', mode: '100644', type: 'blob', content }],
+  }) });
+  const commit = await gh(repo, 'git/commits', { method: 'POST', body: JSON.stringify({
+    message, tree: tree.sha, parents: [base] }) });
+  await gh(repo, `git/refs/heads/${branch}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
+}
+
+// Register a project whose files ALREADY exist in a repo — the counterpart to
+// scaffolding one. Nothing is written into the project's own repo; the only
+// change is a new entry in the host registry, learned from the project's own
+// staged manifest so its deploy target and page size come from the project,
+// not from guesses.
+async function adoptProject(repo, branch, path, displayName) {
+  repo = (repo || '').trim();
+  branch = (branch || 'main').trim();
+  path = (path || 'docs/primer').trim().replace(/^\/+|\/+$/g, '');
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error(`"${repo}" is not owner/name`);
+  if (!await askToken(repo)) throw new Error('cancelled — no token');
+
+  // The staged manifest, straight from the repo (Contents API, so a private
+  // repo works without its Pages being public). Its presence is the proof this
+  // path really holds a docsync project.
+  const mpath = `${path}/engine/manifest.json`;
+  let manifest;
+  try {
+    const res = await gh(repo, `contents/${mpath}?ref=${encodeURIComponent(branch)}`);
+    manifest = JSON.parse(decodeURIComponent(escape(atob(res.content))));
+  } catch (e) {
+    throw new Error(`no docsync project at ${repo}@${branch}:${path} — expected ${mpath} (${e.message})`);
+  }
+  const slug = manifest.id || path.split('/').pop();
+  if (REGISTRY[slug]) throw new Error(`"${slug}" is already in your list`);
+
+  // Where the editor FETCHES this project's engine at runtime. Same repo as
+  // this editor → a path next to it; another repo → that repo's Pages URL,
+  // which the editor can read cross-origin (Pages sends CORS) — that repo must
+  // have Pages enabled.
+  let base;
+  if (repo === currentRepo()) {
+    base = path.replace(/^docs\/primer\/?/, '').replace(/^\/+|\/+$/g, '');
+  } else {
+    const [owner, name] = repo.split('/');
+    base = `https://${owner}.github.io/${name}/${path}`;
+  }
+
+  const entry = { name: displayName || manifest.name || slug,
+                  base, repo: manifest.repo || repo, branch: manifest.branch || branch };
+  await commitRegistry({ ...REGISTRY, [slug]: entry }, `primer: adopt existing project "${slug}"`);
+  REGISTRY = { ...REGISTRY, [slug]: entry };
+  return slug;
+}
+
+async function createProject(name, slug, sizeKey, branch, repo) {
+  repo = repo || currentRepo();    // an explicit repo lets a project live in one this editor never saw
+  branch = branch || 'main';       // the deploy branch this project scaffolds onto and publishes to
+  if (!repo) throw new Error('name a repo (owner/name) to create a project in');
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error(`"${repo}" is not owner/name`);
+
+  // An import staged by "Open HTML…" brings its own page size (the source
+  // page's measured height), its own layout.json, and a renderer that draws
+  // placed objects rather than flowing prose.
+  let imported = null;
+  try { imported = JSON.parse(sessionStorage.getItem('ds-import') || 'null'); }
+  catch (e) { imported = null; }
+
+  // Re-check right here, at the commit — not just back when extractDoc()
+  // traced it. sessionStorage sits in between, and nothing downstream should
+  // have to trust that a browser tab's memory wasn't tampered with. Throws
+  // before the token prompt or any network call, so a bad import never
+  // reaches the repo.
+  if (imported) {
+    const m = await import('./htmlimport.js');
+    m.assertLayoutSafe(imported.layout);
+  }
+
+  if (!await askToken(repo)) throw new Error('cancelled — no token');
+
+  // Fail early and clearly, before writing anything: the token must be able to
+  // WRITE this repo, and the deploy branch must already exist (that is where
+  // the scaffold commit lands). A 404 here usually means the token cannot see
+  // the repo at all — the same message covers "wrong name" and "no access".
+  let info;
+  try { info = await gh(repo, ''); }
+  catch (e) { throw new Error(`cannot reach ${repo} with this token — check the name and that the token has access (${e.message})`); }
+  if (!(info.permissions && info.permissions.push)) {
+    throw new Error(`the token can read ${repo} but not write it — grant Contents: write`);
+  }
+  try { await gh(repo, `git/ref/heads/${branch}`); }
+  catch (e) { throw new Error(`branch "${branch}" does not exist in ${repo} — create it first, or use the repo's default branch`); }
+
+  const size = imported ? imported.page : (PAGE_SIZES[sizeKey] || PAGE_SIZES.letter);
+  const renderPy = imported ? placedTemplate(size.w, size.h)
+                            : renderTemplate(size.w, size.h);
+  const contentMd = imported ? imported.content : contentTemplate(name);
+
+  // The shared docsync package: copy it from the default project's already-
+  // staged files rather than re-typing it, so a new project's copy can never
+  // silently drift from what actually runs.
+  const [contentPy, normalisePy, layoutPy] = await Promise.all(
+    ['docsync/content.py', 'docsync/normalise.py', 'docsync/layout.py']
+      .map(p => fetchText('engine/' + p)));
+
+  const files = [
+    { path: `projects/${slug}/content.md`, content: contentMd },
+    { path: `projects/${slug}/tools/render_report.py`, content: renderPy },
+    { path: `docs/primer/projects/${slug}/engine/docsync/content.py`, content: contentPy },
+    { path: `docs/primer/projects/${slug}/engine/docsync/normalise.py`, content: normalisePy },
+    { path: `docs/primer/projects/${slug}/engine/docsync/layout.py`, content: layoutPy },
+    { path: `docs/primer/projects/${slug}/engine/projects/${slug}/content.md`, content: contentMd },
+    { path: `docs/primer/projects/${slug}/engine/projects/${slug}/tools/render_report.py`, content: renderPy },
+    { path: `docs/primer/projects/${slug}/engine/manifest.json`, content: manifestTemplate(slug, repo, size, !!imported, branch) },
+  ];
+  if (imported) {
+    // The traced objects, and the copy the editor loads before any draft
+    // exists — both, or the project opens empty on a first visit.
+    const layoutJson = JSON.stringify(imported.layout, null, 2) + '\n';
+    files.push({ path: `projects/${slug}/layout.json`, content: layoutJson });
+    files.push({ path: `docs/primer/projects/${slug}/engine/projects/${slug}/layout.json`,
+                 content: layoutJson });
+  }
+
+  // Where the editor fetches this project at runtime. Its files land in `repo`
+  // under docs/primer/projects/<slug>/; if that IS the host repo, a path next
+  // to the editor reaches them, otherwise it is that repo's Pages URL (the
+  // same cross-origin path adoption uses).
+  const isHost = repo === currentRepo();
+  const runBase = isHost ? `projects/${slug}`
+    : `https://${repo.split('/')[0]}.github.io/${repo.split('/')[1]}/docs/primer/projects/${slug}`;
+  const nextRegistry = { ...REGISTRY, [slug]: { name, base: runBase, repo, branch } };
+  // projects.json is the HOST editor's file. It rides the scaffold commit only
+  // when the project lives in the host repo; for another repo it commits to the
+  // host separately (below), because that is where this editor reads it from.
+  if (isHost) files.push({ path: 'docs/primer/projects.json', content: JSON.stringify(nextRegistry, null, 2) + '\n' });
+
+  // One commit for the whole scaffold — a report is either fully there to
+  // open, or (on any failure before the ref update) not created at all;
+  // there is no half-created state for a later load to trip over.
+  const base = (await gh(repo, `git/ref/heads/${branch}`)).object.sha;
+  // Images are bytes, and a tree entry's `content` is text only — so each one
+  // becomes a base64 blob first and rides the tree by sha. They go to the
+  // project's real assets/ AND to the staged copy the editor serves from.
+  const entries = files.map(f =>
+    ({ path: f.path, mode: '100644', type: 'blob', content: f.content }));
+  if (imported && PENDING_ASSETS.length) {
+    $('stat').textContent = `uploading ${PENDING_ASSETS.length} images…`;
+    for (const a of PENDING_ASSETS) {
+      const blob = await gh(repo, 'git/blobs', { method: 'POST',
+        body: JSON.stringify({ content: a.b64, encoding: 'base64' }) });
+      entries.push({ path: `projects/${slug}/web/assets/${a.name}`,
+                     mode: '100644', type: 'blob', sha: blob.sha });
+      entries.push({ path: `docs/primer/projects/${slug}/assets/${a.name}`,
+                     mode: '100644', type: 'blob', sha: blob.sha });
+    }
+  }
+  const tree = await gh(repo, 'git/trees', { method: 'POST', body: JSON.stringify({
+    base_tree: (await gh(repo, `git/commits/${base}`)).tree.sha,
+    tree: entries,
+  }) });
+  const commit = await gh(repo, 'git/commits', { method: 'POST', body: JSON.stringify({
+    message: `primer: scaffold new report "${name}" (${slug})`, tree: tree.sha, parents: [base] }) });
+  await gh(repo, `git/refs/heads/${branch}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
+  // A cross-repo project's files are now in place; register it in the host's
+  // own projects.json so this editor lists and opens it.
+  if (!isHost) await commitRegistry(nextRegistry, `primer: register "${slug}" (${repo})`);
+  REGISTRY = nextRegistry;
+  // The import is spent — a reload must not scaffold it a second time.
+  sessionStorage.removeItem('ds-import');
+  PENDING_ASSETS = [];
+}
+
+// --- new-report modal ----------------------------------------------------------
+const slugify = s => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+$('np-name').addEventListener('input', () => {
+  if (!$('np-slug').dataset.touched) $('np-slug').value = slugify($('np-name').value);
+});
+$('np-slug').addEventListener('input', () => { $('np-slug').dataset.touched = '1'; });
+
+// One modal, three doors. "+ New report" prefills the repo you already use, so
+// the common case is just a title. "Connect a repo…" clears the repo to point
+// somewhere new and scaffold a fresh project. "Adopt existing…" registers a
+// project whose files ALREADY exist in a repo — no scaffold, no overwrite; it
+// reads that project's manifest to learn what it is.
+let modalMode = 'new';
+function openModal(opts = {}) {
+  modalMode = opts.adopt ? 'adopt' : opts.connect ? 'connect' : 'new';
+  const adopt = modalMode === 'adopt';
+  $('np-title').textContent =
+    adopt ? 'Adopt an existing project' : modalMode === 'connect' ? 'Connect a repo' : 'New report';
+  $('np-repo').value = modalMode === 'new' ? currentRepo() : '';
+  $('np-branch').value = 'main';
+  $('np-path').value = 'docs/primer';
+  $('np-name').value = ''; $('np-slug').value = ''; $('np-slug').dataset.touched = '';
+  $('np-size').value = 'letter';
+  $('np-err').textContent = '';
+  // Adopt asks where the project lives and (optionally) what to call it; a
+  // scaffold asks for an id and a page size, which adoption reads instead.
+  $('np-path-l').hidden = !adopt;
+  $('np-slug-l').hidden = adopt;
+  $('np-size-l').hidden = adopt;
+  $('np-name-l').textContent = adopt ? 'Display name (optional)' : 'Title';
+  $('np-create').textContent = adopt ? 'Adopt' : 'Create';
+  $('modal-bg').classList.add('open');
+  (modalMode === 'new' ? $('np-name') : $('np-repo')).focus();
+}
+function closeModal() { $('modal-bg').classList.remove('open'); }
+$('new').onclick = () => openModal();
+$('connect').onclick = () => openModal({ connect: true });
+$('adopt').onclick = () => openModal({ adopt: true });
+$('np-cancel').onclick = closeModal;
+$('modal-bg').addEventListener('click', e => { if (e.target === $('modal-bg')) closeModal(); });
+
+$('np-create').onclick = async () => {
+  const repo = $('np-repo').value.trim();
+  const branch = $('np-branch').value.trim() || 'main';
+  if (!repo) { $('np-err').textContent = 'name the repo (owner/name)'; return; }
+
+  if (modalMode === 'adopt') {
+    const path = $('np-path').value.trim() || 'docs/primer';
+    $('np-create').disabled = true;
+    $('np-err').textContent = '';
+    $('stat').textContent = `looking for a project in ${repo}…`;
+    try {
+      const slug = await adoptProject(repo, branch, path, $('np-name').value.trim());
+      $('stat').textContent = `adopted "${slug}" — opening it…`;
+      location.href = `edit.html?project=${encodeURIComponent(slug)}`;
+    } catch (e) {
+      $('np-err').textContent = e.message;
+      $('stat').textContent = '';
+      $('np-create').disabled = false;
+    }
+    return;
+  }
+
+  const name = $('np-name').value.trim();
+  const slug = slugify($('np-slug').value || name);
+  if (!name || !slug) { $('np-err').textContent = 'a title and a short id are both needed'; return; }
+  if (REGISTRY[slug]) { $('np-err').textContent = `"${slug}" already exists — pick another id`; return; }
+  $('np-create').disabled = true;
+  $('np-err').textContent = '';
+  $('stat').textContent = `creating "${name}" in ${repo}…`;
+  try {
+    await createProject(name, slug, $('np-size').value, branch, repo);
+    $('stat').textContent = `"${name}" created — opening it…`;
+    location.href = `edit.html?project=${encodeURIComponent(slug)}`;
+  } catch (e) {
+    $('np-err').textContent = e.message;
+    $('stat').textContent = '';
+    $('np-create').disabled = false;
+  }
+};
+
+(async () => {
+  await loadRegistry();
+  renderGrid();
+  const n = Object.keys(REGISTRY).length;
+  $('hstat').textContent = n ? `${n} report${n > 1 ? 's' : ''}` : '';
+  $('new').disabled = !currentRepo();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

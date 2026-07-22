@@ -1,0 +1,56 @@
+# Report bindings — the registry the draft editor and the build read.
+#
+# Each entry pairs a committed source file with the report it feeds. This used
+# to sync to a Google Doc; that is gone. Prose is now edited directly in
+# content.md — by hand or through the draft editor — and the files on disk are
+# the single source of truth. The `editor:` block below is what lets one
+# generic editor serve any report.
+#
+#   id       kebab-case, unique
+#   content  the committed source the report reads
+#   build    the one command that rebuilds and publishes (make pub)
+#   editor   what the draft editor needs to run this report in the browser
+
+bindings:
+  - id: budget-primer
+    content: report2027/content.md
+    # The one build command, shared by the live server, the save endpoint and
+    # CI — so the deployed page is always exactly what a build produces.
+    build: make -C report2027 pub
+    outputs:
+      - report2027/web/index.html
+      - docs/primer/index.html
+    # What the draft editor needs to run THIS report in the browser. Naming it
+    # here is what lets one editor serve any report: the editor reads the
+    # manifest staged beside it and knows nothing about the primer.
+    editor:
+      dir: docs/primer               # published dir; editor + engine staged here
+      render: report2027/tools/render_report.py
+      out: report2027/web/index.html
+      layout: report2027/layout.json
+      assets: report2027/web/assets
+      # The report's own colours, offered before anything custom. These are the
+      # palette constants in render_report.py — Muted Teal through Charcoal.
+      palette: ["#6B9E78", "#95B7A2", "#CAD2C5", "#E8EDE6", "#D6E0D2",
+                "#52796F", "#354F52", "#2F3E46", "#FFFFFF"]
+      page: [8.5, 11]                # inches
+      margins: [0.62, 0.75]          # side, top — the text column, for snapping
+      engine:                        # everything else the renderer reads
+        # The logo SVGs ride along so a recolour (svg_img in render_report.py,
+        # which inlines the file) renders in the browser preview too.
+        - report2027/web/assets/appleseed-logo.svg
+        - report2027/web/assets/appleseed-logo-white.svg
+        - report2027/data/report_data.json
+        - report2027/manual/obligated_costs.json
+        - docs/js/departments_act175_fy2027.json
+        - docs/js/historical_trends.json
+
+  # Example — a simple page whose prose lives entirely in a doc. Binding one
+  # takes minutes: add <!-- docsync:start --> / <!-- docsync:end --> where the
+  # content belongs, then add an entry like this.
+  #
+  # - id: snap-timeline
+  #   doc: <doc-id>
+  #   mode: fragment
+  #   content: snap-timeline/content.md
+  #   target: snap-timeline/index.html
