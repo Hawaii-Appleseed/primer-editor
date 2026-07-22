@@ -56,6 +56,10 @@ test.describe('editable cover title', () => {
     // selection and dragging still work exactly as before.
     await expect(page.locator('#type')).toBeVisible();
     await expect(page.locator('#ty-key')).toHaveText('cover.title');
+    // The font dropdown NAMES the rendered font even with no override set —
+    // the cover title is Barlow, so the picker says so rather than a blank.
+    await expect(page.locator('#ty-font')).toHaveValue('Barlow');
+    expect(await page.evaluate(() => (layout.text || {})['cover.title'])).toBeUndefined();
   });
 
   test('dragging the cover title records a position, and the cover year stays put', async ({ page }) => {
