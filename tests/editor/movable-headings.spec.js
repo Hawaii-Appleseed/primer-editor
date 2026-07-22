@@ -22,8 +22,10 @@ test.describe('movable headings', () => {
     await h1.click();
 
     await expect(frame.locator('.ds-edit')).toHaveCount(0);   // no text editor opened
-    await expect(page.locator('#arrange')).toBeVisible();
-    await expect(page.locator('#ar-count')).toHaveText('basics.h1');
+    // A heading is a single-slot text object, so one click puts the TYPE
+    // controls in hand (Canva behaviour) — arrange stays on the mini toolbar.
+    await expect(page.locator('#type')).toBeVisible();
+    await expect(page.locator('#ty-key')).toHaveText('basics.h1');
     // Width-only handles (a heading reflows on width, like any prose slot) —
     // no corners, so it keeps the dangling rotate handle.
     await expect(frame.locator('.ds-handles .ds-h-e')).toHaveCount(1);
@@ -105,7 +107,7 @@ test.describe('movable headings', () => {
       await el.scrollIntoViewIfNeeded();
       await el.click();
       await expect(frame.locator('.ds-edit')).toHaveCount(0);   // selects, not text-edit
-      await expect(page.locator('#ar-count')).toHaveText(id);
+      await expect(page.locator('#ty-key')).toHaveText(id);     // single-slot text: type controls
 
       const box = await el.boundingBox();
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

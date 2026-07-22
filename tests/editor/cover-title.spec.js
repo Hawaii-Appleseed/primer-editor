@@ -52,8 +52,10 @@ test.describe('editable cover title', () => {
     await h1.click();
 
     await expect(frame.locator('.ds-edit')).toHaveCount(0);   // no text editor opened
-    await expect(page.locator('#arrange')).toBeVisible();
-    await expect(page.locator('#ar-count')).toHaveText('cover.title');
+    // A single-slot text object: one click brings up the type controls,
+    // selection and dragging still work exactly as before.
+    await expect(page.locator('#type')).toBeVisible();
+    await expect(page.locator('#ty-key')).toHaveText('cover.title');
   });
 
   test('dragging the cover title records a position, and the cover year stays put', async ({ page }) => {
