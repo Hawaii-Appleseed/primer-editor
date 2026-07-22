@@ -620,6 +620,29 @@ def card(title, bullets, bg, light=None, key=""):
             f'<div class="{cls}"{tag} style="{style}">'
             f'<h4>{title}</h4><ul{ul}>{lis}</ul></div>')
 
+
+def graphic(el_id, svg, w=1.5, cls=""):
+    """A free-standing SVG the editor can MOVE, RESIZE (proportionally, from any
+    corner) and ROTATE like an image — its placement lives in layout.json under
+    el_id, so a drag or a resize sticks across rebuilds.
+
+    This is the ONE way to add an SVG a report editor should be able to
+    reposition: a bare <svg> in the markup is frozen, invisible to the editor.
+    Give every graphic a unique, stable el_id (e.g. "spent.flowchart"); `w` is
+    its default width in inches before the user sizes it (the SVG scales to fill
+    via its viewBox, so it MUST carry a viewBox), and `cls` adds classes.
+
+    The default width is supplied only until the user resizes it — after that
+    the width in layout.json wins, so their sizing is never overwritten by a
+    rebuild.
+    """
+    klass = ("ds-graphic " + cls).strip()
+    sized = L.positions.get(el_id, {}).get("w")     # user has resized it?
+    base = "" if sized else (f"width:{w}in" if w else "")
+    return (f'{L.spacer(el_id)}'
+            f'<span class="{klass}"{L.attr(el_id, base)}>{svg}</span>')
+
+
 def img_el(el_id, cls, src, alt):
     """One image element, honouring replace/radius/filter/crop overrides.
 
@@ -957,6 +980,7 @@ pages.append(f"""
   {card(C.t("onetime.cards.onetime.title"), ONE_TIME_BULLETS, DARK, key="onetime.cards.onetime.bullets")}
   {card(C.t("onetime.cards.emergency.title"), EMERG_BULLETS, DARKEST, key="onetime.cards.emergency.bullets")}
  </div>
+ {graphic("onetime.demo.graphic", '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="demo graphic"><circle cx="60" cy="60" r="56" fill="#52796F"/><path d="M30 78 L52 54 L68 66 L92 38" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="38" r="8" fill="#fff"/></svg>', w=1.4)}
 {C.extras("onetime")} {L.layer(8)}{L.text_boxes(8)}{L.tables_html(8)}{folio(8)}
 </section>""")
 
