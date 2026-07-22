@@ -45,6 +45,24 @@ bindings:
         - docs/js/departments_act175_fy2027.json
         - docs/js/historical_trends.json
 
+  # A SECOND report on the same engine — the proof that one editor serves any
+  # report. Scaffolded by hand the way "+ New report" would; its renderer
+  # demonstrates the shared building blocks (docsync.blocks: graphic, card).
+  - id: demo-report
+    content: projects/demo-report/content.md
+    build: python3 projects/demo-report/render_report.py
+    outputs:
+      - projects/demo-report/index.html
+    editor:
+      dir: docs/demo
+      render: projects/demo-report/render_report.py
+      out: projects/demo-report/index.html
+      layout: projects/demo-report/layout.json
+      palette: ["#6B9E78", "#95B7A2", "#CAD2C5", "#E8EDE6",
+                "#52796F", "#354F52", "#2F3E46", "#FFFFFF"]
+      page: [8.5, 11]
+      margins: [0.62, 0.75]
+
   # Example — a simple page whose prose lives entirely in a doc. Binding one
   # takes minutes: add <!-- docsync:start --> / <!-- docsync:end --> where the
   # content belongs, then add an entry like this.

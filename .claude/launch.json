@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "primer-editor",
+      "runtimeExecutable": "make",
+      "runtimeArgs": ["-C", "report2027", "live"],
+      "port": 8010
+    }
+  ]
+}

@@ -1,0 +1,1264 @@
+"""Layout overrides: positions and shapes, as data.
+
+The report's design lives in the renderer, and that is what keeps it a designed
+artifact rather than a blank canvas — twelve pages that stay twelve pages
+because only text varies. This module does not change that. It adds a thin
+layer on top: where an override exists the renderer honours it, and everywhere
+else the code's own design stands.
+
+So a dragged box is one line of JSON, reviewable in a diff and revertable by
+deleting it, instead of a hand-edit to layout code. With no overrides the file
+is empty and the published HTML is byte-for-byte what it always was.
+
+Coordinates are inches from the page's top-left corner, because `.page` is
+`position: relative` and absolutely positioned children resolve against it.
+
+    {
+      "positions": { "callout.obligated": {"x": 1.2, "y": 3.4, "w": 5.0,
+                                            "reserve": 2.7, "z": 1} },
+      "shapes": [ {"id":"s1","page":3,"kind":"rect","x":1,"y":2,"w":3,"h":1,
+                   "fill":"#6B9E78","z":"back"} ]
+    }
+"""
+from __future__ import annotations
+
+import json
+import math
+import os
+import re
+from pathlib import Path
+
+# One direction only: content.py imports nothing from this package (it takes its
+# styler duck-typed), so there is no cycle. A text box is a markdown block that
+# happens to be positioned — block_html already renders exactly that for the
+# overflow slots, and a second renderer for the same thing would drift.
+from .content import block_html, md_inline
+
+# Letter portrait, because that is what the Budget Primer is. Any report with a
+# different page passes its own size in — this is a default, not a law. It is
+# the only thing in this package that ever knew about one particular report.
+PAGE_W_IN, PAGE_H_IN = 8.5, 11.0
+KINDS = ("rect", "ellipse", "line", "triangle", "arrow", "icon")
+LINE_ENDS = ("none", "start", "end", "both")
+
+# --- icons ---------------------------------------------------------------
+# An icon is picked from an open-source set (Iconoir, Lucide, Heroicons,
+# Bootstrap Icons… via the Iconify API) and its GEOMETRY is copied into
+# layout.json — not a reference to it. That is deliberate: the PDF is printed
+# by headless Chrome from built HTML, and the preview renders under Pyodide,
+# neither of which may assume a network. A stored icon renders offline
+# forever, and cannot change under the report when an upstream set is
+# revised.
+#
+# The flip side is that markup from the internet ends up inside the rendered
+# page, so it is checked here as well as in the editor: layout.json can be
+# hand-edited, and this is the only gate the renderer itself controls.
+# Whitelist, and a hard failure — never a silent strip, which would leave a
+# half-drawn icon nobody can explain.
+ICON_TAGS = {
+    "g", "path", "circle", "ellipse", "rect", "line", "polyline", "polygon",
+    "defs", "clipPath", "mask", "use", "title", "desc", "symbol",
+    "linearGradient", "radialGradient", "stop",
+}
+ICON_BANNED = re.compile(
+    r"<\s*(script|foreignObject|image|iframe|a|animate|animateTransform|set|handler)\b"
+    r"|\bon[a-z]+\s*=|javascript:|<!ENTITY|<!DOCTYPE", re.I)
+_ICON_TAG_RE = re.compile(r"<\s*/?\s*([A-Za-z][A-Za-z0-9]*)")
+_VIEWBOX_RE = re.compile(r"^\s*-?[\d.]+(\s+-?[\d.]+){3}\s*$")
+
+
+def check_icon_svg(body: str, where: str) -> str:
+    """The icon's inner markup, or a hard failure explaining what was wrong."""
+    if not isinstance(body, str) or not body.strip():
+        raise LayoutError(f"{where}: an icon needs its 'svg' markup")
+    if len(body) > 64_000:
+        raise LayoutError(f"{where}: icon markup is {len(body)} bytes — far past "
+                          f"anything an icon needs; refusing it")
+    m = ICON_BANNED.search(body)
+    if m:
+        raise LayoutError(f"{where}: icon markup contains {m.group(0)!r}, which is "
+                          f"not allowed in an icon")
+    for tag in _ICON_TAG_RE.findall(body):
+        if tag not in ICON_TAGS:
+            raise LayoutError(f"{where}: icon markup uses <{tag}>, which is not one "
+                              f"of the allowed SVG shape tags")
+    return body
+
+
+def icon_color(fill) -> str:
+    """The colour an icon's `currentColor` resolves to.
+
+    Icon sets draw in `currentColor` precisely so one CSS property recolours
+    the whole glyph — that is what makes them palette-aware here. A gradient
+    cannot be a colour, so a gradient fill contributes its first stop rather
+    than failing: the icon still lands in the report's palette.
+    """
+    if isinstance(fill, dict):
+        stops = fill.get("stops") or []
+        return stops[0].get("color", "#2F3E46") if stops else "#2F3E46"
+    if isinstance(fill, str) and fill != "none":
+        return fill
+    return "#2F3E46"
+
+# Fonts a report may ask for, with the weights Google will actually serve. An
+# allowlist, not free text: a typo'd family falls back to sans-serif in the PDF
+# with nothing to catch it, and an unchecked family name would land inside a
+# style="…" attribute, where a stray quote ends the attribute. Canva's picker is
+# a fixed list too — this is parity, not a compromise.
+FONTS = {
+    "Barlow":         [400, 500, 600, 700, 800, 900],
+    "Source Sans 3":  [300, 400, 600, 700],
+    "Playfair Display": [400, 500, 600, 700, 800, 900],
+    "Merriweather":   [300, 400, 700, 900],
+    "Lora":           [400, 500, 600, 700],
+    "Libre Baskerville": [400, 700],
+    "Inter":          [300, 400, 500, 600, 700, 800, 900],
+    "Roboto":         [300, 400, 500, 700, 900],
+    "Open Sans":      [300, 400, 600, 700, 800],
+    "Lato":           [300, 400, 700, 900],
+    "Montserrat":     [300, 400, 500, 600, 700, 800, 900],
+    "Oswald":         [300, 400, 500, 600, 700],
+    "Raleway":        [300, 400, 500, 600, 700, 800, 900],
+    "Nunito":         [300, 400, 600, 700, 800, 900],
+    "Work Sans":      [300, 400, 500, 600, 700, 800],
+    "IBM Plex Sans":  [300, 400, 500, 600, 700],
+    "IBM Plex Serif": [300, 400, 500, 600, 700],
+    "Space Grotesk":  [300, 400, 500, 600, 700],
+    "Bebas Neue":     [400],
+    "Anton":          [400],
+    "Archivo":        [300, 400, 500, 600, 700, 800, 900],
+    "Karla":          [300, 400, 500, 600, 700, 800],
+    "Rubik":          [300, 400, 500, 600, 700, 800, 900],
+    "Cormorant Garamond": [300, 400, 500, 600, 700],
+    "Crimson Text":   [400, 600, 700],
+}
+
+# What primer.css already asks Google for. The report needs these whether or not
+# anything is overridden, and font_link must reproduce the old hardcoded literal
+# from exactly this when nothing is.
+BRAND_FONTS = {"Barlow": [800, 900], "Source Sans 3": [300, 400, 600, 700]}
+BRAND_ITALICS = {"Source Sans 3": [400]}
+
+# Effects. Each is a function from its parameters to CSS, so validation can
+# name the ones that exist and the editor can ask which parameters to show.
+#
+# Two conventions worth stating once:
+#  * 0 degrees is 12 o'clock and it goes clockwise — the same convention
+#    arc_path() already uses in the renderer. A second convention for the same
+#    idea in one repo is a bug waiting to happen.
+#  * Offsets and blurs are in em, so a shadow stays proportional when the type
+#    is resized instead of detaching from it.
+#  * We store ALPHA, not Canva's "transparency". Storing the inverted quantity
+#    invites a 1-x slip at every read; the slider can show whatever it likes.
+def _rgba(hexc: str, a: float) -> str:
+    h = hexc.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{a:g})"
+
+
+def _xy(offset: float, deg: float) -> tuple[float, float]:
+    rad = math.radians(deg)
+    return round(offset * math.sin(rad), 3), round(-offset * math.cos(rad), 3)
+
+
+def _fx_shadow(e: dict) -> str:
+    dx, dy = _xy(e.get("offset", 0.06), e.get("direction", 135))
+    c = _rgba(e.get("color", "#2F3E46"), e.get("alpha", 0.45))
+    return f'text-shadow:{dx}em {dy}em {e.get("blur", 0.04)}em {c}'
+
+
+def _fx_lift(e: dict) -> str:
+    k = e.get("intensity", 0.5)
+    return f'text-shadow:0 {round(k * .5, 3)}em {round(k * 1.2, 3)}em rgba(0,0,0,{round(k * .5, 3)})'
+
+
+def _fx_hollow(e: dict) -> str:
+    return (f'color:transparent;-webkit-text-stroke:{e.get("width", 0.02)}em '
+            f'{e.get("color", "#52796F")}')
+
+
+def _fx_splice(e: dict) -> str:
+    dx, dy = _xy(e.get("offset", 0.06), e.get("direction", 135))
+    return (f'color:transparent;-webkit-text-stroke:{e.get("width", 0.02)}em '
+            f'{e.get("color", "#52796F")};'
+            f'text-shadow:{dx}em {dy}em 0 {e.get("shadow", "#95B7A2")}')
+
+
+def _fx_echo(e: dict) -> str:
+    dx, dy = _xy(e.get("offset", 0.06), e.get("direction", 135))
+    c = e.get("color", "#52796F")
+    return (f'text-shadow:{dx}em {dy}em 0 {_rgba(c, .5)},'
+            f'{round(dx * 2, 3)}em {round(dy * 2, 3)}em 0 {_rgba(c, .3)}')
+
+
+def _fx_glitch(e: dict) -> str:
+    dx, dy = _xy(e.get("offset", 0.04), e.get("direction", 90))
+    return (f'text-shadow:{round(-dx, 3)}em {round(-dy, 3)}em 0 {e.get("color", "#00E5FF")},'
+            f'{dx}em {dy}em 0 {e.get("shadow", "#FF00A0")}')
+
+
+def _fx_neon(e: dict) -> str:
+    c = e.get("color", "#6B9E78")
+    k = e.get("intensity", 1.0)
+    return (f'color:{c};text-shadow:0 0 {round(.08 * k, 3)}em {c},'
+            f'0 0 {round(.25 * k, 3)}em {c},0 0 {round(.6 * k, 3)}em {_rgba(c, .7)}')
+
+
+EFFECTS = {"shadow": _fx_shadow, "lift": _fx_lift, "hollow": _fx_hollow,
+           "splice": _fx_splice, "echo": _fx_echo, "glitch": _fx_glitch,
+           "neon": _fx_neon}
+
+# Which knobs each effect actually uses — the editor shows only these, so no
+# control is ever offered that does nothing.
+EFFECT_PARAMS = {
+    "shadow": ["offset", "direction", "blur", "alpha", "color"],
+    "lift":   ["intensity"],
+    "hollow": ["width", "color"],
+    "splice": ["width", "offset", "direction", "color", "shadow"],
+    "echo":   ["offset", "direction", "color"],
+    "glitch": ["offset", "direction", "color", "shadow"],
+    "neon":   ["intensity", "color"],
+}
+
+ALIGNS = ("left", "center", "right", "justify")
+CASES = ("none", "upper", "lower", "title")
+
+
+def _hex(v, where: str) -> str:
+    if not isinstance(v, str) or not re.fullmatch(r"#[0-9a-fA-F]{3,8}", v):
+        raise LayoutError(f"{where}: {v!r} is not a hex colour")
+    return v
+
+
+def text_css(st: dict) -> str:
+    """One text style -> the CSS declarations it means.
+
+    A module function, not a method, because the editor calls it through Pyodide
+    to preview a slider without a full re-render. One implementation of what a
+    style means; a JavaScript twin would drift from this one silently and
+    forever.
+
+    Returns "" for an empty style, which is what keeps an unstyled report
+    byte-identical to the one that shipped before any of this existed.
+    """
+    if not st:
+        return ""
+    out = []
+    if st.get("font"):
+        # Single quotes: this lands inside style="…", so a double quote here
+        # would end the attribute and the rest of the style would become stray
+        # markup. Family names are allowlisted, so no apostrophe can appear.
+        out.append(f"font-family:'{st['font']}'")
+    if st.get("size"):
+        out.append(f'font-size:{st["size"]}px')
+    if st.get("weight"):
+        out.append(f'font-weight:{int(st["weight"])}')
+    if st.get("italic"):
+        out.append("font-style:italic")
+    if st.get("underline"):
+        out.append("text-decoration:underline")
+    if st.get("color"):
+        out.append(f'color:{st["color"]}')
+    if st.get("tracking") is not None:
+        out.append(f'letter-spacing:{st["tracking"]}px')
+    if st.get("leading") is not None:
+        out.append(f'line-height:{st["leading"]}')
+    case = st.get("case")
+    if case and case != "none":
+        out.append("text-transform:" + {"upper": "uppercase", "lower": "lowercase",
+                                        "title": "capitalize"}[case])
+    fx = st.get("effect")
+    if fx and fx.get("kind"):
+        # After colour, deliberately: hollow and splice hollow the glyph out, so
+        # they must win over a colour the same style also set.
+        out.append(EFFECTS[fx["kind"]](fx))
+    if st.get("align"):
+        out.append(f'text-align:{st["align"]}')
+        # text-align does nothing to an inline box, and the inline slots are
+        # spans. Give it a box to align within — but only when alignment was
+        # actually asked for, so nothing else grows a width it never had.
+        out.append("display:inline-block;width:100%")
+    return ";".join(out)
+
+
+def _check_text(st: dict, where: str) -> None:
+    """A bad style must fail here, at load, like a bad layer does — not reach
+    the page as a silently ignored declaration."""
+    fam = st.get("font")
+    if fam is not None:
+        if fam not in FONTS:
+            raise LayoutError(
+                f"{where}: {fam!r} is not a font this report can load. "
+                f"One of: {', '.join(sorted(FONTS))}")
+        w = st.get("weight")
+        if w is not None and int(w) not in FONTS[fam]:
+            raise LayoutError(
+                f"{where}: {fam} has no weight {w} — it would be faked by the "
+                f"browser. One of: {FONTS[fam]}")
+    if st.get("align") and st["align"] not in ALIGNS:
+        raise LayoutError(f"{where}: align {st['align']!r} must be one of "
+                          f"{', '.join(ALIGNS)}")
+    if st.get("case") and st["case"] not in CASES:
+        raise LayoutError(f"{where}: case {st['case']!r} must be one of "
+                          f"{', '.join(CASES)}")
+    if st.get("color"):
+        _hex(st["color"], where + ".color")
+    for k in ("size", "tracking", "leading"):
+        if st.get(k) is not None:
+            _num(st[k], f"{where}.{k}")
+    # `is not None`, not truthiness: an empty effect object is falsy, so a bare
+    # "effect": {} would skip every check below and pass as a no-op rather than
+    # as the malformed thing it is.
+    fx = st.get("effect")
+    if fx is not None:
+        if not isinstance(fx, dict) or not fx.get("kind"):
+            raise LayoutError(f"{where}: effect needs a 'kind'")
+        if fx["kind"] not in EFFECTS:
+            raise LayoutError(f"{where}: effect {fx['kind']!r} must be one of "
+                              f"{', '.join(sorted(EFFECTS))}")
+        for c in ("color", "shadow"):
+            if fx.get(c):
+                _hex(fx[c], f"{where}.effect.{c}")
+        a = fx.get("alpha")
+        if a is not None and not (0 <= float(a) <= 1):
+            raise LayoutError(f"{where}: effect alpha {a} is not a fraction "
+                              f"between 0 and 1")
+        for k in ("offset", "direction", "blur", "intensity", "width"):
+            if fx.get(k) is not None:
+                _num(fx[k], f"{where}.effect.{k}")
+
+
+# Polygon kinds, as point lists inside the x/y/w/h frame every shape shares.
+# The editor mirrors these two functions in JavaScript for live drag preview
+# (a Pyodide call per mousemove is not a 60fps neighbour) — change one, change
+# both, or the preview will visibly disagree with the committed page.
+def triangle_points(x, y, w, h):
+    return [(x + w / 2, y), (x + w, y + h), (x, y + h)]
+
+
+def arrow_points(x, y, w, h):
+    xs, hh = x + w * 0.62, h / 2
+    return [(x, y + h * 0.28), (xs, y + h * 0.28), (xs, y),
+            (x + w, y + hh), (xs, y + h), (xs, y + h * 0.72), (x, y + h * 0.72)]
+
+
+def _pts(pts):
+    return " ".join(f"{round(px, 4):g},{round(py, 4):g}" for px, py in pts)
+
+
+class LayoutError(RuntimeError):
+    """Raised when an override could not produce a sane page."""
+
+
+def _z(s: dict) -> int:
+    """Layer of a shape. Accepts the old back/front words so existing files
+    keep working, but everything speaks integers now."""
+    z = s.get("z", -1)
+    if z == "back":
+        return -1
+    if z == "front":
+        return 2
+    try:
+        return int(z)
+    except (TypeError, ValueError):
+        raise LayoutError(f"shape '{s.get('id')}': z {z!r} is not a layer number")
+
+
+def _num(v, where: str) -> float:
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        raise LayoutError(f"{where}: {v!r} is not a number")
+
+
+def _alpha(v, where: str) -> float:
+    a = _num(v, where)
+    if not 0 <= a <= 1:
+        raise LayoutError(f"{where}: {v} is not a fraction between 0 and 1")
+    return a
+
+
+# ---- fills: a solid hex, or a gradient ----------------------------------
+# A fill value is EITHER a hex string (unchanged — the byte-identity case) or a
+# gradient {type:"linear"|"radial", angle, stops:[{color, at}]}. Three helpers
+# turn that one value into the three forms the report needs — a CSS background,
+# an SVG paint (with its <defs>), and one representative colour for the contrast
+# test. All are module functions so the renderer, the tests, and the editor
+# (through Pyodide) share ONE definition; a JavaScript twin would drift.
+
+def _split_hex(hexc: str) -> tuple[str, float]:
+    """A #hex (3/4/6/8 digits) -> ('#rrggbb', alpha 0..1). SVG stops carry colour
+    and opacity separately, so an 8-digit fill has to be split."""
+    h = hexc.lstrip("#")
+    if len(h) in (3, 4):
+        h = "".join(c * 2 for c in h)
+    a = int(h[6:8], 16) / 255 if len(h) == 8 else 1.0
+    return "#" + h[:6], round(a, 4)
+
+
+def _fill(v, where: str):
+    """Validate a fill value — a hex or a gradient — and return it unchanged."""
+    if isinstance(v, str):
+        return _hex(v, where)
+    if isinstance(v, dict):
+        if v.get("type") not in ("linear", "radial"):
+            raise LayoutError(f"{where}: gradient 'type' must be 'linear' or 'radial'")
+        if v["type"] == "linear" and v.get("angle") is not None:
+            _num(v["angle"], f"{where}.angle")
+        stops = v.get("stops")
+        if not isinstance(stops, list) or len(stops) < 2:
+            raise LayoutError(f"{where}: a gradient needs two or more stops")
+        for j, st in enumerate(stops):
+            if not isinstance(st, dict):
+                raise LayoutError(f"{where}.stops[{j}]: expected a {{color, at}} object")
+            _hex(st.get("color"), f"{where}.stops[{j}].color")
+            _alpha(st.get("at"), f"{where}.stops[{j}].at")
+        return v
+    raise LayoutError(f"{where}: {v!r} is not a hex colour or a gradient")
+
+
+def _grad_vector(angle: float) -> tuple:
+    """CSS angle (0deg = up, clockwise) -> SVG objectBoundingBox x1,y1,x2,y2, the
+    last stop sitting toward the angle. y runs downward in SVG, hence -cos."""
+    rad = math.radians(angle)
+    dx, dy = math.sin(rad), -math.cos(rad)
+    return (round(.5 - .5 * dx, 4), round(.5 - .5 * dy, 4),
+            round(.5 + .5 * dx, 4), round(.5 + .5 * dy, 4))
+
+
+def fill_css(v) -> str:
+    """A fill value -> a CSS background value. A hex passes through verbatim, so a
+    solid fill emits exactly the bytes it did before."""
+    if not isinstance(v, dict):
+        return v
+    stops = ", ".join(f'{s["color"]} {round(s["at"] * 100, 3):g}%' for s in v["stops"])
+    if v["type"] == "radial":
+        return f"radial-gradient(circle, {stops})"
+    return f'linear-gradient({_num(v.get("angle", 0), "angle"):g}deg, {stops})'
+
+
+def fill_svg_paint(v, defid: str) -> tuple:
+    """A fill value -> (SVG paint, defs). A hex/None is (itself, '') — no defs,
+    so a solid shape is byte-identical."""
+    if not isinstance(v, dict):
+        return (v if v is not None else "none"), ""
+    body = ""
+    for s in v["stops"]:
+        six, a = _split_hex(s["color"])
+        body += (f'<stop offset="{round(s["at"] * 100, 3):g}%" stop-color="{six}"'
+                 f' stop-opacity="{a:g}"/>')
+    if v["type"] == "radial":
+        defs = f'<radialGradient id="{defid}" cx="0.5" cy="0.5" r="0.5">{body}</radialGradient>'
+    else:
+        x1, y1, x2, y2 = _grad_vector(v.get("angle", 0))
+        defs = (f'<linearGradient id="{defid}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}">'
+                f'{body}</linearGradient>')
+    return f"url(#{defid})", defs
+
+
+def fill_repr(v) -> str:
+    """A fill value -> one #rrggbb for the contrast test. A gradient averages its
+    stops, each composited over white by its own alpha so a translucent stop reads
+    like it looks. A hex passes straight to is_light_bg, which composites itself."""
+    if not isinstance(v, dict):
+        return v
+    rs = gs = bs = 0.0
+    for s in v["stops"]:
+        six, a = _split_hex(s["color"])
+        r, g, b = (int(six[i:i + 2], 16) for i in (1, 3, 5))
+        rs += r * a + 255 * (1 - a)
+        gs += g * a + 255 * (1 - a)
+        bs += b * a + 255 * (1 - a)
+    n = len(v["stops"])
+    return "#" + "".join(f"{round(c / n):02x}" for c in (rs, gs, bs))
+
+
+def _check_shadow(sh, where: str) -> None:
+    if not isinstance(sh, dict):
+        raise LayoutError(f"{where}: expected a shadow object")
+    for k in ("offset", "direction", "blur"):
+        if sh.get(k) is not None:
+            _num(sh[k], f"{where}.{k}")
+    if sh.get("alpha") is not None:
+        _alpha(sh["alpha"], f"{where}.alpha")
+    if sh.get("color"):
+        _hex(sh["color"], f"{where}.color")
+
+
+def shadow_css(sh: dict) -> str:
+    """An element shadow -> its box-shadow value. Inches, not em: a box's
+    shadow belongs to the page's geometry, not to a font size it does not
+    have. Direction shares the clock convention every other angle here uses.
+    Module-level so the editor can preview a slider through the same code
+    that will render the committed page."""
+    dx, dy = _xy(sh.get("offset", 0.04), sh.get("direction", 135))
+    c = _rgba(sh.get("color", "#2F3E46"), sh.get("alpha", 0.35))
+    return f'{dx}in {dy}in {sh.get("blur", 0.06)}in {c}'
+
+
+def shape_shadow_css(sh: dict) -> str:
+    """The same shadow as a drop-shadow() filter, for SVG shapes — box-shadow
+    follows the box, and a shape is not its bounding box.
+
+    The units are the trap. The shape layer's viewBox is in INCHES (1 user
+    unit = 1in), and Chrome resolves CSS filter lengths on SVG children as
+    user units at 1px = 1 unit — so "0.06in" becomes 96 units: a
+    five-and-a-half-INCH blur that swallowed half a page in testing. The inch
+    values are therefore written with a px suffix, which lands them as the
+    inches they mean."""
+    dx, dy = _xy(sh.get("offset", 0.04), sh.get("direction", 135))
+    c = _rgba(sh.get("color", "#2F3E46"), sh.get("alpha", 0.35))
+    return f'filter:drop-shadow({dx}px {dy}px {sh.get("blur", 0.04)}px {c})'
+
+
+class Layout:
+    def __init__(self, path: Path, page: tuple[float, float] = (PAGE_W_IN, PAGE_H_IN)):
+        self.path = path
+        self.page_w, self.page_h = page
+        raw = {}
+        if path.exists():
+            try:
+                raw = json.loads(path.read_text() or "{}")
+            except json.JSONDecodeError as e:
+                raise LayoutError(f"{path.name}: not valid JSON — {e}")
+        self.positions = raw.get("positions") or {}
+        self.shapes = raw.get("shapes") or []
+        self.text = raw.get("text") or {}
+        self.boxes = raw.get("boxes") or []
+        self.tables = raw.get("tables") or []
+        self.fills = raw.get("fill") or {}
+        # Editor affordances only: ids the editor refuses to drag, and groups
+        # that select-and-move as one. The renderer reads neither, so they
+        # cannot move a byte of the published page — validated so a hand-edit
+        # cannot quietly disable a lock or dangle a group.
+        self.locked = raw.get("locked") or []
+        self.groups = raw.get("groups") or []
+        self.imgs = raw.get("img") or {}
+        # Ruler guides the editor snaps to, as {x:[in…], y:[in…]}. Editor-only,
+        # like `locked`: the renderer never emits a guide, so it cannot move a
+        # published byte — validated so a hand-edit cannot smuggle in junk.
+        self.guides = raw.get("guides") or {}
+        # Page identity vs order. Designed pages are IDS (their born ordinals);
+        # "pages" reorders, hides (by omission) and interleaves blank pages.
+        # Everything page-keyed — shapes, boxes, fills, layers — stays keyed by
+        # identity, so reordering never re-homes anyone's work.
+        self.pages = raw.get("pages") or {}
+        # An explicit endnote order, by source id. Endnotes are numbered by
+        # first appearance in the prose; dragging one past another on the
+        # Endnotes page records an override here instead of rewriting the
+        # refs in the text. Partial by design — ids listed here lead, in this
+        # order, and anything else keeps its first-appearance place after
+        # them. An id that is no longer cited is simply ignored.
+        self.endnotes = raw.get("endnotes") or []
+        self._validate()
+
+    def endnote_order(self) -> list:
+        """The editor's endnote order override (ids), or [] for none."""
+        return [e for e in self.endnotes if isinstance(e, str)]
+
+    def _validate(self):
+        for el, p in self.positions.items():
+            for k in ("x", "y"):
+                if k not in p:
+                    raise LayoutError(f"position '{el}' has no '{k}'")
+                _num(p[k], f"position '{el}'.{k}")
+            if p.get("rot") is not None:
+                _num(p["rot"], f"position '{el}'.rot")
+            if p.get("scale") is not None and _num(p["scale"], f"position '{el}'.scale") <= 0:
+                raise LayoutError(f"position '{el}': scale must be positive")
+            if p.get("alpha") is not None:
+                _alpha(p["alpha"], f"position '{el}'.alpha")
+            if p.get("flip") is not None and p["flip"] not in ("h", "v", "hv"):
+                raise LayoutError(f"position '{el}': flip {p['flip']!r} must be "
+                                  f"h, v or hv")
+        seen = set()
+        for i, s in enumerate(self.shapes):
+            where = f"shape #{i + 1}"
+            sid = s.get("id")
+            if not sid:
+                raise LayoutError(f"{where}: needs an 'id'")
+            if sid in seen:
+                raise LayoutError(f"{where}: duplicate id '{sid}'")
+            seen.add(sid)
+            if s.get("kind") not in KINDS:
+                raise LayoutError(
+                    f"{where}: kind {s.get('kind')!r} must be one of {', '.join(KINDS)}")
+            if not isinstance(s.get("page"), (int, str)) or isinstance(s.get("page"), bool):
+                raise LayoutError(f"{where}: 'page' must be a page number or blank-page id")
+            for k in ("x", "y", "w", "h"):
+                _num(s.get(k), f"{where}.{k}")
+            # These land verbatim inside SVG attributes: a malformed value
+            # does not error, it renders an invisible shape. Fill may be a
+            # gradient; stroke stays a solid hex.
+            if s.get("fill") not in (None, "none"):
+                _fill(s["fill"], f"{where}.fill")
+            if s.get("stroke") not in (None, "none"):
+                _hex(s["stroke"], f"{where}.stroke")
+            if s.get("rot") is not None:
+                _num(s["rot"], f"{where}.rot")
+            if s.get("alpha") is not None:
+                _alpha(s["alpha"], f"{where}.alpha")
+            if s.get("shadow") is not None:
+                _check_shadow(s["shadow"], f"{where}.shadow")
+            if s.get("r") is not None and _num(s["r"], f"{where}.r") < 0:
+                raise LayoutError(f"{where}: corner radius cannot be negative")
+            if s.get("dash") is not None:
+                d = s["dash"]
+                if not isinstance(d, list) or not 1 <= len(d) <= 2 or any(
+                        _num(v, f"{where}.dash") <= 0 for v in d):
+                    raise LayoutError(f"{where}: dash must be one or two positive "
+                                      f"lengths, like [0.08, 0.05]")
+            if s.get("ends") is not None and s["ends"] not in LINE_ENDS:
+                raise LayoutError(f"{where}: ends {s['ends']!r} must be one of "
+                                  f"{', '.join(LINE_ENDS)}")
+            if s.get("kind") == "icon":
+                check_icon_svg(s.get("svg"), where)
+                vb = s.get("vb", "0 0 24 24")
+                # The viewBox lands verbatim in an SVG attribute; four numbers
+                # or nothing, so a stray quote cannot end the attribute early.
+                if not isinstance(vb, str) or not _VIEWBOX_RE.match(vb):
+                    raise LayoutError(f"{where}: viewBox {vb!r} must be four numbers, "
+                                      f"like '0 0 24 24'")
+            _z(s)          # a bad layer must fail at load, not mid-render
+        for el, p in self.positions.items():
+            if "z" in p and not isinstance(p["z"], int):
+                raise LayoutError(f"position '{el}': z {p['z']!r} is not a layer number")
+        for key, st in self.text.items():
+            if not isinstance(st, dict):
+                raise LayoutError(f"text '{key}': expected a style object")
+            _check_text(st, f"text '{key}'")
+        for el, c in self.fills.items():
+            _fill(c, f"fill '{el}'")
+        if not isinstance(self.locked, list) or any(
+                not isinstance(x, str) or not x for x in self.locked):
+            raise LayoutError("locked: expected a list of element ids")
+        if not isinstance(self.groups, list):
+            raise LayoutError("groups: expected a list of groups")
+        _grouped = set()
+        for i, g in enumerate(self.groups):
+            if not isinstance(g, list) or len(g) < 2 or any(
+                    not isinstance(m, str) or not m for m in g):
+                raise LayoutError(f"groups #{i + 1}: a group is two or more "
+                                  f"element ids")
+            for m in g:
+                if m in _grouped:
+                    raise LayoutError(f"groups: '{m}' is in two groups — an "
+                                      f"element belongs to at most one")
+                _grouped.add(m)
+        if self.guides:
+            if not isinstance(self.guides, dict):
+                raise LayoutError("guides: expected {x:[…], y:[…]}")
+            for axis, span in (("x", self.page_w), ("y", self.page_h)):
+                vals = self.guides.get(axis)
+                if vals is None:
+                    continue
+                if not isinstance(vals, list):
+                    raise LayoutError(f"guides.{axis}: expected a list of inches")
+                for v in vals:
+                    if not 0 <= _num(v, f"guides.{axis}") <= span:
+                        raise LayoutError(f"guides.{axis}: {v} is off the "
+                                          f"{span}in page")
+        if self.pages:
+            if not isinstance(self.pages, dict):
+                raise LayoutError("pages: expected an object with order/blanks")
+            blanks = self.pages.get("blanks") or []
+            bids = set()
+            for i, b in enumerate(blanks):
+                if not isinstance(b, dict) or not isinstance(b.get("id"), str) \
+                        or not b["id"]:
+                    raise LayoutError(f"pages.blanks #{i + 1}: needs a string id")
+                if b["id"] in bids:
+                    raise LayoutError(f"pages.blanks: duplicate id '{b['id']}'")
+                bids.add(b["id"])
+            order = self.pages.get("order")
+            if order is not None:
+                if not isinstance(order, list) or not order:
+                    raise LayoutError("pages.order: expected a non-empty list")
+                seen_o = set()
+                for pid in order:
+                    if isinstance(pid, bool) or not isinstance(pid, (int, str)):
+                        raise LayoutError(f"pages.order: {pid!r} is neither a "
+                                          f"designed page number nor a blank id")
+                    if isinstance(pid, str) and pid not in bids:
+                        raise LayoutError(f"pages.order: '{pid}' is not a blank "
+                                          f"this file declares")
+                    if pid in seen_o:
+                        raise LayoutError(f"pages.order: '{pid}' appears twice")
+                    seen_o.add(pid)
+        for el, g in self.imgs.items():
+            where = f"img '{el}'"
+            if not isinstance(g, dict):
+                raise LayoutError(f"{where}: expected an image-override object")
+            if g.get("radius") is not None and _num(g["radius"], f"{where}.radius") < 0:
+                raise LayoutError(f"{where}: radius cannot be negative")
+            if g.get("src") is not None and (
+                    not isinstance(g["src"], str) or not g["src"].strip()):
+                raise LayoutError(f"{where}: src must be a path")
+            if g.get("filter") is not None:
+                f = g["filter"]
+                if not isinstance(f, dict):
+                    raise LayoutError(f"{where}: filter must be an object")
+                for k in ("bright", "contrast", "sat"):
+                    if f.get(k) is not None and _num(f[k], f"{where}.filter.{k}") < 0:
+                        raise LayoutError(f"{where}.filter.{k} cannot be negative")
+                if f.get("gray") is not None:
+                    _alpha(f["gray"], f"{where}.filter.gray")
+            if g.get("crop") is not None:
+                c = g["crop"]
+                if not isinstance(c, dict) or any(k not in c for k in ("imgW", "dx", "dy")):
+                    raise LayoutError(f"{where}: crop needs imgW, dx and dy")
+                for k in ("imgW", "dx", "dy"):
+                    if _num(c[k], f"{where}.crop.{k}") < 0:
+                        raise LayoutError(f"{where}.crop.{k} cannot be negative")
+        for i, b in enumerate(self.boxes):
+            where = f"box #{i + 1}"
+            bid = b.get("id")
+            if not bid:
+                raise LayoutError(f"{where}: needs an 'id'")
+            # One namespace with shapes: the editor resolves an id to a thing by
+            # searching both, so a collision makes the right-click menu act on
+            # whichever it happens to find first.
+            if bid in seen:
+                raise LayoutError(f"{where}: duplicate id '{bid}' — already a shape")
+            seen.add(bid)
+            if not isinstance(b.get("page"), (int, str)) or isinstance(b.get("page"), bool):
+                raise LayoutError(f"{where}: 'page' must be a page number or blank-page id")
+            for k in ("x", "y", "w"):
+                _num(b.get(k), f"{where}.{k}")
+            if b.get("h") is not None:      # optional min-height (never clips)
+                _num(b["h"], f"{where}.h")
+            if not str(b.get("md", "")).strip():
+                raise LayoutError(f"{where}: has no text — 'md' is empty")
+            if "z" in b and not isinstance(b["z"], int):
+                raise LayoutError(f"{where}: z {b['z']!r} is not a layer number")
+            if b.get("fill"):
+                _fill(b["fill"], f"{where}.fill")
+            if b.get("rot") is not None:
+                _num(b["rot"], f"{where}.rot")
+            if b.get("alpha") is not None:
+                _alpha(b["alpha"], f"{where}.alpha")
+            if b.get("shadow") is not None:
+                _check_shadow(b["shadow"], f"{where}.shadow")
+            if b.get("style"):
+                _check_text(b["style"], f"{where}.style")
+
+        for i, t in enumerate(self.tables):
+            where = f"table #{i + 1}"
+            tid = t.get("id")
+            if not tid:
+                raise LayoutError(f"{where}: needs an 'id'")
+            if tid in seen:
+                raise LayoutError(f"{where}: duplicate id '{tid}' — already a shape or box")
+            seen.add(tid)
+            if not isinstance(t.get("page"), (int, str)) or isinstance(t.get("page"), bool):
+                raise LayoutError(f"{where}: 'page' must be a page number or blank-page id")
+            for k in ("x", "y", "w"):
+                _num(t.get(k), f"{where}.{k}")
+            rows = t.get("rows")
+            if not isinstance(rows, list) or not rows:
+                raise LayoutError(f"{where}: 'rows' must be a non-empty grid")
+            width = None
+            for ri, row in enumerate(rows):
+                if not isinstance(row, list) or not row:
+                    raise LayoutError(f"{where}: row #{ri + 1} must be a non-empty list of cells")
+                if width is None:
+                    width = len(row)
+                elif len(row) != width:
+                    raise LayoutError(f"{where}: row #{ri + 1} has {len(row)} cells, expected {width}")
+                for c in row:
+                    if not isinstance(c, str):
+                        raise LayoutError(f"{where}: every cell must be text (markdown)")
+            if "z" in t and not isinstance(t["z"], int):
+                raise LayoutError(f"{where}: z {t['z']!r} is not a layer number")
+            if t.get("rot") is not None:
+                _num(t["rot"], f"{where}.rot")
+            if t.get("alpha") is not None:
+                _alpha(t["alpha"], f"{where}.alpha")
+            if t.get("style"):
+                _check_text(t["style"], f"{where}.style")
+
+    # ---- positions -------------------------------------------------------
+
+    def _style(self, p: dict) -> str:
+        s = f'position:absolute;left:{p["x"]}in;top:{p["y"]}in'
+        if p.get("w"):
+            s += f';width:{p["w"]}in'
+        # Height is opt-in. A text box with a fixed height either clips its
+        # words or leaves a hole when the prose changes, so only things whose
+        # size is their content — images, shapes — should carry one.
+        if p.get("h"):
+            s += f';height:{p["h"]}in'
+        # z is an integer layer: below 0 sits under the text, above 0 over it.
+        s += f';z-index:{int(p.get("z", 1))}'
+        # One transform declaration for all of it: a second would silently
+        # replace the first, which is exactly how a flip would eat a rotation.
+        # Default (centre) origin, so scale grows a graphic from its middle and
+        # rotate/flip pivot in place — one origin that suits every operation.
+        tf = []
+        if p.get("rot"):
+            tf.append(f'rotate({p["rot"]}deg)')
+        if p.get("scale") is not None and float(p["scale"]) != 1:
+            tf.append(f'scale({p["scale"]})')
+        if p.get("flip"):
+            f = p["flip"]
+            tf.append(f'scale({-1 if "h" in f else 1},{-1 if "v" in f else 1})')
+        if tf:
+            s += f';transform:{" ".join(tf)}'
+        if p.get("alpha") is not None:
+            s += f';opacity:{p["alpha"]:g}'
+        return s
+
+    def attr(self, el_id: str, extra: str = "") -> str:
+        """Attributes for an element with no style of its own.
+
+        data-el is stamped only while editing, so the published build carries no
+        editing scaffolding; the style appears only when the element has
+        actually been moved. `extra` is for declarations the call site computed
+        (a recoloured callout's background) — merged here because an element
+        with two style attributes silently keeps only the first.
+        """
+        bits = []
+        if os.environ.get("DOCSYNC_EDIT"):
+            bits.append(f'data-el="{el_id}"')
+        p = self.positions.get(el_id)
+        css = self._style(p) if p else ""
+        both = ";".join(x for x in (css, extra) if x)
+        if both:
+            bits.append(f'style="{both}"')
+        return (" " + " ".join(bits)) if bits else ""
+
+    def spacer(self, el_id: str) -> str:
+        """Hold the place of an element that has been moved away.
+
+        Positioning something absolutely takes it out of the flow, so whatever
+        followed it slides up into the gap — move the logo and the title beneath
+        it jumps. That is never what someone dragging one thing means to do, so
+        the vacated slot stays reserved and its neighbours stay put.
+
+        The slot has a width too, not only a height: a branch photo sits in a
+        FLEX row beside its card, and reserving only the height let the card
+        stretch across the gap the instant the photo moved. 'reserve' (the
+        vacated height) and 'w' (the pinned width) together hold the exact box,
+        and flex:none stops a flex parent from growing or shrinking it.
+
+        'reserve' is only recorded for elements that were in the flow to begin
+        with; an element that was already absolute (a lifecycle callout)
+        reserves nothing, because it never occupied flow space. It is a
+        different thing from 'h', which is how tall the element should be drawn.
+        """
+        p = self.positions.get(el_id)
+        if not p or not p.get("reserve"):
+            return ""
+        wid = f'width:{p["w"]}in;' if p.get("w") else ""
+        return (f'<div class="ds-spacer" style="{wid}height:{p["reserve"]}in;'
+                f'flex:0 0 auto" aria-hidden="true"></div>')
+
+    def tag(self, el_id: str) -> str:
+        """Just the data-el hook, for elements that already carry a style of
+        their own and must merge the override into it rather than grow a second
+        style attribute."""
+        return f' data-el="{el_id}"' if os.environ.get("DOCSYNC_EDIT") else ""
+
+    def style(self, el_id: str, default: str = "") -> str:
+        """For elements the renderer already positions itself (the lifecycle
+        callouts): the override wins, otherwise the computed placement stands."""
+        p = self.positions.get(el_id)
+        return self._style(p) if p else default
+
+    def moved(self, el_id: str) -> bool:
+        return el_id in self.positions
+
+    # ---- text ------------------------------------------------------------
+
+    def text_style(self, key: str) -> str:
+        """The CSS for one slot's text, or "" when it was never styled."""
+        return text_css(self.text.get(key) or {})
+
+    def text_attr(self, key: str) -> str:
+        """ style="…" for a slot, or "" — never style="", which would change
+        the bytes of a report nobody has styled."""
+        css = self.text_style(key)
+        return f' style="{css}"' if css else ""
+
+    def styled(self, key: str) -> bool:
+        return bool(self.text.get(key))
+
+    def unknown_text_keys(self, styleable: set) -> list:
+        """Styles aimed at slots the report cannot carry a style on.
+
+        The renderer builds a few slots into a string before they reach the page
+        (a caption that gets sliced, a label inside SVG). A style on those does
+        nothing at all — silently. Better to say so.
+        """
+        return sorted(k for k in self.text if k not in styleable)
+
+    def font_link(self) -> str:
+        """The Google Fonts <link>, covering the brand's fonts plus anything a
+        style asks for.
+
+        It was a hardcoded literal. It has to keep producing that exact literal
+        when nothing is styled — the head of an unstyled report must not move a
+        byte — while also actually requesting a weight someone picks. Today
+        Barlow 400 would simply be faked; now it is fetched.
+        """
+        want: dict[str, set] = {f: set(ws) for f, ws in BRAND_FONTS.items()}
+        ital: dict[str, set] = {f: set(ws) for f, ws in BRAND_ITALICS.items()}
+        for st in self.text.values():
+            fam = st.get("font")
+            if not fam:
+                continue
+            w = int(st.get("weight") or 400)
+            (ital if st.get("italic") else want).setdefault(fam, set()).add(w)
+            want.setdefault(fam, set())
+        parts = []
+        for fam in list(BRAND_FONTS) + [f for f in want if f not in BRAND_FONTS]:
+            roman, italic = sorted(want.get(fam, set())), sorted(ital.get(fam, set()))
+            if not roman and not italic:
+                continue
+            name = fam.replace(" ", "+")
+            if italic:
+                axis = ";".join([f"0,{w}" for w in roman] + [f"1,{w}" for w in italic])
+                parts.append(f"family={name}:ital,wght@{axis}")
+            else:
+                parts.append(f"family={name}:wght@{';'.join(str(w) for w in roman)}")
+        return ('<link href="https://fonts.googleapis.com/css2?'
+                + "&".join(parts) + '&display=swap" rel="stylesheet">')
+
+    # ---- fills -----------------------------------------------------------
+
+    def fill(self, el_id: str, default: str = "") -> str:
+        """The colour an element should actually be painted.
+
+        This has to be answered in Python, not patched onto the DOM afterwards,
+        and that is not a preference. is_light_bg() reads a tile's luminance at
+        build time to decide whether its text is white or charcoal — and the
+        footnote pills ride the same class. Recolour a tile in the browser and
+        that decision does not re-run: you get white text on a pale tile, which
+        is not "wrong colour", it is invisible.
+        """
+        return self.fills.get(el_id) or default
+
+    def refilled(self, el_id: str) -> bool:
+        return el_id in self.fills
+
+    # ---- pages -----------------------------------------------------------
+
+    def page_order(self, designed: int) -> list:
+        """The final page sequence: designed ids and blank ids, in order.
+
+        With no override this is 1..designed exactly — the byte-identity case.
+        A designed number outside the report is refused here, at render, where
+        the count is finally known.
+        """
+        order = self.pages.get("order")
+        if not order:
+            return list(range(1, designed + 1))
+        for pid in order:
+            if isinstance(pid, int) and not 1 <= pid <= designed:
+                raise LayoutError(f"pages.order: this report has pages "
+                                  f"1–{designed}, not {pid}")
+        return list(order)
+
+    def blank_ids(self) -> list:
+        return [b["id"] for b in (self.pages.get("blanks") or [])]
+
+    def fill_tag(self, el_id: str) -> str:
+        """The editor's right-click hook for recolourable surfaces.
+
+        The editor must not carry a list of what is fillable — that would be
+        report knowledge inside a generic tool, and the first new report would
+        prove it wrong. The renderer stamps data-fill on exactly the elements
+        whose colour it actually consults, so the page itself is the contract.
+        Edit mode only, like data-el.
+        """
+        return f' data-fill="{el_id}"' if os.environ.get("DOCSYNC_EDIT") else ""
+
+    def fill_attr(self, el_id: str) -> str:
+        """fill_tag plus the background itself, for surfaces whose colour lives
+        in CSS rather than in an inline style the renderer already writes (a
+        page section). Emits nothing when unfilled outside edit mode, so the
+        published bytes cannot move."""
+        bits = []
+        if os.environ.get("DOCSYNC_EDIT"):
+            bits.append(f'data-fill="{el_id}"')
+        if self.refilled(el_id):
+            bits.append(f'style="background:{fill_css(self.fills[el_id])}"')
+        return (" " + " ".join(bits)) if bits else ""
+
+    # ---- images ----------------------------------------------------------
+
+    def img_src(self, el_id: str, default: str) -> str:
+        """The file an image element actually shows — replaced or designed."""
+        return (self.imgs.get(el_id) or {}).get("src") or default
+
+    def img_css(self, el_id: str) -> str:
+        """Radius and colour-filter declarations for one image, or ""."""
+        g = self.imgs.get(el_id) or {}
+        out = []
+        if g.get("radius"):
+            out.append(f'border-radius:{g["radius"]}in')
+        f = g.get("filter") or {}
+        fx = []
+        if f.get("bright") is not None:
+            fx.append(f'brightness({f["bright"]:g})')
+        if f.get("contrast") is not None:
+            fx.append(f'contrast({f["contrast"]:g})')
+        if f.get("sat") is not None:
+            fx.append(f'saturate({f["sat"]:g})')
+        if f.get("gray"):
+            fx.append(f'grayscale({f["gray"]:g})')
+        if fx:
+            out.append("filter:" + " ".join(fx))
+        return ";".join(out)
+
+    def cropped(self, el_id: str):
+        """The crop window's inner-image geometry, or None.
+
+        Absolute inches, deliberately: imgW is how wide the full image is
+        drawn, dx/dy how far the window sits into it. The editor measures
+        these against the rendered page, so this code never needs to know a
+        source file's pixel size."""
+        return (self.imgs.get(el_id) or {}).get("crop")
+
+    # ---- free-floating text ---------------------------------------------
+
+    def text_boxes(self, page: int) -> str:
+        """Text that belongs to the layout rather than to the prose.
+
+        A slot says what the report always says; a box is a note someone put on
+        one page. That is why it lives here and not in content.md — and the
+        price of that is real: it never reaches the bound Google Doc, so an
+        editor working there will never see it.
+
+        Height is opt-in via `h`, and only ever a MIN-height: a box grows to at
+        least that tall (so a coloured panel can be sized on all sides in the
+        editor) but never clips — if the words are taller than `h`, the box
+        grows past it. A box with no `h` is auto-height, as before.
+        """
+        mine = [b for b in self.boxes if b.get("page") == page]
+        if not mine:
+            return ""
+        out = []
+        for b in mine:
+            css = (f'position:absolute;left:{b["x"]}in;top:{b["y"]}in;'
+                   f'width:{b["w"]}in;z-index:{int(b.get("z", 2))}')
+            if b.get("h"):
+                css += f';min-height:{b["h"]}in'
+            if b.get("fill"):
+                # A background needs breathing room or the words sit on its
+                # edge; padding only when filled, so a plain box's text keeps
+                # sitting exactly where it was put.
+                css += f';background:{fill_css(b["fill"])};padding:.08in .12in;border-radius:8px'
+            if b.get("rot"):
+                css += f';transform:rotate({b["rot"]}deg)'
+            if b.get("alpha") is not None:
+                css += f';opacity:{b["alpha"]:g}'
+            if b.get("shadow"):
+                css += f';box-shadow:{shadow_css(b["shadow"])}'
+            style = text_css(b.get("style") or {})
+            tag = f' data-el="text.{b["id"]}"' if os.environ.get("DOCSYNC_EDIT") else ""
+            out.append(f'<div class="ds-textbox"{tag} '
+                       f'style="{css}{";" + style if style else ""}">'
+                       f'{block_html(b["md"])}</div>')
+        return "".join(out)
+
+    def box(self, box_id: str) -> dict | None:
+        return next((b for b in self.boxes if b.get("id") == box_id), None)
+
+    # ---- tables ----------------------------------------------------------
+
+    def tables_html(self, page: int) -> str:
+        """A placed, editable grid. Like a text box, it is absolutely positioned
+        in inches and width-driven — the rows set the height. `rows` is a grid
+        of cell markdown; `header` makes the first row a <th> band. Each cell
+        carries a data-cell hook in edit mode so the editor can edit it in
+        place."""
+        mine = [t for t in self.tables if t.get("page") == page]
+        if not mine:
+            return ""
+        edit = bool(os.environ.get("DOCSYNC_EDIT"))
+        out = []
+        for t in mine:
+            css = (f'position:absolute;left:{t["x"]}in;top:{t["y"]}in;'
+                   f'width:{t["w"]}in;z-index:{int(t.get("z", 2))}')
+            if t.get("rot"):
+                css += f';transform:rotate({t["rot"]}deg)'
+            if t.get("alpha") is not None:
+                css += f';opacity:{t["alpha"]:g}'
+            style = text_css(t.get("style") or {})
+            tag = f' data-el="table.{t["id"]}"' if edit else ""
+            header = bool(t.get("header"))
+            body = ""
+            for ri, row in enumerate(t.get("rows", [])):
+                cells = ""
+                for ci, c in enumerate(row):
+                    th = header and ri == 0
+                    name = "th" if th else "td"
+                    hook = f' data-cell="{ri},{ci}"' if edit else ""
+                    cells += f'<{name}{hook}>{md_inline(str(c))}</{name}>'
+                body += f"<tr>{cells}</tr>"
+            out.append(f'<table class="ds-table"{tag} '
+                       f'style="{css}{";" + style if style else ""}">{body}</table>')
+        return "".join(out)
+
+    def table(self, table_id: str) -> dict | None:
+        return next((t for t in self.tables if t.get("id") == table_id), None)
+
+    # ---- shapes ----------------------------------------------------------
+
+    def layer(self, page: int) -> str:
+        """Shapes for one page, grouped into one SVG per layer. Empty when there
+        are none, so a report without shapes renders exactly as before."""
+        mine = [s for s in self.shapes if s.get("page") == page]
+        if not mine:
+            return ""
+        by_z: dict[int, list] = {}
+        for s in mine:
+            by_z.setdefault(_z(s), []).append(s)
+        return "".join(self._svg(by_z[z], z) for z in sorted(by_z))
+
+    def _svg(self, shapes: list, z: int) -> str:
+        body = "".join(self._shape(s) for s in shapes)
+        # One <defs> per layer, holding any gradient definitions and — as before —
+        # the arrowhead marker. With no gradient and no arrow the list is empty
+        # and defs is "", so a plain shape layer is byte-for-byte unchanged; with
+        # arrows only, the marker is exactly the string it was.
+        defbits = [fill_svg_paint(s.get("fill"), f"ds-fill-{s['id']}")[1]
+                   for s in shapes if isinstance(s.get("fill"), dict)]
+        if any(s.get("kind") == "line" and s.get("ends") not in (None, "none")
+               for s in shapes):
+            # One arrowhead marker per layer. markerUnits="strokeWidth" scales
+            # it with the line's weight; context-stroke paints it the line's
+            # own colour (Chrome renders both screen and PDF here). The id
+            # carries page and layer so two layers never fight over one def.
+            pg = shapes[0].get("page")
+            defbits.append(f'<marker id="ds-arr-{pg}-{z}" viewBox="0 0 10 10" '
+                           f'refX="8" refY="5" markerUnits="strokeWidth" markerWidth="7" '
+                           f'markerHeight="7" orient="auto-start-reverse">'
+                           f'<path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>'
+                           f'</marker>')
+        defs = f'<defs>{"".join(defbits)}</defs>' if defbits else ""
+        return (f'<svg class="shape-layer" style="position:absolute;left:0;top:0;'
+                f'width:{self.page_w}in;height:{self.page_h}in;pointer-events:none;'
+                f'z-index:{z}" viewBox="0 0 {self.page_w} {self.page_h}">{defs}{body}</svg>')
+
+    def _shape(self, s: dict) -> str:
+        x, y, w, h = (float(s[k]) for k in ("x", "y", "w", "h"))
+        # A gradient fill becomes fill="url(#…)" and a <defs> entry that _svg
+        # collects; a hex/none stays verbatim, so a solid shape is byte-identical.
+        fill, _ = fill_svg_paint(s.get("fill"), f"ds-fill-{s['id']}")
+        stroke = s.get("stroke", "none")
+        sw = s.get("sw", 0.02)
+        common = (f'fill="{fill}" stroke="{stroke}" stroke-width="{sw}" '
+                  f'data-shape="{s["id"]}"')
+        # Rotation turns about the shape's own centre; the viewBox is in
+        # inches, so the pivot is plain geometry. Opacity and shadow ride the
+        # same node — a wrapping <g> would put a second element between the
+        # editor's data-shape lookups and the thing they mean.
+        if s.get("rot"):
+            common += (f' transform="rotate({s["rot"]} '
+                       f'{round(x + w / 2, 4)} {round(y + h / 2, 4)})"')
+        if s.get("alpha") is not None:
+            common += f' opacity="{s["alpha"]:g}"'
+        if s.get("shadow"):
+            common += f' style="{shape_shadow_css(s["shadow"])}"'
+        if s.get("dash"):
+            d = s["dash"]
+            common += f' stroke-dasharray="{" ".join(str(v) for v in d)}"'
+        if s["kind"] == "icon":
+            # A nested <svg> so the icon's own viewBox does the scaling: the
+            # glyph fits the box in inches whatever grid it was drawn on.
+            # `common` is not reused — its fill/stroke would say nothing here
+            # (the markup paints itself in currentColor) and its data-shape is
+            # re-emitted below so the editor still finds one node per shape.
+            bits = [f'x="{x}"', f'y="{y}"', f'width="{w}"', f'height="{h}"',
+                    f'viewBox="{s.get("vb", "0 0 24 24")}"',
+                    f'data-shape="{s["id"]}"', 'overflow="visible"']
+            css = [f'color:{icon_color(s.get("fill"))}']
+            if s.get("shadow"):
+                css.append(shape_shadow_css(s["shadow"]))
+            bits.append(f'style="{";".join(css)}"')
+            if s.get("rot"):
+                bits.append(f'transform="rotate({s["rot"]} '
+                            f'{round(x + w / 2, 4)} {round(y + h / 2, 4)})"')
+            if s.get("alpha") is not None:
+                bits.append(f'opacity="{s["alpha"]:g}"')
+            return f'<svg {" ".join(bits)}>{s.get("svg", "")}</svg>'
+        if s["kind"] == "rect":
+            r = s.get("r", 0)
+            return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" {common}/>'
+        if s["kind"] == "ellipse":
+            return (f'<ellipse cx="{x + w / 2}" cy="{y + h / 2}" rx="{w / 2}" '
+                    f'ry="{h / 2}" {common}/>')
+        if s["kind"] == "triangle":
+            return (f'<polygon points="{_pts(triangle_points(x, y, w, h))}" {common}/>')
+        if s["kind"] == "arrow":
+            return (f'<polygon points="{_pts(arrow_points(x, y, w, h))}" {common}/>')
+        ends = s.get("ends")
+        if ends and ends != "none":
+            mk = f"ds-arr-{s.get('page')}-{_z(s)}"
+            if ends in ("start", "both"):
+                common += f' marker-start="url(#{mk})"'
+            if ends in ("end", "both"):
+                common += f' marker-end="url(#{mk})"'
+        return f'<line x1="{x}" y1="{y}" x2="{x + w}" y2="{y + h}" {common}/>'
+
+    # ---- guardrail -------------------------------------------------------
+
+    def check_bounds(self) -> list[str]:
+        """Positions and shapes that fall outside the page.
+
+        `.page` is `overflow: hidden`, so a bad drag does not look broken — the
+        content is simply gone. Nothing else would catch that, which is exactly
+        why this is a hard failure rather than a warning.
+
+        A rotated element is judged by its rotated bounding box — the corners
+        are what get clipped, and at 45 degrees they stand well proud of the
+        unrotated frame. That needs a height; where one is not stored (flowed
+        prose), the unrotated checks stand and the fit meter owns the rest.
+        """
+        def rot_aabb(x, y, w, h, deg):
+            cx, cy = x + w / 2, y + h / 2
+            rad = math.radians(deg)
+            hw = abs(w / 2 * math.cos(rad)) + abs(h / 2 * math.sin(rad))
+            hh = abs(w / 2 * math.sin(rad)) + abs(h / 2 * math.cos(rad))
+            return cx - hw, cy - hh, cx + hw, cy + hh
+
+        bad = []
+        for el, p in self.positions.items():
+            x, y = float(p["x"]), float(p["y"])
+            if not (0 <= x <= self.page_w) or not (0 <= y <= self.page_h):
+                bad.append(f"'{el}' sits at {x}in,{y}in — off the "
+                           f"{self.page_w}x{self.page_h}in page")
+            if p.get("w") and x + float(p["w"]) > self.page_w + 0.01:
+                bad.append(f"'{el}' is {p['w']}in wide at x={x}in — "
+                           f"{x + float(p['w']) - self.page_w:.2f}in past the right edge")
+            if p.get("h") and y + float(p["h"]) > self.page_h + 0.01:
+                bad.append(f"'{el}' is {p['h']}in tall at y={y}in — "
+                           f"{y + float(p['h']) - self.page_h:.2f}in past the bottom edge")
+            if p.get("rot") and p.get("w") and p.get("h"):
+                x1, y1, x2, y2 = rot_aabb(x, y, float(p["w"]), float(p["h"]),
+                                          float(p["rot"]))
+                if x1 < -0.01 or y1 < -0.01 or x2 > self.page_w + 0.01 \
+                        or y2 > self.page_h + 0.01:
+                    bad.append(f"'{el}' rotated {p['rot']}° swings past the page edge")
+        for b in self.boxes:
+            x, y, w = (float(b[k]) for k in ("x", "y", "w"))
+            if x < 0 or y < 0 or x > self.page_w or y > self.page_h:
+                bad.append(f"text box '{b['id']}' sits off page {b['page']}")
+            elif x + w > self.page_w + 0.01:
+                bad.append(f"text box '{b['id']}' is {w}in wide at x={x}in — "
+                           f"{x + w - self.page_w:.2f}in past the right edge")
+        for s in self.shapes:
+            x, y, w, h = (float(s[k]) for k in ("x", "y", "w", "h"))
+            if s.get("rot"):
+                x1, y1, x2, y2 = rot_aabb(x, y, w, h, float(s["rot"]))
+                if x1 < -0.01 or y1 < -0.01 or x2 > self.page_w + 0.01 \
+                        or y2 > self.page_h + 0.01:
+                    bad.append(f"shape '{s['id']}' rotated {s['rot']}° swings "
+                               f"past page {s['page']}")
+            elif x < 0 or y < 0 or x + w > self.page_w + 0.01 or y + h > self.page_h + 0.01:
+                bad.append(f"shape '{s['id']}' extends past page {s['page']}")
+        return bad
