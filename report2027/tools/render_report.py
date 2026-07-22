@@ -590,7 +590,7 @@ def fy_pie_swap(fig_id, slices27, slices26, **kw):
             + pie(slices26, attrs=f' data-fig="{fig_id}" data-fy="2026" hidden', **kw))
 
 # ---------- page shells ----------
-def card(title, bullets, bg, light=None, key=""):
+def card(title, bullets, bg, light=None, key="", detachable=False, min_h=None):
     """One tile. The bullets' key names it: it is already unique per card, and a
     second name for the same thing is a second thing to keep in step.
 
@@ -599,6 +599,14 @@ def card(title, bullets, bg, light=None, key=""):
     into it and the column width comes from the track, so no measurement is
     involved. The override merges into the tile's own style attribute; two
     style attributes would silently drop one.
+
+    detachable=True renders the title and bullets as their OWN movable objects
+    (data-el + ds-detachable) laid out inside the tile by default but pull-out-
+    able — the pieces a user wants to separate. The text still comes from
+    content.md; the position hook never shares a tag with a data-slot (two
+    style attributes drop one), so the <ul> is wrapped, not tagged. min_h gives
+    the tile a floor height so it stays a panel after its text is dragged out.
+    A default group (seeded in layout.json) keeps the three moving as one.
     """
     el_id = f"card.{key}" if key else ""
     if el_id and L.refilled(el_id):
@@ -615,10 +623,21 @@ def card(title, bullets, bg, light=None, key=""):
     ul = C.ul_attr(key) if key else ""
     override = L.style(el_id, "") if el_id else ""
     style = f"background:{fill_css(bg)}" + (f";{override}" if override else "")
+    if detachable and min_h:
+        style += f";min-height:{min_h}in"
     tag = (L.tag(el_id) + L.fill_tag(el_id)) if el_id else ""
+    if detachable and key:
+        base = key[:-len(".bullets")] if key.endswith(".bullets") else key
+        title_id = base + ".title"
+        head = f'{L.spacer(title_id)}<h4 class="ds-detachable"{L.attr(title_id)}>{title}</h4>'
+        bullets_el = (f'{L.spacer(key)}<div class="ds-detachable"{L.attr(key)}>'
+                      f'<ul{ul}>{lis}</ul></div>')
+    else:
+        head = f'<h4>{title}</h4>'
+        bullets_el = f'<ul{ul}>{lis}</ul>'
     return (f'{L.spacer(el_id) if el_id else ""}'
             f'<div class="{cls}"{tag} style="{style}">'
-            f'<h4>{title}</h4><ul{ul}>{lis}</ul></div>')
+            f'{head}{bullets_el}</div>')
 
 
 def graphic(el_id, svg, w=1.5, cls=""):
@@ -914,7 +933,7 @@ pages.append(f"""
  {C.html("spent.p1")}
  {C.html("spent.p2")}
  <div class="cards3">
-  {card(C.t("spent.cards.operating.title"), C.list("spent.cards.operating.bullets"), DARK, key="spent.cards.operating.bullets")}
+  {card(C.t("spent.cards.operating.title"), C.list("spent.cards.operating.bullets"), DARK, key="spent.cards.operating.bullets", detachable=True, min_h=1.83)}
   {card(C.t("spent.cards.capital.title"), C.list("spent.cards.capital.bullets"), SAGE_MID, key="spent.cards.capital.bullets")}
   {card(C.t("spent.cards.onetime.title", esc=True), C.list("spent.cards.onetime.bullets"), SAGE_LIGHT, light=True, key="spent.cards.onetime.bullets")}
  </div>
