@@ -1,0 +1,36 @@
+{
+  "id": "rxkids",
+  "repo": null,
+  "branch": "main",
+  "files": {
+    "engine/docsync/content.py": "docsync/content.py",
+    "engine/docsync/normalise.py": "docsync/normalise.py",
+    "engine/docsync/layout.py": "docsync/layout.py",
+    "engine/docsync/blocks.py": "docsync/blocks.py",
+    "engine/projects/rxkids/render_report.py": "projects/rxkids/render_report.py",
+    "engine/projects/rxkids/content.md": "projects/rxkids/content.md",
+    "engine/projects/rxkids/layout.json": "projects/rxkids/layout.json",
+    "engine/projects/rxkids/original.html": "projects/rxkids/original.html"
+  },
+  "render": "projects/rxkids/render_report.py",
+  "content": "projects/rxkids/content.md",
+  "layout": "projects/rxkids/layout.json",
+  "out": "projects/rxkids/index.html",
+  "assets": null,
+  "page": {
+    "w": 12.5,
+    "h": 76.0
+  },
+  "margins": {
+    "side": 0.3,
+    "top": 0.3
+  },
+  "palette": [
+    "#2A3A4D",
+    "#4a5568",
+    "#E57373",
+    "#C62828",
+    "#EF5350",
+    "#FFFFFF"
+  ]
+}

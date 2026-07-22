@@ -121,6 +121,11 @@ a { color: var(--dark); }
 .card { border-radius: 16px; padding: 16px 18px; color: #fff; }
 .card.light { color: var(--ink); }
 .card h4 { font-size: 15px; margin-bottom: 8px; }
+/* A free-standing, editor-movable SVG graphic (render_report.graphic()). The
+   wrapper carries the width; the SVG fills it and its viewBox keeps the aspect,
+   so a proportional corner-resize just changes the wrapper width. */
+.ds-graphic { display: inline-block; vertical-align: middle; line-height: 0; }
+.ds-graphic > svg { display: block; width: 100%; height: auto; }
 .card ul { padding-left: 17px; }
 .card li { font-weight: 600; margin: 4px 0; }
 .card li i { font-weight: 400; }

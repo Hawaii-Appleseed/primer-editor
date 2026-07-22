@@ -105,6 +105,26 @@ An isolated DOM check that a feature works is NOT proof the file still boots.
   escape hatch is `<origin>/reset.html` — it unregisters the service worker,
   drops caches, and reopens the editor.
 
+## Bringing in an existing static page (e.g. a Squarespace embed)
+
+`projects/rxkids/` is the pattern: copy the original HTML in untouched
+(`original.html`), stage it via `editor.engine` in docsync.yml (the browser's
+virtual filesystem only has what the manifest lists — a renderer reading a
+file it forgot to declare fails with no file-not-found on disk to explain it),
+and have `render_report.py` wrap its `<style>`/`<body>` almost verbatim in ONE
+`section.page` sized to the page's own natural footprint (measure
+`scrollHeight` first) rather than a print page. That gets it OPENABLE with
+zero content loss. Making pieces of it editable — moving copy into slots,
+wrapping art in `graphic()`/`card()` — is a separate, later pass.
+
+Known interop quirk: scroll-triggered reveal animations (an IntersectionObserver
+or scroll-listener that adds an "active"/visible class) may not fire inside the
+editor's iframe the way they do on the live site — confirmed on rxkids: the
+hero (first section) revealed correctly, sections further down stayed at
+opacity:0 even after scrolling. Not a build error; a rendering interop wrinkle
+worth fixing (or stripping the reveal-gating for the editor context) if it
+matters for editing that content.
+
 ## Where code lives
 
 The engine (`docsync/`, `edit.html`, `serve.py`, this skill) is canonical in

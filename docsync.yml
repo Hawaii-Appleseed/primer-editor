@@ -45,6 +45,32 @@ bindings:
         - docs/js/departments_act175_fy2027.json
         - docs/js/historical_trends.json
 
+  # RxKids — a real Hawaii Appleseed page (originally a Squarespace embed),
+  # pulled in as STAGE ONE: openable, not yet editable. render_report.py wraps
+  # its original <style>/<body> almost verbatim in one section.page; no
+  # content is wired to a [[slot]] yet. A follow-up session's job, guided by
+  # the report-editor skill: move pieces of it into slots/graphics/cards one
+  # at a time. page size is the page's own natural footprint (~1200px wide,
+  # ~7160px tall), not a print page — this project is a scrolling web page.
+  - id: rxkids
+    content: projects/rxkids/content.md
+    build: python3 projects/rxkids/render_report.py
+    outputs:
+      - projects/rxkids/index.html
+    editor:
+      dir: docs/rxkids
+      render: projects/rxkids/render_report.py
+      out: projects/rxkids/index.html
+      layout: projects/rxkids/layout.json
+      palette: ["#2A3A4D", "#4a5568", "#E57373", "#C62828", "#EF5350", "#FFFFFF"]
+      page: [12.5, 76]
+      margins: [0.3, 0.3]
+      engine:
+        # The untouched source render_report.py reads at build time — must be
+        # staged like any other file the renderer opens, or the browser's
+        # virtual filesystem won't have it (unlike a real checkout on disk).
+        - projects/rxkids/original.html
+
   # A SECOND report on the same engine — the proof that one editor serves any
   # report. Scaffolded by hand the way "+ New report" would; its renderer
   # demonstrates the shared building blocks (docsync.blocks: graphic, card).

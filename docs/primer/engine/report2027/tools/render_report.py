@@ -590,7 +590,7 @@ def fy_pie_swap(fig_id, slices27, slices26, **kw):
             + pie(slices26, attrs=f' data-fig="{fig_id}" data-fy="2026" hidden', **kw))
 
 # ---------- page shells ----------
-def card(title, bullets, bg, light=None, key=""):
+def card(title, bullets, bg, light=None, key="", detachable=False, min_h=None):
     """One tile. The bullets' key names it: it is already unique per card, and a
     second name for the same thing is a second thing to keep in step.
 
@@ -599,6 +599,14 @@ def card(title, bullets, bg, light=None, key=""):
     into it and the column width comes from the track, so no measurement is
     involved. The override merges into the tile's own style attribute; two
     style attributes would silently drop one.
+
+    detachable=True renders the title and bullets as their OWN movable objects
+    (data-el + ds-detachable) laid out inside the tile by default but pull-out-
+    able — the pieces a user wants to separate. The text still comes from
+    content.md; the position hook never shares a tag with a data-slot (two
+    style attributes drop one), so the <ul> is wrapped, not tagged. min_h gives
+    the tile a floor height so it stays a panel after its text is dragged out.
+    A default group (seeded in layout.json) keeps the three moving as one.
     """
     el_id = f"card.{key}" if key else ""
     if el_id and L.refilled(el_id):
@@ -615,10 +623,32 @@ def card(title, bullets, bg, light=None, key=""):
     ul = C.ul_attr(key) if key else ""
     override = L.style(el_id, "") if el_id else ""
     style = f"background:{fill_css(bg)}" + (f";{override}" if override else "")
+    if detachable and min_h:
+        style += f";min-height:{min_h}in"
     tag = (L.tag(el_id) + L.fill_tag(el_id)) if el_id else ""
+    if detachable and key:
+        base = key[:-len(".bullets")] if key.endswith(".bullets") else key
+        title_id = base + ".title"
+        head = f'{L.spacer(title_id)}<h4 class="ds-detachable"{L.attr(title_id)}>{title}</h4>'
+        bullets_el = (f'{L.spacer(key)}<div class="ds-detachable"{L.attr(key)}>'
+                      f'<ul{ul}>{lis}</ul></div>')
+    else:
+        head = f'<h4>{title}</h4>'
+        bullets_el = f'<ul{ul}>{lis}</ul>'
     return (f'{L.spacer(el_id) if el_id else ""}'
             f'<div class="{cls}"{tag} style="{style}">'
-            f'<h4>{title}</h4><ul{ul}>{lis}</ul></div>')
+            f'{head}{bullets_el}</div>')
+
+
+def graphic(el_id, svg, w=1.5, cls=""):
+    """A free-standing SVG the editor can move/resize/rotate; placement lives
+    in layout.json under el_id. One implementation for every report now —
+    docsync.blocks.graphic — this wrapper just supplies this report's Layout.
+    (See blocks.py for the full contract: unique stable el_id, viewBox
+    required, `w` is the default width until the user resizes.)"""
+    from docsync.blocks import graphic as _graphic
+    return _graphic(L, el_id, svg, w=w, cls=cls)
+
 
 def img_el(el_id, cls, src, alt):
     """One image element, honouring replace/radius/filter/crop overrides.
@@ -891,7 +921,7 @@ pages.append(f"""
  {C.html("spent.p1")}
  {C.html("spent.p2")}
  <div class="cards3">
-  {card(C.t("spent.cards.operating.title"), C.list("spent.cards.operating.bullets"), DARK, key="spent.cards.operating.bullets")}
+  {card(C.t("spent.cards.operating.title"), C.list("spent.cards.operating.bullets"), DARK, key="spent.cards.operating.bullets", detachable=True, min_h=1.83)}
   {card(C.t("spent.cards.capital.title"), C.list("spent.cards.capital.bullets"), SAGE_MID, key="spent.cards.capital.bullets")}
   {card(C.t("spent.cards.onetime.title", esc=True), C.list("spent.cards.onetime.bullets"), SAGE_LIGHT, light=True, key="spent.cards.onetime.bullets")}
  </div>
@@ -957,6 +987,7 @@ pages.append(f"""
   {card(C.t("onetime.cards.onetime.title"), ONE_TIME_BULLETS, DARK, key="onetime.cards.onetime.bullets")}
   {card(C.t("onetime.cards.emergency.title"), EMERG_BULLETS, DARKEST, key="onetime.cards.emergency.bullets")}
  </div>
+ {L.spacer("onetime.demo.box")}<div class="ds-demo-box"{L.attr("onetime.demo.box", "display:inline-block;padding:4px;border:1px solid #ccc")}>{graphic("onetime.demo.graphic", '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="demo graphic"><circle cx="60" cy="60" r="56" fill="#52796F"/><path d="M30 78 L52 54 L68 66 L92 38" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="38" r="8" fill="#fff"/></svg>', w=0.8)}</div>
 {C.extras("onetime")} {L.layer(8)}{L.text_boxes(8)}{L.tables_html(8)}{folio(8)}
 </section>""")
 
@@ -1032,7 +1063,18 @@ C.fn.order_by(L.endnote_order(), C.fn.cited(_assembled))
 body = C.fn.resolve(_assembled)
 
 missing_src = C.fn.unused()
-if missing_src:
+# A source with no citation is a HARD error only when PUBLISHING. While editing
+# (DOCSYNC_EDIT), it is almost always a normal in-between state — you cut a
+# sentence to move it elsewhere, and for those few seconds the source it cited
+# has nothing pointing at it. Crashing the live preview over that made a routine
+# move feel like a "critical error" and blocked it. In edit mode the source is
+# simply left unrendered (it reappears the moment you paste the text back), and
+# a note prints; publish/export/CI still refuse, so a source that stays orphaned
+# — a citation typo, a genuinely dangling def — is still caught before it ships.
+if missing_src and os.environ.get("DOCSYNC_EDIT"):
+    print("  draft: source(s) not cited yet — normal while moving text: "
+          + ", ".join(missing_src))
+elif missing_src:
     srcs = ", ".join(f"[{s}]" for s in missing_src)
     hidden = [p for p in range(1, DESIGNED_PAGES + 1) if p not in PAGE_POS]
     if hidden:
@@ -1043,7 +1085,9 @@ if missing_src:
             f"hiding {names} left these sources with nothing citing them: {srcs}. "
             f"Show that page again, or remove the sources from the doc.")
     raise ContentError(
-        "content.md declares sources never cited in the prose: " + srcs)
+        "content.md declares sources never cited in the prose: " + srcs
+        + " — if you're moving the text that cites one, finish the move (paste it "
+        + "back in); this blocks publishing only, not the live preview.")
 
 en = "".join(endnote_link(i + 1, sid, t, u) for i, (sid, t, u) in enumerate(C.fn.endnotes_with_ids()))
 notes = C.fn.endnotes()
