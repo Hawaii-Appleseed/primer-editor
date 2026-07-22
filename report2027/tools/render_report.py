@@ -980,7 +980,7 @@ pages.append(f"""
   {card(C.t("onetime.cards.onetime.title"), ONE_TIME_BULLETS, DARK, key="onetime.cards.onetime.bullets")}
   {card(C.t("onetime.cards.emergency.title"), EMERG_BULLETS, DARKEST, key="onetime.cards.emergency.bullets")}
  </div>
- {graphic("onetime.demo.graphic", '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="demo graphic"><circle cx="60" cy="60" r="56" fill="#52796F"/><path d="M30 78 L52 54 L68 66 L92 38" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="38" r="8" fill="#fff"/></svg>', w=1.4)}
+ {L.spacer("onetime.demo.box")}<div class="ds-demo-box"{L.attr("onetime.demo.box", "display:inline-block;padding:10px;border:1px solid #ccc")}>{graphic("onetime.demo.graphic", '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="demo graphic"><circle cx="60" cy="60" r="56" fill="#52796F"/><path d="M30 78 L52 54 L68 66 L92 38" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="38" r="8" fill="#fff"/></svg>', w=1.4)}</div>
 {C.extras("onetime")} {L.layer(8)}{L.text_boxes(8)}{L.tables_html(8)}{folio(8)}
 </section>""")
 

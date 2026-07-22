@@ -61,6 +61,34 @@ test.describe('editor-movable SVG graphics', () => {
     expect(pos.y).toBeGreaterThan(0);
   });
 
+  test('a graphic NESTED inside another movable stays independently selectable', async ({ page }) => {
+    // The fixture nests the demo graphic inside a movable container
+    // (onetime.demo.box) — the shape of an icon inside a card. Clicking the
+    // graphic must select the GRAPHIC, not glue it to the container.
+    const frame = page.frameLocator('#out');
+    const box = frame.locator('[data-el="onetime.demo.box"]');
+    const g = frame.locator(`[data-el="${GID}"]`);
+    await g.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await expect(box).toHaveCount(1);   // the container is itself a movable
+    await expect(g).toHaveCount(1);     // the graphic sits inside it
+
+    await g.click();
+    const sel = await page.evaluate(() => [...selIds]);
+    expect(sel).toEqual([GID]);         // the graphic, not the container
+
+    // and it drags to its own position, out of the container
+    const bb = await g.boundingBox();
+    await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bb.x + bb.width / 2 + 55, bb.y + bb.height / 2 + 40, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    const pos = await page.evaluate(k => layout.positions[k], GID);
+    expect(pos).toBeTruthy();
+    expect(pos.x).toBeGreaterThan(0);
+  });
+
   test('a corner resize writes a width override (proportional scaling)', async ({ page }) => {
     const frame = page.frameLocator('#out');
     const g = frame.locator(`[data-el="${GID}"]`);
