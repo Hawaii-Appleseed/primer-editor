@@ -36,7 +36,10 @@ Rules that bite:
   block); `python3 -m docsync.stage --id <id>` stages the editor + engine next
   to that report's published dir.
 - **Bringing in a static HTML page**: `python3 -m docsync.scaffold page.html
-  --id <slug>` does STAGE ONE (openable, not editable) automatically —
-  project dir, wrapper renderer, docsync.yml binding, build + stage. Making
-  it editable (STAGE TWO) is a per-page AI/hand job; what could shrink that
-  is scoped in `docsync/STAGE2_AUTOMATION.md`.
+  --id <slug>` does STAGE ONE (openable) automatically — project dir, wrapper
+  renderer, docsync.yml binding, build + stage. Then `python3 -m
+  docsync.propose --id <slug>` mechanically wires every substantial text
+  leaf as an editable slot (worked example: `projects/our-mission`). The
+  remaining STAGE TWO judgment work (renames, chrome pruning, widget
+  restructuring) and what's still automatable is scoped in
+  `docsync/STAGE2_AUTOMATION.md`.

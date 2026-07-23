@@ -8,25 +8,24 @@ payoff, and which parts genuinely need a human or an AI session.
 
 ## Automatable — worth building
 
-### 1. Auto-slot proposal (`docsync.propose` — the big one)
-A DOM walk (Python stdlib `html.parser`) over `original.html` can find every
-substantial text leaf — `h1–h6`, `p`, `li`, text-bearing `span`/`div` above a
-length threshold — and mechanically:
-- generate a slot key from context (`sect2.h1-0`, `sect5.p-3`),
-- rewrite the body to wrap each leaf in a `data-slot` span,
-- emit the matching `[[slot]]` entries into `content.md`.
+### 1. Auto-slot proposal (`docsync.propose`) — DONE
+`python3 -m docsync.propose --id my-page` (after scaffold) walks
+`original.html` and mechanically wires every substantial text leaf as an
+editable slot: the element keeps its tag and styling and gains `data-slot`
+via `C.slot_attr` (no wrapper), its text moves to `content.md` under a
+generated key (`ha-hero-lead.p-1` — CSS classes make surprisingly good
+names). Headings rejected for styled children get the **fragment pass**:
+their simple `<span>` children slot with a relaxed length threshold and the
+bare text runs between them get generated wrapper spans, so a line like
+"Advancing *economic justice* for and with…" is fully editable in three
+pieces without touching the styled markup. Inline b/i/em/a round-trip
+through the markdown layer; free-standing `<img>`s (no style attr) get
+movable `data-el` hooks.
 
-Result: **every paragraph on the page becomes double-click-editable with zero
-judgment applied**. That's most of the day-to-day value of stage two (people
-mostly edit words, not layout). What it cannot do — and where the proposal
-needs pruning by a person or an AI pass:
-- **names**: `hero.title` beats `sect1.h1-0`; ugly keys work but age badly,
-- **chrome vs content**: nav labels, button text, legal boilerplate should
-  usually NOT be slots,
-- **repeated widgets**: six benefit tabs should be six *structured* slot
-  groups (`benefits.health.title/bullets`), not eighteen anonymous leaves.
-
-Realistic yield: 60–80% of hand-wired slot coverage, in seconds.
+Proven on the Hawaii Appleseed mission page (`projects/our-mission`):
+47 slots, hero + values + practices + footer all editable, publish build
+byte-clean (zero markers, zero data-slot). What still needs the AI/hand
+pass: renames, pruning chrome, repeated-widget restructuring, citations.
 
 ### 2. Page-height trim (fully automatic)
 Render, measure the content's real bottom in headless Playwright (already a
@@ -60,11 +59,51 @@ siblings reflow underneath, wrecking the page. Auto-wire images only.
 - **Grouping/detachables**: which visuals move together vs independently is
   design intent, unrecoverable from markup.
 
+## Colored background sections — shorten/lengthen like Canva
+
+The ask: grab the bottom edge of a colored band (the hero gradient, the dark
+"Join us" section) and make the colored area taller or shorter, the way a
+Canva back-layer rectangle works. Two viable models, in build order:
+
+### B first — resizable section heights (recommended, smaller)
+Keep the background glued to its section; make the SECTION's height a layout
+override. The editor grows a new element kind, "section": bottom-edge handle
+only, drag writes a `min-height`/padding override into `layout.json`
+`positions[el_id]` (an `h`-only entry, no x/y), renderer applies it via
+`L.style(el_id)` on the section tag. Shortening bottoms out at the content's
+natural height (or clips via the section's own `overflow`); lengthening just
+extends the band. Because the background stays attached, text keeps flowing
+and the band can never end mid-paragraph — web-native, no reflow hazard.
+- Detection is automatable: parse the page's own `<style>` for section-level
+  class selectors carrying `background`/`background-color`/gradient
+  declarations, and give those sections the hook in `docsync.propose`.
+- Engine work: one new resize mode in `edit.html` (bottom handle, h-only),
+  one `positions` shape variant, renderer marker (`⟦B:key⟧` on the section
+  tag). Modest — the resize/persist plumbing all exists.
+
+### A later — detach to a true back-layer shape (the full Canva model)
+An explicit "detach background" action on a section: strip the background
+declaration from the section, emit a full-width rect into `layout.json`
+`shapes` seeded with the section's rendered geometry, drawn BEHIND the flow
+content (SVG layer with negative z-index inside the `.page` stacking
+context — static flow content paints above negative-z siblings, so this
+works without touching the page's own markup). The user then moves/resizes
+the colored rect completely independently, Canva-style.
+- Costs: needs rendered geometry to seed the rect (headless measure or the
+  editor does it live at detach time — the editor is the right place); once
+  detached, the band no longer follows content reflow — that's inherent to
+  the model and should be a deliberate user action, not a default.
+- Gradients can be carried (SVG gradients); photo backgrounds should refuse
+  detach in v1.
+
+B answers the actual request cheaply; A is the escape hatch for full
+freedom, opt-in per section, and reuses the existing shapes/groups pipeline.
+
 ## The realistic pipeline
 
 ```
-scaffold (script, seconds)        → openable, everything visible
-propose-slots (script, seconds)   → every paragraph editable, ugly names
+scaffold (script, seconds)        → openable, everything visible   [DONE]
+propose (script, seconds)         → every paragraph editable       [DONE]
 AI pass (one session, minutes)    → prune chrome, rename, restructure
                                     widgets, wire citations, JS overrides
 ```
