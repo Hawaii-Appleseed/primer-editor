@@ -37,6 +37,28 @@ test.describe('undo / redo', () => {
     await expect(page.locator('#redo')).toBeDisabled();
   });
 
+  test('a text-slot edit is undoable — the slot editor pushes history', async ({ page }) => {
+    // Regression: editing prose in a [data-slot] used to commit to `source`
+    // WITHOUT pushHistory(), so a typed edit or deletion was not undoable —
+    // ⌘Z found nothing (or undid an earlier move). Editing the cover title
+    // (a proven editable slot) must now leave undo enabled and revert.
+    const frame = page.frameLocator('#out');
+    const title = frame.locator('[data-slot="cover.title"]');
+    await expect(title).toContainText('HAWAI');
+
+    await title.dblclick({ force: true });
+    const ta = frame.locator('.ds-edit');
+    await ta.waitFor({ state: 'visible' });
+    await ta.evaluate(el => { el.textContent = 'A DIFFERENT TITLE'; });
+    await ta.evaluate(el => el.blur());
+
+    await expect(frame.locator('h1.cover-title')).toContainText('DIFFERENT');
+    await expect(page.locator('#undo')).toBeEnabled();   // the edit was recorded
+
+    await page.click('#undo');
+    await expect(frame.locator('h1.cover-title')).toContainText('HAWAI');  // restored
+  });
+
   test('undo with nothing to undo is a no-op, not an error', async ({ page }) => {
     // #undo is disabled (no history yet), so Playwright can't click it — use
     // the ⌘Z shortcut, which calls undo() directly and hits its own early
