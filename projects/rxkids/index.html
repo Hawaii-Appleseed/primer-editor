@@ -1920,6 +1920,33 @@
      fill shape (which has its own orange separators), so they add none. */
   .rxk-col--other { border-right: 1px solid rgba(255,255,255,.28); }
   .rxk-col--other:last-child { border-right: none; }
+  /* Step 4 = the other-funding stretch: purple, matching the timeline. */
+  .tfc-step--alt { background: #F7F0FA; }
+  .tfc-step--alt .tfc-step-number { background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }
+  .tfc-step--alt .tfc-step-phase { color: #8E3B9C; }
+  .tfc-step--alt .tfc-step-amount { color: #7A3E9D; }
+  /* Cost estimate table — TANF column tinted green, the two "additional
+     dollars" columns tinted purple (same colour language as the timeline). */
+  .rxk-cost-wrap { border-radius: 14px; overflow: hidden; text-align: left;
+                    box-shadow: 0 4px 16px rgba(42,58,77,.12); }
+  .rxk-cost-title { background: #00A750; color: #fff; font-weight: 800;
+                     font-size: 1.05rem; letter-spacing: .5px; text-transform: uppercase;
+                     text-align: center; padding: 14px 18px; }
+  .rxk-cost { width: 100%; border-collapse: collapse; background: #fff;
+               font-size: 0.95rem; color: #2A3A4D; }
+  .rxk-cost th, .rxk-cost td { padding: 12px 14px; text-align: center;
+               border-bottom: 1px solid #E2E8F0; }
+  .rxk-cost thead th { font-size: 0.85rem; line-height: 1.35; vertical-align: top;
+               background: #F1F4F8; }
+  .rxk-cost thead th span { display: block; font-weight: 600; font-style: italic;
+               font-size: 0.78rem; color: #4a5568; margin-top: 4px; }
+  .rxk-cost tbody th { text-align: left; font-weight: 700; }
+  .rxk-cost thead th.rxk-cost-tanf { background: #DFF3E8; color: #007A3A; }
+  .rxk-cost td.rxk-cost-tanf { background: #EFF9F3; color: #007A3A; font-weight: 700; }
+  .rxk-cost thead th.rxk-cost-add { background: #EFDFF5; color: #7A3E9D; }
+  .rxk-cost td.rxk-cost-add { background: #F7EFFA; color: #7A3E9D; font-weight: 700; }
+  .rxk-cost tr.rxk-cost-total th, .rxk-cost tr.rxk-cost-total td {
+               font-weight: 800; border-top: 2px solid #2A3A4D; border-bottom: none; }
   /* A green square bracket under the prenatal–month 3 columns, labelled with
      the TANF total. flex 4:9 matches the 4 green : 9 purple columns exactly;
      the 4px side margin lines the bracket up inside the timeline's 4px frame. */
@@ -2181,8 +2208,8 @@
             
             <div class="tfc-total-banner">
                 <span class="tfc-total-label">A Hawaiʻi family could receive</span>
-                <span class="tfc-total-amount">up to $3,000</span>
-                <span class="tfc-total-sub">over their child's first year</span>
+                <span class="tfc-total-amount">more than $3,000</span>
+                <span class="tfc-total-sub"></span>
             </div>
 
             <div class="tfc-steps">
@@ -2207,7 +2234,7 @@
         <div class="tfc-step-amount">$500<span class="tfc-step-amount-note">per month</span></div>
         <p class="tfc-step-text">Guaranteed for the first three months after birth — the TANF-funded stretch.</p>
     </div>
-<div class="tfc-step">
+<div class="tfc-step tfc-step--alt">
         <div class="tfc-step-phase">Months 4–12</div>
         <div class="tfc-step-number">4</div>
         <h3 class="tfc-step-title">Additional Support</h3>
@@ -2217,6 +2244,59 @@
             </div>
 
             <p class="tfc-steps-note">Payment amounts mirror the Flint, Michigan model and are illustrative for a proposed Hawaiʻi program.</p>
+
+            <div class="tfc-expandable-section">
+    <button class="tfc-expand-btn" onclick="rxkToggle(this, 'cost-content')">
+    Cost <span class="tfc-expand-icon">&#9660;</span>
+</button>
+<div id="cost-content" class="tfc-expand-content">
+    <div class="tfc-expand-inner">
+        <div class="rxk-cost-wrap">
+            <div class="rxk-cost-title">Cost estimate to bring RxKids to Hawaiʻi moms and babies</div>
+            <table class="rxk-cost">
+                <thead><tr>
+                    <th></th>
+                    <th>Number of babies<span>2023 births</span></th>
+                    <th class="rxk-cost-tanf">Cash prescriptions covered by TANF<span>$3,000 for each Medicaid birth</span></th>
+                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 6-month program</span></th>
+                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 12-month program</span></th>
+                </tr></thead>
+                <tbody><tr>
+            <th scope="row">Hawaiʻi County</th>
+            <td>2,055</td>
+            <td class="rxk-cost-tanf">$3,213,000</td>
+            <td class="rxk-cost-add">$6,034,500</td>
+            <td class="rxk-cost-add">$12,199,500</td>
+        </tr><tr>
+            <th scope="row">Honolulu County</th>
+            <td>10,474</td>
+            <td class="rxk-cost-tanf">$9,087,000</td>
+            <td class="rxk-cost-add">$38,046,000</td>
+            <td class="rxk-cost-add">$69,468,000</td>
+        </tr><tr>
+            <th scope="row">Maui County</th>
+            <td>1,566</td>
+            <td class="rxk-cost-tanf">$1,989,000</td>
+            <td class="rxk-cost-add">$5,058,000</td>
+            <td class="rxk-cost-add">$9,756,000</td>
+        </tr><tr>
+            <th scope="row">Unidentified Counties</th>
+            <td>713</td>
+            <td class="rxk-cost-tanf">$966,000</td>
+            <td class="rxk-cost-add">$2,242,500</td>
+            <td class="rxk-cost-add">$4,381,500</td>
+        </tr><tr class="rxk-cost-total">
+            <th scope="row">Entire State</th>
+            <td>14,808</td>
+            <td class="rxk-cost-tanf">$15,255,000</td>
+            <td class="rxk-cost-add">$51,381,000</td>
+            <td class="rxk-cost-add">$95,805,000</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
         </div>
     </div>
 </div>
@@ -2251,8 +2331,8 @@
                 
     <div>
       <div class="rxk-timeline">
-        <div class="rxk-frame" style="clip-path:polygon(0 42px, 23.0769% 42px, 25.0000% 23.6px, 26.9231% 10.5px, 28.8462% 2.6px, 30.7692% 0, 100% 0, 100% 100%, 0 100%); -webkit-clip-path:polygon(0 42px, 23.0769% 42px, 25.0000% 23.6px, 26.9231% 10.5px, 28.8462% 2.6px, 30.7692% 0, 100% 0, 100% 100%, 0 100%);"></div>
-        <div class="rxk-inner" style="clip-path:polygon(0 42px, 23.0769% 42px, 25.0000% 23.6px, 26.9231% 10.5px, 28.8462% 2.6px, 30.7692% 0, 100% 0, 100% 100%, 0 100%); -webkit-clip-path:polygon(0 42px, 23.0769% 42px, 25.0000% 23.6px, 26.9231% 10.5px, 28.8462% 2.6px, 30.7692% 0, 100% 0, 100% 100%, 0 100%);">
+        <div class="rxk-frame" style="clip-path:polygon(0 42px, 23.0769% 42px, 26.1538% 40.7px, 27.6923% 37.8px, 28.8462% 31.9px, 29.6154% 21.8px, 30.2308% 10.9px, 30.7692% 0, 100% 0, 100% 100%, 0 100%); -webkit-clip-path:polygon(0 42px, 23.0769% 42px, 26.1538% 40.7px, 27.6923% 37.8px, 28.8462% 31.9px, 29.6154% 21.8px, 30.2308% 10.9px, 30.7692% 0, 100% 0, 100% 100%, 0 100%);"></div>
+        <div class="rxk-inner" style="clip-path:polygon(0 42px, 23.0769% 42px, 26.1538% 40.7px, 27.6923% 37.8px, 28.8462% 31.9px, 29.6154% 21.8px, 30.2308% 10.9px, 30.7692% 0, 100% 0, 100% 100%, 0 100%); -webkit-clip-path:polygon(0 42px, 23.0769% 42px, 26.1538% 40.7px, 27.6923% 37.8px, 28.8462% 31.9px, 29.6154% 21.8px, 30.2308% 10.9px, 30.7692% 0, 100% 0, 100% 100%, 0 100%);">
           <div class="rxk-green-fill" style="width:30.7692%;"></div>
           <div class="rxk-otherfunding" style="width:69.2308%">OTHER FUNDING</div>
           <div class="rxk-cols">
@@ -2507,6 +2587,26 @@
             }
         }
     
+// Generic expand/collapse for sections added on the Hawaii page (the Cost
+// table) — same max-height dance as the original page's toggleFlintSection,
+// which is hard-wired to #flint-content and can't be reused.
+function rxkToggle(btn, id) {
+    const content = document.getElementById(id);
+    const isOpen = content.classList.toggle('active');
+    btn.classList.toggle('active');
+    if (isOpen) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        const release = () => {
+            if (content.classList.contains('active')) content.style.maxHeight = 'none';
+        };
+        content.addEventListener('transitionend', release, { once: true });
+        setTimeout(release, 500);
+    } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        void content.offsetHeight;
+        content.style.maxHeight = '0';
+    }
+}
 </script>
 </body>
 </html>
