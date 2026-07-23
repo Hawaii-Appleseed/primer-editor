@@ -11,6 +11,9 @@
 [[title]]
 RxKids Hawaiʻi
 
+[[header.logo.alt]]
+RxKeiki Hawaiʻi — A Prescription for Health, Hope, and Opportunity: Cash for Moms and Babies
+
 [[hero.title]]
 RxKids
 

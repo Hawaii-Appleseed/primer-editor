@@ -22,6 +22,7 @@ editor's iframe rather than just on the live site:
     under DOCSYNC_EDIT; unchanged on the published page.
 """
 from pathlib import Path
+import base64
 import html as _html
 import os
 import sys
@@ -55,6 +56,17 @@ C = Content(_CONTENT, styles=L)
 
 def esc(s: str) -> str:
     return _html.escape(s, quote=True)
+
+
+def data_uri(path: Path) -> str:
+    """Inlines a local image as base64 — rxkids has no asset-copy step (unlike
+    report2027's Makefile, which mirrors report2027/web/assets into
+    docs/primer/assets), and the live editor's preview + the published page
+    resolve relative image paths against two DIFFERENT directories. A data URI
+    sidesteps that entirely: it works identically in both places with nothing
+    to keep in sync."""
+    mime = "image/png" if path.suffix == ".png" else "image/svg+xml"
+    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode()}"
 
 
 def img_el(el_id, cls, src, alt):
@@ -96,6 +108,15 @@ EDIT_OVERRIDES = """
      section but the hero at opacity:0 — invisible, not just un-editable. */
   .tfc-reveal { opacity: 1 !important; transform: none !important; }
 """ if EDIT else ""
+
+
+# ---- site header (logo) ------------------------------------------------------
+def site_header() -> str:
+    logo_src = data_uri(HERE / "assets" / "rxkeiki-logo.png")
+    return f"""
+<div class="rxkeiki-header">
+    {img_el("header.logo", "rxkeiki-logo", logo_src, esc(C.text("header.logo.alt")))}
+</div>"""
 
 
 # ---- hero -------------------------------------------------------------------
@@ -465,6 +486,7 @@ def sources_section(entries) -> str:
 
 
 MAIN_BODY = f"""<div class="tfc-container">
+{site_header()}
 {hero()}
 {what_is_rxkids()}
 {benefits_widget()}
@@ -497,6 +519,8 @@ html = f"""<!DOCTYPE html>
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}
   {STYLE}
+  .rxkeiki-header {{ padding: 20px 0 0 24px; }}
+  .rxkeiki-logo {{ display: block; width: 220px; height: auto; }}
   {EDIT_OVERRIDES}
 </style>
 </head>
