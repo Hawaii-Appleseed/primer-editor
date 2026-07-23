@@ -54,18 +54,29 @@ bindings:
         - docs/js/departments_act175_fy2027.json
         - docs/js/historical_trends.json
 
-  # RxKids — a real Hawaii Appleseed page (originally a Squarespace embed),
-  # pulled in as STAGE ONE: openable, not yet editable. render_report.py wraps
-  # its original <style>/<body> almost verbatim in one section.page; no
-  # content is wired to a [[slot]] yet. A follow-up session's job, guided by
-  # the report-editor skill: move pieces of it into slots/graphics/cards one
-  # at a time. page size is the page's own natural footprint (~1200px wide,
-  # ~7160px tall), not a print page — this project is a scrolling web page.
+  # RxKids — a real Hawaii Appleseed page (originally a Squarespace embed).
+  # Every section is wired to [[slots]]/L.attr per the report-editor skill —
+  # text, images, and section containers are all editable/movable. page size
+  # is the page's own natural footprint (~1200px wide; tall — text wraps
+  # taller in this fixed column than Squarespace's wider live layout), not a
+  # print page — this project is a scrolling web page.
   - id: rxkids
     content: projects/rxkids/content.md
-    build: python3 projects/rxkids/render_report.py
+    # Also re-stages the editor, unlike budget-primer's `make ... pub` (whose
+    # Makefile target already depends on `editor` -> docsync.stage) — without
+    # this, the watcher rebuilds the PUBLISHED page but leaves the staged
+    # docs/rxkids/engine/ copy the live in-browser editor actually reads from
+    # stale, so an edit's version bump fires with nothing new to show.
+    build: python3 projects/rxkids/render_report.py && python3 -m docsync.stage --id rxkids
     outputs:
       - projects/rxkids/index.html
+    # rxkids has no Makefile asset-copy step (unlike report2027's web/assets ->
+    # docs/primer/assets), so local images are inlined as base64 data URIs at
+    # render time (see render_report.py's data_uri()) rather than referenced
+    # by path — this just needs the watcher to notice when the source file
+    # itself changes.
+    watch:
+      - projects/rxkids/assets/*.png
     editor:
       dir: docs/rxkids
       render: projects/rxkids/render_report.py
@@ -79,13 +90,15 @@ bindings:
         # staged like any other file the renderer opens, or the browser's
         # virtual filesystem won't have it (unlike a real checkout on disk).
         - projects/rxkids/original.html
+        - projects/rxkids/assets/rxkeiki-logo.png
 
   # A SECOND report on the same engine — the proof that one editor serves any
   # report. Scaffolded by hand the way "+ New report" would; its renderer
   # demonstrates the shared building blocks (docsync.blocks: graphic, card).
   - id: demo-report
     content: projects/demo-report/content.md
-    build: python3 projects/demo-report/render_report.py
+    # See rxkids' build command above — same gap, same fix.
+    build: python3 projects/demo-report/render_report.py && python3 -m docsync.stage --id demo-report
     outputs:
       - projects/demo-report/index.html
     editor:

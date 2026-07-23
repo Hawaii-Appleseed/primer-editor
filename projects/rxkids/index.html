@@ -1863,7 +1863,11 @@
             }
         }
     
-  .rxkeiki-header { padding: 20px 0 0 24px; }
+  /* original.html's own `body` rule reserves 80px of top padding (and a
+     beige fill) to clear Squarespace's sticky site nav, which we don't have
+     here — dead space with nothing to clear once extracted. */
+  body { padding-top: 0 !important; }
+  .rxkeiki-header { padding: 16px 0 0 24px; }
   .rxkeiki-logo { display: block; width: 220px; height: auto; }
   
 </style>
@@ -1880,7 +1884,7 @@
 <div class="tfc-hero tfc-reveal">
     <div class="tfc-hero-content">
         <h1 class="tfc-hero-title" style="position:absolute;left:0.57in;top:1.35in;width:3.86in;z-index:1">RxKids</h1>
-        <h2 class="tfc-hero-title tfc-hawaii-title" style="margin-top: 0px; margin-left: 80px; margin-right: 20px;" style="position:absolute;left:1.4in;top:2.64in;width:2.75in;z-index:1">Hawaiʻi</h2>
+        <h2 class="tfc-hero-title tfc-hawaii-title" style="position:absolute;left:1.4in;top:2.64in;width:2.75in;z-index:1;margin-top:0px;margin-left:80px;margin-right:20px">Hawaiʻi</h2>
         <div class="tfc-hero-badge">Direct cash support for expecting mothers and their infants</div>
     </div>
     <div class="tfc-hero-image-container">
@@ -2032,7 +2036,7 @@
                 <div class="tfc-carousel-track" id="statsTrack">
                     <div class="tfc-carousel-slide">
                         
-                        <div class="tfc-pullout-quote" style="margin-top: 0px;">
+                        <div class="tfc-pullout-quote" style="margin-top:0px">
                             <p class="tfc-quote-text">In Hawaiʻi, more than 1 out of 4 children with single mothers are in poverty.</p>
                         </div>
 
@@ -2193,7 +2197,7 @@
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">The choice that keeps it "no strings"</h3>
             
-            <p class="tfc-section-subtitle" style="margin-bottom:32px;">There's a catch: TANF's no-strings help only lasts about four months. If TANF pays for more than that, the law treats it as ongoing aid — and the strings come back. (Just limiting it to lower-income families doesn't change that — what matters is keeping TANF to those first few months.) That leaves Hawaiʻi two ways to build the program:</p>
+            <p class="tfc-section-subtitle" style="margin-bottom:32px">There's a catch: TANF's no-strings help only lasts about four months. If TANF pays for more than that, the law treats it as ongoing aid — and the strings come back. (Just limiting it to lower-income families doesn't change that — what matters is keeping TANF to those first few months.) That leaves Hawaiʻi two ways to build the program:</p>
 
             <div class="tfc-tanf-compare">
                 <div class="tfc-tanf-card">
@@ -2214,7 +2218,7 @@
             <p class="tfc-tanf-note">Hawaiʻi's bill (HB2006) already limits TANF money to families on Medicaid or under 300% of the poverty line — but it doesn't yet cap TANF to those first few months. Adding that cap is the key to keeping the program no-strings. It's also why some state officials have warned about work rules, child support, and reduced benefits — those concerns are real under Option 1, but largely disappear under Option 2.</p>
 
             
-            <div class="tfc-highlight-box" style="margin-bottom:0;">
+            <div class="tfc-highlight-box" style="margin-bottom:0">
                 <h3>The bottom line</h3>
                 <p>TANF pays for the start. Hawaiʻi pays for the rest. Families get help right when they need it most — with no strings attached.</p>
             </div>

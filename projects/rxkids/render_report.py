@@ -22,6 +22,7 @@ editor's iframe rather than just on the live site:
     under DOCSYNC_EDIT; unchanged on the published page.
 """
 from pathlib import Path
+import base64
 import html as _html
 import os
 import sys
@@ -55,6 +56,17 @@ C = Content(_CONTENT, styles=L)
 
 def esc(s: str) -> str:
     return _html.escape(s, quote=True)
+
+
+def data_uri(path: Path) -> str:
+    """Inlines a local image as base64 — rxkids has no asset-copy step (unlike
+    report2027's Makefile, which mirrors report2027/web/assets into
+    docs/primer/assets), and the live editor's preview + the published page
+    resolve relative image paths against two DIFFERENT directories. A data URI
+    sidesteps that entirely: it works identically in both places with nothing
+    to keep in sync."""
+    mime = "image/png" if path.suffix == ".png" else "image/svg+xml"
+    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode()}"
 
 
 def img_el(el_id, cls, src, alt):
@@ -98,6 +110,15 @@ EDIT_OVERRIDES = """
 """ if EDIT else ""
 
 
+# ---- site header (logo) ------------------------------------------------------
+def site_header() -> str:
+    logo_src = data_uri(HERE / "assets" / "rxkeiki-logo.png")
+    return f"""
+<div class="rxkeiki-header">
+    {img_el("header.logo", "rxkeiki-logo", logo_src, esc(C.text("header.logo.alt")))}
+</div>"""
+
+
 # ---- hero -------------------------------------------------------------------
 def hero() -> str:
     return f"""
@@ -105,7 +126,7 @@ def hero() -> str:
 <div class="tfc-hero tfc-reveal">
     <div class="tfc-hero-content">
         <h1 class="tfc-hero-title"{L.attr("hero.title")}>{C.t("hero.title")}</h1>
-        <h2 class="tfc-hero-title tfc-hawaii-title" style="margin-top: 0px; margin-left: 80px; margin-right: 20px;"{L.attr("hero.hawaii")}>{C.t("hero.hawaii")}</h2>
+        <h2 class="tfc-hero-title tfc-hawaii-title"{L.attr("hero.hawaii", "margin-top:0px;margin-left:80px;margin-right:20px")}>{C.t("hero.hawaii")}</h2>
         <div class="tfc-hero-badge"{L.attr("hero.badge")}>{C.t("hero.badge")}</div>
     </div>
     <div class="tfc-hero-image-container">
@@ -246,7 +267,7 @@ def stats_carousel() -> str:
                 <div class="tfc-carousel-track" id="statsTrack">
                     <div class="tfc-carousel-slide">
                         {L.spacer("carousel.poverty.quote")}
-                        <div class="tfc-pullout-quote" style="margin-top: 0px;"{L.attr("carousel.poverty.quote")}>
+                        <div class="tfc-pullout-quote"{L.attr("carousel.poverty.quote", "margin-top:0px")}>
                             <p class="tfc-quote-text">{C.t("carousel.poverty.quote")}</p>
                         </div>
 
@@ -387,7 +408,7 @@ def tanf_section() -> str:
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">{C.t("tanf.choice.title")}</h3>
             {L.spacer("para.tanf.choice.body")}
-            <p class="tfc-section-subtitle" style="margin-bottom:32px;"{L.attr("tanf.choice.body")}>{C("tanf.choice.body")}</p>
+            <p class="tfc-section-subtitle"{L.attr("tanf.choice.body", "margin-bottom:32px")}>{C("tanf.choice.body")}</p>
 
             <div class="tfc-tanf-compare">
                 {tanf_option_card("tanf.option1", "Option 1")}
@@ -398,7 +419,7 @@ def tanf_section() -> str:
             <p class="tfc-tanf-note"{L.attr("tanf.note")}>{C("tanf.note")}</p>
 
             {L.spacer("tanf.bottomline.title")}
-            <div class="tfc-highlight-box" style="margin-bottom:0;"{L.attr("tanf.bottomline.title")}>
+            <div class="tfc-highlight-box"{L.attr("tanf.bottomline.title", "margin-bottom:0")}>
                 <h3>{C.t("tanf.bottomline.title")}</h3>
                 <p>{C.t("tanf.bottomline.body")}</p>
             </div>
@@ -465,6 +486,7 @@ def sources_section(entries) -> str:
 
 
 MAIN_BODY = f"""<div class="tfc-container">
+{site_header()}
 {hero()}
 {what_is_rxkids()}
 {benefits_widget()}
@@ -497,6 +519,12 @@ html = f"""<!DOCTYPE html>
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}
   {STYLE}
+  /* original.html's own `body` rule reserves 80px of top padding (and a
+     beige fill) to clear Squarespace's sticky site nav, which we don't have
+     here — dead space with nothing to clear once extracted. */
+  body {{ padding-top: 0 !important; }}
+  .rxkeiki-header {{ padding: 16px 0 0 24px; }}
+  .rxkeiki-logo {{ display: block; width: 220px; height: auto; }}
   {EDIT_OVERRIDES}
 </style>
 </head>
