@@ -30,7 +30,7 @@ RxKids Hero Image
 The Program
 
 [[what.body]]
-RxKids is a groundbreaking program that provides **no-strings-attached financial support** to pregnant mothers. There are successful RxKids programs in cities across Michigan.
+Based on the RxKids is a groundbreaking program that provides **no-strings-attached financial support** to pregnant mothers. There are successful RxKids programs in cities across Michigan.
 
 [[what.heart.alt]]
 Love
