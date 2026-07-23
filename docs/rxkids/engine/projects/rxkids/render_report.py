@@ -133,9 +133,15 @@ STYLE = rebrand(STYLE)
 
 # The hero's auto-cycling JS (setInterval over three hardcoded URLs) would
 # silently overwrite a user's "replace image" edit a few seconds later — cut
-# it only in edit mode, leaving the published page's behaviour untouched.
+# JUST that block in edit mode, leaving the published page untouched. The
+# block sits at the END of the DOMContentLoaded callback, so: keep everything
+# before the marker, close the callback, then keep everything after its
+# original close ("});") — openBenefit / toggleFlintSection / moveCarousel
+# are defined there, and truncating the whole tail (the old approach) left
+# the tabs, expandables and carousel dead inside the editor preview.
 if EDIT:
-    SCRIPT = SCRIPT.split("// Hero image cycling", 1)[0] + "});"
+    _head, _rest = SCRIPT.split("// Hero image cycling", 1)
+    SCRIPT = _head + "});" + _rest.split("});", 1)[1]
 
 # moveCarousel()'s bar-fill animation hardcodes these two percentages; keep it
 # in sync with content.md instead of maintaining the same number in two places.
