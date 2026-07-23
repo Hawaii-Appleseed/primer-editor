@@ -451,8 +451,10 @@ def cost_expandable() -> str:
             <td class="rxk-cost-add">{twelve}</td>
         </tr>""")
     return f"""<div class="tfc-expandable-section">
-    <button class="tfc-expand-btn" onclick="rxkToggle(this, 'cost-content')">
-    Cost <span class="tfc-expand-icon">&#9660;</span>
+    <button class="tfc-expand-btn rxk-cost-btn" onclick="rxkToggle(this, 'cost-content')">
+    <span class="rxk-cost-btn-eyebrow">Cost to launch statewide</span>
+    <span class="rxk-cost-btn-amt">$15 million</span>
+    <span class="rxk-cost-btn-foot">in TANF cash prescriptions <span class="tfc-expand-icon">&#9660;</span></span>
 </button>
 <div id="cost-content" class="tfc-expand-content">
     <div class="tfc-expand-inner">

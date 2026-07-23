@@ -279,7 +279,7 @@ Payment amounts mirror the Flint, Michigan model and are illustrative for a prop
 TANF (Temporary Assistance for Needy Families) is a federal program that gives each state a pot of money to help families with children who are struggling to get by. States get to decide a lot about how to spend it — and helping families care for their kids at home is exactly what it's meant for.
 
 [[tanf.compare1.title]]
-TANF can give money in two very different ways
+TANF can give money in two different ways
 
 [[tanf.ongoing.title]]
 Ongoing aid
