@@ -35,3 +35,8 @@ Rules that bite:
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
   block); `python3 -m docsync.stage --id <id>` stages the editor + engine next
   to that report's published dir.
+- **Bringing in a static HTML page**: `python3 -m docsync.scaffold page.html
+  --id <slug>` does STAGE ONE (openable, not editable) automatically —
+  project dir, wrapper renderer, docsync.yml binding, build + stage. Making
+  it editable (STAGE TWO) is a per-page AI/hand job; what could shrink that
+  is scoped in `docsync/STAGE2_AUTOMATION.md`.
