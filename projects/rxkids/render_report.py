@@ -133,9 +133,15 @@ STYLE = rebrand(STYLE)
 
 # The hero's auto-cycling JS (setInterval over three hardcoded URLs) would
 # silently overwrite a user's "replace image" edit a few seconds later — cut
-# it only in edit mode, leaving the published page's behaviour untouched.
+# JUST that block in edit mode, leaving the published page untouched. The
+# block sits at the END of the DOMContentLoaded callback, so: keep everything
+# before the marker, close the callback, then keep everything after its
+# original close ("});") — openBenefit / toggleFlintSection / moveCarousel
+# are defined there, and truncating the whole tail (the old approach) left
+# the tabs, expandables and carousel dead inside the editor preview.
 if EDIT:
-    SCRIPT = SCRIPT.split("// Hero image cycling", 1)[0] + "});"
+    _head, _rest = SCRIPT.split("// Hero image cycling", 1)
+    SCRIPT = _head + "});" + _rest.split("});", 1)[1]
 
 # moveCarousel()'s bar-fill animation hardcodes these two percentages; keep it
 # in sync with content.md instead of maintaining the same number in two places.
@@ -396,6 +402,8 @@ def how_it_works() -> str:
             </div>
 
             <p class="tfc-steps-note">{C.t("steps.note")}</p>
+
+            {cost_expandable()}
         </div>
     </div>
 </div>"""
@@ -404,16 +412,68 @@ def how_it_works() -> str:
 def step(n: int) -> str:
     key = f"steps.{n}"
     has_amount = n != 1
+    # Step 4 (months 4–12) is the OTHER-FUNDING stretch — purple, matching the
+    # TANF timeline's colour language, so it reads apart from the TANF steps.
+    alt = " tfc-step--alt" if n == 4 else ""
     amount = (f'<div class="tfc-step-amount">{C.t(f"{key}.amount")}'
               f'<span class="tfc-step-amount-note">{C.t(f"{key}.amountnote")}</span></div>'
               if has_amount else "")
-    return f"""{L.spacer(key)}<div class="tfc-step"{L.attr(key)}>
+    return f"""{L.spacer(key)}<div class="tfc-step{alt}"{L.attr(key)}>
         <div class="tfc-step-phase">{C.t(f"{key}.phase")}</div>
         <div class="tfc-step-number">{n}</div>
         <h3 class="tfc-step-title">{C.t(f"{key}.title")}</h3>
         {amount}
         <p class="tfc-step-text">{C.t(f"{key}.text")}</p>
     </div>"""
+
+
+# Cost estimate table (from the program's own cost slide) — hand-set here like
+# the other charts (see content.md's note). Columns 3–5 carry the same colour
+# language as the funding timeline: TANF = green, additional dollars = purple.
+COST_ROWS = [
+    ("Hawaiʻi County", "2,055", "$3,213,000", "$6,034,500", "$12,199,500"),
+    ("Honolulu County", "10,474", "$9,087,000", "$38,046,000", "$69,468,000"),
+    ("Maui County", "1,566", "$1,989,000", "$5,058,000", "$9,756,000"),
+    ("Unidentified Counties", "713", "$966,000", "$2,242,500", "$4,381,500"),
+    ("Entire State", "14,808", "$15,255,000", "$51,381,000", "$95,805,000"),
+]
+
+
+def cost_expandable() -> str:
+    body_rows = []
+    for county, babies, tanf, six, twelve in COST_ROWS:
+        total = ' class="rxk-cost-total"' if county == "Entire State" else ""
+        body_rows.append(f"""<tr{total}>
+            <th scope="row">{county}</th>
+            <td>{babies}</td>
+            <td class="rxk-cost-tanf">{tanf}</td>
+            <td class="rxk-cost-add">{six}</td>
+            <td class="rxk-cost-add">{twelve}</td>
+        </tr>""")
+    return f"""<div class="tfc-expandable-section">
+    <button class="tfc-expand-btn rxk-cost-btn" onclick="rxkToggle(this, 'cost-content')">
+    <span class="rxk-cost-btn-eyebrow">Cost to launch statewide</span>
+    <span class="rxk-cost-btn-amt">$15 million</span>
+    <span class="rxk-cost-btn-foot">in TANF cash prescriptions <span class="tfc-expand-icon">&#9660;</span></span>
+</button>
+<div id="cost-content" class="tfc-expand-content">
+    <div class="tfc-expand-inner">
+        <div class="rxk-cost-wrap">
+            <div class="rxk-cost-title">Cost estimate to bring RxKids to Hawaiʻi moms and babies</div>
+            <table class="rxk-cost">
+                <thead><tr>
+                    <th></th>
+                    <th>Number of babies<span>2023 births</span></th>
+                    <th class="rxk-cost-tanf">Cash prescriptions covered by TANF<span>$3,000 for each Medicaid birth</span></th>
+                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 6-month program</span></th>
+                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 12-month program</span></th>
+                </tr></thead>
+                <tbody>{"".join(body_rows)}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>"""
 
 
 # The RxKids payment schedule as a month-by-month funding timeline (mirrors the
@@ -461,10 +521,12 @@ def tanf_timeline() -> str:
     g1 = (n_tanf - 1) / n                           # curve start: month-3's left edge
     g2 = n_tanf / n                                 # curve end: month-3's right edge
     pts = [f"0 {drop}px", f"{g1 * 100:.4f}% {drop}px"]
-    for t in (0.25, 0.5, 0.75):                     # quadratic ease-out ≈ a curve
+    # Inverted (concave, ease-in) curve: hug the flat green top for most of
+    # month 3's width, then rise VERY steeply around the last quarter to join
+    # the purple at the cell boundary.
+    for t, frac in ((0.4, 0.97), (0.6, 0.9), (0.75, 0.76), (0.85, 0.52), (0.93, 0.26)):
         x = (g1 + (g2 - g1) * t) * 100
-        y = drop * (1 - t) ** 2
-        pts.append(f"{x:.4f}% {y:.1f}px")
+        pts.append(f"{x:.4f}% {drop * frac:.1f}px")
     pts += [f"{g2 * 100:.4f}% 0", "100% 0", "100% 100%", "0 100%"]
     poly = f"polygon({', '.join(pts)})"
     green_w = f"{n_tanf / n * 100:.4f}%"            # green block: full height, left of the curve's end
@@ -680,6 +742,47 @@ html = f"""<!DOCTYPE html>
      fill shape (which has its own orange separators), so they add none. */
   .rxk-col--other {{ border-right: 1px solid rgba(255,255,255,.28); }}
   .rxk-col--other:last-child {{ border-right: none; }}
+  /* Step 4 = the other-funding stretch: purple, matching the timeline. */
+  .tfc-step--alt {{ background: #F7F0FA; }}
+  .tfc-step--alt .tfc-step-number {{ background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }}
+  .tfc-step--alt .tfc-step-phase {{ color: #8E3B9C; }}
+  .tfc-step--alt .tfc-step-amount {{ color: #7A3E9D; }}
+  /* The Cost expandable's button features the statewide TANF figure — a tall
+     green pill (TANF colour) with the amount big and the rest small, instead
+     of the flat red text button the other expandables use. */
+  .rxk-cost-btn {{ flex-direction: column; gap: 2px; padding: 16px 40px;
+                   background: linear-gradient(135deg, #00A750, #007A3A) !important;
+                   box-shadow: 0 6px 18px rgba(0,122,58,.35) !important; line-height: 1.1; }}
+  .rxk-cost-btn-eyebrow {{ font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
+                           text-transform: uppercase; opacity: .9; }}
+  .rxk-cost-btn-amt {{ font-size: 2.4rem; font-weight: 800; letter-spacing: .5px;
+                       font-family: 'Halyard Display','Oswald','Impact',sans-serif; }}
+  .rxk-cost-btn-foot {{ font-size: 0.78rem; font-weight: 600; opacity: .92;
+                        display: inline-flex; align-items: center; gap: 8px; }}
+  .rxk-cost-btn .tfc-expand-icon {{ transition: transform .3s ease; }}
+  .rxk-cost-btn.active .tfc-expand-icon {{ transform: rotate(180deg); }}
+  /* Cost estimate table — TANF column tinted green, the two "additional
+     dollars" columns tinted purple (same colour language as the timeline). */
+  .rxk-cost-wrap {{ border-radius: 14px; overflow: hidden; text-align: left;
+                    box-shadow: 0 4px 16px rgba(42,58,77,.12); }}
+  .rxk-cost-title {{ background: #00A750; color: #fff; font-weight: 800;
+                     font-size: 1.05rem; letter-spacing: .5px; text-transform: uppercase;
+                     text-align: center; padding: 14px 18px; }}
+  .rxk-cost {{ width: 100%; border-collapse: collapse; background: #fff;
+               font-size: 0.95rem; color: #2A3A4D; }}
+  .rxk-cost th, .rxk-cost td {{ padding: 12px 14px; text-align: center;
+               border-bottom: 1px solid #E2E8F0; }}
+  .rxk-cost thead th {{ font-size: 0.85rem; line-height: 1.35; vertical-align: top;
+               background: #F1F4F8; }}
+  .rxk-cost thead th span {{ display: block; font-weight: 600; font-style: italic;
+               font-size: 0.78rem; color: #4a5568; margin-top: 4px; }}
+  .rxk-cost tbody th {{ text-align: left; font-weight: 700; }}
+  .rxk-cost thead th.rxk-cost-tanf {{ background: #DFF3E8; color: #007A3A; }}
+  .rxk-cost td.rxk-cost-tanf {{ background: #EFF9F3; color: #007A3A; font-weight: 700; }}
+  .rxk-cost thead th.rxk-cost-add {{ background: #EFDFF5; color: #7A3E9D; }}
+  .rxk-cost td.rxk-cost-add {{ background: #F7EFFA; color: #7A3E9D; font-weight: 700; }}
+  .rxk-cost tr.rxk-cost-total th, .rxk-cost tr.rxk-cost-total td {{
+               font-weight: 800; border-top: 2px solid #2A3A4D; border-bottom: none; }}
   /* A green square bracket under the prenatal–month 3 columns, labelled with
      the TANF total. flex 4:9 matches the 4 green : 9 purple columns exactly;
      the 4px side margin lines the bracket up inside the timeline's 4px frame. */
@@ -703,6 +806,26 @@ html = f"""<!DOCTYPE html>
 {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
 <script>
 {SCRIPT}
+// Generic expand/collapse for sections added on the Hawaii page (the Cost
+// table) — same max-height dance as the original page's toggleFlintSection,
+// which is hard-wired to #flint-content and can't be reused.
+function rxkToggle(btn, id) {{
+    const content = document.getElementById(id);
+    const isOpen = content.classList.toggle('active');
+    btn.classList.toggle('active');
+    if (isOpen) {{
+        content.style.maxHeight = content.scrollHeight + 'px';
+        const release = () => {{
+            if (content.classList.contains('active')) content.style.maxHeight = 'none';
+        }};
+        content.addEventListener('transitionend', release, {{ once: true }});
+        setTimeout(release, 500);
+    }} else {{
+        content.style.maxHeight = content.scrollHeight + 'px';
+        void content.offsetHeight;
+        content.style.maxHeight = '0';
+    }}
+}}
 </script>
 </body>
 </html>
