@@ -2,9 +2,8 @@
   "positions": {
     "header.logo": {
       "x": 0.89,
-      "y": 1.59,
+      "y": 0.3,
       "w": 2.29,
-      "reserve": 0.83,
       "z": 2,
       "scale": 1.377
     },

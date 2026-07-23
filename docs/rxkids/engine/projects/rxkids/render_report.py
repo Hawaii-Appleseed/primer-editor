@@ -151,20 +151,18 @@ EDIT_OVERRIDES = """
 """ if EDIT else ""
 
 
-# ---- site header (logo) ------------------------------------------------------
-def site_header() -> str:
+# ---- hero (with logo overlaid top-left) --------------------------------------
+def hero() -> str:
+    # The logo lives INSIDE the hero, absolutely positioned like hero.title —
+    # so it sits on the hero's blue background (not a separate white band above
+    # it) and its editor drag coords are relative to the hero, same as the
+    # title. No leading L.spacer("hero.title") here: that spacer reserved
+    # container-level flow space for a title that's actually positioned within
+    # the hero, which only produced a phantom white band above it.
     logo_src = data_uri(HERE / "assets" / "rxkeiki-logo.png")
     return f"""
-<div class="rxkeiki-header">
-    {img_el("header.logo", "rxkeiki-logo", logo_src, esc(C.text("header.logo.alt")))}
-</div>"""
-
-
-# ---- hero -------------------------------------------------------------------
-def hero() -> str:
-    return f"""
-{L.spacer("hero.title")}
 <div class="tfc-hero tfc-reveal">
+    {img_el("header.logo", "rxkeiki-logo", logo_src, esc(C.text("header.logo.alt")))}
     <div class="tfc-hero-content">
         <h1 class="tfc-hero-title"{L.attr("hero.title")}>{C.t("hero.title")}</h1>
         <h2 class="tfc-hero-title tfc-hawaii-title"{L.attr("hero.hawaii", "margin-top:0px;margin-left:80px;margin-right:20px")}>{C.t("hero.hawaii")}</h2>
@@ -527,7 +525,6 @@ def sources_section(entries) -> str:
 
 
 MAIN_BODY = f"""<div class="tfc-container">
-{site_header()}
 {hero()}
 {what_is_rxkids()}
 {benefits_widget()}
@@ -562,13 +559,20 @@ html = f"""<!DOCTYPE html>
   {STYLE}
   /* original.html reserves dead space at the top for chrome we don't have:
      body{{padding-top:80px}} cleared Squarespace's sticky nav, and
-     .tfc-container's own 30px top padding sat below it. Both are removed so
-     the logo sits near the top; the container's 24px side padding still sets
-     horizontal alignment, so the header only adds a small top margin. */
+     .tfc-container's own 30px top padding sat below it — both removed so the
+     hero (with the logo overlaid on its blue background) starts at the top. */
   body {{ padding-top: 0 !important; }}
   .tfc-container {{ padding-top: 0 !important; }}
-  .rxkeiki-header {{ padding: 14px 0 0 0; }}
-  .rxkeiki-logo {{ display: block; width: 220px; height: auto; }}
+  /* The logo is an absolute overlay inside the hero (positioned by the editor
+     via layout.json), so it needs no box of its own — just block display. */
+  .rxkeiki-logo {{ display: block; height: auto; }}
+  /* TANF funding split — GREEN for the TANF-funded prenatal–month 3 stretch,
+     PURPLE for the state-funded month 4–12 stretch. The green side keeps
+     original.html's (rebranded) green; the later-months side is recoloured
+     from its original indigo to purple. flex 4:9 tracks the month ranges
+     (4 periods: prenatal + m1–3, vs 9 periods: m4–12). */
+  .tfc-tanf-seg--tanf {{ flex: 4; background: linear-gradient(135deg, #00A750, #007A3A); }}
+  .tfc-tanf-seg--state {{ flex: 9; background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }}
   {EDIT_OVERRIDES}
 </style>
 </head>
