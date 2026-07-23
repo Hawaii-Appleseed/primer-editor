@@ -213,10 +213,10 @@ Source: Child Care Aware of America 2024 Analysis[^childcare-aware-2024]
 A Hawaiʻi family could receive
 
 [[steps.banner.amount]]
-up to $7,500
+up to $3,000
 
 [[steps.banner.sub]]
-over their child's first year
+ove
 
 [[steps.1.phase]]
 3rd Trimester
