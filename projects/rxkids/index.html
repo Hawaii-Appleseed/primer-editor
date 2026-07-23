@@ -1927,6 +1927,27 @@
   .rxk-hiw-bg { background-color: #FEDF98; }
   .rxk-hiw-bg .tfc-step:not(:last-child)::after { background: #E8B04B; }
   .rxk-hiw-bg .tfc-steps-note { color: #8A6D3B; }
+  /* The section heading was navy (cool) — jarring on the warm cream. A deep
+     warm espresso-brown keeps the contrast but reads with the background. */
+  .rxk-hiw-bg .tfc-section-title { color: #4A3413; }
+
+  /* "How TANF helps pay for RxKids" top band — magenta field (logo magenta).
+     Its heading/intro go white; the "two ways" comparison cards stay light
+     boxes, which read cleanly on the magenta. */
+  .rxk-tanf-top { background-color: #AB3192; }
+  .rxk-tanf-top .tfc-section-title { color: #FFFFFF; }
+  .rxk-tanf-top .tfc-section-subtitle { color: #F7E3F1; }
+  .rxk-tanf-top .rxk-tanf-h3 { color: #FFFFFF; }
+
+  /* Benefits of RxKids — the tabs take the logo's rainbow (red / blue / green
+     / orange / magenta / gold), each tab's active fill + left rule + its
+     panel's bullets sharing one colour. Gold gets dark text for contrast. */
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(1) { border-left-color: #D81830; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(1).active { background: #D81830; border-left-color: #D81830; color: #FFFFFF; } .tfc-benefits-display .tfc-benefit-content:nth-child(1) .tfc-benefit-list li::before { color: #D81830; } .tfc-benefits-display .tfc-benefit-content:nth-child(1) h3 { color: #D81830; }
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(2) { border-left-color: #0078C0; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(2).active { background: #0078C0; border-left-color: #0078C0; color: #FFFFFF; } .tfc-benefits-display .tfc-benefit-content:nth-child(2) .tfc-benefit-list li::before { color: #0078C0; } .tfc-benefits-display .tfc-benefit-content:nth-child(2) h3 { color: #0078C0; }
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(3) { border-left-color: #009048; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(3).active { background: #009048; border-left-color: #009048; color: #FFFFFF; } .tfc-benefits-display .tfc-benefit-content:nth-child(3) .tfc-benefit-list li::before { color: #009048; } .tfc-benefits-display .tfc-benefit-content:nth-child(3) h3 { color: #009048; }
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(4) { border-left-color: #F09018; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(4).active { background: #F09018; border-left-color: #F09018; color: #FFFFFF; } .tfc-benefits-display .tfc-benefit-content:nth-child(4) .tfc-benefit-list li::before { color: #F09018; } .tfc-benefits-display .tfc-benefit-content:nth-child(4) h3 { color: #F09018; }
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(5) { border-left-color: #A81878; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(5).active { background: #A81878; border-left-color: #A81878; color: #FFFFFF; } .tfc-benefits-display .tfc-benefit-content:nth-child(5) .tfc-benefit-list li::before { color: #A81878; } .tfc-benefits-display .tfc-benefit-content:nth-child(5) h3 { color: #A81878; }
+  .tfc-benefits-tabs .tfc-benefit-tab:nth-child(6) { border-left-color: #F0A800; } .tfc-benefits-tabs .tfc-benefit-tab:nth-child(6).active { background: #F0A800; border-left-color: #F0A800; color: #2A3A4D; } .tfc-benefits-display .tfc-benefit-content:nth-child(6) .tfc-benefit-list li::before { color: #F0A800; } .tfc-benefits-display .tfc-benefit-content:nth-child(6) h3 { color: #F0A800; }
   /* Step 4 = the other-funding stretch: purple, matching the timeline. */
   .tfc-step--alt { background: #F7F0FA; }
   .tfc-step--alt .tfc-step-number { background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }
@@ -2324,13 +2345,13 @@
     </div>
 </div>
 
-<div class="tfc-full-width tfc-bg-white tfc-reveal">
+<div class="tfc-full-width rxk-tanf-top tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">How TANF helps pay for RxKids</h2>
             <p class="tfc-section-subtitle">TANF (Temporary Assistance for Needy Families) is a federal program that gives each state a pot of money to help struggling families with children. A large part of the RxKids program is funded with TANF money.</p>
 
-            <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 0 0 28px;">TANF can give money in two different ways</h3>
+            <h3 class="rxk-tanf-h3" style="text-align:center; font-size:1.5rem; margin: 0 0 28px;">TANF can give money in two different ways</h3>
 
             <div class="tfc-tanf-compare">
                 <div class="tfc-tanf-card">
@@ -2346,7 +2367,12 @@
         <p>A brief payment for one specific moment — like welcoming a new baby. As long as it lasts no more than a few months, it counts as short-term help: no time limits, no work requirements, no strings attached.</p>
     </div>
             </div>
-
+        </div>
+    </div>
+</div>
+<div class="tfc-full-width tfc-bg-white tfc-reveal">
+    <div class="tfc-content-container">
+        <div class="tfc-section" style="margin-bottom: 0;">
             
             <div class="tfc-tanf-split">
                 <h3>How RxKids uses TANF</h3>

@@ -212,6 +212,25 @@ def scene_tag(side: str, key: str) -> str:
 
 # ---- benefits widget (6 tabs) -------------------------------------------------
 BENEFIT_KEYS = ["health", "development", "housing", "food", "economic", "bonding"]
+# The RxKeiki logo's rainbow, one per benefit tab (red, blue, green, orange,
+# magenta, gold) — sampled from the logo PNG.
+BENEFIT_COLORS = ["#D81830", "#0078C0", "#009048", "#F09018", "#A81878", "#F0A800"]
+
+
+def _benefit_rainbow_css() -> str:
+    """Per-tab logo colour: an inactive tab shows its colour as a left rule;
+    active, that colour fills the tab; its panel's bullets and sub-headings
+    match. Gold takes dark ink for contrast; every other fill takes white."""
+    out = []
+    for i, col in enumerate(BENEFIT_COLORS, start=1):
+        ink = "#2A3A4D" if col == "#F0A800" else "#FFFFFF"
+        out.append(
+            f".tfc-benefits-tabs .tfc-benefit-tab:nth-child({i}) {{ border-left-color: {col}; }} "
+            f".tfc-benefits-tabs .tfc-benefit-tab:nth-child({i}).active {{ background: {col}; border-left-color: {col}; color: {ink}; }} "
+            f".tfc-benefits-display .tfc-benefit-content:nth-child({i}) .tfc-benefit-list li::before {{ color: {col}; }} "
+            f".tfc-benefits-display .tfc-benefit-content:nth-child({i}) h3 {{ color: {col}; }}"
+        )
+    return "\n  ".join(out)
 
 
 def benefits_widget() -> str:
@@ -551,15 +570,18 @@ def tanf_timeline() -> str:
 
 
 # ---- TANF section -------------------------------------------------------------
+# Two full-width bands: the top (intro + "two ways" comparison) on a magenta
+# #AB3192 field (matching the logo's magenta), the rest on white starting at
+# "How RxKids uses TANF".
 def tanf_section() -> str:
     return f"""
-<div class="tfc-full-width tfc-bg-white tfc-reveal">
+<div class="tfc-full-width rxk-tanf-top tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">How TANF helps pay for RxKids</h2>
             {C.html("tanf.intro", "tfc-section-subtitle")}
 
-            <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 0 0 28px;">{C.t("tanf.compare1.title")}</h3>
+            <h3 class="rxk-tanf-h3" style="text-align:center; font-size:1.5rem; margin: 0 0 28px;">{C.t("tanf.compare1.title")}</h3>
 
             <div class="tfc-tanf-compare">
                 {tanf_card("tanf.ongoing", good=False,
@@ -567,7 +589,12 @@ def tanf_section() -> str:
                 {tanf_card("tanf.shortterm", good=True,
                            icon_path='<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2.6"/><path d="M12 15v2"/>')}
             </div>
-
+        </div>
+    </div>
+</div>
+<div class="tfc-full-width tfc-bg-white tfc-reveal">
+    <div class="tfc-content-container">
+        <div class="tfc-section" style="margin-bottom: 0;">
             {L.spacer("tanf.split.title")}
             <div class="tfc-tanf-split"{L.attr("tanf.split.title")}>
                 <h3>{C.t("tanf.split.title")}</h3>
@@ -749,6 +776,22 @@ html = f"""<!DOCTYPE html>
   .rxk-hiw-bg {{ background-color: #FEDF98; }}
   .rxk-hiw-bg .tfc-step:not(:last-child)::after {{ background: #E8B04B; }}
   .rxk-hiw-bg .tfc-steps-note {{ color: #8A6D3B; }}
+  /* The section heading was navy (cool) — jarring on the warm cream. A deep
+     warm espresso-brown keeps the contrast but reads with the background. */
+  .rxk-hiw-bg .tfc-section-title {{ color: #4A3413; }}
+
+  /* "How TANF helps pay for RxKids" top band — magenta field (logo magenta).
+     Its heading/intro go white; the "two ways" comparison cards stay light
+     boxes, which read cleanly on the magenta. */
+  .rxk-tanf-top {{ background-color: #AB3192; }}
+  .rxk-tanf-top .tfc-section-title {{ color: #FFFFFF; }}
+  .rxk-tanf-top .tfc-section-subtitle {{ color: #F7E3F1; }}
+  .rxk-tanf-top .rxk-tanf-h3 {{ color: #FFFFFF; }}
+
+  /* Benefits of RxKids — the tabs take the logo's rainbow (red / blue / green
+     / orange / magenta / gold), each tab's active fill + left rule + its
+     panel's bullets sharing one colour. Gold gets dark text for contrast. */
+  {_benefit_rainbow_css()}
   /* Step 4 = the other-funding stretch: purple, matching the timeline. */
   .tfc-step--alt {{ background: #F7F0FA; }}
   .tfc-step--alt .tfc-step-number {{ background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }}
