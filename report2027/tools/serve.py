@@ -32,7 +32,6 @@ import io
 import json
 import mimetypes
 import os
-import shlex
 import shutil
 import signal
 import socket
@@ -195,11 +194,32 @@ def rebuild(pid: str, reason: str = "") -> None:
     st, root, b = STATE[pid], p["root"], p["binding"]
     with st.lock:
         if b.build:
-            r = subprocess.run(shlex.split(b.build), cwd=str(root),
+            # Run through a shell, not shlex.split — the registry documents
+            # `build` as "a shell command", and rxkids/demo-report's actually
+            # ARE compound ones (render && re-stage the editor); a plain
+            # split-and-exec would pass "&&" as a literal argv token instead
+            # of chaining, silently skipping the second command.
+            r = subprocess.run(b.build, shell=True, cwd=str(root),
                                 capture_output=True, text=True)
             ok, output = r.returncode == 0, r.stdout + r.stderr
         else:
             ok, output = True, ""
+        # Guarantee the live editor's staged copy is fresh after ANY rebuild —
+        # regardless of whether THIS project's own `build:` remembers to
+        # re-stage. budget-primer's Makefile chain does; rxkids/demo-report
+        # originally didn't, which silently left the editor showing stale
+        # content while `build` "succeeded". Idempotent (docsync.stage just
+        # copies declared files) and safe to run unconditionally: it preserves
+        # whatever --repo a human already set (see stage.py), so this can't
+        # un-link a project from the repo it pushes to. This is what makes the
+        # live-reload loop correct for EVERY docsync.yml-registered project —
+        # one freshly authored here, or one pointed at via a projects.json
+        # local_root — without relying on each one's own build: string.
+        if ok and b.editor:
+            sr = subprocess.run(["python3", "-m", "docsync.stage", "--id", pid],
+                                 cwd=str(root), capture_output=True, text=True)
+            if sr.returncode != 0:
+                ok, output = False, output + "\n[re-stage]\n" + sr.stdout + sr.stderr
         st.mtimes = _snapshot(_watch_patterns(root, b))   # AFTER the build, so
         if ok:                                            # its own writes don't
             st.version += 1                               # look like a fresh change

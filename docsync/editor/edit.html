@@ -998,6 +998,19 @@ async function get(u) {
   return r.text();
 }
 
+// A manifest file that isn't text (an image an editor.engine list names, e.g.
+// a logo a renderer inlines as a data URI). r.text() UTF-8-decodes the
+// response — on real binary bytes that silently replaces every invalid
+// sequence with U+FFFD, corrupting the file from the first non-ASCII byte
+// on. Every manifest file used to be source code/markdown/JSON, so this
+// never came up until a project first staged a raster image.
+const BINARY_RE = /\.(png|jpe?g|gif|webp|ico|bmp|woff2?|ttf|otf)$/i;
+async function getBytes(u) {
+  const r = await fetch(bust(u), { cache: 'no-store' });
+  if (!r.ok) throw new Error(`HTTP ${r.status} — ${u}`);
+  return new Uint8Array(await r.arrayBuffer());
+}
+
 // --- projects: one editor, many reports ------------------------------------
 // projects.json beside this file maps an id to the directory holding that
 // report's engine/ (relative to this page, or an absolute URL — GitHub Pages
@@ -6317,7 +6330,8 @@ async function boot() {
 
   const urls = Object.keys(M.files);
   const [pyodide, ...files] =
-    await Promise.all([loadPyodide(), ...urls.map(u => get(withBase(u)))]);
+    await Promise.all([loadPyodide(),
+      ...urls.map(u => BINARY_RE.test(u) ? getBytes(withBase(u)) : get(withBase(u)))]);
   // Viewing or continuing a draft: its content and layout come from the draft
   // branch, not the deployed copies (which are main's). The engine code itself
   // stays same-origin — only the two authored files differ per draft.
