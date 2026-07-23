@@ -20,6 +20,15 @@ bindings:
     outputs:
       - report2027/web/index.html
       - docs/primer/index.html
+    # Files the renderer doesn't read directly but the live server's rebuild
+    # loop must still react to — hand-edited CSS/JS, or data the renderer only
+    # reads through report2027/tools/build_data.py, not render_report.py.
+    watch:
+      - report2027/tools/*.py
+      - report2027/web/primer.css
+      - report2027/web/primer.js
+      - report2027/data/*.json
+      - report2027/manual/*.json
     # What the draft editor needs to run THIS report in the browser. Naming it
     # here is what lets one editor serve any report: the editor reads the
     # manifest staged beside it and knows nothing about the primer.
@@ -63,7 +72,7 @@ bindings:
       out: projects/rxkids/index.html
       layout: projects/rxkids/layout.json
       palette: ["#2A3A4D", "#4a5568", "#E57373", "#C62828", "#EF5350", "#FFFFFF"]
-      page: [12.5, 76]
+      page: [12.5, 160]
       margins: [0.3, 0.3]
       engine:
         # The untouched source render_report.py reads at build time — must be

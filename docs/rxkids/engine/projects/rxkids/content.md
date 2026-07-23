@@ -1,15 +1,375 @@
 <!--
-  RxKids — scaffolded to OPEN in the draft editor, not yet made editable.
-  original.html is the untouched source (from the Hawaii Appleseed website
-  repo); render_report.py currently wraps its <style>/<body> almost verbatim
-  in one big page so nothing is lost and nothing crashes. Making pieces of it
-  actually editable (graphic()/card() from docsync.blocks, L.attr/L.spacer on
-  the hero, the stat blocks, the benefits tabs…) is the next step — see the
-  report-editor skill.
+  RxKids — wired for editing. original.html stays the untouched reference copy;
+  render_report.py now rebuilds every section from these slots instead of
+  echoing original.html's markup verbatim. Bar/chart heights in the stats
+  carousel and the poverty chart are still hand-set in render_report.py (no
+  live chart component exists in this engine yet) — editing a percentage here
+  updates the number but not the bar's height; keep them visually consistent
+  by hand if they change.
 -->
 
 [[title]]
 RxKids Hawaiʻi
 
+[[hero.title]]
+RxKids
+
+[[hero.hawaii]]
+Hawaiʻi
+
+[[hero.badge]]
+Direct cash support for expecting mothers and their infants
+
+[[hero.image.alt]]
+RxKids Hero Image
+
+[[what.eyebrow]]
+The Program
+
+[[what.body]]
+RxKids is a groundbreaking program that provides **no-strings-attached financial support** to pregnant mothers. There are successful RxKids programs in cities across Michigan.
+
+[[what.heart.alt]]
+Love
+
+[[what.childcare.alt]]
+Childcare Center
+
+[[what.scene.right.title]]
+No Strings Attached
+
+[[what.scene.right.body]]
+Families decide how to use the funds based on their unique needs—whether for rent, food, baby supplies, or other essentials.
+
+[[what.scene.left.title]]
+Universal Support
+
+[[what.scene.left.body]]
+Every pregnant mother in participating communities receives support—no complicated eligibility requirements or means testing.
+
+[[what.scene.bottom.title]]
+Critical First Year
+
+[[what.scene.bottom.body]]
+Monthly payments continue throughout the baby's first year, providing stability during the most important developmental period.
+
+[[benefits.health.title]]
+Better Health Outcomes
+
+[[benefits.health.bullets]]
+- **Preterm births reduced by up to 18%** and low birthweight by 27%[^flint-preterm]
+- **Infant maltreatment allegations reduced by 32%**[^rxkids-maltreatment]
+- Postpartum depression screenings dropped by 14 percentage points[^rxkids-savings]
+- **$6.2 million in annual healthcare savings** from improved birth outcomes[^rxkids-savings]
+
+[[benefits.development.title]]
+Child Development
+
+[[benefits.development.bullets]]
+- **80% of participants** report RxKids helped them become more confident parents[^rxkids-research-brief]
+- Reduced NICU admissions establish stronger developmental foundations[^rxkids-nicu]
+- Funds enable direct investments in home learning environments and enrichment materials[^rxkids-intl-analysis]
+- 59% found it easier to obtain needed healthcare[^rxkids-research-brief]
+
+[[benefits.housing.title]]
+Housing Stability
+
+[[benefits.housing.bullets]]
+- **91% decrease in evictions** among RxKids participants[^rxkids-impact]
+- Average reduction in housing debt of **over $1,000 per family**[^rxkids-savings]
+- 57% of participants used funds explicitly for rent payments[^rxkids-research-brief]
+- Represents a **75% income expansion** for lowest-income families[^rxkids-nicu]
+
+[[benefits.food.title]]
+Food Security
+
+[[benefits.food.bullets]]
+- **78% of participants** use RxKids funds for food purchases[^rxkids-research-brief]
+- 8.2% increase in families reporting they have "enough of the kinds of foods we want"[^rxkids-research-brief]
+- Cash enables purchase of preferred nutritious foods rather than reliance on emergency assistance
+- Better nutrition supports improved maternal health and birth outcomes[^rxkids-intl-analysis]
+
+[[benefits.economic.title]]
+Economic Mobility
+
+[[benefits.economic.bullets]]
+- Economic benefits exceed program costs by **2.4 times**[^upjohn-study]
+- Every dollar invested generates **~$1.60 in local economic activity**[^givedirectly-rxkids]
+- 88% of participants report the program helped them make ends meet and feel financially secure[^rxkids-survey-nov2024]
+- **40% of economic gains** flow to families in the lowest income quintile[^upjohn-study]
+
+[[benefits.bonding.title]]
+Family Bonding
+
+[[benefits.bonding.bullets]]
+- Mothers report feeling **more loved, valued, empowered, and respected**[^rxkids-impact]
+- "My mental space is different, so I'm happy to be happy for my baby" — Participant[^rxkids-survey-nov2024]
+- Reduced financial stress enables greater emotional availability for children[^rxkids-maltreatment]
+- Trust in healthcare institutions rose by 10 percentage points[^rxkids-savings]
+
+[[flint.eyebrow]]
+Case Study · Flint, Michigan
+
+[[flint.lead]]
+Comparing Flint mothers eligible for Rx Kids in 2024 with 2023 — every hardship and mental-health measure improved.[^ajph-flint]
+
+[[flint.stat.rent.value]]
+13.0%
+
+[[flint.stat.rent.desc]]
+Reduction in owing back rent or mortgage
+
+[[flint.stat.eviction.value]]
+4.2%
+
+[[flint.stat.eviction.desc]]
+Reduction in eviction risk after birth
+
+[[flint.stat.food.value]]
+14.0%
+
+[[flint.stat.food.desc]]
+Reduction in food insecurity
+
+[[flint.stat.backrent.value]]
+$1,004
+
+[[flint.stat.backrent.desc]]
+Less back rent/mortgage owed on average
+
+[[flint.stat.depression.value]]
+14.0%
+
+[[flint.stat.depression.desc]]
+Reduction in screening positive for postpartum depression
+
+[[flint.stat.worrying.value]]
+6.0%
+
+[[flint.stat.worrying.desc]]
+Reduction in uncontrollable worrying
+
+[[carousel.poverty.quote]]
+In Hawaiʻi, more than 1 out of 4 children with single mothers are in poverty.
+
+[[carousel.poverty.chart.title]]
+Child Poverty in Hawaiʻi by Household Type
+
+[[carousel.poverty.bar.married.label]]
+Married Couple
+
+[[carousel.poverty.bar.married.value]]
+6.4%
+
+[[carousel.poverty.bar.singlefather.label]]
+Single Father
+
+[[carousel.poverty.bar.singlefather.value]]
+11.3%
+
+[[carousel.poverty.bar.singlemother.label]]
+Single Mother
+
+[[carousel.poverty.bar.singlemother.value]]
+26.6%
+
+[[carousel.poverty.source]]
+Source: U.S. Census Bureau[^census-poverty]
+
+[[carousel.childcare.title]]
+Center-Based Care in Hawaiʻi is completely unaffordable to the working class.
+
+[[carousel.childcare.cost.title]]
+Annual Center-Based Care Cost (2024)
+
+[[carousel.childcare.cost.amount]]
+$24,115
+
+[[carousel.childcare.cost.monthly]]
+($2,010 per month)
+
+[[carousel.childcare.bar.single.label]]
+Percentage of single-parent median income
+
+[[carousel.childcare.bar.single.value]]
+49.0%
+
+[[carousel.childcare.bar.single.note]]
+Nearly half of income goes to childcare
+
+[[carousel.childcare.bar.married.label]]
+Percentage of married-couple median income
+
+[[carousel.childcare.bar.married.value]]
+17.9%
+
+[[carousel.childcare.source]]
+Source: Child Care Aware of America 2024 Analysis[^childcare-aware-2024]
+
+[[steps.banner.label]]
+A Hawaiʻi family could receive
+
+[[steps.banner.amount]]
+up to $7,500
+
+[[steps.banner.sub]]
+over their child's first year
+
+[[steps.1.phase]]
+3rd Trimester
+
+[[steps.1.title]]
+Pregnancy Enrollment
+
+[[steps.1.text]]
+Expectant mothers enroll during their third trimester of pregnancy.
+
+[[steps.2.phase]]
+Before Birth
+
+[[steps.2.title]]
+Initial Payment
+
+[[steps.2.amount]]
+$1,500
+
+[[steps.2.amountnote]]
+one-time
+
+[[steps.2.text]]
+A lump sum during pregnancy to prepare for baby's arrival.
+
+[[steps.3.phase]]
+Months 1–6
+
+[[steps.3.title]]
+Monthly Support
+
+[[steps.3.amount]]
+$500
+
+[[steps.3.amountnote]]
+per month
+
+[[steps.3.text]]
+Guaranteed for the first six months after birth.
+
+[[steps.4.phase]]
+Months 7–12
+
+[[steps.4.title]]
+Additional Support
+
+[[steps.4.amount]]
+$500
+
+[[steps.4.amountnote]]
+per month
+
+[[steps.4.text]]
+Six more monthly payments, if program funds are available.
+
+[[steps.note]]
+Payment amounts mirror the Flint, Michigan model and are illustrative for a proposed Hawaiʻi program.
+
+[[tanf.intro]]
+TANF (Temporary Assistance for Needy Families) is a federal program that gives each state a pot of money to help families with children who are struggling to get by. States get to decide a lot about how to spend it — and helping families care for their kids at home is exactly what it's meant for.
+
+[[tanf.compare1.title]]
+TANF can give money in two very different ways
+
+[[tanf.ongoing.title]]
+Ongoing aid
+
+[[tanf.ongoing.tag]]
+Comes with strings
+
+[[tanf.ongoing.body]]
+Monthly cash meant to cover a family's needs over the long term. To get it, families must follow rules — time limits, work requirements, and paperwork — and it can shrink other help like food assistance.
+
+[[tanf.shortterm.title]]
+Short-term help
+
+[[tanf.shortterm.tag]]
+No strings
+
+[[tanf.shortterm.body]]
+A brief payment for one specific moment — like welcoming a new baby. As long as it lasts no more than a few months, it counts as short-term help: no time limits, no work requirements, no strings attached.
+
+[[tanf.split.title]]
+How RxKids uses TANF
+
+[[tanf.split.body]]
+RxKids uses the no-strings, short-term kind of TANF to cover the most important early stretch — the payment during pregnancy and the first few months after birth. The later months are paid for with state and other funds.
+
+[[tanf.split.bar.tanf.label]]
+Pregnancy & first months
+
+[[tanf.split.bar.tanf.sub]]
+TANF · no strings
+
+[[tanf.split.bar.state.label]]
+Later months
+
+[[tanf.split.bar.state.sub]]
+State & other funds
+
+[[tanf.choice.title]]
+The choice that keeps it "no strings"
+
+[[tanf.choice.body]]
+There's a catch: TANF's no-strings help only lasts about four months. If TANF pays for more than that, the law treats it as ongoing aid — and the strings come back. (Just limiting it to lower-income families doesn't change that — what matters is keeping TANF to those first few months.) That leaves Hawaiʻi two ways to build the program:
+
+[[tanf.option1.title]]
+Use TANF for everything
+
+[[tanf.option1.tag]]
+Strings come back
+
+[[tanf.option1.body]]
+For families who qualify, TANF could pay for all 12 months. It's simpler to fund — but because the help now lasts longer than a few months, the law counts it as ongoing aid. That brings back time limits, work requirements, child-support rules, and smaller food and housing benefits.
+
+[[tanf.option2.title]]
+"Braided" funding
+
+[[tanf.option2.tag]]
+Stays no strings
+
+[[tanf.option2.body]]
+TANF pays only for the first few months, where it's truly no-strings. State and other funds cover the rest — plus the families who don't qualify for TANF. Everyone is covered, and the whole program stays no-strings. This is how RxKids already runs in Michigan.
+
+[[tanf.note]]
+Hawaiʻi's bill (HB2006) already limits TANF money to families on Medicaid or under 300% of the poverty line — but it doesn't yet cap TANF to those first few months. Adding that cap is the key to keeping the program no-strings. It's also why some state officials have warned about work rules, child support, and reduced benefits — those concerns are real under Option 1, but largely disappear under Option 2.
+
+[[tanf.bottomline.title]]
+The bottom line
+
+[[tanf.bottomline.body]]
+TANF pays for the start. Hawaiʻi pays for the rest. Families get help right when they need it most — with no strings attached.
+
+[[cta.title]]
+Learn More About RxKids
+
+[[cta.body]]
+Discover how this innovative program is transforming communities and supporting families across the nation.
+
+[[cta.link1.label]]
+Visit RxKids.org
+
+[[cta.link2.label]]
+About the Program
+
 [[sources]]
-[example]: Replace or delete this placeholder source — https://example.com
+[flint-preterm]: GiveDirectly, "Flint pregnancy and infancy study," 2025. — https://www.givedirectly.org/flintstudy2025/
+[rxkids-maltreatment]: Rx Kids, "New rigorous research shows Rx Kids reduced infant maltreatment allegations in Flint, Michigan." — https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/
+[rxkids-savings]: Rx Kids, "New research shows cash for moms and babies improves health, stabilizes families, and saves millions." — https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/
+[rxkids-research-brief]: Rx Kids Research Brief, September 2024. — https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf
+[rxkids-nicu]: Your Children's Foundation, "Rx Kids: helping families thrive from the start," September 30, 2025. — https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/
+[rxkids-intl-analysis]: Rx Kids, "New analysis finds child cash benefits improve child health and development internationally." — https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/
+[rxkids-impact]: Rx Kids, program impact summary. — https://rxkids.org/impact/
+[rxkids-survey-nov2024]: Rx Kids, "Rx Kids survey results," November 2024. — https://rxkids.org/rx-kids-survey-results-november-2024/
+[upjohn-study]: W.E. Upjohn Institute, "Study finds Rx Kids program supports families, drives jobs and income growth." — https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth
+[givedirectly-rxkids]: GiveDirectly, Rx Kids program overview. — https://www.givedirectly.org/rxkids/
+[ajph-flint]: American Journal of Public Health, Flint Rx Kids outcomes study. — https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244
+[census-poverty]: U.S. Census Bureau, poverty and income data. — https://www.census.gov/topics/income-poverty/poverty/data.html
+[childcare-aware-2024]: Child Care Aware of America, "2024 Affordability Analysis." — https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf
