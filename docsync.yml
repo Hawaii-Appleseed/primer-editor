@@ -82,8 +82,10 @@ bindings:
       render: projects/rxkids/render_report.py
       out: projects/rxkids/index.html
       layout: projects/rxkids/layout.json
-      palette: ["#2A3A4D", "#4a5568", "#E57373", "#C62828", "#EF5350", "#FFFFFF"]
-      page: [12.5, 160]
+      # rxkids.org's own brand palette: navy text, accent red, brand blue,
+      # green, orange, white — the swatches the editor offers for recolouring.
+      palette: ["#2A3A4D", "#EE303B", "#0082C9", "#00A750", "#F6921E", "#FFFFFF"]
+      page: [12.5, 84]
       margins: [0.3, 0.3]
       engine:
         # The untouched source render_report.py reads at build time — must be
