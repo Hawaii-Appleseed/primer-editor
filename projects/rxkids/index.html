@@ -1920,6 +1920,13 @@
      fill shape (which has its own orange separators), so they add none. */
   .rxk-col--other { border-right: 1px solid rgba(255,255,255,.28); }
   .rxk-col--other:last-child { border-right: none; }
+  /* Warm cream backdrop for the How-RxKids-would-work section (replaces the
+     cool blue-grey). The white step/banner cards and the green $15M pill still
+     read clearly on it; the connector line between steps is warmed to a soft
+     amber so it doesn't clash with the cream. */
+  .rxk-hiw-bg { background-color: #FEDF98; }
+  .rxk-hiw-bg .tfc-step:not(:last-child)::after { background: #E8B04B; }
+  .rxk-hiw-bg .tfc-steps-note { color: #8A6D3B; }
   /* Step 4 = the other-funding stretch: purple, matching the timeline. */
   .tfc-step--alt { background: #F7F0FA; }
   .tfc-step--alt .tfc-step-number { background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }
@@ -2214,7 +2221,7 @@
     </div>
 </div>
 
-<div class="tfc-full-width tfc-bg-blue tfc-reveal">
+<div class="tfc-full-width rxk-hiw-bg tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">How RxKids would work in Hawaiʻi</h2>
@@ -2263,7 +2270,7 @@
     <button class="tfc-expand-btn rxk-cost-btn" onclick="rxkToggle(this, 'cost-content')">
     <span class="rxk-cost-btn-eyebrow">Cost to launch statewide</span>
     <span class="rxk-cost-btn-amt">$15 million</span>
-    <span class="rxk-cost-btn-foot">in TANF cash prescriptions <span class="tfc-expand-icon">&#9660;</span></span>
+    <span class="rxk-cost-btn-foot"><span class="tfc-expand-icon">&#9660;</span></span>
 </button>
 <div id="cost-content" class="tfc-expand-content">
     <div class="tfc-expand-inner">
