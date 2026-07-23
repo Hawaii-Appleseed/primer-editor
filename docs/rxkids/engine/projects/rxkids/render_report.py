@@ -747,6 +747,20 @@ html = f"""<!DOCTYPE html>
   .tfc-step--alt .tfc-step-number {{ background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }}
   .tfc-step--alt .tfc-step-phase {{ color: #8E3B9C; }}
   .tfc-step--alt .tfc-step-amount {{ color: #7A3E9D; }}
+  /* The Cost expandable's button features the statewide TANF figure — a tall
+     green pill (TANF colour) with the amount big and the rest small, instead
+     of the flat red text button the other expandables use. */
+  .rxk-cost-btn {{ flex-direction: column; gap: 2px; padding: 16px 40px;
+                   background: linear-gradient(135deg, #00A750, #007A3A) !important;
+                   box-shadow: 0 6px 18px rgba(0,122,58,.35) !important; line-height: 1.1; }}
+  .rxk-cost-btn-eyebrow {{ font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
+                           text-transform: uppercase; opacity: .9; }}
+  .rxk-cost-btn-amt {{ font-size: 2.4rem; font-weight: 800; letter-spacing: .5px;
+                       font-family: 'Halyard Display','Oswald','Impact',sans-serif; }}
+  .rxk-cost-btn-foot {{ font-size: 0.78rem; font-weight: 600; opacity: .92;
+                        display: inline-flex; align-items: center; gap: 8px; }}
+  .rxk-cost-btn .tfc-expand-icon {{ transition: transform .3s ease; }}
+  .rxk-cost-btn.active .tfc-expand-icon {{ transform: rotate(180deg); }}
   /* Cost estimate table — TANF column tinted green, the two "additional
      dollars" columns tinted purple (same colour language as the timeline). */
   .rxk-cost-wrap {{ border-radius: 14px; overflow: hidden; text-align: left;
