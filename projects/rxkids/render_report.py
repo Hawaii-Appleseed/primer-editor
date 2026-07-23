@@ -440,7 +440,8 @@ TANF_TIMELINE = [
 
 def tanf_timeline() -> str:
     n = len(TANF_TIMELINE)
-    n_other = sum(1 for _, _, tanf in TANF_TIMELINE if not tanf)
+    n_tanf = sum(1 for _, _, tanf in TANF_TIMELINE if tanf)
+    n_other = n - n_tanf
     cols = []
     for month, amount, tanf in TANF_TIMELINE:
         cls = "rxk-col rxk-col--tanf" if tanf else "rxk-col rxk-col--other"
@@ -450,18 +451,25 @@ def tanf_timeline() -> str:
             <span class="rxk-col-amt">{amount}</span>
             {tag}
         </div>""")
-    # OTHER FUNDING banner spans the purple columns (right n_other of n).
-    banner_w = f"{n_other / n * 100:.4f}%"
+    # The green fill is a single shape behind the TANF columns so its top edge
+    # can slope: flat over all but the last TANF column, then a sharp ramp up
+    # to the top over that column (month 3), handing off to the purple.
+    green_w = f"{n_tanf / n * 100:.4f}%"           # width of the TANF block
+    ramp_x = f"{(n_tanf - 1) / n_tanf * 100:.4f}%"  # where the ramp starts (month-3 left edge)
+    banner_w = f"{n_other / n * 100:.4f}%"          # OTHER FUNDING spans the purple columns
     return f"""{L.spacer("tanf.timeline")}
     <div{L.attr("tanf.timeline")}>
       <div class="rxk-timeline">
+        <div class="rxk-green-fill" style="width:{green_w};
+             clip-path: polygon(0 40px, {ramp_x} 40px, 100% 0, 100% 100%, 0 100%);
+             -webkit-clip-path: polygon(0 40px, {ramp_x} 40px, 100% 0, 100% 100%, 0 100%);"></div>
         <div class="rxk-otherfunding" style="width:{banner_w}">OTHER FUNDING</div>
         <div class="rxk-cols">
             {"".join(cols)}
         </div>
       </div>
       <div class="rxk-bracket-row">
-        <div class="rxk-bracket"><span class="rxk-bracket-amt">$3,500</span></div>
+        <div class="rxk-bracket"><span class="rxk-bracket-amt">$3,000</span></div>
         <div class="rxk-bracket-rest"></div>
       </div>
     </div>"""
@@ -617,32 +625,41 @@ html = f"""<!DOCTYPE html>
   .rxk-timeline {{ position: relative; margin-top: 22px; border: 4px solid #F6921E;
                    border-radius: 12px; overflow: hidden; background: #8E3B9C;
                    box-shadow: 0 4px 16px rgba(42,58,77,.12); }}
-  .rxk-otherfunding {{ position: absolute; top: 0; right: 0; height: 40px;
+  /* The green (TANF) block is ONE shape behind the first columns, so its top
+     edge can slope: flat below the 40px band over the early columns, then a
+     sharp ramp up to the top over the last TANF column (month 3), meeting the
+     purple. The three orange lines are the internal separators (they ride the
+     clip, so they never spill into the purple). Per-column geometry (width,
+     ramp start) is set inline in tanf_timeline(). */
+  .rxk-green-fill {{ position: absolute; left: 0; top: 0; height: 100%; z-index: 0;
+      background:
+        linear-gradient(90deg, transparent calc(25% - 1px), #F6921E calc(25% - 1px), #F6921E calc(25% + 1px), transparent calc(25% + 1px)),
+        linear-gradient(90deg, transparent calc(50% - 1px), #F6921E calc(50% - 1px), #F6921E calc(50% + 1px), transparent calc(50% + 1px)),
+        linear-gradient(90deg, transparent calc(75% - 1px), #F6921E calc(75% - 1px), #F6921E calc(75% + 1px), transparent calc(75% + 1px)),
+        linear-gradient(180deg, #34B36B, #1E9E57); }}
+  /* Solid purple so the column separator lines behind it don't cross the
+     "OTHER FUNDING" text; sits above the columns (z-index) to cover them. */
+  .rxk-otherfunding {{ position: absolute; top: 0; right: 0; height: 40px; z-index: 2;
+                       background: #8E3B9C;
                        display: flex; align-items: center; justify-content: center;
                        color: #fff; font-weight: 800; font-size: 0.95rem;
                        letter-spacing: 1px; text-transform: uppercase; }}
-  .rxk-cols {{ display: flex; align-items: stretch; min-height: 150px; }}
+  .rxk-cols {{ position: relative; z-index: 1; display: flex; align-items: stretch; min-height: 150px; }}
   /* Content top-aligned below the OTHER FUNDING band (~52px), so every column's
      month label sits on the same line, green and purple alike — TANF then flows
      below the green amount, matching the program graphic. */
   .rxk-col {{ flex: 1; display: flex; flex-direction: column; align-items: center;
               justify-content: flex-start; gap: 5px; padding: 52px 4px 16px;
-              color: #fff; text-align: center; line-height: 1.15;
-              border-right: 1px solid rgba(255,255,255,.28); }}
-  .rxk-col:last-child {{ border-right: none; }}
+              color: #fff; text-align: center; line-height: 1.15; }}
   /* nowrap: "Month 10/11/12" are wider and would wrap to two lines in the
      narrow columns, pushing their $500 down out of line with the rest. */
   .rxk-col-month {{ font-size: 0.8rem; font-weight: 700; opacity: .95; white-space: nowrap; }}
   .rxk-col-amt {{ font-size: 1.35rem; font-weight: 800; }}
   .rxk-col-tag {{ font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }}
-  /* Green columns start below the 40px OTHER FUNDING band, so the purple base
-     shows above them — the block reads as a distinct TANF-funded stretch. The
-     12px top padding then lands their month label on the same line as the
-     purple columns' (which clear the band with the shared 52px padding). */
-  .rxk-col--tanf {{ background: linear-gradient(180deg, #34B36B, #1E9E57);
-                    margin-top: 40px; padding-top: 12px;
-                    border-right: 2px solid #F6921E; }}
-  .rxk-col--tanf:nth-of-type(4) {{ border-right: 3px solid #F6921E; }}
+  /* Purple columns carry the thin separators; green columns are drawn by the
+     fill shape (which has its own orange separators), so they add none. */
+  .rxk-col--other {{ border-right: 1px solid rgba(255,255,255,.28); }}
+  .rxk-col--other:last-child {{ border-right: none; }}
   /* A green square bracket under the prenatal–month 3 columns, labelled with
      the TANF total. flex 4:9 matches the 4 green : 9 purple columns exactly;
      the 4px side margin lines the bracket up inside the timeline's 4px frame. */

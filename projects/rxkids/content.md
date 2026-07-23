@@ -216,7 +216,7 @@ A Hawaiʻi family could receive
 up to $3,000
 
 [[steps.banner.sub]]
-ove
+over their child's first year
 
 [[steps.1.phase]]
 3rd Trimester
@@ -240,10 +240,10 @@ $1,500
 one-time
 
 [[steps.2.text]]
-A lump sum during pregnancy to prepare for baby's arrival.
+A lump sum during pregnancy to prepare for baby's arrival — funded by TANF.
 
 [[steps.3.phase]]
-Months 1–6
+Months 1–3
 
 [[steps.3.title]]
 Monthly Support
@@ -255,10 +255,10 @@ $500
 per month
 
 [[steps.3.text]]
-Guaranteed for the first six months after birth.
+Guaranteed for the first three months after birth — the TANF-funded stretch.
 
 [[steps.4.phase]]
-Months 7–12
+Months 4–12
 
 [[steps.4.title]]
 Additional Support
@@ -270,7 +270,7 @@ $500
 per month
 
 [[steps.4.text]]
-Six more monthly payments, if program funds are available.
+Nine more monthly payments, covered by state and other funds.
 
 [[steps.note]]
 Payment amounts mirror the Flint, Michigan model and are illustrative for a proposed Hawaiʻi program.
