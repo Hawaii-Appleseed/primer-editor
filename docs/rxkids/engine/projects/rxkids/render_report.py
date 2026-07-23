@@ -40,17 +40,15 @@ _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
 _OUT = Path(os.environ.get("DOCSYNC_OUT") or (HERE / "index.html"))
 EDIT = bool(os.environ.get("DOCSYNC_EDIT"))
 
-L = Layout(_LAYOUT, page=(12.5, 160))   # ~1200px wide (matches the editor's own
+L = Layout(_LAYOUT, page=(12.5, 84))    # ~1200px wide (matches the editor's own
                                         # canvas width) x tall enough for the
-                                        # page's true natural height — text-heavy
-                                        # sections (TANF especially) wrap taller
-                                        # in this fixed 12.5in column than they
-                                        # did in Squarespace's wider live layout,
-                                        # so this is much taller than Stage One's
-                                        # original ~76in guess. Measured via the
-                                        # editor's own "N in past the cut"
-                                        # warning, not a DOM scrollHeight guess
-                                        # (that undercounts — see git history).
+                                        # page's natural content height (~82in;
+                                        # content ends ~7885px at 96dpi) plus a
+                                        # little headroom. The earlier 160in was
+                                        # inflated by the hero.hawaii overlap bug
+                                        # (duplicate style attrs) that has since
+                                        # been fixed; 84in leaves no giant blank
+                                        # tail on the published page.
 C = Content(_CONTENT, styles=L)
 
 
@@ -89,6 +87,49 @@ def img_el(el_id, cls, src, alt):
 SRC = (HERE / "original.html").read_text()
 STYLE = SRC.split("<style>", 1)[1].split("</style>", 1)[0]
 SCRIPT = SRC.split("<script>", 1)[1].split("</script>", 1)[0]
+
+# Re-brand toward rxkids.org's own palette (sampled from its CSS): the punchy
+# accent red #EE303B, blue #0082C9, green #00A750, orange #F6921E. original.html
+# was built on Material Design swatches — a pinkish coral red, Material greens
+# and ambers — so we remap those hexes to the rxkids.org equivalents (with
+# consistent lighter/darker shades so gradients and hovers keep their depth)
+# rather than editing original.html, which stays the untouched reference copy.
+# Navy #2A3A4D / slate #4A5568 / gray #718096 (headings and body text) are left
+# alone: rxkids.org's own text is a near-black dark gray, close enough.
+COLOR_REMAP = {
+    # red family: Material Reds -> rxkids.org #EE303B and its shades
+    "#e57373": "#ee303b",   # primary card/accent red (was a light coral)
+    "#ef5350": "#e81f2b",
+    "#e53935": "#d81f29",
+    "#c62828": "#c11722",   # dark red — hovers, bold numbers
+    "#b71c1c": "#a5141d",
+    "#8b1a1a": "#7d1319",
+    "#ef9a9a": "#f39aa0",   # light red tints
+    "#ffcdd2": "#fbd0d3",
+    "#ffebee": "#fdebec",
+    # green family: Material Greens -> rxkids.org #00A750 (TANF "no strings")
+    "#43a047": "#00a750",
+    "#2e7d32": "#007a3a",
+    "#66bb6a": "#2ab972",
+    "#81c784": "#5bc890",
+    "#a5d6a7": "#a2dcbc",
+    "#e8f5e9": "#e6f6ee",
+    # amber/orange family: Material Ambers -> rxkids.org #F6921E (warnings)
+    "#ffd54f": "#fbb040",
+    "#f9a825": "#f6921e",
+    "#e65100": "#d97706",
+    "#ffe0b2": "#fde3bd",
+    "#fff3e0": "#fef4e7",
+}
+
+
+def rebrand(css: str) -> str:
+    for old, new in COLOR_REMAP.items():
+        css = css.replace(old, new).replace(old.upper(), new)
+    return css
+
+
+STYLE = rebrand(STYLE)
 
 # The hero's auto-cycling JS (setInterval over three hardcoded URLs) would
 # silently overwrite a user's "replace image" edit a few seconds later — cut
@@ -519,11 +560,14 @@ html = f"""<!DOCTYPE html>
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}
   {STYLE}
-  /* original.html's own `body` rule reserves 80px of top padding (and a
-     beige fill) to clear Squarespace's sticky site nav, which we don't have
-     here — dead space with nothing to clear once extracted. */
+  /* original.html reserves dead space at the top for chrome we don't have:
+     body{{padding-top:80px}} cleared Squarespace's sticky nav, and
+     .tfc-container's own 30px top padding sat below it. Both are removed so
+     the logo sits near the top; the container's 24px side padding still sets
+     horizontal alignment, so the header only adds a small top margin. */
   body {{ padding-top: 0 !important; }}
-  .rxkeiki-header {{ padding: 16px 0 0 24px; }}
+  .tfc-container {{ padding-top: 0 !important; }}
+  .rxkeiki-header {{ padding: 14px 0 0 0; }}
   .rxkeiki-logo {{ display: block; width: 220px; height: auto; }}
   {EDIT_OVERRIDES}
 </style>
