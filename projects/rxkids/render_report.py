@@ -416,6 +416,51 @@ def step(n: int) -> str:
     </div>"""
 
 
+# The RxKids payment schedule as a month-by-month funding timeline (mirrors the
+# program graphic): a $1,500 prenatal payment then $500/month for 12 months.
+# The first four columns (prenatal + months 1–3) are TANF-funded (green); the
+# rest (months 4–12) are "other funding" (purple). Hand-set here like the other
+# charts (see content.md's note) rather than wired to per-cell slots.
+TANF_TIMELINE = [
+    ("Prenatal", "$1,500", True),
+    ("Month 1", "$500", True),
+    ("Month 2", "$500", True),
+    ("Month 3", "$500", True),
+    ("Month 4", "$500", False),
+    ("Month 5", "$500", False),
+    ("Month 6", "$500", False),
+    ("Month 7", "$500", False),
+    ("Month 8", "$500", False),
+    ("Month 9", "$500", False),
+    ("Month 10", "$500", False),
+    ("Month 11", "$500", False),
+    ("Month 12", "$500", False),
+]
+
+
+def tanf_timeline() -> str:
+    n = len(TANF_TIMELINE)
+    n_other = sum(1 for _, _, tanf in TANF_TIMELINE if not tanf)
+    cols = []
+    for month, amount, tanf in TANF_TIMELINE:
+        cls = "rxk-col rxk-col--tanf" if tanf else "rxk-col rxk-col--other"
+        tag = '<span class="rxk-col-tag">TANF</span>' if tanf else ""
+        cols.append(f"""<div class="{cls}">
+            <span class="rxk-col-month">{month}</span>
+            <span class="rxk-col-amt">{amount}</span>
+            {tag}
+        </div>""")
+    # OTHER FUNDING banner spans the purple columns (right n_other of n).
+    banner_w = f"{n_other / n * 100:.4f}%"
+    return f"""{L.spacer("tanf.timeline")}
+    <div class="rxk-timeline"{L.attr("tanf.timeline")}>
+        <div class="rxk-otherfunding" style="width:{banner_w}">OTHER FUNDING</div>
+        <div class="rxk-cols">
+            {"".join(cols)}
+        </div>
+    </div>"""
+
+
 # ---- TANF section -------------------------------------------------------------
 def tanf_section() -> str:
     return f"""
@@ -439,10 +484,7 @@ def tanf_section() -> str:
             <div class="tfc-tanf-split"{L.attr("tanf.split.title")}>
                 <h3>{C.t("tanf.split.title")}</h3>
                 <p>{C.t("tanf.split.body")}</p>
-                <div class="tfc-tanf-bar">
-                    <div class="tfc-tanf-seg tfc-tanf-seg--tanf">{C.t("tanf.split.bar.tanf.label")}<span>{C.t("tanf.split.bar.tanf.sub")}</span></div>
-                    <div class="tfc-tanf-seg tfc-tanf-seg--state">{C.t("tanf.split.bar.state.label")}<span>{C.t("tanf.split.bar.state.sub")}</span></div>
-                </div>
+                {tanf_timeline()}
             </div>
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">{C.t("tanf.choice.title")}</h3>
@@ -566,13 +608,37 @@ html = f"""<!DOCTYPE html>
   /* The logo is an absolute overlay inside the hero (positioned by the editor
      via layout.json), so it needs no box of its own — just block display. */
   .rxkeiki-logo {{ display: block; height: auto; }}
-  /* TANF funding split — GREEN for the TANF-funded prenatal–month 3 stretch,
-     PURPLE for the state-funded month 4–12 stretch. The green side keeps
-     original.html's (rebranded) green; the later-months side is recoloured
-     from its original indigo to purple. flex 4:9 tracks the month ranges
-     (4 periods: prenatal + m1–3, vs 9 periods: m4–12). */
-  .tfc-tanf-seg--tanf {{ flex: 4; background: linear-gradient(135deg, #00A750, #007A3A); }}
-  .tfc-tanf-seg--state {{ flex: 9; background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }}
+  /* TANF funding timeline — a month-by-month bar: GREEN columns are the
+     TANF-funded prenatal–month 3 payments, PURPLE columns the month 4–12
+     "other funding", all inside an orange frame. Mirrors the program graphic. */
+  .rxk-timeline {{ position: relative; margin-top: 22px; border: 4px solid #F6921E;
+                   border-radius: 12px; overflow: hidden; background: #8E3B9C;
+                   box-shadow: 0 4px 16px rgba(42,58,77,.12); }}
+  .rxk-otherfunding {{ position: absolute; top: 0; right: 0; height: 40px;
+                       display: flex; align-items: center; justify-content: center;
+                       color: #fff; font-weight: 800; font-size: 0.95rem;
+                       letter-spacing: 1px; text-transform: uppercase; }}
+  .rxk-cols {{ display: flex; align-items: stretch; min-height: 150px; }}
+  /* Content top-aligned below the OTHER FUNDING band (~52px), so every column's
+     month label sits on the same line, green and purple alike — TANF then flows
+     below the green amount, matching the program graphic. */
+  .rxk-col {{ flex: 1; display: flex; flex-direction: column; align-items: center;
+              justify-content: flex-start; gap: 5px; padding: 52px 4px 16px;
+              color: #fff; text-align: center; line-height: 1.15;
+              border-right: 1px solid rgba(255,255,255,.28); }}
+  .rxk-col:last-child {{ border-right: none; }}
+  .rxk-col-month {{ font-size: 0.8rem; font-weight: 700; opacity: .95; }}
+  .rxk-col-amt {{ font-size: 1.35rem; font-weight: 800; }}
+  .rxk-col-tag {{ font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }}
+  /* Green columns start below the 40px OTHER FUNDING band, so the purple base
+     shows above them — the block reads as a distinct TANF-funded stretch. The
+     12px top padding then lands their month label on the same line as the
+     purple columns' (which clear the band with the shared 52px padding). */
+  .rxk-col--tanf {{ background: linear-gradient(180deg, #34B36B, #1E9E57);
+                    margin-top: 40px; padding-top: 12px;
+                    border-right: 2px solid #F6921E; }}
+  .rxk-col--tanf:nth-of-type(4) {{ border-right: 3px solid #F6921E; }}
+  .rxk-col--other {{ background: transparent; }}
   {EDIT_OVERRIDES}
 </style>
 </head>

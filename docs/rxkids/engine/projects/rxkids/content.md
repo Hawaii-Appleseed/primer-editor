@@ -305,18 +305,6 @@ How RxKids uses TANF
 [[tanf.split.body]]
 RxKids uses the no-strings, short-term TANF to cover the most important early stretch — before pregnancy and the first three months after birth. The later months are paid for with state and other funds.
 
-[[tanf.split.bar.tanf.label]]
-Prenatal – Month 3
-
-[[tanf.split.bar.tanf.sub]]
-TANF · no strings
-
-[[tanf.split.bar.state.label]]
-Month 4 – Month 12
-
-[[tanf.split.bar.state.sub]]
-State & other funds
-
 [[tanf.choice.title]]
 The choice that keeps it "no strings"
 

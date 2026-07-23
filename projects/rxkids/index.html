@@ -1872,13 +1872,37 @@
   /* The logo is an absolute overlay inside the hero (positioned by the editor
      via layout.json), so it needs no box of its own — just block display. */
   .rxkeiki-logo { display: block; height: auto; }
-  /* TANF funding split — GREEN for the TANF-funded prenatal–month 3 stretch,
-     PURPLE for the state-funded month 4–12 stretch. The green side keeps
-     original.html's (rebranded) green; the later-months side is recoloured
-     from its original indigo to purple. flex 4:9 tracks the month ranges
-     (4 periods: prenatal + m1–3, vs 9 periods: m4–12). */
-  .tfc-tanf-seg--tanf { flex: 4; background: linear-gradient(135deg, #00A750, #007A3A); }
-  .tfc-tanf-seg--state { flex: 9; background: linear-gradient(135deg, #9B4DB8, #7A3E9D); }
+  /* TANF funding timeline — a month-by-month bar: GREEN columns are the
+     TANF-funded prenatal–month 3 payments, PURPLE columns the month 4–12
+     "other funding", all inside an orange frame. Mirrors the program graphic. */
+  .rxk-timeline { position: relative; margin-top: 22px; border: 4px solid #F6921E;
+                   border-radius: 12px; overflow: hidden; background: #8E3B9C;
+                   box-shadow: 0 4px 16px rgba(42,58,77,.12); }
+  .rxk-otherfunding { position: absolute; top: 0; right: 0; height: 40px;
+                       display: flex; align-items: center; justify-content: center;
+                       color: #fff; font-weight: 800; font-size: 0.95rem;
+                       letter-spacing: 1px; text-transform: uppercase; }
+  .rxk-cols { display: flex; align-items: stretch; min-height: 150px; }
+  /* Content top-aligned below the OTHER FUNDING band (~52px), so every column's
+     month label sits on the same line, green and purple alike — TANF then flows
+     below the green amount, matching the program graphic. */
+  .rxk-col { flex: 1; display: flex; flex-direction: column; align-items: center;
+              justify-content: flex-start; gap: 5px; padding: 52px 4px 16px;
+              color: #fff; text-align: center; line-height: 1.15;
+              border-right: 1px solid rgba(255,255,255,.28); }
+  .rxk-col:last-child { border-right: none; }
+  .rxk-col-month { font-size: 0.8rem; font-weight: 700; opacity: .95; }
+  .rxk-col-amt { font-size: 1.35rem; font-weight: 800; }
+  .rxk-col-tag { font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }
+  /* Green columns start below the 40px OTHER FUNDING band, so the purple base
+     shows above them — the block reads as a distinct TANF-funded stretch. The
+     12px top padding then lands their month label on the same line as the
+     purple columns' (which clear the band with the shared 52px padding). */
+  .rxk-col--tanf { background: linear-gradient(180deg, #34B36B, #1E9E57);
+                    margin-top: 40px; padding-top: 12px;
+                    border-right: 2px solid #F6921E; }
+  .rxk-col--tanf:nth-of-type(4) { border-right: 3px solid #F6921E; }
+  .rxk-col--other { background: transparent; }
   
 </style>
 </head>
@@ -2195,10 +2219,65 @@
             <div class="tfc-tanf-split">
                 <h3>How RxKids uses TANF</h3>
                 <p>RxKids uses the no-strings, short-term TANF to cover the most important early stretch — before pregnancy and the first three months after birth. The later months are paid for with state and other funds.</p>
-                <div class="tfc-tanf-bar">
-                    <div class="tfc-tanf-seg tfc-tanf-seg--tanf">Prenatal – Month 3<span>TANF · no strings</span></div>
-                    <div class="tfc-tanf-seg tfc-tanf-seg--state">Month 4 – Month 12<span>State & other funds</span></div>
-                </div>
+                
+    <div class="rxk-timeline">
+        <div class="rxk-otherfunding" style="width:69.2308%">OTHER FUNDING</div>
+        <div class="rxk-cols">
+            <div class="rxk-col rxk-col--tanf">
+            <span class="rxk-col-month">Prenatal</span>
+            <span class="rxk-col-amt">$1,500</span>
+            <span class="rxk-col-tag">TANF</span>
+        </div><div class="rxk-col rxk-col--tanf">
+            <span class="rxk-col-month">Month 1</span>
+            <span class="rxk-col-amt">$500</span>
+            <span class="rxk-col-tag">TANF</span>
+        </div><div class="rxk-col rxk-col--tanf">
+            <span class="rxk-col-month">Month 2</span>
+            <span class="rxk-col-amt">$500</span>
+            <span class="rxk-col-tag">TANF</span>
+        </div><div class="rxk-col rxk-col--tanf">
+            <span class="rxk-col-month">Month 3</span>
+            <span class="rxk-col-amt">$500</span>
+            <span class="rxk-col-tag">TANF</span>
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 4</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 5</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 6</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 7</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 8</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 9</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 10</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 11</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div><div class="rxk-col rxk-col--other">
+            <span class="rxk-col-month">Month 12</span>
+            <span class="rxk-col-amt">$500</span>
+            
+        </div>
+        </div>
+    </div>
             </div>
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">The choice that keeps it "no strings"</h3>
