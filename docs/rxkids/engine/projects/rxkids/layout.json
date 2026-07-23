@@ -7,6 +7,18 @@
       "reserve": 0.83,
       "z": 2,
       "scale": 1.377
+    },
+    "hero.title": {
+      "x": 0.57,
+      "y": 1.35,
+      "w": 3.86,
+      "reserve": 1.28
+    },
+    "hero.hawaii": {
+      "x": 1.4,
+      "y": 2.64,
+      "w": 2.75,
+      "reserve": 1.01
     }
   },
   "shapes": [],
