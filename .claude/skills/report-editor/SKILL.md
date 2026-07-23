@@ -55,7 +55,16 @@ layout.json position/size override.
 |---|---|---|
 | Free-standing SVG/graphic | `blocks.graphic(L, id, svg, w=)` | move, 4-corner proportional resize, rotate |
 | Coloured tile with text | `blocks.card(C, L, …, detachable=)` | recolour, move; pieces pull apart if detachable |
-| Editable prose / heading | `L.attr(el_id)` on the tag + a slot (`C.t`, `C.slot_span`) | click-to-edit text; drag; width resize |
+| Editable prose paragraph | `C.html(key, cls)` — stamps `data-slot` AND wraps a movable `para.<key>` | click-to-edit text; drag; resize |
+| Editable heading / inline text | a slot: `C.t(key)`, or `C.slot_attr`/`C.slot_span` on a tag you build | click-to-edit text; drag; width resize |
+
+**The `C()` trap — the #1 "why can't I edit this?" cause.** Bare `C(key)` (i.e.
+`Content.__call__`) and `C.text(key)` emit prose with **no `data-slot`**, so the
+editor has no click-to-edit hook — the text is frozen even when the `<p>` around
+it carries `L.attr` (that only makes it *movable*, `data-el`, not *editable*).
+For any prose the user should edit, render it through `C.html(key, cls)` (a
+whole `<p>`) or wrap the inner text in `C.slot_attr`/`C.slot_span`/`C.t`. A `<p>`
+with `data-el` but no `data-slot` is the tell.
 | Photo / raster image | an `<img>` with `L.attr` (see the primer's `img_el`) | move, corner resize, rotate, crop, replace |
 | Rect / ellipse / line / text box / table | user adds from the editor; stored in layout.json | move, resize, restyle |
 

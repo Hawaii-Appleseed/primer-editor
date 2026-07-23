@@ -182,7 +182,7 @@ def what_is_rxkids() -> str:
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">What is RxKids?</h2>
             {L.spacer("para.what.body")}
-            <p class="tfc-section-subtitle tfc-subtitle-box"{L.attr("what.body")}><span class="tfc-subtitle-eyebrow"{L.attr("what.eyebrow")}>{C.t("what.eyebrow")}</span>{C("what.body")}</p>
+            <p class="tfc-section-subtitle tfc-subtitle-box"{L.attr("what.body")}><span class="tfc-subtitle-eyebrow"{L.attr("what.eyebrow")}>{C.t("what.eyebrow")}</span>{C.slot_span("what.body", C("what.body"))}</p>
 
             <div class="tfc-scene-container">
                 {img_el("what.heart.image", "tfc-floating-heart", "https://images.squarespace-cdn.com/content/63c215f8a268791349c9f04a/7e595665-8ca3-4621-b694-a787aa3f3965/floating+heart.png?content-type=image%2Fpng", esc(C.text("what.heart.alt")))}
@@ -280,7 +280,7 @@ def flint_expandable() -> str:
     <div class="tfc-expand-inner">
         <div class="tfc-flint-body">
             {L.spacer("flint.eyebrow")}<span class="tfc-flint-eyebrow"{L.attr("flint.eyebrow")}>{C.t("flint.eyebrow")}</span>
-            {L.spacer("para.flint.lead")}<p class="tfc-flint-lead"{L.attr("flint.lead")}>{C("flint.lead")}</p>
+            {C.html("flint.lead", "tfc-flint-lead")}
 
             <div class="tfc-flint-stats-grid">
                 {"".join(blocks)}
@@ -318,7 +318,7 @@ def stats_carousel() -> str:
                                 {poverty_bar("singlefather", 113)}
                                 {poverty_bar("singlemother", 266)}
                             </div>
-                            <p class="tfc-chart-source">{C("carousel.poverty.source")}</p>
+                            <p class="tfc-chart-source"{C.slot_attr("carousel.poverty.source")}>{C("carousel.poverty.source")}</p>
                         </div>
                     </div>
 
@@ -353,7 +353,7 @@ def stats_carousel() -> str:
                         </div>
 
                         <div class="tfc-flint-source">
-                            <p>{C("carousel.childcare.source")}</p>
+                            <p{C.slot_attr("carousel.childcare.source")}>{C("carousel.childcare.source")}</p>
                         </div>
                     </div>
                 </div>
@@ -453,11 +453,17 @@ def tanf_timeline() -> str:
     # OTHER FUNDING banner spans the purple columns (right n_other of n).
     banner_w = f"{n_other / n * 100:.4f}%"
     return f"""{L.spacer("tanf.timeline")}
-    <div class="rxk-timeline"{L.attr("tanf.timeline")}>
+    <div{L.attr("tanf.timeline")}>
+      <div class="rxk-timeline">
         <div class="rxk-otherfunding" style="width:{banner_w}">OTHER FUNDING</div>
         <div class="rxk-cols">
             {"".join(cols)}
         </div>
+      </div>
+      <div class="rxk-bracket-row">
+        <div class="rxk-bracket"><span class="rxk-bracket-amt">$3,500</span></div>
+        <div class="rxk-bracket-rest"></div>
+      </div>
     </div>"""
 
 
@@ -468,8 +474,7 @@ def tanf_section() -> str:
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">How TANF helps pay for RxKids</h2>
-            {L.spacer("para.tanf.intro")}
-            <p class="tfc-section-subtitle"{L.attr("tanf.intro")}>{C("tanf.intro")}</p>
+            {C.html("tanf.intro", "tfc-section-subtitle")}
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 0 0 28px;">{C.t("tanf.compare1.title")}</h3>
 
@@ -488,16 +493,14 @@ def tanf_section() -> str:
             </div>
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">{C.t("tanf.choice.title")}</h3>
-            {L.spacer("para.tanf.choice.body")}
-            <p class="tfc-section-subtitle"{L.attr("tanf.choice.body", "margin-bottom:32px")}>{C("tanf.choice.body")}</p>
+            {C.html("tanf.choice.body", "tfc-section-subtitle tanf-choice-body")}
 
             <div class="tfc-tanf-compare">
                 {tanf_option_card("tanf.option1", "Option 1")}
                 {tanf_option_card("tanf.option2", "Option 2 · Recommended", free=True)}
             </div>
 
-            {L.spacer("para.tanf.note")}
-            <p class="tfc-tanf-note"{L.attr("tanf.note")}>{C("tanf.note")}</p>
+            {C.html("tanf.note", "tfc-tanf-note")}
 
             {L.spacer("tanf.bottomline.title")}
             <div class="tfc-highlight-box"{L.attr("tanf.bottomline.title", "margin-bottom:0")}>
@@ -627,7 +630,9 @@ html = f"""<!DOCTYPE html>
               color: #fff; text-align: center; line-height: 1.15;
               border-right: 1px solid rgba(255,255,255,.28); }}
   .rxk-col:last-child {{ border-right: none; }}
-  .rxk-col-month {{ font-size: 0.8rem; font-weight: 700; opacity: .95; }}
+  /* nowrap: "Month 10/11/12" are wider and would wrap to two lines in the
+     narrow columns, pushing their $500 down out of line with the rest. */
+  .rxk-col-month {{ font-size: 0.8rem; font-weight: 700; opacity: .95; white-space: nowrap; }}
   .rxk-col-amt {{ font-size: 1.35rem; font-weight: 800; }}
   .rxk-col-tag {{ font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }}
   /* Green columns start below the 40px OTHER FUNDING band, so the purple base
@@ -638,6 +643,18 @@ html = f"""<!DOCTYPE html>
                     margin-top: 40px; padding-top: 12px;
                     border-right: 2px solid #F6921E; }}
   .rxk-col--tanf:nth-of-type(4) {{ border-right: 3px solid #F6921E; }}
+  /* A green square bracket under the prenatal–month 3 columns, labelled with
+     the TANF total. flex 4:9 matches the 4 green : 9 purple columns exactly;
+     the 4px side margin lines the bracket up inside the timeline's 4px frame. */
+  .rxk-bracket-row {{ display: flex; margin: 10px 4px 0; }}
+  .rxk-bracket {{ flex: 4; height: 15px; position: relative;
+                  border: 3px solid #1E9E57; border-top: none;
+                  border-radius: 0 0 10px 10px; }}
+  .rxk-bracket-rest {{ flex: 9; }}
+  .rxk-bracket-amt {{ position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+                      margin-top: 6px; white-space: nowrap;
+                      color: #1E9E57; font-weight: 800; font-size: 1.4rem; }}
+  .tanf-choice-body {{ margin-bottom: 32px; }}
   .rxk-col--other {{ background: transparent; }}
   {EDIT_OVERRIDES}
 </style>

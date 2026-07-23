@@ -1891,7 +1891,9 @@
               color: #fff; text-align: center; line-height: 1.15;
               border-right: 1px solid rgba(255,255,255,.28); }
   .rxk-col:last-child { border-right: none; }
-  .rxk-col-month { font-size: 0.8rem; font-weight: 700; opacity: .95; }
+  /* nowrap: "Month 10/11/12" are wider and would wrap to two lines in the
+     narrow columns, pushing their $500 down out of line with the rest. */
+  .rxk-col-month { font-size: 0.8rem; font-weight: 700; opacity: .95; white-space: nowrap; }
   .rxk-col-amt { font-size: 1.35rem; font-weight: 800; }
   .rxk-col-tag { font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }
   /* Green columns start below the 40px OTHER FUNDING band, so the purple base
@@ -1902,6 +1904,18 @@
                     margin-top: 40px; padding-top: 12px;
                     border-right: 2px solid #F6921E; }
   .rxk-col--tanf:nth-of-type(4) { border-right: 3px solid #F6921E; }
+  /* A green square bracket under the prenatal–month 3 columns, labelled with
+     the TANF total. flex 4:9 matches the 4 green : 9 purple columns exactly;
+     the 4px side margin lines the bracket up inside the timeline's 4px frame. */
+  .rxk-bracket-row { display: flex; margin: 10px 4px 0; }
+  .rxk-bracket { flex: 4; height: 15px; position: relative;
+                  border: 3px solid #1E9E57; border-top: none;
+                  border-radius: 0 0 10px 10px; }
+  .rxk-bracket-rest { flex: 9; }
+  .rxk-bracket-amt { position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+                      margin-top: 6px; white-space: nowrap;
+                      color: #1E9E57; font-weight: 800; font-size: 1.4rem; }
+  .tanf-choice-body { margin-bottom: 32px; }
   .rxk-col--other { background: transparent; }
   
 </style>
@@ -2195,7 +2209,6 @@
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">How TANF helps pay for RxKids</h2>
-            
             <p class="tfc-section-subtitle">TANF (Temporary Assistance for Needy Families) is a federal program that gives each state a pot of money to help families with children who are struggling to get by. States get to decide a lot about how to spend it — and helping families care for their kids at home is exactly what it's meant for.</p>
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 0 0 28px;">TANF can give money in two very different ways</h3>
@@ -2220,7 +2233,8 @@
                 <h3>How RxKids uses TANF</h3>
                 <p>RxKids uses the no-strings, short-term TANF to cover the most important early stretch — before pregnancy and the first three months after birth. The later months are paid for with state and other funds.</p>
                 
-    <div class="rxk-timeline">
+    <div>
+      <div class="rxk-timeline">
         <div class="rxk-otherfunding" style="width:69.2308%">OTHER FUNDING</div>
         <div class="rxk-cols">
             <div class="rxk-col rxk-col--tanf">
@@ -2277,12 +2291,16 @@
             
         </div>
         </div>
+      </div>
+      <div class="rxk-bracket-row">
+        <div class="rxk-bracket"><span class="rxk-bracket-amt">$3,500</span></div>
+        <div class="rxk-bracket-rest"></div>
+      </div>
     </div>
             </div>
 
             <h3 style="text-align:center; color:#2A3A4D; font-size:1.5rem; margin: 56px 0 16px;">The choice that keeps it "no strings"</h3>
-            
-            <p class="tfc-section-subtitle" style="margin-bottom:32px">There's a catch: TANF's no-strings help only lasts about four months. If TANF pays for more than that, the law treats it as ongoing aid — and the strings come back. (Just limiting it to lower-income families doesn't change that — what matters is keeping TANF to those first few months.) That leaves Hawaiʻi two ways to build the program:</p>
+            <p class="tfc-section-subtitle tanf-choice-body">There's a catch: TANF's no-strings help only lasts about four months. If TANF pays for more than that, the law treats it as ongoing aid — and the strings come back. (Just limiting it to lower-income families doesn't change that — what matters is keeping TANF to those first few months.) That leaves Hawaiʻi two ways to build the program:</p>
 
             <div class="tfc-tanf-compare">
                 <div class="tfc-tanf-card">
@@ -2299,7 +2317,6 @@
     </div>
             </div>
 
-            
             <p class="tfc-tanf-note">Hawaiʻi's bill (HB2006) already limits TANF money to families on Medicaid or under 300% of the poverty line — but it doesn't yet cap TANF to those first few months. Adding that cap is the key to keeping the program no-strings. It's also why some state officials have warned about work rules, child support, and reduced benefits — those concerns are real under Option 1, but largely disappear under Option 2.</p>
 
             <div class="ds-spacer" style="width:12in;height:2.08in;flex:0 0 auto" aria-hidden="true"></div>
