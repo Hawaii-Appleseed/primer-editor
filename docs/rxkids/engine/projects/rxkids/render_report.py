@@ -451,21 +451,34 @@ def tanf_timeline() -> str:
             <span class="rxk-col-amt">{amount}</span>
             {tag}
         </div>""")
-    # The green fill is a single shape behind the TANF columns so its top edge
-    # can slope: flat over all but the last TANF column, then a sharp ramp up
-    # to the top over that column (month 3), handing off to the purple.
-    green_w = f"{n_tanf / n * 100:.4f}%"           # width of the TANF block
-    ramp_x = f"{(n_tanf - 1) / n_tanf * 100:.4f}%"  # where the ramp starts (month-3 left edge)
+    # The CONTAINER ITSELF is the stepped shape — nothing (no purple, no frame
+    # headroom) sits above the green stretch. Its outline: flat, lower top over
+    # prenatal–month 2, a concave curve up over month 3, then the full-height
+    # purple section. Two layers clipped to the same polygon make the orange
+    # frame: an orange backdrop, and the content inset 4px inside it (same
+    # polygon values — the inset shifts it, giving a ~4px rim all round).
+    drop = 42                                       # px the green top sits below the purple top
+    g1 = (n_tanf - 1) / n                           # curve start: month-3's left edge
+    g2 = n_tanf / n                                 # curve end: month-3's right edge
+    pts = [f"0 {drop}px", f"{g1 * 100:.4f}% {drop}px"]
+    for t in (0.25, 0.5, 0.75):                     # quadratic ease-out ≈ a curve
+        x = (g1 + (g2 - g1) * t) * 100
+        y = drop * (1 - t) ** 2
+        pts.append(f"{x:.4f}% {y:.1f}px")
+    pts += [f"{g2 * 100:.4f}% 0", "100% 0", "100% 100%", "0 100%"]
+    poly = f"polygon({', '.join(pts)})"
+    green_w = f"{n_tanf / n * 100:.4f}%"            # green block: full height, left of the curve's end
     banner_w = f"{n_other / n * 100:.4f}%"          # OTHER FUNDING spans the purple columns
     return f"""{L.spacer("tanf.timeline")}
     <div{L.attr("tanf.timeline")}>
       <div class="rxk-timeline">
-        <div class="rxk-green-fill" style="width:{green_w};
-             clip-path: polygon(0 40px, {ramp_x} 40px, 100% 0, 100% 100%, 0 100%);
-             -webkit-clip-path: polygon(0 40px, {ramp_x} 40px, 100% 0, 100% 100%, 0 100%);"></div>
-        <div class="rxk-otherfunding" style="width:{banner_w}">OTHER FUNDING</div>
-        <div class="rxk-cols">
-            {"".join(cols)}
+        <div class="rxk-frame" style="clip-path:{poly}; -webkit-clip-path:{poly};"></div>
+        <div class="rxk-inner" style="clip-path:{poly}; -webkit-clip-path:{poly};">
+          <div class="rxk-green-fill" style="width:{green_w};"></div>
+          <div class="rxk-otherfunding" style="width:{banner_w}">OTHER FUNDING</div>
+          <div class="rxk-cols">
+              {"".join(cols)}
+          </div>
         </div>
       </div>
       <div class="rxk-bracket-row">
@@ -622,20 +635,26 @@ html = f"""<!DOCTYPE html>
   /* TANF funding timeline — a month-by-month bar: GREEN columns are the
      TANF-funded prenatal–month 3 payments, PURPLE columns the month 4–12
      "other funding", all inside an orange frame. Mirrors the program graphic. */
-  .rxk-timeline {{ position: relative; margin-top: 22px; border: 4px solid #F6921E;
-                   border-radius: 12px; overflow: hidden; background: #8E3B9C;
-                   box-shadow: 0 4px 16px rgba(42,58,77,.12); }}
-  /* The green (TANF) block is ONE shape behind the first columns, so its top
-     edge can slope: flat below the 40px band over the early columns, then a
-     sharp ramp up to the top over the last TANF column (month 3), meeting the
-     purple. The three orange lines are the internal separators (they ride the
-     clip, so they never spill into the purple). Per-column geometry (width,
-     ramp start) is set inline in tanf_timeline(). */
+  /* The timeline container is ITSELF the stepped shape (see tanf_timeline():
+     nothing sits above the green stretch — the orange frame hugs the green's
+     flat top, curves up over month 3, then runs the full-height purple part).
+     Two same-polygon layers form it: .rxk-frame (orange, inset 0) and
+     .rxk-inner (content, inset 4px) — identical polygon values on an element
+     shifted 4px in from every side read as a ~4px orange rim. */
+  .rxk-timeline {{ position: relative; margin-top: 22px; border-radius: 12px;
+                   overflow: hidden;
+                   filter: drop-shadow(0 4px 10px rgba(42,58,77,.15)); }}
+  .rxk-frame {{ position: absolute; inset: 0; background: #F6921E; }}
+  .rxk-inner {{ position: relative; margin: 4px; background: #8E3B9C; }}
+  /* The green (TANF) block: full height, its top shaped by the container's
+     own curve. The orange lines are its internal cell separators, plus one on
+     its right edge where it hands off to the purple. */
   .rxk-green-fill {{ position: absolute; left: 0; top: 0; height: 100%; z-index: 0;
       background:
         linear-gradient(90deg, transparent calc(25% - 1px), #F6921E calc(25% - 1px), #F6921E calc(25% + 1px), transparent calc(25% + 1px)),
         linear-gradient(90deg, transparent calc(50% - 1px), #F6921E calc(50% - 1px), #F6921E calc(50% + 1px), transparent calc(50% + 1px)),
         linear-gradient(90deg, transparent calc(75% - 1px), #F6921E calc(75% - 1px), #F6921E calc(75% + 1px), transparent calc(75% + 1px)),
+        linear-gradient(90deg, transparent calc(100% - 3px), #F6921E calc(100% - 3px)),
         linear-gradient(180deg, #34B36B, #1E9E57); }}
   /* Solid purple so the column separator lines behind it don't cross the
      "OTHER FUNDING" text; sits above the columns (z-index) to cover them. */
@@ -644,17 +663,18 @@ html = f"""<!DOCTYPE html>
                        display: flex; align-items: center; justify-content: center;
                        color: #fff; font-weight: 800; font-size: 0.95rem;
                        letter-spacing: 1px; text-transform: uppercase; }}
-  .rxk-cols {{ position: relative; z-index: 1; display: flex; align-items: stretch; min-height: 150px; }}
-  /* Content top-aligned below the OTHER FUNDING band (~52px), so every column's
-     month label sits on the same line, green and purple alike — TANF then flows
-     below the green amount, matching the program graphic. */
+  .rxk-cols {{ position: relative; z-index: 1; display: flex; align-items: stretch; min-height: 158px; }}
+  /* Content top-aligned below the OTHER FUNDING band / the green's flat top
+     (42px) — every column's month label sits on the same line, green and
+     purple alike; TANF flows below, matching the program graphic. Slim side
+     padding so the nowrap labels fit inside their own cells. */
   .rxk-col {{ flex: 1; display: flex; flex-direction: column; align-items: center;
-              justify-content: flex-start; gap: 5px; padding: 52px 4px 16px;
-              color: #fff; text-align: center; line-height: 1.15; }}
+              justify-content: flex-start; gap: 5px; padding: 52px 2px 14px;
+              color: #fff; text-align: center; line-height: 1.15; min-width: 0; }}
   /* nowrap: "Month 10/11/12" are wider and would wrap to two lines in the
      narrow columns, pushing their $500 down out of line with the rest. */
-  .rxk-col-month {{ font-size: 0.8rem; font-weight: 700; opacity: .95; white-space: nowrap; }}
-  .rxk-col-amt {{ font-size: 1.35rem; font-weight: 800; }}
+  .rxk-col-month {{ font-size: 0.78rem; font-weight: 700; opacity: .95; white-space: nowrap; }}
+  .rxk-col-amt {{ font-size: 1.3rem; font-weight: 800; white-space: nowrap; }}
   .rxk-col-tag {{ font-size: 0.72rem; font-weight: 700; letter-spacing: .5px; margin-top: auto; }}
   /* Purple columns carry the thin separators; green columns are drawn by the
      fill shape (which has its own orange separators), so they add none. */
