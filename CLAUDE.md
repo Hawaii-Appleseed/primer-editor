@@ -13,8 +13,16 @@ not the live report. The live report lives in `~/BudgetPrimerFinal`, which
 
 Rules that bite:
 
-- **Engine bugs are fixed HERE first**, then the changed file is copied to the
-  consuming repo(s). Content/design changes in a report repo never flow back.
+- **Engine changes are made HERE, and vendoring is automatic.** A commit that
+  touches `docsync/` or `report2027/tools/serve.py` triggers
+  `.githooks/post-commit`, which runs `python3 -m docsync.vendor`: it copies
+  every git-tracked engine file (the package IS the manifest — no list to
+  maintain) into each consumer in `vendor.yml`, restages that repo's editors,
+  and commits the engine paths there (local only; deploying stays each repo's
+  own Push). New consumer repo = one line in vendor.yml. Fresh clone of THIS
+  repo = run `git config core.hooksPath .githooks` once. The vendor refuses a
+  consumer whose engine paths are dirty — engine edits must never originate
+  in a consumer, and content/design changes in a report repo never flow back.
 - **`edit.html`'s stylesheet is a JS template literal** — a backtick or `${…}`
   even in a CSS comment kills the whole script (editor hangs at "loading the
   render engine…", no console error). After any edit: `npx playwright test

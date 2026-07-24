@@ -1,0 +1,11 @@
+# Consumer repos that carry a vendored copy of the engine (docsync/ +
+# report2027/tools/serve.py). `python3 -m docsync.vendor` — run automatically
+# by .githooks/post-commit after any commit touching an engine path — copies
+# the canonical files into each, restages its editors, and commits the
+# engine paths there (local commit only; deploying stays each repo's own
+# explicit Push).
+#
+# Adding a future report repo to the engine is ONE line here — nothing else
+# to account for. The repo must be a docsync repo (have its own docsync.yml).
+consumers:
+  - path: ~/BudgetPrimerFinal

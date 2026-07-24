@@ -1,0 +1,10 @@
+#!/bin/sh
+# Auto-vendor the engine to consumer repos (vendor.yml) whenever a commit
+# touches an engine path. Install once per clone:
+#   git config core.hooksPath .githooks
+if git diff-tree --no-commit-id --name-only -r HEAD \
+   | grep -qE '^docsync/|^report2027/tools/serve\.py$'; then
+  echo "engine changed - vendoring to consumers (vendor.yml)..."
+  python3 -m docsync.vendor \
+    || echo "VENDOR FAILED - run python3 -m docsync.vendor manually"
+fi
