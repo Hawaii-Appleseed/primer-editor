@@ -29,6 +29,18 @@ async function blockDangerousLocalEndpoints(context) {
     contentType: 'application/pdf',
     body: Buffer.from('%PDF-1.4 fake export for tests'),
   }));
+  // /__upload writes an image into the BINDING's repo — which for the grid's
+  // default project is a real checkout elsewhere on this machine, not the
+  // fixture. Same hazard class as save/push: mock it here, once. The mock
+  // honours the real contract ({ok, src, path}) so the editor-side flow
+  // (box creation, preview, markdown path) is still fully exercised.
+  await context.route('**/__upload', route => {
+    let name = 'upload.png';
+    try { name = JSON.parse(route.request().postData() || '{}').name || name; }
+    catch (e) {}
+    route.fulfill({ json: { ok: true, src: 'assets/' + name,
+                            path: 'report2027/web/assets/' + name } });
+  });
 }
 
 /** Wait for Pyodide to finish the first render: the report's page divs land
