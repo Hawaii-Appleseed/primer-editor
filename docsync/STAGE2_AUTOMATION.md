@@ -65,21 +65,19 @@ The ask: grab the bottom edge of a colored band (the hero gradient, the dark
 "Join us" section) and make the colored area taller or shorter, the way a
 Canva back-layer rectangle works. Two viable models, in build order:
 
-### B first — resizable section heights (recommended, smaller)
-Keep the background glued to its section; make the SECTION's height a layout
-override. The editor grows a new element kind, "section": bottom-edge handle
-only, drag writes a `min-height`/padding override into `layout.json`
-`positions[el_id]` (an `h`-only entry, no x/y), renderer applies it via
-`L.style(el_id)` on the section tag. Shortening bottoms out at the content's
-natural height (or clips via the section's own `overflow`); lengthening just
-extends the band. Because the background stays attached, text keeps flowing
-and the band can never end mid-paragraph — web-native, no reflow hazard.
-- Detection is automatable: parse the page's own `<style>` for section-level
-  class selectors carrying `background`/`background-color`/gradient
-  declarations, and give those sections the hook in `docsync.propose`.
-- Engine work: one new resize mode in `edit.html` (bottom handle, h-only),
-  one `positions` shape variant, renderer marker (`⟦B:key⟧` on the section
-  tag). Modest — the resize/persist plumbing all exists.
+### B — resizable section heights — DONE
+The background stays glued to its section; the section's height is a layout
+override. `docsync.propose` finds `section`/`header`/`footer` tags whose own
+CSS class carries a `background` declaration and stamps them with a `⟦B:key⟧`
+marker; the renderer substitutes `L.sec(key)` — `data-sec` in edit mode, a
+`min-height:<h>in` style in both modes when `layout.json` has a `sections`
+override. In the editor (`wireSections` in `edit.html`), every `[data-sec]`
+band grows a bottom-edge grip (hover pill, ns-resize cursor): dragging down
+stretches the band and writes `layout.sections[id] = {h}`, dragging back to
+the content's natural height clears the override entirely, so an untouched
+page stays untouched. Text keeps flowing — the band can never end
+mid-paragraph. Guarded by `tests/editor/section-resize.spec.js`; proven on
+the mission page (hero / five-section / footer bands).
 
 ### A later — detach to a true back-layer shape (the full Canva model)
 An explicit "detach background" action on a section: strip the background
@@ -96,8 +94,9 @@ the colored rect completely independently, Canva-style.
 - Gradients can be carried (SVG gradients); photo backgrounds should refuse
   detach in v1.
 
-B answers the actual request cheaply; A is the escape hatch for full
-freedom, opt-in per section, and reuses the existing shapes/groups pipeline.
+B is built; A remains the escape hatch for full freedom — opt-in per
+section, reusing the existing shapes/groups pipeline — if stretching alone
+ever proves insufficient.
 
 ## The realistic pipeline
 

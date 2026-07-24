@@ -42,11 +42,13 @@ _head_src = SRC[:_body_m.start()] if _body_m else ""
 STYLE = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", _head_src, re.S | re.I))
 
 BODY = (HERE / "body.slotted.html").read_text()
-# marker substitution: A=slot attr, T=slot text, S=movable spacer, E=movable attr
+# marker substitution: A=slot attr, T=slot text, S=movable spacer,
+# E=movable attr, B=resizable background band
 BODY = re.sub("\u27e6A:([a-z0-9_.-]+)\u27e7", lambda m: C.slot_attr(m.group(1)), BODY)
 BODY = re.sub("\u27e6T:([a-z0-9_.-]+)\u27e7", lambda m: C(m.group(1)), BODY)
 BODY = re.sub("\u27e6S:([a-z0-9_.-]+)\u27e7", lambda m: L.spacer(m.group(1)), BODY)
 BODY = re.sub("\u27e6E:([a-z0-9_.-]+)\u27e7", lambda m: L.attr(m.group(1)), BODY)
+BODY = re.sub("\u27e6B:([a-z0-9_.-]+)\u27e7", lambda m: L.sec(m.group(1)), BODY)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">

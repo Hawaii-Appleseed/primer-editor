@@ -67,6 +67,7 @@ whole `<p>`) or wrap the inner text in `C.slot_attr`/`C.slot_span`/`C.t`. A `<p>
 with `data-el` but no `data-slot` is the tell.
 | Photo / raster image | an `<img>` with `L.attr` (see the primer's `img_el`) | move, corner resize, rotate, crop, replace |
 | Rect / ellipse / line / text box / table | user adds from the editor; stored in layout.json | move, resize, restyle |
+| Coloured background band (a full-width section) | `L.sec(el_id)` on the section tag — NOT `L.attr` (a band must never leave the flow) | bottom-edge grip: stretch taller, or drag back to natural height to reset; override lives in layout.json `sections` |
 
 ## Composing NEW visuals: separate primitives, grouped — never fused
 

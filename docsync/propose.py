@@ -78,6 +78,7 @@ class _Walker(HTMLParser):
         self.candidates: list[dict] = []     # closed, qualifying text leaves
         self.rejected: list[dict] = []       # text tags with complex children
         self.text_nodes: list[dict] = []     # direct text runs, merged
+        self.bands: list[dict] = []          # section/header/footer open tags
         self.images: list[dict] = []         # free-standing img/svg
         self.in_body = False
         self.skip_depth = 0                  # inside a _SKIP_INSIDE subtree
@@ -93,6 +94,12 @@ class _Walker(HTMLParser):
         raw = self.get_starttag_text() or ""
         if tag == "body":
             self.in_body = True
+        # band candidates for the resizable-section pass — whether one really
+        # carries a background is decided later against the page's own CSS
+        if (tag in ("section", "header", "footer") and self.in_body
+                and not self.skip_depth and "style" not in dict(attrs)):
+            self.bands.append({"tag_start": start, "tag_end": start + len(raw),
+                               "attrs": dict(attrs)})
         if tag in _SKIP_INSIDE:
             self.skip_depth += 1
         if tag in _VOID:
@@ -267,11 +274,13 @@ _head_src = SRC[:_body_m.start()] if _body_m else ""
 STYLE = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", _head_src, re.S | re.I))
 
 BODY = (HERE / "body.slotted.html").read_text()
-# marker substitution: A=slot attr, T=slot text, S=movable spacer, E=movable attr
+# marker substitution: A=slot attr, T=slot text, S=movable spacer,
+# E=movable attr, B=resizable background band
 BODY = re.sub("\u27e6A:([a-z0-9_.-]+)\u27e7", lambda m: C.slot_attr(m.group(1)), BODY)
 BODY = re.sub("\u27e6T:([a-z0-9_.-]+)\u27e7", lambda m: C(m.group(1)), BODY)
 BODY = re.sub("\u27e6S:([a-z0-9_.-]+)\u27e7", lambda m: L.spacer(m.group(1)), BODY)
 BODY = re.sub("\u27e6E:([a-z0-9_.-]+)\u27e7", lambda m: L.attr(m.group(1)), BODY)
+BODY = re.sub("\u27e6B:([a-z0-9_.-]+)\u27e7", lambda m: L.sec(m.group(1)), BODY)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -410,6 +419,29 @@ def main() -> int:
         slots.append((key, val))
         fragments += 1
 
+    # ---- resizable background bands -----------------------------------------
+    # A section whose own CSS class carries a background declaration is a
+    # colored band the page's owner may want taller or shorter. It gets
+    # L.sec()'s hook: a bottom-edge grip in the editor that drags a
+    # min-height override into layout.json — background stays glued, text
+    # keeps flowing (see STAGE2_AUTOMATION.md, model B).
+    head_css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>",
+                                    src[:body_lo], re.S | re.I))
+    bands = []
+    for bd in w.bands:
+        classes = (bd["attrs"].get("class") or "").split()
+        tok = next((c for c in classes if re.search(
+            r"\." + re.escape(c) + r"[^{}]*\{[^}]*background", head_css)), None)
+        if not tok:
+            continue
+        base = "sec." + re.sub(r"[^a-z0-9-]+", "-", tok.lower()).strip("-")
+        counters[base] = counters.get(base, 0) + 1
+        key = f"{base}-{counters[base]}" if counters[base] > 1 else base
+        raw_tag = src[bd["tag_start"]:bd["tag_end"]]
+        close = 2 if raw_tag.endswith("/>") else 1
+        edits.append((bd["tag_end"] - close, bd["tag_end"] - close, f"⟦B:{key}⟧"))
+        bands.append(key)
+
     if not slots and not movables:
         print("nothing to propose — no qualifying text leaves found")
         return 1
@@ -463,7 +495,8 @@ def main() -> int:
             REGISTRY.write_text(reg)
 
     print(f"proposed {len(slots)} text slots ({fragments} of them fragments "
-          f"of styled headings/paragraphs) + {len(movables)} movable images")
+          f"of styled headings/paragraphs) + {len(movables)} movable images "
+          f"+ {len(bands)} resizable background bands")
     print("next: rebuild + restage —")
     print(f"  python3 projects/{args.slug}/render_report.py && "
           f"python3 -m docsync.stage --id {args.slug}")
