@@ -1,22 +1,24 @@
 // Multi-project registry (docsync/editor/edit.html): loadRegistry() reads
 // projects.json beside the editor and shows a #proj picker only when it names
-// 2+ ids — one editor, any number of reports. This repo's real projects.json
-// has exactly one entry (budget-primer), so the picker never appears in
-// production; inject a second id to exercise the switching behavior itself.
+// 2+ ids — one editor, any number of reports.
 const { test, expect, gotoEditor, fillDialog, submitDialog, cancelDialog } = require('./fixtures/editor-test');
 
 async function withTwoProjectRegistry(context) {
+  // Serve a registry this test OWNS rather than editing whatever is on disk.
+  // projects.json is per-machine and untracked now, so on one computer it
+  // lists several reports, on another it is absent entirely and the server
+  // falls back to every binding in docsync.yml — either way "exactly these
+  // two ids" was at the mercy of the machine, which is what made these four
+  // fail here while passing in CI. Both entries point at the SAME engine/
+  // (base: ''), because the switching mechanism is what is under test, not a
+  // second real report's content.
   // get()'s cache-buster appends ?cb=<timestamp> — match that suffix too.
-  await context.route('**/projects.json*', async route => {
-    const res = await route.fetch();
-    const real = await res.json();
-    const ids = Object.keys(real);
-    // Second entry points at the SAME engine/ (base: '') as the first — the
-    // switching mechanism (picker, URL, PROJECT var) is what's under test,
-    // not a second real report's content.
-    real['second-report'] = { name: 'Second Report', base: '', repo: real[ids[0]].repo };
-    await route.fulfill({ response: res, json: real });
-  });
+  await context.route('**/projects.json*', route => route.fulfill({
+    json: {
+      'budget-primer': { name: 'Budget Primer', base: '' },
+      'second-report': { name: 'Second Report', base: '' },
+    },
+  }));
 }
 
 test.describe('multi-project registry', () => {
@@ -33,10 +35,17 @@ test.describe('multi-project registry', () => {
   });
 
   test('switching projects navigates with ?project= and the picker reflects it', async ({ page }) => {
+    // Switching reloads the page, which boots Pyodide (~30MB) a SECOND time in
+    // one test — the default budget cannot cover two cold boots.
+    test.setTimeout(180_000);
     await gotoEditor(page);
     await page.locator('#proj').selectOption('second-report');
-    await page.waitForURL(/[?&]project=second-report/);
-    await page.frameLocator('#out').locator('.page').first().waitFor({ state: 'visible' });
+    // 'commit' — the assertion is about the URL the switch navigates to; make
+    // it wait on the navigation itself rather than on the whole load, then
+    // wait for the render separately with its own generous budget.
+    await page.waitForURL(/[?&]project=second-report/, { waitUntil: 'commit' });
+    await page.frameLocator('#out').locator('.page').first()
+      .waitFor({ state: 'visible', timeout: 90_000 });
 
     expect(new URL(page.url()).searchParams.get('project')).toBe('second-report');
     await expect(page.locator('#proj')).toHaveValue('second-report');
@@ -67,4 +76,32 @@ test.describe('multi-project registry', () => {
     expect(page.url()).toBe(urlBefore);   // declined -> selection reverts, no navigation
     await expect(page.locator('#proj')).toHaveValue('budget-primer');
   });
+});
+
+// Regression: a freshly opened report reported UNSAVED EDITS. The editor fills
+// in empty containers on load (positions/shapes/sections) so the rest of the
+// code need not null-check them, and markDirty compared the raw object against
+// the file — so their appearance read as a change. Save sat lit with nothing
+// to save, and switching project warned about losing edits that did not exist,
+// which is what wedged the switch test above: the confirm dialog opened and no
+// navigation ever happened.
+test('a freshly opened report is not dirty', async ({ page }) => {
+  await gotoEditor(page);
+  expect(await page.evaluate(() => dirty)).toBe(false);
+  await expect(page.locator('#save')).toBeDisabled();
+
+  // A real edit still registers...
+  await page.evaluate(() => {
+    layout.shapes.push({ id: 'zz', page: 3, kind: 'rect', x: 1, y: 1, w: 1, h: 1 });
+    markDirty();
+  });
+  expect(await page.evaluate(() => dirty)).toBe(true);
+
+  // ...and so does genuinely emptying a container the file had content in.
+  await page.evaluate(() => {
+    layoutOrig = JSON.stringify({ shapes: [{ id: 'was-here' }] });
+    layout.shapes = [];
+    markDirty();
+  });
+  expect(await page.evaluate(() => dirty)).toBe(true);
 });
