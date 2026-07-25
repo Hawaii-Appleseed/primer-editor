@@ -48,7 +48,7 @@ test.describe('charts', () => {
     const id = await addChart(page);
     expect(id).toBeTruthy();
     await expect(page.locator('#side-title')).toHaveText('Chart');
-    await expect(page.locator('#chartpop .ch-typesel option')).toHaveCount(4);
+    await expect(page.locator('#chartpop .ch-typesel option')).toHaveCount(13);
 
     const c = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').chart);
     expect(c.type).toBe('bar');
@@ -248,6 +248,107 @@ test.describe('chart colours and labels', () => {
   });
 });
 
+/** Where the chart's drawing actually IS on screen. Asserting on
+ *  layout.shapes[].x/y is not enough and was the blind spot that let a real
+ *  bug ship: a chart's x/y updated on every drag (the status bar even
+ *  reported the new inches) while the drawing never moved, because paintShape
+ *  had no branch for it and fell through to the line branch, setting
+ *  x1/y1/x2/y2 on a <g> that ignores them. Same failure the icon branch was
+ *  written to fix, one kind further on. Tests must read the VIEW. */
+async function chartScreenPos(page, id) {
+  return page.evaluate((cid) => {
+    const d = document.getElementById('out').contentDocument;
+    const r = d.querySelector(`g[data-shape="${cid}"]`).getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y) };
+  }, id);
+}
+
+async function dragChart(page, id, dx, dy) {
+  const frame = page.frameLocator('#out');
+  const g = frame.locator(`g[data-shape="${id}"]`);
+  await g.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  const b = await g.boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2 + dx, b.y + b.height / 2 + dy, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(1400);
+}
+
+test('dragging a chart moves the DRAWING, not just its stored x/y', async ({ page }) => {
+  await gotoEditor(page);
+  const id = await addChart(page);
+  const before = await chartScreenPos(page, id);
+  await dragChart(page, id, 90, 50);
+  const after = await chartScreenPos(page, id);
+  expect(after.x).toBeGreaterThan(before.x);
+  expect(after.y).toBeGreaterThan(before.y);
+});
+
+test('a chart tracks the cursor mid-drag, with its ring on it', async ({ page }) => {
+  await gotoEditor(page);
+  const id = await addChart(page);
+  const frame = page.frameLocator('#out');
+  await frame.locator(`g[data-shape="${id}"]`).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+
+  // Read the chart's OWN box (its background rect), not the <g> bbox — the
+  // bbox includes axis labels that sit outside the declared box.
+  const read = () => page.evaluate((cid) => {
+    const d = document.getElementById('out').contentDocument;
+    const r = d.querySelector(`g[data-shape="${cid}"] rect`).getBoundingClientRect();
+    const ring = d.querySelector('.ds-selbox');
+    const rr = ring && ring.getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width),
+             ringX: rr ? Math.round(rr.x) : null, ringW: rr ? Math.round(rr.width) : null };
+  }, id);
+
+  const b = await frame.locator(`g[data-shape="${id}"]`).boundingBox();
+  const start = await read();
+  expect(start.ringX).toBe(start.x);            // ring sits ON the chart's box
+  expect(start.ringW).toBe(start.w);
+
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2 + 100, b.y + b.height / 2 + 50, { steps: 8 });
+  await page.waitForTimeout(150);
+  const mid = await read();
+  // It must travel WITH the cursor, not freeze and teleport on drop — and it
+  // must not wear the lift's scale instead of its own translate.
+  expect(mid.x).toBeGreaterThan(start.x + 50);
+  expect(mid.w).toBe(start.w);
+  expect(mid.ringX).toBe(mid.x);                // ...and the ring comes along
+
+  await page.mouse.up();
+  await page.waitForTimeout(1400);
+  const end = await read();
+  expect(end.ringX).toBe(end.x);
+  expect(end.ringW).toBe(end.w);
+});
+
+test('a chart on a BLANK page moves too', async ({ page }) => {
+  await gotoEditor(page);
+  const frame = page.frameLocator('#out');
+  await page.click('#rail-add');
+  await page.waitForTimeout(1500);
+  const bid = await page.evaluate(() => layout.pages.blanks[0].id);
+  await frame.locator(`section[data-page="${bid}"]`).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await page.click('#chart');
+  await frame.locator('g[data-shape]').first().waitFor({ state: 'attached', timeout: 20000 });
+  await page.waitForTimeout(1200);
+  const id = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').id);
+  expect(await page.evaluate(() =>
+    layout.shapes.find(s => s.kind === 'chart').page)).toBe(bid);
+
+  const before = await chartScreenPos(page, id);
+  await dragChart(page, id, 90, 50);
+  const after = await chartScreenPos(page, id);
+  expect(after.x).toBeGreaterThan(before.x);
+  expect(after.y).toBeGreaterThan(before.y);
+});
+
 // Regression: a report's own STICKY chrome floats over the canvas and took
 // every click that landed on it. The primer's `.toolbar` is
 // position:sticky; z-index:50 — above the shape layer — so any object scrolled
@@ -301,4 +402,168 @@ test('a chart under the report\'s sticky toolbar is still grabbable', async ({ p
   expect(after.y).toBeGreaterThan(before.y);
   expect(after.w).toBe(before.w);                  // ...rather than resizing
   expect(after.h).toBe(before.h);
+});
+
+// --- the full type list -----------------------------------------------------
+// Every option in the dropdown has to actually draw. A type that stores fine
+// but renders an empty <g> is worse than one that isn't offered — and packed
+// circles did exactly that at first (the radius formula counted pi twice, so
+// the largest circle was wider than the box and the layout loop bailed on the
+// first item). Deliberately NOT offered: an animated bar-chart race, which
+// cannot mean anything in a report that gets printed.
+test('every chart type in the dropdown renders something', async ({ page }) => {
+  test.setTimeout(240_000);
+  await gotoEditor(page);
+  const frame = page.frameLocator('#out');
+  const id = await addChart(page);
+  await page.evaluate(() => {
+    const c = layout.shapes.find(s => s.kind === 'chart').chart;
+    c.labels = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];
+    c.series = [{ name: 'FY26', data: [12, 19, 8, 15, 6] },
+                { name: 'FY27', data: [9, 14, 11, 7, 10] }];
+    c.legend = true; c.values = true;
+  });
+  await page.evaluate(() => render());
+  await page.waitForTimeout(1400);
+
+  const opts = await page.locator('#chartpop .ch-typesel option')
+    .evaluateAll(o => o.map(x => x.value));
+  expect(opts).toHaveLength(13);
+
+  for (const val of opts) {
+    await page.selectOption('#chartpop .ch-typesel', val);
+    await page.waitForTimeout(1500);
+    const r = await page.evaluate((cid) => {
+      const d = document.getElementById('out').contentDocument;
+      const g = d.querySelector(`g[data-shape="${cid}"]`);
+      return {
+        marks: g ? g.querySelectorAll('rect,circle,path,polygon,polyline,line').length : -1,
+        type: layout.shapes.find(s => s.kind === 'chart').chart.type,
+        stat: document.getElementById('stat').textContent,
+      };
+    }, id);
+    expect(r.type, `${val} stored`).toBe(val);
+    expect(r.marks, `${val} drew marks`).toBeGreaterThan(2);
+    expect(r.stat, `${val} built`).not.toContain('does not build');
+  }
+});
+
+test('the panel adapts to what a type can actually do', async ({ page }) => {
+  await gotoEditor(page);
+  await addChart(page);
+
+  // A bar chart takes several series and has axes to configure.
+  await expect(page.locator('#chartpop .tp-btn', { hasText: '+ Series' })).toHaveCount(1);
+  await customize(page, 'Text');
+  await expect(page.locator('#chartpop .ch-sec', { hasText: 'Axis & grid' })).toHaveCount(1);
+
+  // A treemap reads one value per label, and has no axes to speak of.
+  await page.locator('#chartpop .ch-tab', { hasText: 'Data' }).click();
+  await page.selectOption('#chartpop .ch-typesel', 'treemap');
+  await page.waitForTimeout(1500);
+  await expect(page.locator('#chartpop .tp-btn', { hasText: '+ Series' })).toHaveCount(0);
+  await page.locator('#chartpop .ch-tab', { hasText: 'Customize' }).click();
+  await page.waitForTimeout(200);
+  await expect(page.locator('#chartpop .ch-sec', { hasText: 'Axis & grid' })).toHaveCount(0);
+  await expect(page.locator('#chartpop .ch-sec', { hasText: 'Slice colours' })).toHaveCount(1);
+});
+
+// Regression: a tab still running an OLDER engine has no data-ox stamp on the
+// chart (the renderer adds it), and paintShape translates from that stamp — so
+// the chart sat perfectly still while its selection ring slid away, and every
+// new chart type was rejected by the stale validator. The drag must not depend
+// on which engine build painted the page.
+test('a chart with no renderer stamp still drags, ring and all', async ({ page }) => {
+  await gotoEditor(page);
+  const frame = page.frameLocator('#out');
+  await page.click('#rail-add');                        // a blank page, as reported
+  await page.waitForTimeout(1500);
+  const bid = await page.evaluate(() => layout.pages.blanks[0].id);
+  await frame.locator(`section[data-page="${bid}"]`).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await page.click('#chart');
+  await frame.locator('g[data-shape]').first().waitFor({ state: 'attached', timeout: 20000 });
+  await page.waitForTimeout(1200);
+  const id = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').id);
+  await frame.locator(`g[data-shape="${id}"]`).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+
+  // Strip the stamp: this is exactly what an older engine renders.
+  await page.evaluate((cid) => {
+    const g = document.getElementById('out').contentDocument
+      .querySelector(`g[data-shape="${cid}"]`);
+    ['ox', 'oy', 'ow', 'oh'].forEach(k => delete g.dataset[k]);
+  }, id);
+
+  const read = () => page.evaluate((cid) => {
+    const d = document.getElementById('out').contentDocument;
+    const r = d.querySelector(`g[data-shape="${cid}"] rect`).getBoundingClientRect();
+    const ring = d.querySelector('.ds-selbox');
+    return { x: Math.round(r.x),
+             ringX: ring ? Math.round(ring.getBoundingClientRect().x) : null };
+  }, id);
+
+  const b = await frame.locator(`g[data-shape="${id}"]`).boundingBox();
+  const before = await read();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2 + 100, b.y + b.height / 2 + 40, { steps: 8 });
+  await page.waitForTimeout(150);
+  const mid = await read();
+  await page.mouse.up();
+  await page.waitForTimeout(1300);
+  const after = await read();
+
+  expect(mid.x).toBeGreaterThan(before.x + 50);      // the DRAWING travelled
+  expect(mid.ringX).toBe(mid.x);                     // ...with its ring
+  expect(after.x).toBeGreaterThan(before.x + 50);
+});
+
+// The other half of the same failure: a tab open across a rebuild it never saw
+// keeps running old Python, and the first sign of it was a cryptic validator
+// error about chart types. It has to announce itself instead.
+test('a stale engine on disk announces itself', async ({ page }) => {
+  const fs = require('fs');
+  const path = require('path');
+  await gotoEditor(page);
+  await page.waitForTimeout(700);
+  expect(await page.evaluate(() => buildStamp !== null)).toBe(true);
+  expect(await page.evaluate(() => buildChangedOnDisk())).toBe(false);
+
+  const f = path.join(__dirname, '../../docs/primer/engine/docsync/layout.py');
+  const was = fs.statSync(f).mtime;
+  try {
+    fs.utimesSync(f, new Date(), new Date(Date.now() + 60_000));
+    expect(await page.evaluate(() => buildChangedOnDisk())).toBe(true);
+    await page.evaluate(() => offerEditorReload());
+    await expect(page.locator('#stat')).toContainText('updated on disk');
+    await expect(page.locator('#stat')).toHaveClass(/err/);
+  } finally {
+    fs.utimesSync(f, was, was);
+  }
+});
+
+// The server's file watcher is what turns an edit on disk into a reload here.
+// When that thread dies the server keeps serving perfectly, so nothing looks
+// wrong while every edit silently stops arriving — and the first symptom
+// surfaces far away (a stale engine rejecting values the new one accepts).
+// Found live: two days' uptime with the version frozen and no file change
+// producing a rebuild.
+test('a dead server watcher is reported, and an old server is not judged', async ({ page }) => {
+  await gotoEditor(page);
+  await page.waitForTimeout(600);
+
+  await page.evaluate(() => watchHealth({ watchAge: 0.4 }));
+  await expect(page.locator('#stat')).not.toContainText('live reload has stopped');
+
+  await page.evaluate(() => watchHealth({ watchAge: 40 }));
+  await expect(page.locator('#stat')).toContainText('live reload has stopped');
+  await expect(page.locator('#stat')).toHaveClass(/err/);
+
+  // A server too old to publish watchAge must not be accused of anything.
+  await page.evaluate(() => {
+    $('stat').dataset.watchdead = ''; $('stat').textContent = 'untouched';
+  });
+  await page.evaluate(() => watchHealth({ ahead: 0, v: 1 }));
+  await expect(page.locator('#stat')).toHaveText('untouched');
 });
