@@ -23,7 +23,34 @@ asserts against that report's real content.
 
 ## Install
 
-Requires **Python 3.10+**, **git**, and — only for PDF/PNG export — **Chrome**.
+One line. Requires **Python 3.10+**, **git**, and — only for PDF/PNG export —
+**Chrome**.
+
+```
+curl -fsSL https://raw.githubusercontent.com/dtomkatsu/primer-editor/main/install.sh | bash
+```
+
+That clones the repo to `~/primer-editor`, puts its Python dependencies in a
+virtualenv **inside the checkout** (nothing system-wide, no sudo), and builds
+`~/Applications/Budget Primer Editor.app`. Delete the directory and the app to
+uninstall completely.
+
+`PRIMER_HOME=/some/dir`, `PRIMER_PORT=8011` and `PRIMER_BRANCH=…` override the
+defaults.
+
+### It updates itself
+
+Opening the app fast-forwards the checkout from GitHub before the server
+starts — so publishing an update is `git push`, and users get it next time they
+open the editor.
+
+**It will never touch your work.** The update is fast-forward only, and it
+stops and explains itself instead whenever you have uncommitted changes, local
+commits of your own, or no connection. What you have installed is a normal git
+checkout you own: read it, edit it, commit, open a pull request. Run
+`python3 tools/selfupdate.py --check` any time to see where you stand.
+
+### Or by hand
 
 ```
 git clone https://github.com/dtomkatsu/primer-editor && cd primer-editor

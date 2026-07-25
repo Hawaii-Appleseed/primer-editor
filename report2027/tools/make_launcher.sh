@@ -46,6 +46,14 @@ cd "\$REPO" || exit 1
 # so the entire build chain, not just serve.py's own launch, uses it.
 export PATH="\$(dirname "\$PYTHON"):\$PATH"
 
+# Opening the app IS how you get updates: fast-forward this checkout from
+# origin before the server starts, so the code that boots is the current code.
+# Never destructive — selfupdate.py refuses whenever the person has local
+# commits or uncommitted work, and says why. Failure here (offline, no access)
+# is not fatal: you simply run what you already have.
+: > /tmp/primer-live.log   # fresh log per launch
+"\$PYTHON" tools/selfupdate.py >>/tmp/primer-live.log 2>&1 || true
+
 # The app OWNS the server. A server on this port that the app did not start
 # (a leftover from a Claude session, a forgotten terminal) may be running in
 # a context that cannot reach the keychain — its Push would fail — so it is
@@ -60,7 +68,13 @@ if up && ! mine; then
   sleep 1
 fi
 if ! up; then
-  PRIMER_OPEN=0 nohup "\$PYTHON" -u report2027/tools/serve.py >/tmp/primer-live.log 2>&1 &
+  # PRIMER_PORT must be PASSED, not just baked into the URL: without it the
+  # server took its own default (8010) while the app polled the port it was
+  # built for, so a non-default install waited forever and then opened a
+  # window pointing at nothing. It only ever "worked" because the two
+  # numbers happened to match.
+  PRIMER_OPEN=0 PRIMER_PORT="\$PORT" nohup "\$PYTHON" -u report2027/tools/serve.py \\
+    >>/tmp/primer-live.log 2>&1 &
   echo \$! > "\$PIDFILE"
   for _ in \$(seq 1 40); do
     up && break
