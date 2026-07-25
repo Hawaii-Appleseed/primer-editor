@@ -64,9 +64,15 @@ the browser, so an edit shows in ~1s. **Save** writes the files and commits
 
 ```
 npm ci
-npx playwright test          # the full editor suite
-python3 docsync/test_docsync.py   # the engine's own self-test
+npx playwright install chromium   # the browser itself — npm ci does not fetch it
+npx playwright test               # the full editor suite (~190 specs)
+python3 docsync/test_docsync.py       # the engine's own self-test
+python3 report2027/tools/test_render.py   # render tolerances + edit.html syntax
 ```
+
+The suite starts its own throwaway `serve.py` on port 8199 and mocks GitHub
+entirely — it never touches the network or your real repo. It also regenerates
+`docs/` on startup, so it works on a clone that has never been built.
 
 ## Architecture: one editor, many reports
 
