@@ -14,7 +14,7 @@ asserts against that report's real content.
 | Path | What it is |
 |------|-----------|
 | `docsync/editor/edit.html` | the editor itself (the canonical source; one file, no build step) |
-| `docs/primer/` | the **staged** editor + engine + demo, as GitHub Pages serves it (`start.html`, `edit.html`, `htmlimport.js`, `sw.js`, `manifest.webmanifest`, `icons/`, `engine/`) |
+| `docs/` | the editor's own shell — `start.html`, `sw.js`, `manifest.webmanifest`, `icons/` — plus, once built, each report's staged copy. **The staged parts are generated and untracked**: `edit.html`, `engine/`, and the built report are written by `make -C report2027 pub`, which the live server also runs on startup. Nothing here is published; the Budget Primer deploys from its own repo. |
 | `docsync/*.py` | the **engine**: `content.py` / `layout.py` / `normalise.py` run in Pyodide; `stage.py` / `registry.py` assemble a project's engine beside the editor |
 | `report2027/` | the bundled Budget Primer demo — `content.md`, `layout.json`, `tools/render_report.py`, data — that the editor renders and the tests exercise |
 | `report2027/tools/serve.py` | the local live server: watch-rebuild-reload, plus `/__save` (commit locally) and `/__push` (send to GitHub) |

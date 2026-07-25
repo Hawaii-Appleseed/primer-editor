@@ -30,4 +30,22 @@ test.describe('boot errors', () => {
       .waitFor({ state: 'visible', timeout: 75_000 });
     await expect(page.locator('#stat')).not.toHaveClass(/\berr\b/);
   });
+
+  // Pyodide is a ~30MB CDN download and the first thing a new user needs. When
+  // that script does not load — offline, a proxy, a network that blocks
+  // jsdelivr — loadPyodide is simply undefined, and the failure read as an
+  // anonymous ReferenceError at the moment someone is least able to guess why.
+  // It is cached after one success, so this is a first-run cliff.
+  test('a blocked Pyodide CDN is named, not an anonymous ReferenceError', async ({ page, context }) => {
+    await blockDangerousLocalEndpoints(context);
+    await context.route('**/cdn.jsdelivr.net/**', route => route.abort());
+
+    await page.goto('edit.html');
+    const stat = page.locator('#stat');
+    await expect(stat).toHaveClass(/\berr\b/, { timeout: 30_000 });
+    await expect(stat).toContainText('render engine');
+    await expect(stat).toContainText('cdn.jsdelivr.net');
+    // The row ellipsises, so the whole sentence has to survive on hover.
+    expect(await stat.getAttribute('title')).toContain('cached after the first');
+  });
 });

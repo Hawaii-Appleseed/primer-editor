@@ -9,10 +9,24 @@ name: Editor tests
 # real git push, ever.
 
 on:
+  # Every commit that lands, not just ones that arrive by PR. This repo's work
+  # goes straight to main, so a pull_request-only trigger meant the suite had
+  # never run once — 190 specs guarding nothing. Same path filter both ways.
+  push:
+    branches: [main]
+    paths:
+      - "docsync/**"
+      - "docs/primer/start.html"
+      - "docs/primer/sw.js"
+      - "report2027/tools/serve.py"
+      - "report2027/tools/render_report.py"
+      - "tests/**"
+      - "playwright.config.js"
+      - "package.json"
+      - ".github/workflows/editor-tests.yml"
   pull_request:
     paths:
       - "docsync/editor/edit.html"
-      - "docs/primer/edit.html"
       - "docs/primer/start.html"
       - "docs/primer/sw.js"
       - "report2027/tools/serve.py"
@@ -39,6 +53,12 @@ jobs:
 
       - name: Self-test the docsync engine
         run: python3 docsync/test_docsync.py
+
+      # Also guards edit.html's inline script: its stylesheet is a JS template
+      # literal, so a stray backtick anywhere in it kills the whole editor with
+      # no console error. Cheap, and catches a whole class of silent breakage.
+      - name: Render tolerances + edit.html syntax guard
+        run: python3 report2027/tools/test_render.py
 
       - uses: actions/setup-node@v4
         with:

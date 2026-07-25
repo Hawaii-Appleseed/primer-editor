@@ -15,3 +15,19 @@ docs/primer/projects.json
 
 # Per-machine vendoring targets (see docsync/vendor.py consumers()).
 vendor.local.yml
+
+# --- generated under docs/ ---------------------------------------------------
+# docs/ is this repo's LOCAL serving directory, not a published site: there is
+# no Pages site here (the Budget Primer publishes from its own repo), so these
+# were tracked build artifacts nothing consumed. Every engine change rewrote
+# four staged copies of the editor plus four manifests — ~38 files a commit, in
+# generated content no human can resolve a merge conflict in.
+#
+# `make -C report2027 live` rebuilds every project on startup, so a fresh clone
+# regenerates all of this on first run; `make -C report2027 pub` does it
+# without the server.
+docs/*/edit.html
+docs/*/engine/
+docs/primer/index.html
+docs/primer/primer.css
+docs/primer/assets/

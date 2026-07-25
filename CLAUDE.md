@@ -23,6 +23,12 @@ Rules that bite:
   repo = run `git config core.hooksPath .githooks` once. The vendor refuses a
   consumer whose engine paths are dirty — engine edits must never originate
   in a consumer, and content/design changes in a report repo never flow back.
+- **`docs/` is generated, not source.** Each report's `edit.html` and
+  `engine/` there, and the built report itself, are written by
+  `make -C report2027 pub` (which the live server runs on startup) and are
+  untracked. Edit `docsync/editor/edit.html` and re-stage; never edit a staged
+  copy. Only the editor's shell — `start.html`, `sw.js`, icons, the manifest —
+  is tracked under `docs/`.
 - **`edit.html`'s stylesheet is a JS template literal** — a backtick or `${…}`
   even in a CSS comment kills the whole script (editor hangs at "loading the
   render engine…", no console error). After any edit: `npx playwright test
