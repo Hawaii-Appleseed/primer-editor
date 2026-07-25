@@ -12,8 +12,13 @@ validate:
 # stages it — and everything it reads — next to the published page, driven by
 # the editor: block in docsync.yml. Nothing about the editor is primer-specific,
 # so there is nothing to configure here.
+# No --repo: the bundled Budget Primer here is this repo's TEST FIXTURE, not
+# the live report (that lives in its own repo and stages its own copy). Naming
+# a report repo here baked it into the committed manifest, so anyone who
+# cloned got an editor whose Save/Push aimed at someone else's repo. Left
+# unset, docsync.stage defaults to this checkout's own origin.
 editor: render
-	cd .. && python3 -m docsync.stage --id budget-primer --repo dtomkatsu/BudgetPrimerFinal
+	cd .. && python3 -m docsync.stage --id budget-primer
 
 # Publish the built report + editor into docs/, which GitHub Pages serves. This
 # is the ONE build command — the local live server, the save endpoint, and CI
@@ -54,7 +59,14 @@ preview: html
 # The local live-editing loop: serve docs/, rebuild on every change to the
 # source (yours or Claude's), reload the browser in about a second, and push to
 # the cloud when you press Save. See tools/serve.py.
-live:
+live: setup
 	python3 tools/serve.py
 
-.PHONY: render editor pub live all validate data html pdf embed preview
+# One-time (and idempotent) local setup. `live` depends on it so a fresh clone
+# cannot start the server missing a dependency or with the vendoring hook
+# unarmed — both used to be manual steps documented elsewhere, and skipping
+# either failed later and somewhere else.
+setup:
+	@cd .. && python3 tools/preflight.py
+
+.PHONY: render editor pub live setup all validate data html pdf embed preview

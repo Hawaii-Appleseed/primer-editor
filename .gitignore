@@ -7,3 +7,11 @@ __pycache__/
 .DS_Store
 report2027/web/__export-*.html
 /tmp/
+
+# Per-machine editor registry: which reports this computer serves, and where
+# their files live. Paths here are local to one person, so it is generated
+# rather than tracked — see docs/primer/projects.example.json.
+docs/primer/projects.json
+
+# Per-machine vendoring targets (see docsync/vendor.py consumers()).
+vendor.local.yml

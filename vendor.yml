@@ -7,5 +7,14 @@
 #
 # Adding a future report repo to the engine is ONE line here — nothing else
 # to account for. The repo must be a docsync repo (have its own docsync.yml).
-consumers:
-  - path: ~/BudgetPrimerFinal
+consumers: []
+# Example — one line per repo that vendors this engine:
+#
+# consumers:
+#   - path: ~/BudgetPrimerFinal
+#
+# Left EMPTY by default: a clone of this repo has no business writing
+# into someone else's checkout, and the post-commit hook would try on
+# the very first commit. Add your own consumers here; the file is
+# tracked, so keep entries you push generic or leave it empty and
+# manage it locally.

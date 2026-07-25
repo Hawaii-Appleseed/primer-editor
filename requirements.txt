@@ -1,0 +1,11 @@
+# Runtime dependencies for the docsync tooling (Python 3.10+).
+#
+# The RENDERER itself — docsync/content.py, layout.py, blocks.py — is stdlib
+# only on purpose: it runs inside Pyodide in the browser, where installing a
+# wheel is a network round-trip the editor should never need. Everything below
+# is for the tooling that runs on your machine.
+#
+#   python3 -m pip install -r requirements.txt
+
+# Reads docsync.yml (the report registry) — needed by stage/registry/bind/vendor.
+PyYAML>=6.0

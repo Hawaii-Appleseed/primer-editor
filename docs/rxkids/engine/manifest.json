@@ -1,6 +1,6 @@
 {
   "id": "rxkids",
-  "repo": null,
+  "repo": "dtomkatsu/primer-editor",
   "branch": "main",
   "files": {
     "engine/docsync/content.py": "docsync/content.py",

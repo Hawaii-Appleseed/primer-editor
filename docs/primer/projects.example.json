@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "Copy this to projects.json — that file is per-machine and is NOT tracked.",
+    "It names the reports this editor's start page lists, and where each one's",
+    "files live on THIS computer.",
+    "",
+    "  name       what the start page shows",
+    "  base       the report's staged editor dir, relative to docs/primer/",
+    "  repo       owner/name the editor's Push sends to. Omit and the editor",
+    "             asks the first time you Save.",
+    "  local_root ONLY when the report's files live in a different repo on this",
+    "             machine. Omit for a report that lives in this one.",
+    "",
+    "With no projects.json at all, every report in this repo's docsync.yml is",
+    "still served — you just don't get the start-page grid."
+  ],
+  "rxkids": { "name": "RxKids", "base": "../rxkids" },
+  "demo-report": { "name": "Demo report", "base": "../demo" }
+}
