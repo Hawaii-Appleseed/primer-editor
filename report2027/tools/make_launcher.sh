@@ -52,7 +52,29 @@ export PATH="\$(dirname "\$PYTHON"):\$PATH"
 # commits or uncommitted work, and says why. Failure here (offline, no access)
 # is not fatal: you simply run what you already have.
 : > /tmp/primer-live.log   # fresh log per launch
-"\$PYTHON" tools/selfupdate.py >>/tmp/primer-live.log 2>&1 || true
+{
+  # Prefer the checkout's own updater (better messages, installs new
+  # requirements), but never DEPEND on it: it ships inside the very thing it
+  # updates, so a checkout older than it — or one where it broke — could never
+  # update again. The inline fallback below lives in the app bundle, which is
+  # rebuilt at install time, and does the same safe thing.
+  if [ -x tools/selfupdate.py ] || [ -f tools/selfupdate.py ]; then
+    "\$PYTHON" tools/selfupdate.py
+  elif [ -d .git ] && git rev-parse '@{u}' >/dev/null 2>&1; then
+    git fetch --quiet origin || true
+    behind=\$(git rev-list --count HEAD..'@{u}' 2>/dev/null || echo 0)
+    ahead=\$(git rev-list --count '@{u}'..HEAD 2>/dev/null || echo 0)
+    dirty=\$(git status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')
+    if [ "\$behind" -gt 0 ] && [ "\$ahead" = "0" ] && [ "\$dirty" = "0" ]; then
+      git merge --ff-only '@{u}' >/dev/null 2>&1 \\
+        && echo "  updated — \$behind new commit(s)"
+      [ -x .venv/bin/python ] \\
+        && .venv/bin/python -m pip install --quiet -r requirements.txt || true
+    elif [ "\$behind" -gt 0 ]; then
+      echo "  update available (\$behind) but not applied: you have local work"
+    fi
+  fi
+} >>/tmp/primer-live.log 2>&1 || true
 
 # The app OWNS the server. A server on this port that the app did not start
 # (a leftover from a Claude session, a forgotten terminal) may be running in
