@@ -55,7 +55,7 @@ test.describe('tables', () => {
     await tbl.locator('td[data-cell="1,0"]').click({ button: 'right' });
     const menu = frame.locator('.ds-menu');
     await expect(menu).toBeVisible();
-    await menu.locator('button', { hasText: 'Insert row below' }).click();
+    await menu.locator('button', { hasText: 'Add row' }).click();
 
     await expect(page.evaluate(() => layout.tables[0].rows.length)).resolves.toBe(before + 1);
   });
@@ -65,7 +65,7 @@ test.describe('tables', () => {
     const frame = page.frameLocator('#out');
 
     await tbl.locator('th[data-cell="0,0"]').click({ button: 'right' });
-    await frame.locator('.ds-menu button', { hasText: 'Insert column right' }).click();
+    await frame.locator('.ds-menu button', { hasText: 'Add column' }).click();
 
     const widths = await page.evaluate(() => layout.tables[0].rows.map(r => r.length));
     expect(widths.every(w => w === 3)).toBe(true);   // every row gained a cell
@@ -104,5 +104,287 @@ test.describe('tables', () => {
     // The validator ran and passed: the report is on screen, not the error page.
     await expect(frame.locator('section.page').first()).toBeVisible();
     await expect(page.locator('#stat')).not.toContainText('does not build');
+  });
+});
+
+// --- table styling: the Canva-style panel -----------------------------------
+// Cells, rows, columns, fills and borders all live in layout.json and render
+// through layout.py's tables_html, so each of these asserts BOTH the stored
+// shape and what actually came out on the page.
+test.describe('table styling', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  test('creating a table opens its panel, and cells select by clicking', async ({ page }) => {
+    await addTable(page);
+    await expect(page.locator('#side')).toBeVisible();
+    await expect(page.locator('#side-title')).toHaveText('Table');
+    // The table is selected on create, so a click inside picks a CELL rather
+    // than starting a drag of the whole table.
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,0"]').click();
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => cellSel && [cellSel.r0, cellSel.c0])).toEqual([1, 0]);
+    await expect(frame.locator('td.ds-cell-sel')).toHaveCount(1);
+    await expect(page.locator('.tp-scope')).toContainText('Cell selected');
+  });
+
+  test('a fill applies to the selected cell only, and renders', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,1"]').click();
+    await page.waitForTimeout(200);
+
+    // Second swatch: the first is "none". Pick whatever colour it carries.
+    const sw = page.locator('#tablepop .tp-sw').first().locator('.tp-swatch').nth(1);
+    await sw.click();
+    await page.waitForTimeout(1200);
+
+    const cells = await page.evaluate(() => layout.tables[0].cells);
+    expect(Object.keys(cells)).toEqual(['1,1']);
+    expect(cells['1,1'].fill).toMatch(/^#/);
+    // ...and the renderer put it on that cell and no other.
+    const bg = await frame.locator('td[data-cell="1,1"]')
+      .evaluate(el => el.style.background || el.style.backgroundColor);
+    expect(bg).toBeTruthy();
+    const other = await frame.locator('td[data-cell="1,0"]')
+      .evaluate(el => el.style.background || el.style.backgroundColor);
+    expect(other).toBeFalsy();
+  });
+
+  test('borders write a spec and render as real edges; "Outer" drops the gridlines', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await page.locator('#tablepop .tp-btn', { hasText: 'Outer' }).click();
+    await page.waitForTimeout(1200);
+
+    expect(await page.evaluate(() => layout.tables[0].border.sides)).toBe('outer');
+    // Top-left cell: outer edges drawn, inner edges explicitly off.
+    const tl = await frame.locator('th[data-cell="0,0"]').evaluate(el => ({
+      top: el.style.borderTop, right: el.style.borderRight,
+    }));
+    expect(tl.top).not.toBe('');
+    expect(tl.right).toMatch(/^0/);          // inner gridline suppressed
+  });
+
+  test('inserting a row moves per-cell fills with it instead of stranding them', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,0"]').click();
+    await page.waitForTimeout(200);
+    await page.locator('#tablepop .tp-sw').first().locator('.tp-swatch').nth(1).click();
+    await page.waitForTimeout(1200);
+    const before = await page.evaluate(() => layout.tables[0].cells['1,0'].fill);
+
+    // Insert a row ABOVE the filled one: its override must follow to row 2.
+    await page.locator('#tablepop .tp-btn', { hasText: '↑ Row' }).click();
+    await page.waitForTimeout(1200);
+
+    const cells = await page.evaluate(() => layout.tables[0].cells);
+    expect(cells['2,0'].fill).toBe(before);
+    expect(cells['1,0']).toBeUndefined();     // the new blank row is unstyled
+    expect(await page.evaluate(() => layout.tables[0].rows.length)).toBe(4);
+  });
+
+  test('adding a column keeps the grid rectangular and the draft building', async ({ page }) => {
+    await addTable(page);
+    await page.locator('#tablepop .tp-btn', { hasText: '→ Col' }).click();
+    await page.waitForTimeout(1200);
+
+    const widths = await page.evaluate(() => layout.tables[0].rows.map(r => r.length));
+    expect(widths.every(w => w === 3)).toBe(true);
+    // The validator ran and passed — the report is on screen, not the error page.
+    await expect(page.frameLocator('#out').locator('section.page').first()).toBeVisible();
+    await expect(page.locator('#stat')).not.toContainText('does not build');
+  });
+
+  test('with nothing selected the panel styles the whole table', async ({ page }) => {
+    await addTable(page);
+    await expect(page.locator('.tp-scope')).toContainText('whole table');
+    await page.locator('#tablepop .tp-sw').first().locator('.tp-swatch').nth(1).click();
+    await page.waitForTimeout(1200);
+    // One table-wide property, not a per-cell override for all six cells.
+    const t = await page.evaluate(() => layout.tables[0]);
+    expect(t.fill).toMatch(/^#/);
+    expect(t.cells).toBeUndefined();
+  });
+});
+
+// --- direct editing: a table cell behaves like a spreadsheet cell -----------
+// The complaint this answers: you could not just click a cell and type. It
+// took click (select table) → click (select cell) → double-click (edit), and
+// nothing but the mouse moved you between cells.
+test.describe('table cells edit directly', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  test('one click puts the cursor on a cell, and typing replaces it', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,0"]').click();
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => cellSel && [cellSel.r0, cellSel.c0])).toEqual([1, 0]);
+
+    await page.keyboard.type('Revenue');
+    await page.waitForTimeout(300);
+    // The first keystroke opened the editor AND was kept, rather than being
+    // swallowed opening it.
+    await expect(frame.locator('.ds-cell-edit')).toHaveText('Revenue');
+
+    await page.keyboard.press('Escape');       // discard; the cell stays put
+    await page.waitForTimeout(900);
+  });
+
+  test('Enter commits and drops a row; Tab commits and moves right', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,0"]').click();
+    await page.waitForTimeout(200);
+
+    await page.keyboard.type('one');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1400);
+    expect(await page.evaluate(() => layout.tables[0].rows[1][0])).toBe('one');
+    // Enter landed on the cell below.
+    expect(await page.evaluate(() => cellSel && [cellSel.r0, cellSel.c0])).toEqual([2, 0]);
+
+    await page.keyboard.type('two');
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(1400);
+    expect(await page.evaluate(() => layout.tables[0].rows[2][0])).toBe('two');
+    expect(await page.evaluate(() => cellSel && [cellSel.r0, cellSel.c0])).toEqual([2, 1]);
+  });
+
+  test('arrows walk the grid and Delete empties the cell, not the table', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('th[data-cell="0,0"]').click();
+    await page.waitForTimeout(200);
+
+    await page.keyboard.press('ArrowRight');
+    expect(await page.evaluate(() => [cellSel.r0, cellSel.c0])).toEqual([0, 1]);
+    await page.keyboard.press('ArrowDown');
+    expect(await page.evaluate(() => [cellSel.r0, cellSel.c0])).toEqual([1, 1]);
+    // Off the top edge is a no-op, not a wrap or a crash.
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
+    expect(await page.evaluate(() => [cellSel.r0, cellSel.c0])).toEqual([0, 1]);
+
+    // Delete on a selected CELL clears its text; the table survives.
+    await page.keyboard.press('Delete');
+    await page.waitForTimeout(1400);
+    expect(await page.evaluate(() => layout.tables[0].rows[0][1])).toBe('');
+    expect(await page.evaluate(() => layout.tables.length)).toBe(1);
+  });
+
+  test('the context menu offers the full Canva set, and Move row down works', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    // Give row 1 a marker so the move is observable.
+    await frame.locator('td[data-cell="1,0"]').click();
+    await page.keyboard.type('marker');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => { layout.tables[0].rows[1][0] = 'marker'; });
+    await page.evaluate(() => render());
+    await page.waitForTimeout(1400);
+
+    await frame.locator('td[data-cell="1,0"]').click({ button: 'right' });
+    const menu = frame.locator('.ds-menu.ds-tmenu');
+    await expect(menu).toBeVisible();
+    for (const label of ['Copy', 'Duplicate', 'Delete table', 'Delete column',
+                         'Delete row', 'Add column', 'Add row',
+                         'Fit columns to content', 'Move row down',
+                         'Move column right', 'Table styles…']) {
+      await expect(menu.locator('.ds-mi-lab', { hasText: label }).first()).toBeVisible();
+    }
+    await menu.locator('button', { hasText: 'Move row down' }).click();
+    await page.waitForTimeout(1400);
+    expect(await page.evaluate(() => layout.tables[0].rows[2][0])).toBe('marker');
+  });
+
+  test('Fit columns to content writes widths and renders a colgroup', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('td[data-cell="1,0"]').click({ button: 'right' });
+    await frame.locator('.ds-menu button', { hasText: 'Fit columns to content' }).click();
+    await page.waitForTimeout(1400);
+
+    const colw = await page.evaluate(() => layout.tables[0].colw);
+    expect(colw).toHaveLength(2);
+    expect(colw.every(w => w > 0)).toBe(true);
+    await expect(frame.locator('table.ds-table col')).toHaveCount(2);
+  });
+});
+
+// --- style presets + the collapsible panel ----------------------------------
+test.describe('table style presets', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  test('the gallery offers three looks per palette colour', async ({ page }) => {
+    await addTable(page);
+    const presets = page.locator('#tablepop .tp-preset');
+    // grey + the report palette, three variants each.
+    expect(await presets.count()).toBeGreaterThanOrEqual(9);
+    expect((await presets.count()) % 3).toBe(0);
+    // Each thumbnail is drawn from the same rules the renderer will apply.
+    await expect(presets.first().locator('.tp-preset-grid')).toBeVisible();
+  });
+
+  test('a banded preset writes header + zebra and renders both', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    // Index 5 = the first palette colour's "banded" variant.
+    await page.locator('#tablepop .tp-preset').nth(5).click();
+    await page.waitForTimeout(1600);
+
+    const t = await page.evaluate(() => layout.tables[0]);
+    expect(t.headerFill).toMatch(/^#/);
+    expect(t.headerColor).toMatch(/^#/);
+    expect(t.band).toMatch(/^#/);
+    expect(t.border.sides).toBe('none');
+
+    // Rendered: header band coloured, and the zebra on alternate BODY rows.
+    const hdr = await frame.locator('th[data-cell="0,0"]').getAttribute('style');
+    expect(hdr).toContain('background');
+    const row1 = await frame.locator('td[data-cell="1,0"]').getAttribute('style');
+    const row2 = await frame.locator('td[data-cell="2,0"]').getAttribute('style');
+    expect(row1 || '').not.toContain(t.band.toLowerCase());
+    expect((row2 || '').toLowerCase()).toContain(t.band.toLowerCase());
+
+    // ...and the gallery now shows which one is in force.
+    await expect(page.locator('#tablepop .tp-preset.on')).toHaveCount(1);
+  });
+
+  test('the panel folds away and comes back, keeping its tool', async ({ page }) => {
+    await addTable(page);
+    const side = page.locator('#side');
+    await expect(side).toBeVisible();
+    await expect(page.locator('#tablepop')).toBeVisible();
+
+    await page.click('#side-fold');
+    await expect(side).toHaveClass(/folded/);
+    await expect(page.locator('#side-body')).toBeHidden();
+    // Folded, not closed: the tool is still the one that was open.
+    expect(await page.evaluate(() => sidePanelTool)).toBe('table');
+    // The chevron itself stays reachable on the canvas edge.
+    await expect(page.locator('#side-fold')).toBeVisible();
+
+    await page.click('#side-fold');
+    await expect(side).not.toHaveClass(/folded/);
+    await expect(page.locator('#tablepop')).toBeVisible();
+  });
+
+  test('opening another tool unfolds the panel', async ({ page }) => {
+    await addTable(page);
+    await page.click('#side-fold');
+    await expect(page.locator('#side')).toHaveClass(/folded/);
+    await page.click('#shape');
+    await expect(page.locator('#side')).not.toHaveClass(/folded/);
+    await expect(page.locator('#shapepop')).toBeVisible();
   });
 });
