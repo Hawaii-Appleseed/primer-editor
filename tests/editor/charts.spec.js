@@ -17,6 +17,28 @@ async function addChart(page) {
   return page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').id);
 }
 
+
+/** The panel's Customize tab, with a named section expanded. "Text" is open by
+ *  default; the others start collapsed, so opening is idempotent-by-intent
+ *  rather than assumed. */
+async function customize(page, sectionLabel) {
+  await page.locator('#chartpop .ch-tab', { hasText: 'Customize' }).click();
+  await page.waitForTimeout(200);
+  const head = page.locator('#chartpop .ch-sec', { hasText: sectionLabel });
+  if (!(await head.evaluate(el => el.classList.contains('open')))) {
+    await head.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+/** A labelled switch inside the currently-open Customize section. */
+const switchFor = (page, label) =>
+  page.locator('#chartpop .ch-switchrow', { hasText: label }).locator('.ch-switch');
+
+/** A labelled colour row inside the currently-open Customize section. */
+const colorRow = (page, label) =>
+  page.locator('#chartpop .ch-colrow', { hasText: label });
+
 test.describe('charts', () => {
   test.beforeEach(async ({ page }) => {
     await gotoEditor(page);
@@ -26,7 +48,7 @@ test.describe('charts', () => {
     const id = await addChart(page);
     expect(id).toBeTruthy();
     await expect(page.locator('#side-title')).toHaveText('Chart');
-    await expect(page.locator('#chartpop .ch-type')).toHaveCount(4);
+    await expect(page.locator('#chartpop .ch-typesel option')).toHaveCount(4);
 
     const c = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').chart);
     expect(c.type).toBe('bar');
@@ -46,7 +68,7 @@ test.describe('charts', () => {
     await page.evaluate(() => render());
     await page.waitForTimeout(1200);
 
-    await page.locator('#chartpop .ch-type', { hasText: 'Pie' }).click();
+    await page.selectOption('#chartpop .ch-typesel', 'pie');
     await page.waitForTimeout(1300);
     const c = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').chart);
     expect(c.type).toBe('pie');
@@ -81,7 +103,7 @@ test.describe('charts', () => {
     expect(c.series[1].data).toHaveLength(4);        // padded to the label count
 
     // A pie reads one series, so offering "+ Series" there would be a lie.
-    await page.locator('#chartpop .ch-type', { hasText: 'Pie' }).click();
+    await page.selectOption('#chartpop .ch-typesel', 'pie');
     await page.waitForTimeout(1300);
     await expect(page.locator('#chartpop .tp-btn', { hasText: '+ Series' })).toHaveCount(0);
   });
@@ -109,7 +131,8 @@ test.describe('charts', () => {
     const texts = () => frame.locator(`g[data-shape="${id}"] text`).count();
     const before = await texts();
 
-    await page.locator('#chartpop .tp-btn', { hasText: 'Legend' }).click();
+    await customize(page, 'Text');
+    await switchFor(page, 'Legend').click();
     await page.waitForTimeout(1300);
     expect(await page.evaluate(() =>
       layout.shapes.find(s => s.kind === 'chart').chart.legend)).toBe(true);
@@ -128,6 +151,7 @@ test.describe('chart colours and labels', () => {
     await page.locator('#chartpop .tp-btn', { hasText: '+ Series' }).click();
     await page.waitForTimeout(1200);
     // The ramp is the swatch row directly under "Series colours".
+    await customize(page, 'Series colours');
     await page.locator('#chartpop .tp-sw .tp-swatch').first().click();
     await page.waitForTimeout(1300);
 
@@ -142,6 +166,7 @@ test.describe('chart colours and labels', () => {
     const id = await addChart(page);
     const frame = page.frameLocator('#out');
     // Give it a title so the title row exists, through the panel's own field.
+    await customize(page, 'Text');
     const ti = page.locator('#chartpop .ch-title');
     await ti.fill('Budget');
     await ti.blur();
@@ -150,14 +175,14 @@ test.describe('chart colours and labels', () => {
     // Set the ink through the control, not by poking layout — that is the path
     // a person takes, and it is what keeps the panel's own state in step.
     const setInk = async (label, hex) => {
-      await page.locator('#chartpop .ch-colrow', { hasText: label })
+      await colorRow(page, label)
         .locator('.ch-colsw').evaluate((el, v) => {
           el.value = v; el.dispatchEvent(new Event('change', { bubbles: true }));
         }, hex);
       await page.waitForTimeout(1300);
     };
-    await setInk('Title', '#123456');
-    await setInk('Labels', '#B23A48');
+    await setInk('Title colour', '#123456');
+    await setInk('Label colour', '#B23A48');
 
     await expect(frame.locator(`g[data-shape="${id}"] [data-ch="title"]`))
       .toHaveAttribute('fill', '#123456');
@@ -165,8 +190,7 @@ test.describe('chart colours and labels', () => {
       .toHaveAttribute('fill', '#B23A48');
 
     // The reset arrow drops the override back to the report default.
-    await page.locator('#chartpop .ch-colrow', { hasText: 'Title' })
-      .locator('.ch-reset').click();
+    await colorRow(page, 'Title colour').locator('.ch-reset').click();
     await page.waitForTimeout(1300);
     expect(await page.evaluate(() =>
       layout.shapes.find(s => s.kind === 'chart').chart.titleColor)).toBeUndefined();
@@ -208,7 +232,8 @@ test.describe('chart colours and labels', () => {
 
   test('the chart background is settable and clearable', async ({ page }) => {
     await addChart(page);
-    const row = page.locator('#chartpop .ch-colrow', { hasText: 'Background' });
+    await customize(page, 'Series colours');
+    const row = colorRow(page, 'Background');
     await row.locator('.ch-colsw').evaluate(el => {
       el.value = '#EEF4EF'; el.dispatchEvent(new Event('change', { bubbles: true }));
     });
@@ -221,4 +246,59 @@ test.describe('chart colours and labels', () => {
     expect(await page.evaluate(() =>
       layout.shapes.find(s => s.kind === 'chart').fill)).toBe('none');
   });
+});
+
+// Regression: a report's own STICKY chrome floats over the canvas and took
+// every click that landed on it. The primer's `.toolbar` is
+// position:sticky; z-index:50 — above the shape layer — so any object scrolled
+// under it could not be grabbed at all. Charts hit it hardest: one is big
+// enough that its top sits under the bar by the time the rest is on screen.
+test('a chart under the report\'s sticky toolbar is still grabbable', async ({ page }) => {
+  await gotoEditor(page);
+  const frame = page.frameLocator('#out');
+  await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await page.click('#chart');
+  await frame.locator('g[data-shape]').first().waitFor({ state: 'attached', timeout: 20000 });
+  await page.waitForTimeout(1000);
+  await page.evaluate(() => {
+    layout.shapes.find(s => s.kind === 'chart').chart.title = 'Title';
+  });
+  await page.evaluate(() => render());
+  await page.waitForTimeout(1400);
+
+  const id = await page.evaluate(() => layout.shapes.find(s => s.kind === 'chart').id);
+  const g = frame.locator(`g[data-shape="${id}"]`);
+  await g.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+
+  // The chrome must not be what answers a hit test over the chart.
+  const hit = await page.evaluate(() => {
+    const d = document.getElementById('out').contentDocument;
+    const t = d.querySelector('[data-ch="title"]');
+    const r = t.getBoundingClientRect();
+    const h = d.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    return h && h.tagName.toLowerCase();
+  });
+  expect(hit).toBe('text');
+
+  const before = await page.evaluate(() => {
+    const s = layout.shapes.find(x => x.kind === 'chart');
+    return { x: s.x, y: s.y, w: s.w, h: s.h };
+  });
+  const tb = await frame.locator(`g[data-shape="${id}"] [data-ch="title"]`).boundingBox();
+  await page.mouse.move(tb.x + tb.width / 2, tb.y + tb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(tb.x + tb.width / 2 + 40, tb.y + tb.height / 2 + 25, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(1300);
+
+  const after = await page.evaluate(() => {
+    const s = layout.shapes.find(x => x.kind === 'chart');
+    return { x: s.x, y: s.y, w: s.w, h: s.h };
+  });
+  expect(after.x).toBeGreaterThan(before.x);       // it MOVED...
+  expect(after.y).toBeGreaterThan(before.y);
+  expect(after.w).toBe(before.w);                  // ...rather than resizing
+  expect(after.h).toBe(before.h);
 });
