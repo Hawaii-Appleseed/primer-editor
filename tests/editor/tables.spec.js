@@ -70,4 +70,39 @@ test.describe('tables', () => {
     const widths = await page.evaluate(() => layout.tables[0].rows.map(r => r.length));
     expect(widths.every(w => w === 3)).toBe(true);   // every row gained a cell
   });
+
+  // Regression: layout.py validates shapes, boxes AND tables against ONE id
+  // namespace, but the editor had two allocators that each saw only part of
+  // it — freeBoxId skipped tables, freeTableId skipped boxes and shapes. So a
+  // text box took 't1', the next table took 't1' too, and the render that
+  // followed died in the validator: the whole canvas went to "This draft does
+  // not build: duplicate id 't1' — already a shape or box".
+  test('a table added after a text box gets its own id, and the draft still builds', async ({ page }) => {
+    const frame = page.frameLocator('#out');
+    await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+
+    await page.click('#text');
+    await page.click('#textpop .txtpreset[data-k="body"]');
+    await frame.locator('.ds-textbox').first().waitFor({ state: 'attached', timeout: 20000 });
+    await page.waitForTimeout(600);
+
+    await page.click('#table');
+    await frame.locator('table.ds-table[data-el]').first()
+      .waitFor({ state: 'attached', timeout: 20000 });
+    await page.waitForTimeout(800);
+
+    const ids = await page.evaluate(() => ({
+      boxes: (layout.boxes || []).map(b => b.id),
+      tables: (layout.tables || []).map(t => t.id),
+      shapes: (layout.shapes || []).map(s => s.id),
+    }));
+    const all = [...ids.boxes, ...ids.tables, ...ids.shapes];
+    expect(ids.tables).toHaveLength(1);
+    expect(new Set(all).size).toBe(all.length);          // no id used twice
+
+    // The validator ran and passed: the report is on screen, not the error page.
+    await expect(frame.locator('section.page').first()).toBeVisible();
+    await expect(page.locator('#stat')).not.toContainText('does not build');
+  });
 });
