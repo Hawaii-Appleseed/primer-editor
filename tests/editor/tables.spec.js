@@ -388,3 +388,67 @@ test.describe('table style presets', () => {
     await expect(page.locator('#shapepop')).toBeVisible();
   });
 });
+
+// --- the right-click menu is the SAME menu, wherever and whenever ------------
+test.describe('table context menu consistency', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  const menuInfo = (page) => page.evaluate(() => {
+    const d = document.getElementById('out').contentDocument;
+    const m = d.querySelector('.ds-menu');
+    if (!m) return { menu: 'NONE' };
+    const labels = [...m.querySelectorAll('button')].map(b => b.textContent.trim());
+    return { menu: m.classList.contains('ds-tmenu') ? 'TABLE' : 'layer',
+             addCol: labels.some(t => /add column/i.test(t)) };
+  });
+  const clearMenus = (page) => page.evaluate(() => {
+    document.getElementById('out').contentDocument
+      .querySelectorAll('.ds-menu').forEach(m => m.remove());
+  });
+
+  test('every part of a table gives the table menu, with Add column', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('table.ds-table').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    // Coordinates via boundingBox, which is top-document space and already
+    // accounts for the iframe's offset AND the canvas scale — computing them
+    // from inside the frame aims at the wrong pixel entirely.
+    const tbl = await frame.locator('table.ds-table').boundingBox();
+    const spots = [[0.02, 0.06], [0.5, 0.5], [0.98, 0.94], [0.001, 0.5], [0.999, 0.5]];
+    for (const [fx, fy] of spots) {
+      await clearMenus(page);
+      await page.mouse.click(tbl.x + tbl.width * fx, tbl.y + tbl.height * fy,
+                             { button: 'right' });
+      await page.waitForTimeout(350);
+      const r = await menuInfo(page);
+      expect(r.menu, `at ${fx},${fy}`).toBe('TABLE');
+      expect(r.addCol, `Add column at ${fx},${fy}`).toBe(true);
+    }
+  });
+
+  // Regression: right-clicking a cell that is being EDITED blurs it, and the
+  // blur commits and re-renders the whole document — so the menu was built
+  // into a document about to be thrown away and nothing appeared at all.
+  // `editing` is already false by the time contextmenu fires, so the guard has
+  // to be on the render, not on the flag.
+  test('right-clicking a cell mid-edit still opens the menu', async ({ page }) => {
+    await addTable(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator('table.ds-table').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+
+    await frame.locator('td[data-cell="1,0"]').dblclick();
+    await page.waitForTimeout(600);
+    expect(await page.evaluate(() => editing)).toBe(true);
+
+    await clearMenus(page);
+    await frame.locator('td[data-cell="1,0"]').click({ button: 'right' });
+    await page.waitForTimeout(900);
+    const r = await menuInfo(page);
+    expect(r.menu).toBe('TABLE');
+    expect(r.addCol).toBe(true);
+  });
+});
