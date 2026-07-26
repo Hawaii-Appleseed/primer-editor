@@ -519,10 +519,15 @@ test('a chart with no renderer stamp still drags, ring and all', async ({ page }
   expect(after.x).toBeGreaterThan(before.x + 50);
 });
 
-// The other half of the same failure: a tab open across a rebuild it never saw
-// keeps running old Python, and the first sign of it was a cryptic validator
-// error about chart types. It has to announce itself instead.
-test('a stale engine on disk announces itself', async ({ page }) => {
+// A tab open across a rebuild it never saw keeps running old editor code, and
+// has to announce itself. Two things this gets wrong if you are not careful:
+//   * warning about the ENGINE is a false alarm — _pull() refreshes that into
+//     Pyodide on every bump, and a rebuild restages it constantly, so the
+//     warning fired over and over during ordinary work;
+//   * the warning was said ONCE and then overwritten by _pull()'s own
+//     "reloaded" status, so it flashed red for an instant and was gone for
+//     good — the opposite of what a "you are running stale code" notice is for.
+test('the stale-editor notice is raised only when it should be, and persists', async ({ page }) => {
   const fs = require('fs');
   const path = require('path');
   await gotoEditor(page);
@@ -530,17 +535,30 @@ test('a stale engine on disk announces itself', async ({ page }) => {
   expect(await page.evaluate(() => buildStamp !== null)).toBe(true);
   expect(await page.evaluate(() => buildChangedOnDisk())).toBe(false);
 
-  const f = path.join(__dirname, '../../docs/primer/engine/docsync/layout.py');
-  const was = fs.statSync(f).mtime;
-  try {
-    fs.utimesSync(f, new Date(), new Date(Date.now() + 60_000));
-    expect(await page.evaluate(() => buildChangedOnDisk())).toBe(true);
-    await page.evaluate(() => offerEditorReload());
-    await expect(page.locator('#stat')).toContainText('updated on disk');
-    await expect(page.locator('#stat')).toHaveClass(/err/);
-  } finally {
-    fs.utimesSync(f, was, was);
-  }
+  const touch = async (rel, expected) => {
+    const f = path.join(__dirname, '../../docs/primer', rel);
+    const was = fs.statSync(f).mtime;
+    try {
+      fs.utimesSync(f, new Date(), new Date(Date.now() + 60_000));
+      expect(await page.evaluate(() => buildChangedOnDisk()), rel).toBe(expected);
+    } finally {
+      fs.utimesSync(f, was, was);
+    }
+  };
+  await touch('engine/docsync/layout.py', false);   // heals itself; do not warn
+  await touch('edit.html', true);                   // needs a reload; do warn
+
+  await page.evaluate(() => offerEditorReload());
+  await expect(page.locator('#stat')).toContainText('updated on disk');
+  await expect(page.locator('#stat')).toHaveClass(/err/);
+
+  // ...and it survives the reload status that used to erase it.
+  await page.evaluate(() => {
+    $('stat').textContent = 'reloaded';
+    if ($('stat').dataset.stale) offerEditorReload();
+  });
+  await expect(page.locator('#stat')).toContainText('updated on disk');
+  await expect(page.locator('#stat')).toHaveClass(/err/);
 });
 
 // The server's file watcher is what turns an edit on disk into a reload here.
