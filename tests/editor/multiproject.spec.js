@@ -105,3 +105,26 @@ test('a freshly opened report is not dirty', async ({ page }) => {
   });
   expect(await page.evaluate(() => dirty)).toBe(true);
 });
+
+// Regression, and the second home of the same bug: _pull() decides whether a
+// disk change collides with your unsaved work. It compared layout RAW, so the
+// empty containers the editor fills in on load counted as edits — and every
+// change that landed on disk (a rebuild, a vendored engine) came back as
+// "Claude changed the same thing you have unsaved" over an editor nobody had
+// typed in. markDirty was fixed for this; this comparison was missed.
+test('a disk change on an untouched editor is adopted, not reported as a clash', async ({ page }) => {
+  await gotoEditor(page);
+  await page.waitForTimeout(800);
+  expect(await page.evaluate(() => dirty)).toBe(false);
+
+  // _pull's own test for "the person has unsaved work here".
+  const mineChanged = () => page.evaluate(() =>
+    layoutSaid(layout) !== layoutSaid(JSON.parse(layoutOrig || '{}')));
+  expect(await mineChanged()).toBe(false);          // nothing typed -> no clash
+
+  await page.evaluate(() => {
+    layout.shapes.push({ id: 'clash-probe', page: 3, kind: 'rect', x: 1, y: 1, w: 1, h: 1 });
+    markDirty();
+  });
+  expect(await mineChanged()).toBe(true);           // real work -> still protected
+});
