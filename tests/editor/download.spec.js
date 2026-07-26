@@ -3,7 +3,7 @@
 // (mocked by the shared fixture — see STANDALONE.md §C, this never spawns the
 // real headless-Chrome PDF/PNG renderer in tests) or falls back to the
 // browser's own print() for PDF-only when there's no local server.
-const { test, expect, gotoEditor } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, PING } = require('./fixtures/editor-test');
 
 test.describe('download: local mode (server-rendered PDF/PNG via /__export)', () => {
   test.beforeEach(async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('download: source zip (fflate, client-side)', () => {
 
 test.describe('download: hosted mode (no local server)', () => {
   test.beforeEach(async ({ context, page }) => {
-    await context.route('**/__ping', route => route.fulfill({ status: 404, body: 'no local server' }));
+    await context.route(PING, route => route.fulfill({ status: 404, body: 'no local server' }));
     await gotoEditor(page);
   });
 

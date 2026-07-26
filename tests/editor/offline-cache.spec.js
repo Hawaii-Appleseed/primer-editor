@@ -4,7 +4,7 @@
 // lose work. Hosted mode — page.reload() keeps the same origin, so the same
 // IndexedDB and the fake-GitHub context routes survive the reload.
 const { hostedTest: test, expect, gotoEditor, waitForFirstRender,
-        fillDialog, submitDialog, submitDialogIfPresent } = require('./fixtures/editor-test');
+        fillDialog, submitDialog, submitDialogIfPresent, PING } = require('./fixtures/editor-test');
 
 async function addSection(page, slug) {
   await page.click('#add');
@@ -53,7 +53,7 @@ test.describe('offline draft cache', () => {
   test('the cache does not fire in local mode (files on disk are the truth)', async ({ page, context }) => {
     // Undo the hosted fixture's /__ping block for this one test so the app runs
     // in local mode, then confirm nothing was written to the draft cache.
-    await context.unroute('**/__ping');
+    await context.unroute(PING);
     await gotoEditor(page);
     await addSection(page, 'local-no-cache');
     await page.waitForTimeout(1200);

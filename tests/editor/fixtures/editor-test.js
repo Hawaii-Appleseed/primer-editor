@@ -17,6 +17,17 @@
 const base = require('@playwright/test');
 const { FakeGitHub } = require('./fake-github');
 
+// Match /__ping WITH OR WITHOUT its query string. The editor appends
+// ?project=<id> to every live-reload call, and a glob of '**/__ping' matches
+// the bare path only — so every mock written that way silently stopped
+// matching, the real dev server answered instead, and tests that meant to
+// pin `ahead` (or to have no local server at all) quietly ran against this
+// machine's actual repository. They then passed or failed according to how
+// many unpushed commits happened to be sitting in it. One shared matcher, so
+// there is no per-file spelling to get wrong again.
+const PING = /\/__ping(\?|$)/;
+const EVENTS = /\/__events(\?|$)/;
+
 async function blockDangerousLocalEndpoints(context) {
   await context.route('**/__save', route => route.fulfill({
     json: { ok: true, message: 'blocked in tests — no real save/push happens here', ahead: 0 },
@@ -86,7 +97,10 @@ const hostedTest = base.test.extend({
   },
   context: async ({ context, github }, use) => {
     await blockDangerousLocalEndpoints(context);
-    await context.route('**/__ping', route => route.fulfill({ status: 404, body: 'no local server' }));
+    await context.route(PING, route => route.fulfill({ status: 404, body: 'no local server' }));
+    // Hosted mode means NO local server: the SSE stream must be refused too,
+    // or the editor keeps a live connection open to one that is right there.
+    await context.route(EVENTS, route => route.fulfill({ status: 404, body: 'no local server' }));
     await github.install(context);
     await context.addInitScript(() => {
       window.localStorage.setItem('docsync-pat', 'fake-test-token');
@@ -136,7 +150,7 @@ async function submitDialogIfPresent(page, timeout = 3000) {
 }
 
 module.exports = {
-  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender,
+  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS,
   blockDangerousLocalEndpoints, dialog, fillDialog, submitDialog, cancelDialog,
   submitDialogIfPresent,
 };

@@ -4,7 +4,7 @@
 // running — and the service worker makes that genuinely confusing, because
 // edit.html comes from cache so the page DRAWS and only its engine files
 // (network-only, deliberately) fail.
-const { test, expect, blockDangerousLocalEndpoints } = require('./fixtures/editor-test');
+const { test, expect, blockDangerousLocalEndpoints, PING } = require('./fixtures/editor-test');
 
 test.describe('boot errors', () => {
   test('a dead dev server is named, not reported as "Failed to fetch"', async ({ page, context }) => {
@@ -12,7 +12,7 @@ test.describe('boot errors', () => {
     // The shape of the real failure: the page itself loads, everything it
     // needs afterwards does not.
     await context.route('**/engine/**', route => route.abort());
-    await context.route('**/__ping', route => route.abort());
+    await context.route(PING, route => route.abort());
 
     await page.goto('edit.html');
     const stat = page.locator('#stat');

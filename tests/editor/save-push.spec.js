@@ -13,14 +13,17 @@
 // the call and the next assertion. Mocking makes the poll agree with the
 // scenario instead of fighting it. These tests are about the CLIENT'S state
 // machine, not serve.py's actual git plumbing.
-const { test, hostedTest, expect, gotoEditor, submitDialogIfPresent } = require('./fixtures/editor-test');
+const { test, hostedTest, expect, gotoEditor, submitDialogIfPresent, PING } = require('./fixtures/editor-test');
 
 /** Navigate with /__ping pinned to a fixed `ahead`, registered before the
  *  page ever loads — detectLocal()'s first ping (which decides `local` and
  *  the button's initial state) must see the same value the 1.5s poll will
  *  keep reporting for the rest of the test. */
 async function gotoWithAhead(page, context, ahead) {
-  await context.route('**/__ping', route => route.fulfill({ json: { ok: true, v: 1, ahead } }));
+  // PING, not '**/__ping': the editor asks for /__ping?project=<id>, which a
+  // bare-path glob does not match — the mock was dead and the real server's
+  // count (this machine's unpushed commits) answered instead.
+  await context.route(PING, route => route.fulfill({ json: { ok: true, v: 1, ahead } }));
   await gotoEditor(page);
 }
 
