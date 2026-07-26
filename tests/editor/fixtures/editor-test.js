@@ -27,6 +27,7 @@ const { FakeGitHub } = require('./fake-github');
 // there is no per-file spelling to get wrong again.
 const PING = /\/__ping(\?|$)/;
 const EVENTS = /\/__events(\?|$)/;
+const UPDATE = /\/__update(\?|$)/;
 
 async function blockDangerousLocalEndpoints(context) {
   await context.route('**/__save', route => route.fulfill({
@@ -150,7 +151,7 @@ async function submitDialogIfPresent(page, timeout = 3000) {
 }
 
 module.exports = {
-  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS,
+  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS, UPDATE,
   blockDangerousLocalEndpoints, dialog, fillDialog, submitDialog, cancelDialog,
   submitDialogIfPresent,
 };
