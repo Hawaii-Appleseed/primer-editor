@@ -567,3 +567,55 @@ test('a dead server watcher is reported, and an old server is not judged', async
   await page.evaluate(() => watchHealth({ ahead: 0, v: 1 }));
   await expect(page.locator('#stat')).toHaveText('untouched');
 });
+
+// --- panel polish -----------------------------------------------------------
+test('swatch rows come out even, not orphaned', async ({ page }) => {
+  await gotoEditor(page);
+  await addChart(page);
+  await customize(page, 'Series colours');
+  const rows = await page.locator('#chartpop .tp-sw').first().evaluate(el => {
+    const ys = [...el.children].map(k => Math.round(k.getBoundingClientRect().y));
+    const byRow = {};
+    ys.forEach(y => { byRow[y] = (byRow[y] || 0) + 1; });
+    return Object.values(byRow);
+  });
+  // Greedy wrapping packed 7 and stranded 2. Even rows differ by at most one.
+  expect(Math.max(...rows) - Math.min(...rows)).toBeLessThanOrEqual(1);
+});
+
+test('a reset arrow appears only where there is something to reset', async ({ page }) => {
+  await gotoEditor(page);
+  await addChart(page);
+  await customize(page, 'Text');
+
+  const vis = label => page.locator('#chartpop .ch-colrow', { hasText: label })
+    .locator('.ch-reset').evaluate(el => getComputedStyle(el).visibility);
+  expect(await vis('Title colour')).toBe('hidden');       // nothing overridden yet
+
+  await page.locator('#chartpop .ch-colrow', { hasText: 'Title colour' })
+    .locator('.ch-colsw').evaluate(el => {
+      el.value = '#B23A48'; el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  await page.waitForTimeout(1300);
+  expect(await vis('Title colour')).toBe('visible');
+  expect(await vis('Label colour')).toBe('hidden');       // still untouched
+});
+
+test('"no background" does not look like a white background', async ({ page }) => {
+  await gotoEditor(page);
+  await addChart(page);
+  await customize(page, 'Series colours');
+  const row = page.locator('#chartpop .ch-colrow', { hasText: 'Background' });
+  const sw = row.locator('.ch-colsw');
+  // Unset: marked, and says so on hover — a bare white chip on a white panel
+  // was indistinguishable from an actual white fill.
+  await expect(sw).toHaveClass(/unset/);
+  expect(await sw.getAttribute('title')).toBe('No background');
+
+  await sw.evaluate(el => {
+    el.value = '#EEF4EF'; el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await page.waitForTimeout(1300);
+  await expect(sw).not.toHaveClass(/unset/);
+  expect(await sw.getAttribute('title')).toContain('#EEF4EF');
+});
