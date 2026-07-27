@@ -87,16 +87,80 @@ test.describe('File ▸ Resize', () => {
     await expect(page.locator('#size-list .size-dim').first()).toHaveText(/13\.33 × 7\.5 in/);
   });
 
-  test('picking a size that is not wired up yet says so instead of pretending', async ({ page }) => {
-    await gotoEditor(page);
+  /** The rendered sheet, as the browser computes it. The assertion that
+   *  matters: not what the editor stored, but what the document became. */
+  const sheet = (page) => page.evaluate(() => {
+    const d = document.getElementById('out').contentDocument;
+    const p = d.querySelector('.page');
+    const cs = d.defaultView.getComputedStyle(p);
+    return { width: cs.width, minHeight: cs.minHeight };
+  });
+
+  const pickSize = async (page, id) => {
     await openFileMenu(page);
     await page.click('#file-resize');
-    await page.click('#size-list button[data-size="a3"]');
-    // Page size is set when the report is BUILT (the report's own stylesheet
-    // and docsync.yml's editor.page), so the editor cannot flip it alone. A
-    // control that looked like it worked would be the worse answer.
-    await expect(page.locator('#stat')).toContainText('not wired up yet');
-    await expect(page.locator('#resizepop')).toBeHidden();
+    await page.click(`#size-list button[data-size="${id}"]`);
+    await expect(page.locator('#stat')).toContainText('page is now');
+  };
+
+  test('picking a size re-renders the document at it', async ({ page }) => {
+    await gotoEditor(page);
+    expect(await sheet(page)).toEqual({ width: '816px', minHeight: '1056px' });   // 8.5 x 11in
+
+    await pickSize(page, 'a3');
+    // 11.69 x 16.54in at 96dpi. Asserted on the RENDERED page, not on
+    // layout.page — the editor storing a number the renderer ignores is
+    // exactly the failure this feature has to avoid.
+    await expect.poll(() => sheet(page), { timeout: 20000 })
+      .toEqual({ width: '1122.24px', minHeight: '1587.84px' });
+    expect(await page.evaluate(() => layout.page)).toEqual({ w: 11.69, h: 16.54 });
+    // And it counts as an edit, because it changes what Save would write.
+    expect(await page.evaluate(() => dirty)).toBe(true);
+  });
+
+  test('the size in use is re-marked after a change', async ({ page }) => {
+    await gotoEditor(page);
+    await pickSize(page, 'legal');
+    await openFileMenu(page);
+    await page.click('#file-resize');
+    await expect(page.locator('#size-list button[aria-current="true"]')).toContainText('Legal');
+  });
+
+  test('pageless drops the fixed height instead of picking a large one', async ({ page }) => {
+    await gotoEditor(page);
+    await pickSize(page, 'pageless');
+    // A pageless document has no bottom: the sheet keeps its width and grows
+    // with its content.
+    await expect.poll(() => sheet(page), { timeout: 20000 })
+      .toEqual({ width: '816px', minHeight: '0px' });
+    expect(await page.evaluate(() => layout.page)).toEqual({ w: 8.5, h: null });
+    // The height every clamp measures against becomes a number no report
+    // reaches, rather than a special case in each of them.
+    expect(await page.evaluate(() => PAGE_H_IN)).toBe(200);
+  });
+
+  test('going back to the built size removes the override, not restates it', async ({ page }) => {
+    await gotoEditor(page);
+    await pickSize(page, 'a3');
+    expect(await page.evaluate(() => layout.page)).toBeTruthy();
+
+    await pickSize(page, 'letter');       // what this fixture was built at
+    // A layout that was resized and put back must be byte-identical to one
+    // that was never resized, or every round trip leaves a trace in the file.
+    expect(await page.evaluate(() => 'page' in layout)).toBe(false);
+    await expect.poll(() => sheet(page), { timeout: 20000 })
+      .toEqual({ width: '816px', minHeight: '1056px' });
+  });
+
+  test('a wider sheet grows the canvas rather than being cut off', async ({ page }) => {
+    await gotoEditor(page);
+    const before = await page.evaluate(() => VIEW_W);
+    await pickSize(page, 'digital');       // 13.33in — wider than the old fixed canvas
+    // The canvas had a fixed design width from when every report was Letter.
+    // A page wider than it disappeared behind the IFRAME's own scrollbar.
+    await expect.poll(() => page.evaluate(() => VIEW_W), { timeout: 20000 })
+      .toBeGreaterThan(Math.round(13.33 * 96));
+    expect(before).toBe(1200);
   });
 });
 
