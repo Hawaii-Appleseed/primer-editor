@@ -109,8 +109,41 @@ fi
 # exiting. Invoking the Chrome binary directly and backgrounding it did NOT:
 # the handoff stub died with the script and no window ever appeared. Falls
 # back to the default browser if Chrome isn't installed.
+# Reopening the app should RETURN you to its window, not add another one.
+# \`open -n\` forces a NEW instance every time, so every click on the Dock icon
+# left another editor window behind — and each one is a full Pyodide boot.
+# Look for a window already showing this server and raise it instead.
+#
+# This asks macOS for permission to control Chrome the first time (System
+# Settings > Privacy & Security > Automation). Declining is not fatal: the
+# lookup fails, and the old behaviour — open a window — is what happens.
+focus_existing() {
+  osascript - "http://localhost:\$PORT/" <<'OSA' 2>/dev/null
+on run argv
+  set target to item 1 of argv
+  tell application "System Events"
+    if not (exists process "Google Chrome") then return "no"
+  end tell
+  tell application "Google Chrome"
+    repeat with w in windows
+      repeat with t in tabs of w
+        if URL of t starts with target then
+          set index of w to 1
+          activate
+          return "yes"
+        end if
+      end repeat
+    end repeat
+  end tell
+  return "no"
+end run
+OSA
+}
+
 if [ -d "/Applications/Google Chrome.app" ]; then
-  open -na "Google Chrome" --args --app="\$URL"
+  if [ "\$(focus_existing)" != "yes" ]; then
+    open -na "Google Chrome" --args --app="\$URL"
+  fi
 else
   open "\$URL"
 fi
