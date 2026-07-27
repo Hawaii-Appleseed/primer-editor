@@ -24,8 +24,17 @@ test.describe('contextual toolbar', () => {
   });
 
   test('the strip is centered, not packed left', async ({ page }) => {
-    const jc = await page.evaluate(() => getComputedStyle($('arrange')).justifyContent);
-    expect(jc).toContain('center');
+    await addRect(page);
+    // Measured, not declared. This used to read justify-content and call it
+    // centered — which stays true no matter where the box ends up once the
+    // strip is shrink-wrapped rather than full-bleed, so it would have kept
+    // passing through exactly the change it exists to catch.
+    const off = await page.evaluate(() => {
+      const strip = $('arrange').getBoundingClientRect();
+      const row = $('context').getBoundingClientRect();
+      return Math.abs((strip.left + strip.right) / 2 - (row.left + row.right) / 2);
+    });
+    expect(off).toBeLessThan(2);
   });
 
   test('a shape offers colour, border, transparency, effects and Position', async ({ page }) => {
