@@ -11,6 +11,7 @@
 // be replayed on top of it — live in tools/selfupdate.py and are exercised
 // against actual repositories there, not here.
 const { test, expect, gotoEditor, PING, UPDATE } = require('./fixtures/editor-test');
+const ROLLBACK = /\/__rollback(\?|$)/;
 
 const ver = (page) => page.locator('#ver');
 const upd = (page) => page.locator('#upd');
@@ -100,5 +101,39 @@ test.describe('version and updates', () => {
     await reloaded;
     // Back up on the new version.
     await expect(ver(page)).toHaveText('def5678', { timeout: 30000 });
+  });
+
+  test('with no earlier version there is nothing to go back to', async ({ page, context }) => {
+    await withUpdate(context, { sha: 'abc1234', date: '2026-07-26', behind: 0, can: false, rollback: '' });
+    await gotoEditor(page);
+    // The chip must not LOOK clickable when clicking it would do nothing.
+    await expect(ver(page)).not.toHaveClass(/can-undo/);
+    await expect(ver(page)).toHaveAttribute('title', /latest version/);
+    await expect(ver(page)).not.toHaveAttribute('title', /go back/);
+  });
+
+  test('after an update the version chip offers the way back', async ({ page, context }) => {
+    await withUpdate(context, { sha: 'def5678', date: '2026-07-26', behind: 0, can: false, rollback: 'abc1234' });
+    await gotoEditor(page);
+    await expect(ver(page)).toHaveClass(/can-undo/);
+    await expect(ver(page)).toHaveAttribute('title', /Click to go back to abc1234/);
+
+    // Confirmed, because it restarts the editor — and cancelling must not.
+    let posted = 0;
+    await context.route(ROLLBACK, route => { posted++; route.fulfill({ json: { ok: true } }); });
+    await ver(page).click();
+    await page.locator('dialog.dsdlg button.dsdlg-cancel').click();
+    expect(posted, 'cancelling must not roll anything back').toBe(0);
+  });
+
+  test('going back is refused while there are unsaved edits', async ({ page, context }) => {
+    await withUpdate(context, { sha: 'def5678', date: '2026-07-26', behind: 0, can: false, rollback: 'abc1234' });
+    await gotoEditor(page);
+    let posted = 0;
+    await context.route(ROLLBACK, route => { posted++; route.fulfill({ json: { ok: true } }); });
+    await page.evaluate(() => { source = original + '\n'; markDirty(); });
+    await ver(page).click();
+    await expect(page.locator('#stat')).toContainText('save your changes first');
+    expect(posted).toBe(0);
   });
 });

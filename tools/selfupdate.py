@@ -3,26 +3,38 @@
 
     python3 tools/selfupdate.py              # update if it is safe to
     python3 tools/selfupdate.py --check      # only report, change nothing
+    python3 tools/selfupdate.py --json       # the same, machine-readable
+    python3 tools/selfupdate.py --rollback   # back to the pre-update version
 
-Run by the launcher before the server starts, which is what makes the editor
-behave like an app: quit, reopen, you have the latest.
+Run by the launcher before the server starts, and by the server itself while
+it runs — which is what makes the editor behave like an app: a version you
+push arrives, without anyone cloning anything.
 
 The whole design constraint is that this is a REAL checkout the person owns —
-they can read it, edit it, commit to it, open a PR. So an update is only ever
-a fast-forward, and anything that could lose work stops and says so instead:
+they can read it, edit it, commit to it, open a PR. So an update either
+fast-forwards, or replays their own commits on top of it, and anything that
+could lose work stops and says so instead:
 
   * uncommitted changes to tracked files      -> skip
-  * local commits origin does not have        -> skip
+  * local commits touching the SAME files     -> skip
   * a branch that is not the upstream's       -> skip
   * no origin, or no network                  -> skip, quietly
+  * PRIMER_NO_UPDATE set                      -> skip, deliberately
 
-Nothing here resets, stashes, checks out or force-pulls. The worst case is
-that you stay on the version you already had and are told why.
+Local commits that touch DIFFERENT files are not a reason to skip: Save
+commits locally, so refusing on any local commit meant the first edit anyone
+made ended updates for that install permanently.
+
+Nothing here stashes or force-pushes, and the only reset is --rollback, whose
+entire job is to undo an update by returning to the commit recorded before it
+ran. The worst case is that you stay on the version you already had and are
+told why.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -176,16 +188,93 @@ def apply_update(st: dict) -> bool:
     return True
 
 
+PREV_FILE = ROOT / ".primer-previous-version"
+
+
+def rollback_target() -> str:
+    """The commit this checkout was on before its last update, if going back to
+    it is still possible. Empty when there is nothing to go back to — no
+    recorded version, already there, or a tree that would lose work."""
+    try:
+        prev = PREV_FILE.read_text().strip()
+    except OSError:
+        return ""
+    if not prev:
+        return ""
+    rc, head = git("rev-parse", "HEAD")
+    if rc or head.strip().startswith(prev):
+        return ""                                   # already on it
+    rc, _ = git("cat-file", "-e", prev + "^{commit}")
+    if rc:
+        return ""                                   # recorded, but not in this repo
+    # Going back means moving HEAD, which would take uncommitted work with it.
+    rc, dirty = git("status", "--porcelain", "--untracked-files=no")
+    return "" if dirty else prev
+
+
+def rollback() -> dict:
+    """Return to the version in use before the last update.
+
+    Updates are automatic, so one bad push reaches every install at once, and
+    the person it reaches has no git at their fingertips and an app that may
+    not start. This is the way back.
+
+    A hard reset is right here and only here: the recorded commit is the exact
+    state this checkout had BEFORE the update — including that person's own
+    saved work, which was committed locally long before any of this ran. What
+    it discards is the update itself, which is precisely the ask. It still
+    refuses on a dirty tree, because uncommitted work is the one thing not
+    represented in any commit."""
+    prev = rollback_target()
+    if not prev:
+        # Say WHICH of the reasons it is. "Nothing to go back to" is a lie when
+        # the truth is "you have unsaved work in the checkout", and it sends
+        # the person looking in exactly the wrong place.
+        rc, dirty = git("status", "--porcelain", "--untracked-files=no")
+        if dirty:
+            return {"ok": False, "why": f"you have uncommitted changes to "
+                                        f"{len(dirty.splitlines())} tracked file(s) — "
+                                        f"commit or discard them first"}
+        return {"ok": False, "why": "there is no earlier version to go back to"}
+    _, before = git("rev-parse", "HEAD")
+    rc, out = git("reset", "--hard", prev)
+    if rc:
+        return {"ok": False, "why": f"could not go back: {out.splitlines()[-1] if out else 'unknown'}"}
+    # The version just left behind becomes the way FORWARD again, so a rollback
+    # is not a one-way door — and a second rollback cannot walk backwards
+    # through history one commit at a time.
+    try:
+        PREV_FILE.write_text(before.strip() + "\n")
+    except OSError:
+        pass
+    _, sha = git("log", "-1", "--pretty=%h")
+    return {"ok": True, "sha": sha.strip(), "why": f"went back to {sha.strip()}"}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report only, change nothing")
     ap.add_argument("--json", action="store_true", help="machine-readable status")
     ap.add_argument("--quiet", action="store_true", help="say nothing when already current")
+    ap.add_argument("--rollback", action="store_true",
+                    help="return to the version in use before the last update")
     a = ap.parse_args()
 
-    st = status()
+    if a.rollback:
+        r = rollback()
+        print(json.dumps(r) if a.json else "  " + r["why"])
+        return 0 if r["ok"] else 1
+
+    # Updating is opt-out, for the case where a checkout must stay put: a
+    # machine mid-demo, or one deliberately held on a known-good version.
+    if os.environ.get("PRIMER_NO_UPDATE"):
+        st = {"can": False, "behind": 0, "ahead": 0, "quiet": True, "log": [],
+              "why": "updates are switched off here (PRIMER_NO_UPDATE)"}
+    else:
+        st = status()
     if a.json:
         st["sha"], st["date"] = version()
+        st["rollback"] = rollback_target()[:7]
         if not a.check and st["can"]:
             st["applied"] = apply_update(st)
             st["sha"], st["date"] = version()
