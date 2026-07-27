@@ -186,3 +186,47 @@ test.describe('File ▸ Open', () => {
     await page.waitForURL(new RegExp('project=' + id));
   });
 });
+
+// The chrome's two folding surfaces and what the contextual strip says about
+// a selection. Grouped here because all three are about how much room the
+// editor takes from the report, and what it spends that room saying.
+test.describe('chrome', () => {
+  test('the page strip folds, and remembers', async ({ page }) => {
+    await gotoEditor(page);
+    const height = () => page.locator('#rail').evaluate(el => Math.round(el.getBoundingClientRect().height));
+    const open = await height();
+    expect(open).toBeGreaterThan(80);
+
+    await page.click('#rail-fold');
+    await expect(page.locator('#rail')).toHaveClass(/folded/);
+    await expect(page.locator('#rail-list')).toBeHidden();
+    expect(await height()).toBeLessThan(open / 2);
+    // Its label stays, so what is left says what bringing it back would give.
+    await expect(page.locator('#rail-head')).toBeVisible();
+    await expect(page.locator('#rail-fold')).toHaveAttribute('aria-expanded', 'false');
+
+    // Whether you want thumbnails is a standing preference about how you work,
+    // not a decision to retake every time the editor opens.
+    await page.reload();
+    await page.frameLocator('#out').locator('.page').first().waitFor({ state: 'visible', timeout: 75_000 });
+    await expect(page.locator('#rail')).toHaveClass(/folded/);
+
+    await page.click('#rail-fold');
+    await expect(page.locator('#rail')).not.toHaveClass(/folded/);
+  });
+
+  test('the contextual strip never shows an element’s internal id', async ({ page }) => {
+    await gotoEditor(page);
+    const el = page.frameLocator('#out').locator('[data-el]').first();
+    await el.click({ force: true });
+    await expect(page.locator('#arrange')).toBeVisible();
+
+    // "cover.logo" is the name a slot has inside content.md — noise on screen,
+    // and on a designed element a name the person never chose. The id stays on
+    // hover, where it costs nothing and still answers "which slot is this?".
+    const id = await el.getAttribute('data-el');
+    await expect(page.locator('#ar-count')).toBeHidden();
+    await expect(page.locator('#ar-count')).toHaveAttribute('title', id);
+    await expect(page.locator('#arrange')).not.toContainText(id);
+  });
+});
