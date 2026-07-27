@@ -38,12 +38,14 @@ Rules that bite:
   `card(detachable=…)`, `is_light_bg`) — zero-stylesheet, importable by any
   project renderer, staged into the browser engine automatically. Add new
   reusable capabilities there, not in one report's renderer.
-- **Tests:** `npx playwright test` (editor behaviour; ~190 specs),
+- **Tests:** `npx playwright test` (editor behaviour; 276 specs),
   `python3 docsync/test_docsync.py` (engine round-trip),
   `python3 report2027/tools/test_render.py` (render tolerances + edit.html
   syntax guard). `make -C report2027 validate` chains them but its
   build_data step needs fixture data files this repo doesn't carry — run the
-  three directly.
+  three directly. All 276 pass clean as of 2026-07-27 — if you inherit a
+  failure, suspect your own change first, but see the two traps below before
+  chasing a ghost.
 - **Never launch or kill a dev server the user owns**; Playwright starts its
   own throwaway servers and that's fine.
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
@@ -57,3 +59,54 @@ Rules that bite:
   remaining STAGE TWO judgment work (renames, chrome pruning, widget
   restructuring) and what's still automatable is scoped in
   `docsync/STAGE2_AUTOMATION.md`.
+
+## Recent architecture (2026-07), so you don't rediscover it
+
+- **Page resize is real, not cosmetic.** `layout.py`'s `Layout` reads an
+  optional `"page": {"w": 8.5, "h": 11}` (or `"h": null` for pageless) from
+  layout.json and emits matching `.page`/`@page` CSS via `layer()`'s
+  `_page_style_once()` — so the preview, the published HTML and the printed
+  PDF all agree. The editor's `File ▸ Resize` writes that field and calls
+  `syncPageSize()`, which keeps the JS globals `PAGE_W_IN`/`PAGE_H_IN` (every
+  clamp, guide and align rule) in step. **`syncPageSize()` must run in
+  `boot()`**, not in `restoreCachedDraft()` — a stray anchor once put it in
+  the wrong one and a resized report silently kept the OLD geometry for every
+  drag/clamp rule while rendering the new sheet. If you touch boot-time
+  layout normalisation, grep for `syncPageSize()` and confirm both call
+  sites still make sense before you commit.
+- **The File menu** (`#file` / `#filepop`) is the top-left entry point:
+  Open (switch project — the old `#proj` `<select>` is gone), Resize, and
+  Download/Token moved in from the bar (same ids, same handlers). `+ Section`
+  is hidden via `#add { display:none }` only — still fully wired.
+- **Auto-update + rollback** (`tools/selfupdate.py`, `serve.py`'s
+  `/__update` and `/__rollback`, the editor's version chip `#ver`/`#upd`):
+  an update REBASES the user's local Save commits on top when their files
+  don't overlap with the incoming ones, refuses (naming the file) when they
+  do. `apply_update()` records the pre-update SHA in
+  `.primer-previous-version` (gitignored) so `--rollback` can `reset --hard`
+  back to it — safe there specifically because that commit already includes
+  the user's own prior saves. The server checks in the background every 20
+  min (`UPDATE_POLL`), not just at launch.
+- **Dismiss-on-outside-click** (`closeOnOutsideClick` /
+  `closeOnOutsideClick`'s per-render twin `bindOutsideClose`): a click
+  inside the report iframe does NOT bubble to the parent document, so it
+  needs its own listener, rebound every render. Table/Chart/Colour panels
+  are deliberately exempt (`RAIL_PICKERS` only covers Text/Shape/Icon) —
+  they describe a selection and are used WHILE clicking the canvas. A click
+  while any `dialog[open]` exists is ignored outright.
+- **Chrome is one system now**: `--canvas` is the single grey behind the
+  report, the contextual toolbar card, and `#work`'s background (the last
+  one exists specifically so the rail's rounded corners don't show white
+  wedges). `--r-ctl`/`--r-card`/`--r-edge` are the only three border-radius
+  values anything should use. `--rail-w` is border-box — if you add another
+  surface anchored to `left: var(--rail-w)`, this is why it lines up.
+- **Contextual strip never shows an element's raw id** (`cover.logo` etc.)
+  — it showed a count or nothing, with the id on `title=` only. If you add a
+  new selection-summary field, keep that rule.
+- **Page strip folds and remembers per project**
+  (`localStorage['primer-rail-folded:'+M.id]`, restored in `boot()`).
+- **A rewritten test that only asserts a CSS declaration (`justify-content:
+  center`, a class name, a boundingBox read right after a CSS transition
+  starts) can pass against the exact bug it's meant to catch.** This bit us
+  three times in one session — always verify a new/rewritten assertion FAILS
+  on the pre-fix code before trusting it, not just that it passes on the fix.

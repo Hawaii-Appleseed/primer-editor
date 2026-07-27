@@ -19,7 +19,7 @@ asserts against that report's real content.
 | `report2027/` | the bundled Budget Primer demo — `content.md`, `layout.json`, `tools/render_report.py`, data — that the editor renders and the tests exercise |
 | `report2027/tools/serve.py` | the local live server: watch-rebuild-reload, plus `/__save` (commit locally) and `/__push` (send to GitHub) |
 | `report2027/tools/make_launcher.sh` | builds a double-clickable macOS `.app` that boots the server and opens the editor |
-| `tests/editor/` | the Playwright suite (170+ specs) — runs against the real `serve.py` with GitHub fully mocked; never touches the network |
+| `tests/editor/` | the Playwright suite (276 specs) — runs against the real `serve.py` with GitHub fully mocked; never touches the network |
 
 ## Install
 
@@ -40,15 +40,23 @@ defaults.
 
 ### It updates itself
 
-Opening the app fast-forwards the checkout from GitHub before the server
-starts — so publishing an update is `git push`, and users get it next time they
-open the editor.
+The server checks for updates in the background every 20 minutes — not just at
+launch — and the editor's version chip (bottom of the toolbar) offers one the
+moment it can be taken, naming what's in it. Publishing an update is a
+`git push`; nothing here needs a release step.
 
-**It will never touch your work.** The update is fast-forward only, and it
-stops and explains itself instead whenever you have uncommitted changes, local
-commits of your own, or no connection. What you have installed is a normal git
-checkout you own: read it, edit it, commit, open a pull request. Run
-`python3 tools/selfupdate.py --check` any time to see where you stand.
+**It will never lose your work.** What you have installed is a normal git
+checkout you own: read it, edit it, commit, open a pull request. Save commits
+locally, so an update REBASES your local commits on top of the incoming ones
+when the files don't overlap — the common case — and only refuses (naming the
+file) when they genuinely touch the same thing. It never fast-forwards over
+uncommitted changes. Run `python3 tools/selfupdate.py --check` any time to see
+where you stand.
+
+**One bad update, undone in one click.** Every update records the version you
+were on before it ran; the version chip's tooltip offers "go back" whenever
+there's somewhere to go back to. `python3 tools/selfupdate.py --rollback` does
+the same from a terminal.
 
 ### Or by hand
 
@@ -92,7 +100,7 @@ the browser, so an edit shows in ~1s. **Save** writes the files and commits
 ```
 npm ci
 npx playwright install chromium   # the browser itself — npm ci does not fetch it
-npx playwright test               # the full editor suite (~190 specs)
+npx playwright test               # the full editor suite (276 specs)
 python3 docsync/test_docsync.py       # the engine's own self-test
 python3 report2027/tools/test_render.py   # render tolerances + edit.html syntax
 ```
@@ -100,6 +108,19 @@ python3 report2027/tools/test_render.py   # render tolerances + edit.html syntax
 The suite starts its own throwaway `serve.py` on port 8199 and mocks GitHub
 entirely — it never touches the network or your real repo. It also regenerates
 `docs/` on startup, so it works on a clone that has never been built.
+
+## The editor
+
+Canva-style: a left rail (Text/Shape/Icon/Table/Chart) opens a docked panel
+rather than a cramped popover; a contextual toolbar appears above the canvas
+for whatever is selected; a bottom strip shows every page as a thumbnail and
+can be collapsed when you don't need it (remembered per project). The
+top-left **File** menu is where report-level actions live: Open (switch
+between reports this server knows about), Resize (six standard doc sizes —
+changing one re-renders the report at it, live), Download, and the GitHub
+token. Clicking the report itself dismisses whatever menu or panel is open,
+except the ones that describe your current selection (Table/Chart/Colour),
+which stay open so you can keep working while they're up.
 
 ## Architecture: one editor, many reports
 
