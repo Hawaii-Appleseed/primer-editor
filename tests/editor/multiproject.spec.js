@@ -1,7 +1,19 @@
 // Multi-project registry (docsync/editor/edit.html): loadRegistry() reads
-// projects.json beside the editor and shows a #proj picker only when it names
-// 2+ ids — one editor, any number of reports.
-const { test, expect, gotoEditor, fillDialog, submitDialog, cancelDialog, clickAddSection } = require('./fixtures/editor-test');
+// projects.json beside the editor — one editor, any number of reports.
+//
+// Switching used to be a <select> in the toolbar. It is File > Open now: a
+// second control doing the same job, in a place that had to explain itself,
+// was one too many once the menu existed. These tests moved with it.
+const { test, expect, gotoEditor, fillDialog, submitDialog, cancelDialog,
+        clickAddSection, openFileMenu } = require('./fixtures/editor-test');
+
+/** Open File > Open and return the list of reports it offers. */
+async function openList(page) {
+  await openFileMenu(page);
+  await page.click('#file-open');
+  await page.locator('#openpop').waitFor({ state: 'visible' });
+  return page.locator('#open-list button');
+}
 
 async function withTwoProjectRegistry(context) {
   // Serve a registry this test OWNS rather than editing whatever is on disk.
@@ -26,12 +38,13 @@ test.describe('multi-project registry', () => {
     await withTwoProjectRegistry(context);
   });
 
-  test('the picker is hidden with one project, visible with two', async ({ page }) => {
+  test('every registered report is offered, and the open one is marked', async ({ page }) => {
     await gotoEditor(page);
-    const sel = page.locator('#proj');
-    await expect(sel).toBeVisible();
-    const values = await sel.locator('option').evaluateAll(opts => opts.map(o => o.value));
-    expect(values.sort()).toEqual(['budget-primer', 'second-report']);
+    const items = await openList(page);
+    const ids = await items.evaluateAll(bs => bs.map(b => b.dataset.open).sort());
+    expect(ids).toEqual(['budget-primer', 'second-report']);
+    await expect(page.locator('#open-list button[aria-current="true"]'))
+      .toHaveAttribute('data-open', 'budget-primer');
   });
 
   test('switching projects navigates with ?project= and the picker reflects it', async ({ page }) => {
@@ -39,7 +52,8 @@ test.describe('multi-project registry', () => {
     // one test — the default budget cannot cover two cold boots.
     test.setTimeout(180_000);
     await gotoEditor(page);
-    await page.locator('#proj').selectOption('second-report');
+    (await openList(page)).filter({ has: page.locator('[data-open]') });
+    await page.click('#open-list button[data-open="second-report"]');
     // 'commit' — the assertion is about the URL the switch navigates to; make
     // it wait on the navigation itself rather than on the whole load, then
     // wait for the render separately with its own generous budget.
@@ -48,12 +62,17 @@ test.describe('multi-project registry', () => {
       .waitFor({ state: 'visible', timeout: 90_000 });
 
     expect(new URL(page.url()).searchParams.get('project')).toBe('second-report');
-    await expect(page.locator('#proj')).toHaveValue('second-report');
+    const items = await openList(page);
+    await expect(page.locator('#open-list button[aria-current="true"]'))
+      .toHaveAttribute('data-open', 'second-report');
+    expect(await items.count()).toBe(2);
   });
 
   test('an unknown ?project= falls back to the default engine, not an error', async ({ page }) => {
     await gotoEditor(page, '?project=does-not-exist');
-    await expect(page.locator('#proj')).toHaveValue('budget-primer');
+    await openList(page);
+    await expect(page.locator('#open-list button[aria-current="true"]'))
+      .toHaveAttribute('data-open', 'budget-primer');
     await expect(page.locator('#title')).toContainText('budget-primer');
   });
 
@@ -69,12 +88,12 @@ test.describe('multi-project registry', () => {
     await expect(page.locator('#undo')).toBeEnabled();   // confirms the edit landed, dirty=true
 
     const urlBefore = page.url();
-    await page.locator('#proj').selectOption('second-report');
-    await cancelDialog(page);   // decline the "Switch project?" confirm
+    await openList(page);
+    await page.click('#open-list button[data-open="second-report"]');
+    await cancelDialog(page);   // decline the "Open ...? Unsaved edits are lost" confirm
     await page.waitForTimeout(500);   // give a (wrongly) accepted navigation a chance to happen
 
-    expect(page.url()).toBe(urlBefore);   // declined -> selection reverts, no navigation
-    await expect(page.locator('#proj')).toHaveValue('budget-primer');
+    expect(page.url()).toBe(urlBefore);   // declined -> no navigation
   });
 });
 
