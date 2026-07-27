@@ -7,7 +7,29 @@
 // response feeds the next request. A handful of independent mocks drift out of
 // sync with that chain the first time it changes; one small stateful backend
 // stays correct because it behaves like git actually does.
-const REPO = 'dtomkatsu/BudgetPrimerFinal';
+// WHICH repo, read from the manifest the editor itself boots from rather than
+// written down here. It was a constant, and when this repo's fixture was
+// re-bound (report2027 became a fixture inside primer-editor) the constant
+// stayed behind. Every call then failed the owner/name check below and came
+// back 404 — which the editor reports as "save failed", so seven tests across
+// drafts, deploy-branch, download and offline-cache went red for one stale
+// string, none of them naming it.
+const fs = require('fs');
+const path = require('path');
+
+function manifestRepo() {
+  const f = path.join(__dirname, '..', '..', '..', 'docs', 'primer', 'engine', 'manifest.json');
+  try {
+    const r = JSON.parse(fs.readFileSync(f, 'utf8')).repo;
+    if (r) return r;
+  } catch (e) { /* not staged yet — fall through */ }
+  throw new Error(
+    'fake-github: cannot read the fixture\'s repo from ' + f + '.\n' +
+    'Run `python3 -m docsync.stage --id budget-primer` first — the mock has to ' +
+    'answer for whatever repo the editor actually asks about.');
+}
+
+const REPO = manifestRepo();
 
 function sha(seed) {
   return seed.toString(16).padStart(40, '0').slice(0, 40);

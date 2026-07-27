@@ -5,8 +5,19 @@
 // browser's own print() for PDF-only when there's no local server.
 const { test, expect, gotoEditor, PING, openFileMenu } = require('./fixtures/editor-test');
 
+/** The exported file is named after the report as a PERSON knows it, which
+ *  comes from the registry — and projects.json is per-machine, so a test that
+ *  reads whatever this computer happens to have is asserting the computer.
+ *  Serve one the test owns instead. */
+async function withNamedProject(context, name) {
+  await context.route('**/projects.json*', route => route.fulfill({
+    json: { 'budget-primer': { name, base: '' } },
+  }));
+}
+
 test.describe('download: local mode (server-rendered PDF/PNG via /__export)', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    await withNamedProject(context, 'Budget Primer FY2026–27');
     await gotoEditor(page);
   });
 
@@ -36,8 +47,11 @@ test.describe('download: local mode (server-rendered PDF/PNG via /__export)', ()
       page.waitForEvent('download'),
       page.click('#dl-png'),
     ]);
-    expect(download.suggestedFilename()).toBe('Budget-Primer-pages.zip');
-    await expect(page.locator('#stat')).toContainText('downloaded Budget-Primer-pages.zip');
+    // The SAME basename as the PDF — this expected a shorter one, from back
+    // when the registry name was shorter, so the two tests disagreed about
+    // what one report is called.
+    expect(download.suggestedFilename()).toBe('Budget-Primer-FY2026-27-pages.zip');
+    await expect(page.locator('#stat')).toContainText('downloaded Budget-Primer-FY2026-27-pages.zip');
   });
 });
 
