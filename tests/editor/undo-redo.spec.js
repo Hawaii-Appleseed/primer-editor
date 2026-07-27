@@ -1,10 +1,10 @@
 // Undo/redo (docsync/editor/edit.html): pushHistory()/undo()/redo() snapshot
 // {source, layout} on every structural edit. Uses the section-add flow (now a
 // native <dialog> form) as a convenient, already-verified mutation.
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 async function addSection(page, slug) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug });
   await submitDialog(page);
   await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

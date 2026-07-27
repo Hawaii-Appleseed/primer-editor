@@ -2,13 +2,13 @@
 // mode — /__ping is blocked so local=false and every persistence call goes
 // through gh() against the in-memory FakeGitHub (tests/editor/fixtures/
 // fake-github.js), never the real GitHub API.
-const { hostedTest: test, expect, gotoEditor, fillDialog, submitDialog, submitDialogIfPresent } = require('./fixtures/editor-test');
+const { hostedTest: test, expect, gotoEditor, fillDialog, submitDialog, submitDialogIfPresent, clickAddSection } = require('./fixtures/editor-test');
 
 // Every modal here is a native <dialog>: the +Section form, the print-fit-cut
 // confirm on Save, and the publish/discard confirms. submitDialog clicks OK on
 // whichever one is currently open.
 async function addASection(page) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug: 'draft-section' });
   await submitDialog(page);
   await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

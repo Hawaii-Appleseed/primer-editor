@@ -3,7 +3,7 @@
 // point of the change — a validation error keeps typed input instead of
 // discarding it (the old sequential-prompt + alert flow lost everything), and
 // cancel/Escape are clean no-ops.
-const { test, expect, gotoEditor, dialog, fillDialog, cancelDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, dialog, fillDialog, cancelDialog, clickAddSection } = require('./fixtures/editor-test');
 
 test.describe('modal dialogs', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe('modal dialogs', () => {
   });
 
   test('cancelling the +Section form adds nothing and pushes no history', async ({ page }) => {
-    await page.click('#add');
+    await clickAddSection(page);
     await fillDialog(page, { slug: 'never-added' });
     await cancelDialog(page);
 
@@ -20,7 +20,7 @@ test.describe('modal dialogs', () => {
   });
 
   test('a validation error keeps the form (and its input) open, then submits once fixed', async ({ page }) => {
-    await page.click('#add');
+    await clickAddSection(page);
     const d = await dialog(page);
 
     // Non-empty but normalizes to an empty slug — trips the dsForm validator.
@@ -40,7 +40,7 @@ test.describe('modal dialogs', () => {
   });
 
   test('Escape cancels a dialog without acting', async ({ page }) => {
-    await page.click('#add');
+    await clickAddSection(page);
     await dialog(page);
     await page.keyboard.press('Escape');
 

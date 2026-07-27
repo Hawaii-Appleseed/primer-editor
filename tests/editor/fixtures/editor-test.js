@@ -110,6 +110,18 @@ const hostedTest = base.test.extend({
   },
 });
 
+/** Download and Token live in the File menu now, so reaching either means
+ *  opening it first — which is what a person does too. */
+async function openFileMenu(page) {
+  await page.click('#file');
+  await page.locator('#filepop').waitFor({ state: 'visible' });
+}
+
+/** +Section is hidden from the toolbar for now (#add { display:none }), but
+ *  still wired. Playwright cannot click a control with no box, so drive it the
+ *  way the app does. The day it comes back this becomes page.click again. */
+const clickAddSection = (page) => page.evaluate(() => document.getElementById('add').click());
+
 // --- native <dialog> helpers ------------------------------------------------
 // prompt()/confirm() were replaced by dsForm/dsConfirm/dsPrompt over a native
 // <dialog class="dsdlg"> in the PARENT document (not the iframe). These drive
@@ -151,7 +163,7 @@ async function submitDialogIfPresent(page, timeout = 3000) {
 }
 
 module.exports = {
-  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS, UPDATE,
+  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS, UPDATE, openFileMenu, clickAddSection,
   blockDangerousLocalEndpoints, dialog, fillDialog, submitDialog, cancelDialog,
   submitDialogIfPresent,
 };

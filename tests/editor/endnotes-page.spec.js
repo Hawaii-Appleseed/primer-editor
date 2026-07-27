@@ -6,7 +6,7 @@
 // function the floating Sources panel's own fields call. Since the page's
 // <li> list is rebuilt fresh from content.md's [[sources]] block on every
 // render, editing either surface can never leave the other stale. Local mode.
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 
 /** Add a brand-new source through the real UI flow. The inline toolbar (and
@@ -17,7 +17,7 @@ const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtur
 let citeCounter = 0;
 async function addSourceViaUi(page, id, text, url) {
   const frame = page.frameLocator('#out');
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug: 'cite-' + (++citeCounter) });
   await submitDialog(page);
   const host = frame.locator('.ds-edit');

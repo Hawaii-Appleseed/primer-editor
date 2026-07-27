@@ -3,13 +3,13 @@
 // flows now go through native <dialog> modals (dsForm/dsConfirm), not
 // prompt()/confirm(). Local-mode: no GitHub, only in-memory `source` and the
 // Pyodide-rendered iframe.
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 /** Add a section through the +Section dialog: pick a page and name it in one
  *  form, submit, then Escape out of the auto-opened editor so it re-renders
  *  read-only with its .extra-section / .ds-xtools controls. */
 async function addSection(page, slug, pageValue = 'basics') {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: pageValue, slug });
   await submitDialog(page);
   await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

@@ -3,14 +3,14 @@
 // survived htmlToMd at commit, so the structure vanished silently minutes
 // later. Now the clipboard is normalized through the report's OWN grammar on
 // the way in, so what lands on the page is what will render. Local mode.
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 let counter = 0;
 
 /** A +Section overflow slot: block_html's grammar, so lists and headings are
  *  real there — the richest paste target the report has. */
 async function openSection(page) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug: 'paste-' + (++counter) });
   await submitDialog(page);
   const ta = page.frameLocator('#out').locator('.ds-edit');

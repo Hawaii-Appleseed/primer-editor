@@ -4,10 +4,10 @@
 // lose work. Hosted mode — page.reload() keeps the same origin, so the same
 // IndexedDB and the fake-GitHub context routes survive the reload.
 const { hostedTest: test, expect, gotoEditor, waitForFirstRender,
-        fillDialog, submitDialog, submitDialogIfPresent, PING } = require('./fixtures/editor-test');
+        fillDialog, submitDialog, submitDialogIfPresent, PING, clickAddSection } = require('./fixtures/editor-test');
 
 async function addSection(page, slug) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug });
   await submitDialog(page);
   await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

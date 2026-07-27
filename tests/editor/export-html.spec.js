@@ -4,7 +4,7 @@
 // minus the editing scaffolding, with everything it referenced pulled inline.
 // These tests hold that line: same page count, same text, no data-slot/
 // data-el hooks, no external references left dangling.
-const { test, expect, gotoEditor } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 /** Run the export and capture the file instead of writing it to disk. */
 async function grabExport(page, which) {
@@ -20,7 +20,8 @@ async function grabExport(page, which) {
       return realClick.call(this);
     };
   });
-  await page.click('#download');
+  await openFileMenu(page);
+    await page.click('#download');
   await page.click(which);
   await page.waitForFunction(() => window.__dl !== null, null, { timeout: 60_000 });
   return {

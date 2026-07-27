@@ -3,13 +3,13 @@
 // selected paragraph-level blocks to/from <li>s; the renderer's block_html()
 // only gives '- '/'N. ' lines meaning for a +Section overflow block, so that's
 // what these buttons are offered on (see buildTools's allowLists gate).
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 // Enter in a contenteditable creates a new block per line (unlike a textarea,
 // where '\n' is just a character within one value) — build the paragraphs
 // directly so the list-toggle's per-block logic has real blocks to work with.
 async function addSectionAndEdit(page, slug, lines) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug });
   await submitDialog(page);
   const frame = page.frameLocator('#out');

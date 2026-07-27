@@ -5,10 +5,10 @@
 // branch:"production", and the fake GitHub is seeded with that branch — so a
 // real Save-then-Publish must fork from and merge into production, never main.
 const { hostedTest: test, expect, gotoEditor, fillDialog, submitDialog,
-        submitDialogIfPresent } = require('./fixtures/editor-test');
+        submitDialogIfPresent, clickAddSection } = require('./fixtures/editor-test');
 
 async function addASection(page) {
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug: 'branch-section' });
   await submitDialog(page);
   await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

@@ -3,7 +3,7 @@
 // (mocked by the shared fixture — see STANDALONE.md §C, this never spawns the
 // real headless-Chrome PDF/PNG renderer in tests) or falls back to the
 // browser's own print() for PDF-only when there's no local server.
-const { test, expect, gotoEditor, PING } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, PING, openFileMenu } = require('./fixtures/editor-test');
 
 test.describe('download: local mode (server-rendered PDF/PNG via /__export)', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,6 +11,7 @@ test.describe('download: local mode (server-rendered PDF/PNG via /__export)', ()
   });
 
   test('the popover offers PNG (and bleed marks) only when a local server is present', async ({ page }) => {
+    await openFileMenu(page);
     await page.click('#download');
     await expect(page.locator('#downloadpop')).toBeVisible();
     await expect(page.locator('#dl-png')).toBeEnabled();
@@ -18,6 +19,7 @@ test.describe('download: local mode (server-rendered PDF/PNG via /__export)', ()
   });
 
   test('PDF downloads a file named for the report', async ({ page }) => {
+    await openFileMenu(page);
     await page.click('#download');
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -28,6 +30,7 @@ test.describe('download: local mode (server-rendered PDF/PNG via /__export)', ()
   });
 
   test('PNG downloads a per-page zip', async ({ page }) => {
+    await openFileMenu(page);
     await page.click('#download');
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -41,6 +44,7 @@ test.describe('download: local mode (server-rendered PDF/PNG via /__export)', ()
 test.describe('download: source zip (fflate, client-side)', () => {
   test('bundles content.md + layout.json into a zip named for the project', async ({ page }) => {
     await gotoEditor(page);
+    await openFileMenu(page);
     await page.click('#download');
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -68,6 +72,7 @@ test.describe('download: hosted mode (no local server)', () => {
   });
 
   test('PNG and bleed marks are disabled, with a tooltip explaining why', async ({ page }) => {
+    await openFileMenu(page);
     await page.click('#download');
     await expect(page.locator('#dl-png')).toBeDisabled();
     await expect(page.locator('#dl-png')).toHaveAttribute('title', /local live server/);
@@ -87,6 +92,7 @@ test.describe('download: hosted mode (no local server)', () => {
       };
     });
 
+    await openFileMenu(page);
     await page.click('#download');
     await page.click('#dl-pdf');
     await expect.poll(() => page.evaluate(() =>

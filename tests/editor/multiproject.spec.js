@@ -1,7 +1,7 @@
 // Multi-project registry (docsync/editor/edit.html): loadRegistry() reads
 // projects.json beside the editor and shows a #proj picker only when it names
 // 2+ ids — one editor, any number of reports.
-const { test, expect, gotoEditor, fillDialog, submitDialog, cancelDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, cancelDialog, clickAddSection } = require('./fixtures/editor-test');
 
 async function withTwoProjectRegistry(context) {
   // Serve a registry this test OWNS rather than editing whatever is on disk.
@@ -61,7 +61,7 @@ test.describe('multi-project registry', () => {
     await gotoEditor(page);
     // Make a real edit so dirty=true — reuse the +Section flow (already proven
     // in sections.spec.js) via its <dialog> form.
-    await page.click('#add');
+    await clickAddSection(page);
     await fillDialog(page, { page: 'basics', slug: 'mp-test-section' });
     await submitDialog(page);
     await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });

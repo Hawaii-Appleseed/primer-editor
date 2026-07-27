@@ -4,7 +4,7 @@
 // paste-a-token fallback is what's actually configured), so this test injects
 // one into the manifest response and fakes the relay, to exercise the code
 // path that OAUTH_SETUP.md would activate.
-const { hostedTest: test, expect, gotoEditor } = require('./fixtures/editor-test');
+const { hostedTest: test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 const RELAY = 'https://fake-relay.test';
 
@@ -40,6 +40,7 @@ test.describe('oauth device-flow sign-in', () => {
     await gotoEditor(page);
     // hostedTest seeds a PAT so the app never prompts on its own; Token…
     // explicitly clears it first, which is what actually triggers ensureAuth().
+    await openFileMenu(page);
     await page.click('#tok');
 
     const panel = page.locator('#authpanel');
@@ -60,6 +61,7 @@ test.describe('oauth device-flow sign-in', () => {
     });
 
     await gotoEditor(page);
+    await openFileMenu(page);
     await page.click('#tok');
     await expect(page.locator('#authpanel')).toBeHidden({ timeout: 10_000 });
 
@@ -74,6 +76,7 @@ test.describe('oauth device-flow sign-in', () => {
     }));
 
     await gotoEditor(page);
+    await openFileMenu(page);
     await page.click('#tok');
     await expect(page.locator('#authpanel .au-msg')).toContainText('declined', { timeout: 10_000 });
     await expect(page.locator('#authpanel')).toBeHidden({ timeout: 5_000 });

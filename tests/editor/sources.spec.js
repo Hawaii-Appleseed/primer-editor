@@ -2,7 +2,7 @@
 // toolbar button while editing a paragraph, then edit/rename/reorder/delete
 // it from the Sources panel (openSources/renderSources/addSource/
 // updateSource/renameSource/moveSource/deleteSource). Local-mode, no GitHub.
-const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
 
 // toc.author (the "Author: …" byline). Like every movable text in the
 // report it now sits inside a [data-el] object, so a single click selects
@@ -17,7 +17,7 @@ const { test, expect, gotoEditor, fillDialog, submitDialog } = require('./fixtur
 let citeCounter = 0;
 async function addSourceViaUi(page, id, text, url) {
   const frame = page.frameLocator('#out');
-  await page.click('#add');
+  await clickAddSection(page);
   await fillDialog(page, { page: 'basics', slug: 'cite-' + (++citeCounter) });
   await submitDialog(page);
   const host = frame.locator('.ds-edit');
