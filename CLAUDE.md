@@ -4,6 +4,24 @@
 > — load it when building or changing anything a report's user should be able
 > to edit. This file is the always-on summary.
 
+## Default to driving the editor UI, not editing files
+
+When the user asks for a visual/content change — move, resize, restyle,
+retext, recolor an element, swap an image, adjust a chart — **drive
+`edit.html` in the browser** (open it, click, drag, type) instead of editing
+`content.md` / `layout.json` / any file directly. That is what the editor is
+*for*: a drag writes `layout.json` and nothing else, Save is a local commit
+the user reviews before Push, and the browser session has no reach into
+`docsync/*.py` or the renderer even by accident.
+
+Only edit repo files directly when the user's instruction is explicitly about
+the files or the code — "edit content.md", "fix the renderer", "change how
+tables render", "update layout.py", or similar. If a request is ambiguous
+("make the intro shorter"), prefer the UI; it is reversible in the same way a
+human's own edit would be, and never risks touching engine code that vendors
+out to every consumer repo on commit (see below). Say which mode you're in if
+it isn't obvious from the request.
+
 This repo is the **canonical home of the editor engine**: `docsync/` (content,
 layout, blocks, stage, fragment), `docsync/editor/edit.html`, and
 `report2027/tools/serve.py`. The `report2027/` report here is a **test
