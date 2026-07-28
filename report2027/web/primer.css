@@ -49,6 +49,12 @@ img.inline-img { display: block; max-width: 100%; height: auto; margin: 10px 0;
 /* Overflow slots ([[extra.<page>.<slug>]]) — bullet lists outside cards */
 ul.extra-bullets { margin: 0 0 12px; padding-left: 20px; }
 ul.extra-bullets li { margin: 3px 0; }
+/* Sub-bullets. The UA default indent (40px) is twice the list's own and reads
+   as a second column rather than a level, and a nested list inherits no class
+   to hang this on — content.py only labels the outermost one. */
+li > ul, li > ol { margin: 3px 0 0; padding-left: 18px; }
+li > ul { list-style-type: circle; }
+li > ul ul { list-style-type: square; }
 ol.extra-numbers { margin: 0 0 12px; padding-left: 22px; }
 ol.extra-numbers li { margin: 3px 0; }
 
