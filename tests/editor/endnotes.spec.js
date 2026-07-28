@@ -23,18 +23,20 @@ test.describe('right-click endnotes', () => {
     await gotoEditor(page);
   });
 
-  test('right-click offers "Add endnote here" and inserts a [^id] ref', async ({ page }) => {
+  test('right-click offers "New endnote" and inserts a [^id] ref', async ({ page }) => {
     const frame = page.frameLocator('#out');
     const ta = await openProse(page);
     await ta.click({ button: 'right' });
 
     const menu = frame.locator('.ds-menu');
     await expect(menu).toBeVisible();
-    await menu.locator('button', { hasText: 'Add endnote here' }).click();
+    await menu.locator('button', { hasText: 'New endnote' }).click();
 
     // The shared new-source dialog opens in the parent doc.
+    // The citation is assembled from its parts now, in the house style.
     await fillDialog(page, {
-      id: 'rc-src', text: 'A right-click source, 2026.', url: 'https://example.com/rc',
+      id: 'rc-src', title: 'A right-click source', publisher: 'Example Org',
+      date: '2026', url: 'https://example.com/rc',
     });
     await submitDialog(page);
 
@@ -47,14 +49,18 @@ test.describe('right-click endnotes', () => {
     // First create a source via right-click.
     let ta = await openProse(page);
     await ta.click({ button: 'right' });
-    await frame.locator('.ds-menu button', { hasText: 'Add endnote here' }).click();
-    await fillDialog(page, { id: 'existing1', text: 'First source.', url: 'https://example.com/1' });
+    await frame.locator('.ds-menu button', { hasText: 'New endnote' }).click();
+    await fillDialog(page, { id: 'existing1', title: 'First source',
+                             url: 'https://example.com/1' });
     await submitDialog(page);
     await expect(ta).toContainText('[^existing1]');
 
-    // Right-click again — the existing source is now offered directly.
+    // Right-click again — the existing source is offered behind the
+    // "Existing endnote" row, which keeps the common case (a NEW source) from
+    // being buried under a document's worth of citations.
     await ta.click({ button: 'right' });
-    const cite = frame.locator('.ds-menu button', { hasText: '[existing1]' });
+    await frame.locator('.ds-menu button.ds-sub').hover();
+    const cite = frame.locator('.ds-submenu button', { hasText: 'First source' });
     await expect(cite).toBeVisible();
     await cite.click();
     // A second reference to the same source now sits in the text, as a

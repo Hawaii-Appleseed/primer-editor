@@ -39,7 +39,9 @@ async function clickReport(page) {
 test.describe('clicking away dismisses', () => {
   test('a popover closes when the report is clicked', async ({ page }) => {
     await gotoEditor(page);
-    await page.click('#layers');
+    // #layers is display:none for now — the button and its popover stay wired,
+    // which is exactly what this test is about, so open it programmatically.
+    await page.evaluate(() => document.getElementById('layers').click());
     await expect(page.locator('#layerspop')).toBeVisible();
     await clickReport(page);
     await expect(page.locator('#layerspop')).toBeHidden();
@@ -47,7 +49,9 @@ test.describe('clicking away dismisses', () => {
 
   test('a popover still closes when other chrome is clicked', async ({ page }) => {
     await gotoEditor(page);
-    await page.click('#layers');
+    // #layers is display:none for now — the button and its popover stay wired,
+    // which is exactly what this test is about, so open it programmatically.
+    await page.evaluate(() => document.getElementById('layers').click());
     await expect(page.locator('#layerspop')).toBeVisible();
     await page.click('#stat');
     await expect(page.locator('#layerspop')).toBeHidden();

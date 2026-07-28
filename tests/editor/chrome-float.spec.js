@@ -36,14 +36,12 @@ test.describe('floating chrome', () => {
       expect(g.railBg).toMatch(/, 0\)$|^transparent$/);
       // the document runs all the way to the bottom of the window
       expect(g.work.bottom).toBeCloseTo(g.winH, 0);
-      // The LABEL (not the strip's box, which spans the window and does its
-      // offsetting in padding) clears the dark tool rail, so a colour chosen
-      // for the light canvas is legible on the ground it actually lands on.
-      const headX = await page.locator('#rail-head').evaluate(el =>
+      // The control sits in the window's bottom-left CORNER. It only ever sat
+      // inboard of that because the tool rail used to run the full height;
+      // the rail stops after its last button now, so the corner is free.
+      const foldX = await page.locator('#rail-fold').evaluate(el =>
         el.getBoundingClientRect().x);
-      const railW = await page.evaluate(() => parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--rail-w')));
-      expect(headX).toBeGreaterThanOrEqual(railW);
+      expect(foldX).toBeLessThan(30);
       // the chevron is still reachable through the pass-through strip
       await page.click('#rail-fold');
       await expect(page.locator('#rail')).not.toHaveClass(/folded/);
@@ -139,5 +137,52 @@ test.describe('page strip fold', () => {
       expect(s).not.toBeNull();
       expect(s).toBeGreaterThan(0.01);
       await expect(page.locator('.chip-thumb.empty')).toHaveCount(0);
+    });
+});
+
+// The arrange strip describes a SELECTION, so with nothing selected there is
+// nothing for it to say and it stays away entirely. Insert Image moved to the
+// left tool rail precisely so that hiding it costs nothing.
+test.describe('selection-contextual arrange strip', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+    await page.waitForTimeout(700);
+  });
+
+  test('no selection, no card', async ({ page }) => {
+    await expect(page.locator('#arrange')).toBeHidden();
+    await expect(page.locator('#ar-pos')).toBeHidden();
+    await page.evaluate(() => setSel($('out').contentDocument, ['cover.logo']));
+    await page.waitForTimeout(400);
+    await expect(page.locator('#arrange')).toBeVisible();
+    await expect(page.locator('#ar-pos')).toBeVisible();
+  });
+
+  test('Insert Image lives in the left rail, reachable with nothing selected',
+    async ({ page }) => {
+      await expect(page.locator('#arrange')).toBeHidden();
+      await expect(page.locator('#leftrail #ar-img')).toBeVisible();
+      await expect(page.locator('#leftrail #ar-img')).toBeEnabled();
+    });
+
+  test('the tool rail ends after its last button, with nothing below it',
+    async ({ page }) => {
+      const g = await page.evaluate(() => {
+        const rail = document.getElementById('leftrail');
+        const r = rail.getBoundingClientRect();
+        const last = rail.querySelector('button:last-of-type').getBoundingClientRect();
+        const work = document.getElementById('work').getBoundingClientRect();
+        const stage = document.getElementById('stage').getBoundingClientRect();
+        return { railBottom: r.bottom, lastBottom: last.bottom, workBottom: work.bottom,
+                 stageX: stage.x, workX: work.x,
+                 after: getComputedStyle(rail, '::after').content };
+      });
+      // solid only as far as the tools go — not a full-height wall
+      expect(g.railBottom).toBeLessThan(g.workBottom - 40);
+      expect(g.railBottom - g.lastBottom).toBeLessThan(20);
+      // the canvas runs underneath rather than starting where the rail ends
+      expect(g.stageX).toBeCloseTo(g.workX, 0);
+      // and nothing continues below the tools — no veil, no tint
+      expect(g.after).toBe('none');
     });
 });

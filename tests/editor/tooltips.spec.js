@@ -8,22 +8,31 @@
 // (this document) and the draft iframe (the floating mini toolbar).
 const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 
+// The arrange strip only exists while something is selected, so every test that
+// hovers a button in it has to put something in hand first. That is the point
+// of the strip — it describes a selection — but it does mean "nothing selected"
+// is no longer a state in which these buttons can be reached at all.
+const select = (page) =>
+  page.evaluate(() => setSel($('out').contentDocument, ['cover.logo']));
+
 test.describe('hover tooltips', () => {
   test.beforeEach(async ({ page }) => {
     await gotoEditor(page);
   });
 
   test('a disabled chrome button still shows its tooltip', async ({ page }) => {
-    // Nothing selected yet, so ar-dup/ar-lock are disabled — exactly the case
-    // native title never covered.
-    await expect(page.locator('#ar-dup')).toBeDisabled();
-    await page.hover('#ar-dup');
+    // Group needs two things to group, so one selected element leaves it
+    // disabled — exactly the case native title never covered.
+    await select(page);
+    await expect(page.locator('#ar-group')).toBeDisabled();
+    await page.hover('#ar-group');
     const tip = page.locator('#tt');
     await expect(tip).toBeVisible({ timeout: 2000 });
-    await expect(tip).toHaveText('Duplicate (⌘D)');
+    await expect(tip).toHaveText('Group (⌘G)');
   });
 
   test('the short label drops the " — " explanation', async ({ page }) => {
+    await select(page);
     await page.hover('#ar-lock');
     const tip = page.locator('#tt');
     await expect(tip).toBeVisible({ timeout: 2000 });
@@ -32,6 +41,7 @@ test.describe('hover tooltips', () => {
   });
 
   test('moving to a different button swaps the label without a stale one lingering', async ({ page }) => {
+    await select(page);
     await page.hover('#ar-dup');
     await expect(page.locator('#tt')).toHaveText('Duplicate (⌘D)', { timeout: 2000 });
     await page.hover('#ar-del');
@@ -39,6 +49,7 @@ test.describe('hover tooltips', () => {
   });
 
   test('moving off a button hides the tooltip', async ({ page }) => {
+    await select(page);
     await page.hover('#ar-dup');
     await expect(page.locator('#tt')).toBeVisible({ timeout: 2000 });
     await page.hover('#stat');
@@ -49,7 +60,7 @@ test.describe('hover tooltips', () => {
     // Enabled, not disabled: a disabled control suppresses mousedown itself
     // (browser default, not this feature's concern), so there is nothing to
     // dismiss-on-click for — the case worth guarding is a real action button.
-    await page.evaluate(() => setSel($('out').contentDocument, ['cover.logo']));
+    await select(page);
     await expect(page.locator('#ar-dup')).toBeEnabled();
     await page.hover('#ar-dup');
     await expect(page.locator('#tt')).toBeVisible({ timeout: 2000 });

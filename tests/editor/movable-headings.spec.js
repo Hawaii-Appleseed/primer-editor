@@ -26,11 +26,15 @@ test.describe('movable headings', () => {
     // controls in hand (Canva behaviour) — arrange stays on the mini toolbar.
     await expect(page.locator('#type')).toBeVisible();
     await expect(page.locator('#ty-key')).toHaveText('basics.h1');
-    // Width-only handles (a heading reflows on width, like any prose slot) —
-    // no corners, so it keeps the dangling rotate handle.
-    await expect(frame.locator('.ds-handles .ds-h-e')).toHaveCount(1);
-    await expect(frame.locator('.ds-handles .ds-h-w')).toHaveCount(1);
-    await expect(frame.locator('.ds-handles .ds-rot')).toHaveCount(1);
+    // A heading takes the full text-box handle set: it IS a text box the
+    // renderer happened to place, and its height is written as a floor
+    // (layout.py's hmin) so the extra edges cannot clip the words. Cornered,
+    // so it rotates from the corner rings rather than the dangling grip.
+    for (const dir of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']) {
+      await expect(frame.locator(`.ds-handles .ds-h-${dir}`)).toHaveCount(1);
+    }
+    await expect(frame.locator('.ds-handles .ds-rot')).toHaveCount(0);
+    await expect(frame.locator('.ds-handles .ds-rot-corner')).toHaveCount(4);
   });
 
   test('dragging the heading records a position, and the flow below it stays put', async ({ page }) => {

@@ -233,7 +233,13 @@
       clearTimeout(fnTimer);   // inside the popover — keep it open so the link is reachable
     } else if (!fnPinned && !fnp.hidden) {
       clearTimeout(fnTimer);
-      fnTimer = setTimeout(fnHide, 250);   // grace period to reach the popover
+      // 250ms was not enough to cross the gap between the marker and the card
+      // and land on the link: the timer starts the moment the pointer leaves
+      // the marker, and moving WITHIN the page behind fires no further
+      // mouseover to restart it, so the whole journey had to fit in a quarter
+      // of a second. #fnpop's hover bridge (primer.css) closes the gap; this
+      // gives an unhurried hand time to get there.
+      fnTimer = setTimeout(fnHide, 700);
     }
   });
 

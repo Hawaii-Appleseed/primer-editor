@@ -1,3 +1,21 @@
+/* Single-page isolation for per-page PNG export. The live server's export
+   endpoint screenshots "file://…/__export.html?only=N" once per page; this
+   hides every page but the Nth and squares it to the viewport top-left so the
+   capture is exactly that trim page. Inert without ?only= — normal loads never
+   see it. */
+(function () {
+  var m = /[?&]only=(\d+)/.exec(location.search);
+  if (!m) return;
+  var n = parseInt(m[1], 10);
+  document.documentElement.style.background = document.body.style.background = '#fff';
+  var tb = document.querySelector('.toolbar');
+  if (tb) tb.style.display = 'none';
+  document.querySelectorAll('section.page').forEach(function (pg, i) {
+    if (i === n - 1) { pg.style.margin = '0'; pg.style.height = '11in'; pg.style.boxShadow = 'none'; }
+    else { pg.style.display = 'none'; }
+  });
+})();
+
 /* Interactive layer: hover tooltips + department preview popovers that surface a
    slice of the Budget Tracker (funding trend + largest programs) in place.
    Progressive enhancement over the inline SVG; print unaffected. */
@@ -215,7 +233,13 @@
       clearTimeout(fnTimer);   // inside the popover — keep it open so the link is reachable
     } else if (!fnPinned && !fnp.hidden) {
       clearTimeout(fnTimer);
-      fnTimer = setTimeout(fnHide, 250);   // grace period to reach the popover
+      // 250ms was not enough to cross the gap between the marker and the card
+      // and land on the link: the timer starts the moment the pointer leaves
+      // the marker, and moving WITHIN the page behind fires no further
+      // mouseover to restart it, so the whole journey had to fit in a quarter
+      // of a second. #fnpop's hover bridge (primer.css) closes the gap; this
+      // gives an unhurried hand time to get there.
+      fnTimer = setTimeout(fnHide, 700);
     }
   });
 

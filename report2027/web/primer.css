@@ -386,6 +386,14 @@ svg .brk { stroke: var(--sage); stroke-width: 2; fill: none; stroke-linecap: rou
 #fnpop { position: fixed; z-index: 110; width: 320px; max-width: calc(100vw - 20px);
          background: #fff; border: 1.5px solid var(--sage-light); border-radius: 10px;
          box-shadow: 0 10px 30px rgba(47,62,70,.22); padding: 12px 14px; font-size: 12.5px; }
+/* Hover bridges across the 8px the card is offset from its marker. Without
+   them that gap is the page behind, so crossing it reads as "left the
+   popover" and starts the hide timer. Two strips rather than one box, so
+   neither ever covers the card itself and swallows a click on the link. */
+#fnpop::before, #fnpop::after { content: ""; position: absolute; left: 0; right: 0;
+         height: 14px; }
+#fnpop::before { bottom: 100%; }
+#fnpop::after { top: 100%; }
 #fnpop .fn-n { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: #7A8E92;
                text-transform: uppercase; margin-bottom: 4px; }
 #fnpop p { margin: 0 0 10px; color: #3F4F52; line-height: 1.42; }

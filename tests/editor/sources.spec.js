@@ -11,7 +11,7 @@ const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = 
 
 /** Add a brand-new source through the real UI flow. The inline toolbar (and
  *  its Cite button) is gone — citing now rides RIGHT-CLICK in a block prose
- *  editor ("Add endnote here…", the endnoteMenu), which opens the same
+ *  editor ("New endnote…", the text menu), which opens the same
  *  <dialog> form (id + citation text + URL). Each call adds its own throwaway
  *  section to cite from, since inline one-liners take no footnotes. */
 let citeCounter = 0;
@@ -23,9 +23,11 @@ async function addSourceViaUi(page, id, text, url) {
   const host = frame.locator('.ds-edit');
   await host.waitFor({ state: 'visible' });
   await host.click({ button: 'right' });
-  await frame.locator('.ds-menu button', { hasText: 'Add endnote here' }).click();
-  // The dsForm dialog opens in the parent doc; fill all three fields at once.
-  await fillDialog(page, { id, text, url });
+  await frame.locator('.ds-menu button', { hasText: 'New endnote' }).click();
+  // The dsForm dialog opens in the parent doc. The citation is assembled from
+  // its parts now, so `text` goes in as the title and comes back out wrapped
+  // in the house style's quotes.
+  await fillDialog(page, { id, title: text.replace(/[.,]+$/, ''), url });
   await submitDialog(page);
   // Blur (not Escape) to COMMIT the edit — Escape's finish(false) would
   // discard the [^id] reference spliceAt() just inserted, leaving the source
@@ -58,7 +60,8 @@ test.describe('sources panel', () => {
     const row = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[test-src-1]' }) });
     await expect(row).toBeVisible();
     await expect(row.locator('.srcuse')).toContainText('cited 1');
-    await expect(row.locator('.srctext')).toHaveValue('A Test Source, 2026.');
+    // The dialog assembles the house style, so the title comes back quoted.
+    await expect(row.locator('.srctext')).toHaveValue('"A Test Source, 2026."');
     await expect(row.locator('input').nth(1)).toHaveValue('https://example.com/a');
     // Cited: the panel must refuse to delete it out from under the citation.
     await expect(row.locator('.srcdel')).toBeDisabled();

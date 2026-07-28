@@ -26,6 +26,11 @@ editor: render
 pub: editor
 	cp web/index.html ../docs/primer/
 	cp web/primer.css ../docs/primer/
+# primer.js too: render_report.py emits <script src="primer.js"> into every
+# built page, so leaving it out of this list meant the served report kept
+# whatever copy happened to be in docs/ — every change to the interactive
+# layer (footnote popovers, hover tooltips) silently never shipped.
+	cp web/primer.js ../docs/primer/
 	mkdir -p ../docs/primer/assets && cp -R web/assets/. ../docs/primer/assets/
 
 data:

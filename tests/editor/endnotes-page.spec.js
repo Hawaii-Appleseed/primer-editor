@@ -23,9 +23,11 @@ async function addSourceViaUi(page, id, text, url) {
   const host = frame.locator('.ds-edit');
   await host.waitFor({ state: 'visible' });
   await host.click({ button: 'right' });
-  await frame.locator('.ds-menu button', { hasText: 'Add endnote here' }).click();
-  // The dsForm dialog opens in the parent doc; fill all three fields at once.
-  await fillDialog(page, { id, text, url });
+  await frame.locator('.ds-menu button', { hasText: 'New endnote' }).click();
+  // The dsForm dialog opens in the parent doc. The citation is assembled from
+  // its parts now, so `text` goes in as the title and comes back wrapped in
+  // the house style's quotes.
+  await fillDialog(page, { id, title: text.replace(/[.,]+$/, ''), url });
   await submitDialog(page);
   await frame.locator('.ds-edit').evaluate(el => el.blur());
   await frame.locator('.ds-edit').waitFor({ state: 'detached' });
