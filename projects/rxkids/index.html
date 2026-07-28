@@ -1920,23 +1920,36 @@
      fill shape (which has its own orange separators), so they add none. */
   .rxk-col--other { border-right: 1px solid rgba(255,255,255,.28); }
   .rxk-col--other:last-child { border-right: none; }
-  /* Warm cream backdrop for the How-RxKids-would-work section (replaces the
-     cool blue-grey). The white step/banner cards and the green $15M pill still
-     read clearly on it; the connector line between steps is warmed to a soft
-     amber so it doesn't clash with the cream. */
-  .rxk-hiw-bg { background-color: #FEDF98; }
-  .rxk-hiw-bg .tfc-step:not(:last-child)::after { background: #E8B04B; }
-  .rxk-hiw-bg .tfc-steps-note { color: #8A6D3B; }
-  /* The section heading was navy (cool) — jarring on the warm cream. A deep
-     warm espresso-brown keeps the contrast but reads with the background. */
-  .rxk-hiw-bg .tfc-section-title { color: #4A3413; }
+  /* Backdrop for the How-RxKids-would-work section: an 18% tint of the brand
+     blue #0082C9. This is the page's only coloured band before the magenta
+     TANF section, so it has to hand off to that band — the previous mustard
+     cream did that badly (warm yellow straight into magenta), and yellow is
+     the palette's weakest colour besides. Blue is a core brand colour that
+     was otherwise only carrying one benefit tab; it reads cool and
+     mechanism-y for the "how it works" step-through, sets the section apart
+     from the white sections above, and sits next to magenta as a neighbour
+     rather than a clash. White step/banner cards and the green $15M pill and
+     cost button all pop harder on blue than they did on the cream — and that
+     green is the TANF/money colour, so it previews the section below. */
+  .rxk-hiw-bg { background-color: #D1E8F5; }
+  .rxk-hiw-bg .tfc-step:not(:last-child)::after { background: #7FB9DE; }
+  .rxk-hiw-bg .tfc-steps-note { color: #3F6B8C; }
+  /* Heading goes back to the brand navy — it was only espresso-brown to cope
+     with the warm cream, and navy is the correct ink on a cool blue field. */
+  .rxk-hiw-bg .tfc-section-title { color: #2A3A4D; }
 
-  /* "How TANF helps pay for RxKids" top band — magenta field (logo magenta).
-     Its heading/intro go white; the "two ways" comparison cards stay light
-     boxes, which read cleanly on the magenta. */
-  .rxk-tanf-top { background-color: #AB3192; }
+  /* "How TANF helps pay for RxKids" top band — a deep grape drawn from the
+     same purple family as the funding timeline further down (#8E3B9C /
+     #7A3E9D / #9B4DB8) rather than the old logo magenta #AB3192. The magenta
+     was a fourth hue on a page already carrying blue, green, red and orange,
+     and it read as its own unrelated thing rather than as the purple the
+     "other funding" language uses everywhere else. Pulling it into that
+     family also makes the page's tail one descent — pale blue field, then
+     deep purple — instead of a jump between two unrelated saturated bands.
+     Heading/intro go white; the "two ways" cards stay light boxes. */
+  .rxk-tanf-top { background-color: #5B2C7B; }
   .rxk-tanf-top .tfc-section-title { color: #FFFFFF; }
-  .rxk-tanf-top .tfc-section-subtitle { color: #F7E3F1; }
+  .rxk-tanf-top .tfc-section-subtitle { color: #E7DAF2; }
   .rxk-tanf-top .rxk-tanf-h3 { color: #FFFFFF; }
 
   /* Benefits of RxKids — the tabs take the logo's rainbow (red / blue / green
@@ -1956,9 +1969,15 @@
   /* The Cost expandable's button features the statewide TANF figure — a tall
      green pill (TANF colour) with the amount big and the rest small, instead
      of the flat red text button the other expandables use. */
+  /* Deeper, cooler sea-green than the flat brand #00A750: the bright brand
+     green read acid against the cool blue field it now sits on, but the
+     button has to STAY green — it's the TANF/money colour, and the table it
+     opens is headed and tinted green. This gradient lands either side of the
+     #007A3A already used for that table's TANF figures, so the two read as
+     one tonal family instead of two different greens. */
   .rxk-cost-btn { flex-direction: column; gap: 2px; padding: 16px 40px;
-                   background: linear-gradient(135deg, #00A750, #007A3A) !important;
-                   box-shadow: 0 6px 18px rgba(0,122,58,.35) !important; line-height: 1.1; }
+                   background: linear-gradient(135deg, #00915C, #00693F) !important;
+                   box-shadow: 0 6px 18px rgba(0,90,58,.32) !important; line-height: 1.1; }
   .rxk-cost-btn-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
                            text-transform: uppercase; opacity: .9; }
   .rxk-cost-btn-amt { font-size: 2.4rem; font-weight: 800; letter-spacing: .5px;
