@@ -30,6 +30,7 @@ docs/*/edit.html
 docs/*/engine/
 docs/primer/index.html
 docs/primer/primer.css
+docs/primer/primer.js
 docs/primer/assets/
 
 # Written by tools/selfupdate.py before it moves the checkout: the way back
