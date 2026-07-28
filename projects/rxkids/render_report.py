@@ -718,6 +718,23 @@ html = f"""<!DOCTYPE html>
      hero (with the logo overlaid on its blue background) starts at the top. */
   body {{ padding-top: 0 !important; }}
   .tfc-container {{ padding-top: 0 !important; }}
+  /* Full-bleed bands must break out to the PAGE, not the viewport. Squarespace
+     sized these against the browser window (.tfc-hero: width:100vw +
+     margin-left:-50vw + left:50%; .tfc-full-width: width:100vw +
+     margin:0 calc(50% - 50vw)), which pins their left edge to viewport x≈0.
+     Here the page is a fixed {L.page_w}in sheet that gets CENTERED in whatever
+     window it's viewed at, so those two origins diverge by (viewport - page)/2
+     — and .tfc-hero's children (logo, title, badge) are absolutely positioned
+     with layout.json coords measured from the hero, so the whole hero drifts
+     further left the wider the window gets. At 1685px that already put the
+     hero's text ~220px outside the page's left edge; it only looked right at
+     a viewport of exactly {L.page_w}in.
+     Breaking out with -24px (the .tfc-container side padding) instead spans
+     the same full page width at ANY window size, and makes the saved drag
+     coords mean one fixed thing. */
+  .tfc-hero, .tfc-full-width {{
+      width: auto !important; left: 0 !important; right: auto !important;
+      margin-left: -24px !important; margin-right: -24px !important; }}
   /* The logo is an absolute overlay inside the hero (positioned by the editor
      via layout.json), so it needs no box of its own — just block display. */
   .rxkeiki-logo {{ display: block; height: auto; }}
