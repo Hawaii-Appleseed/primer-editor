@@ -2069,6 +2069,39 @@
   .tanf-choice-body { margin-bottom: 32px; }
   .rxk-col--other { background: transparent; }
   
+  /* Footnote refs. rxkids' citations all sit on light ground (benefit-panel
+     bullets, the flint lead, the small source lines), so unlike report2027 this
+     needs no inverted variant for dark cards. Tinted pill in the brand blue so
+     the marker reads as a control rather than as body punctuation. */
+  sup { font-size: 11px; line-height: 0; }
+  @media screen {
+    a.fn { color: #00669E; font-weight: 700; text-decoration: none; cursor: pointer;
+           background: #DCEBF7; padding: 1px 4px; border-radius: 4px; margin: 0 1px; }
+    a.fn:hover { background: #0082C9; color: #fff; }
+  }
+  /* On paper the pill is noise and the popover is unreachable — the number
+     alone does the job, and the endnote list carries the URL. */
+  @media print { a.fn { color: inherit; background: none; text-decoration: none; } }
+  #fnpop { position: fixed; z-index: 110; width: 320px; max-width: calc(100vw - 20px);
+           background: #fff; border: 1.5px solid #BFDCF0; border-radius: 10px;
+           box-shadow: 0 10px 30px rgba(42,58,77,.22); padding: 12px 14px; font-size: 12.5px; }
+  #fnpop .fn-n { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: #6B8AA3;
+                 text-transform: uppercase; margin-bottom: 4px; }
+  #fnpop p { margin: 0 0 10px; color: #3A4A5C; line-height: 1.42; }
+  .fn-cta { display: inline-block; background: #0082C9; color: #fff !important;
+            font-weight: 700; padding: 6px 12px; border-radius: 7px;
+            text-decoration: none; font-size: 12px; }
+  /* The endnote list itself: two columns on a 12.5in sheet, which halves a
+     13-entry block that was running the full width one line at a time. */
+  .rxk-endnotes { columns: 2; column-gap: 48px; padding-left: 1.4em;
+                  font-size: 0.9rem; color: #4a5568; line-height: 1.6; }
+  .rxk-endnotes li { margin-bottom: 12px; break-inside: avoid; }
+  .rxk-endnotes a { word-break: break-all; }
+  /* Jumping to an endnote should say WHICH one you landed on. */
+  .rxk-endnotes li:target { background: #FFF6D8; border-radius: 6px;
+                            box-shadow: 0 0 0 6px #FFF6D8; }
+
+  
 </style>
 </head>
 <body>
@@ -2131,42 +2164,42 @@
         
         <div class="tfc-benefit-text-box">
             <h3>Better Health Outcomes</h3>
-            <ul class="tfc-benefit-list"><li><b>Preterm births reduced by up to 18%</b> and low birthweight by 27%<sup>1</sup></li><li><b>Infant maltreatment allegations reduced by 32%</b><sup>2</sup></li><li>Postpartum depression screenings dropped by 14 percentage points<sup>3</sup></li><li><b>$6.2 million in annual healthcare savings</b> from improved birth outcomes<sup>3</sup></li></ul>
+            <ul class="tfc-benefit-list"><li><b>Preterm births reduced by up to 18%</b> and low birthweight by 27%<sup><a class="fn" href="#en1" data-fn="1">1</a></sup></li><li><b>Infant maltreatment allegations reduced by 32%</b><sup><a class="fn" href="#en2" data-fn="2">2</a></sup></li><li>Postpartum depression screenings dropped by 14 percentage points<sup><a class="fn" href="#en3" data-fn="3">3</a></sup></li><li><b>$6.2 million in annual healthcare savings</b> from improved birth outcomes<sup><a class="fn" href="#en3" data-fn="3">3</a></sup></li></ul>
         </div>
     </div>
 <div id="benefit-development" class="tfc-benefit-content">
         
         <div class="tfc-benefit-text-box">
             <h3>Child Development</h3>
-            <ul class="tfc-benefit-list"><li><b>80% of participants</b> report RxKids helped them become more confident parents<sup>4</sup></li><li>Reduced NICU admissions establish stronger developmental foundations<sup>5</sup></li><li>Funds enable direct investments in home learning environments and enrichment materials<sup>6</sup></li><li>59% found it easier to obtain needed healthcare<sup>4</sup></li></ul>
+            <ul class="tfc-benefit-list"><li><b>80% of participants</b> report RxKids helped them become more confident parents<sup><a class="fn" href="#en4" data-fn="4">4</a></sup></li><li>Reduced NICU admissions establish stronger developmental foundations<sup><a class="fn" href="#en5" data-fn="5">5</a></sup></li><li>Funds enable direct investments in home learning environments and enrichment materials<sup><a class="fn" href="#en6" data-fn="6">6</a></sup></li><li>59% found it easier to obtain needed healthcare<sup><a class="fn" href="#en4" data-fn="4">4</a></sup></li></ul>
         </div>
     </div>
 <div id="benefit-housing" class="tfc-benefit-content">
         
         <div class="tfc-benefit-text-box">
             <h3>Housing Stability</h3>
-            <ul class="tfc-benefit-list"><li><b>91% decrease in evictions</b> among RxKids participants<sup>7</sup></li><li>Average reduction in housing debt of <b>over $1,000 per family</b><sup>3</sup></li><li>57% of participants used funds explicitly for rent payments<sup>4</sup></li><li>Represents a <b>75% income expansion</b> for lowest-income families<sup>5</sup></li></ul>
+            <ul class="tfc-benefit-list"><li><b>91% decrease in evictions</b> among RxKids participants<sup><a class="fn" href="#en7" data-fn="7">7</a></sup></li><li>Average reduction in housing debt of <b>over $1,000 per family</b><sup><a class="fn" href="#en3" data-fn="3">3</a></sup></li><li>57% of participants used funds explicitly for rent payments<sup><a class="fn" href="#en4" data-fn="4">4</a></sup></li><li>Represents a <b>75% income expansion</b> for lowest-income families<sup><a class="fn" href="#en5" data-fn="5">5</a></sup></li></ul>
         </div>
     </div>
 <div id="benefit-food" class="tfc-benefit-content">
         
         <div class="tfc-benefit-text-box">
             <h3>Food Security</h3>
-            <ul class="tfc-benefit-list"><li><b>78% of participants</b> use RxKids funds for food purchases<sup>4</sup></li><li>8.2% increase in families reporting they have "enough of the kinds of foods we want"<sup>4</sup></li><li>Cash enables purchase of preferred nutritious foods rather than reliance on emergency assistance</li><li>Better nutrition supports improved maternal health and birth outcomes<sup>6</sup></li></ul>
+            <ul class="tfc-benefit-list"><li><b>78% of participants</b> use RxKids funds for food purchases<sup><a class="fn" href="#en4" data-fn="4">4</a></sup></li><li>8.2% increase in families reporting they have "enough of the kinds of foods we want"<sup><a class="fn" href="#en4" data-fn="4">4</a></sup></li><li>Cash enables purchase of preferred nutritious foods rather than reliance on emergency assistance</li><li>Better nutrition supports improved maternal health and birth outcomes<sup><a class="fn" href="#en6" data-fn="6">6</a></sup></li></ul>
         </div>
     </div>
 <div id="benefit-economic" class="tfc-benefit-content">
         
         <div class="tfc-benefit-text-box">
             <h3>Economic Mobility</h3>
-            <ul class="tfc-benefit-list"><li>Economic benefits exceed program costs by <b>2.4 times</b><sup>8</sup></li><li>Every dollar invested generates <b>~$1.60 in local economic activity</b><sup>9</sup></li><li>88% of participants report the program helped them make ends meet and feel financially secure<sup>10</sup></li><li><b>40% of economic gains</b> flow to families in the lowest income quintile<sup>8</sup></li></ul>
+            <ul class="tfc-benefit-list"><li>Economic benefits exceed program costs by <b>2.4 times</b><sup><a class="fn" href="#en8" data-fn="8">8</a></sup></li><li>Every dollar invested generates <b>~$1.60 in local economic activity</b><sup><a class="fn" href="#en9" data-fn="9">9</a></sup></li><li>88% of participants report the program helped them make ends meet and feel financially secure<sup><a class="fn" href="#en10" data-fn="10">10</a></sup></li><li><b>40% of economic gains</b> flow to families in the lowest income quintile<sup><a class="fn" href="#en8" data-fn="8">8</a></sup></li></ul>
         </div>
     </div>
 <div id="benefit-bonding" class="tfc-benefit-content">
         
         <div class="tfc-benefit-text-box">
             <h3>Family Bonding</h3>
-            <ul class="tfc-benefit-list"><li>Mothers report feeling <b>more loved, valued, empowered, and respected</b><sup>7</sup></li><li>"My mental space is different, so I'm happy to be happy for my baby" — Participant<sup>10</sup></li><li>Reduced financial stress enables greater emotional availability for children<sup>2</sup></li><li>Trust in healthcare institutions rose by 10 percentage points<sup>3</sup></li></ul>
+            <ul class="tfc-benefit-list"><li>Mothers report feeling <b>more loved, valued, empowered, and respected</b><sup><a class="fn" href="#en7" data-fn="7">7</a></sup></li><li>"My mental space is different, so I'm happy to be happy for my baby" — Participant<sup><a class="fn" href="#en10" data-fn="10">10</a></sup></li><li>Reduced financial stress enables greater emotional availability for children<sup><a class="fn" href="#en2" data-fn="2">2</a></sup></li><li>Trust in healthcare institutions rose by 10 percentage points<sup><a class="fn" href="#en3" data-fn="3">3</a></sup></li></ul>
         </div>
     </div>
             </div>
@@ -2180,7 +2213,7 @@
     <div class="tfc-expand-inner">
         <div class="tfc-flint-body">
             <span class="tfc-flint-eyebrow">Case Study · Flint, Michigan</span>
-            <p class="tfc-flint-lead">Comparing Flint mothers eligible for Rx Kids in 2024 with 2023 — every hardship and mental-health measure improved.<sup>11</sup></p>
+            <p class="tfc-flint-lead">Comparing Flint mothers eligible for Rx Kids in 2024 with 2023 — every hardship and mental-health measure improved.<sup><a class="fn" href="#en11" data-fn="11">11</a></sup></p>
 
             <div class="tfc-flint-stats-grid">
                 <div class="tfc-stat-block">
@@ -2262,7 +2295,7 @@
         <div class="tfc-3d-bar-label">Single Mother</div>
     </div>
                             </div>
-                            <p class="tfc-chart-source">Source: U.S. Census Bureau<sup>12</sup></p>
+                            <p class="tfc-chart-source">Source: U.S. Census Bureau<sup><a class="fn" href="#en12" data-fn="12">12</a></sup></p>
                         </div>
                     </div>
 
@@ -2297,7 +2330,7 @@
                         </div>
 
                         <div class="tfc-flint-source">
-                            <p>Source: Child Care Aware of America 2024 Analysis<sup>13</sup></p>
+                            <p>Source: Child Care Aware of America 2024 Analysis<sup><a class="fn" href="#en13" data-fn="13">13</a></sup></p>
                         </div>
                     </div>
                 </div>
@@ -2550,7 +2583,7 @@
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">Sources</h2>
-            <ol style="font-size:0.95rem; color:#4a5568; line-height:1.7; padding-left:1.4em;"><li id="en1">GiveDirectly, "Flint pregnancy and infancy study," 2025. <a href="https://www.givedirectly.org/flintstudy2025/" target="_blank">https://www.givedirectly.org/flintstudy2025/</a></li><li id="en2">Rx Kids, "New rigorous research shows Rx Kids reduced infant maltreatment allegations in Flint, Michigan." <a href="https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/" target="_blank">https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/</a></li><li id="en3">Rx Kids, "New research shows cash for moms and babies improves health, stabilizes families, and saves millions." <a href="https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/" target="_blank">https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/</a></li><li id="en4">Rx Kids Research Brief, September 2024. <a href="https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf" target="_blank">https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf</a></li><li id="en5">Your Children's Foundation, "Rx Kids: helping families thrive from the start," September 30, 2025. <a href="https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/" target="_blank">https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/</a></li><li id="en6">Rx Kids, "New analysis finds child cash benefits improve child health and development internationally." <a href="https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/" target="_blank">https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/</a></li><li id="en7">Rx Kids, program impact summary. <a href="https://rxkids.org/impact/" target="_blank">https://rxkids.org/impact/</a></li><li id="en8">W.E. Upjohn Institute, "Study finds Rx Kids program supports families, drives jobs and income growth." <a href="https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth" target="_blank">https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth</a></li><li id="en9">GiveDirectly, Rx Kids program overview. <a href="https://www.givedirectly.org/rxkids/" target="_blank">https://www.givedirectly.org/rxkids/</a></li><li id="en10">Rx Kids, "Rx Kids survey results," November 2024. <a href="https://rxkids.org/rx-kids-survey-results-november-2024/" target="_blank">https://rxkids.org/rx-kids-survey-results-november-2024/</a></li><li id="en11">American Journal of Public Health, Flint Rx Kids outcomes study. <a href="https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244" target="_blank">https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244</a></li><li id="en12">U.S. Census Bureau, poverty and income data. <a href="https://www.census.gov/topics/income-poverty/poverty/data.html" target="_blank">https://www.census.gov/topics/income-poverty/poverty/data.html</a></li><li id="en13">Child Care Aware of America, "2024 Affordability Analysis." <a href="https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf" target="_blank">https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf</a></li></ol>
+            <ol class="rxk-endnotes"><li id="en1">GiveDirectly, "Flint pregnancy and infancy study," 2025. <a href="https://www.givedirectly.org/flintstudy2025/" target="_blank">https://www.givedirectly.org/flintstudy2025/</a></li><li id="en2">Rx Kids, "New rigorous research shows Rx Kids reduced infant maltreatment allegations in Flint, Michigan." <a href="https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/" target="_blank">https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/</a></li><li id="en3">Rx Kids, "New research shows cash for moms and babies improves health, stabilizes families, and saves millions." <a href="https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/" target="_blank">https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/</a></li><li id="en4">Rx Kids Research Brief, September 2024. <a href="https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf" target="_blank">https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf</a></li><li id="en5">Your Children's Foundation, "Rx Kids: helping families thrive from the start," September 30, 2025. <a href="https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/" target="_blank">https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/</a></li><li id="en6">Rx Kids, "New analysis finds child cash benefits improve child health and development internationally." <a href="https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/" target="_blank">https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/</a></li><li id="en7">Rx Kids, program impact summary. <a href="https://rxkids.org/impact/" target="_blank">https://rxkids.org/impact/</a></li><li id="en8">W.E. Upjohn Institute, "Study finds Rx Kids program supports families, drives jobs and income growth." <a href="https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth" target="_blank">https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth</a></li><li id="en9">GiveDirectly, Rx Kids program overview. <a href="https://www.givedirectly.org/rxkids/" target="_blank">https://www.givedirectly.org/rxkids/</a></li><li id="en10">Rx Kids, "Rx Kids survey results," November 2024. <a href="https://rxkids.org/rx-kids-survey-results-november-2024/" target="_blank">https://rxkids.org/rx-kids-survey-results-november-2024/</a></li><li id="en11">American Journal of Public Health, Flint Rx Kids outcomes study. <a href="https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244" target="_blank">https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244</a></li><li id="en12">U.S. Census Bureau, poverty and income data. <a href="https://www.census.gov/topics/income-poverty/poverty/data.html" target="_blank">https://www.census.gov/topics/income-poverty/poverty/data.html</a></li><li id="en13">Child Care Aware of America, "2024 Affordability Analysis." <a href="https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf" target="_blank">https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf</a></li></ol>
         </div>
     </div>
 </div>
@@ -2725,6 +2758,75 @@ function rxkToggle(btn, id) {
         content.style.maxHeight = '0';
     }
 }
+</script>
+<script>window.RXK_NOTES = [{"t":"GiveDirectly, \"Flint pregnancy and infancy study,\" 2025.","u":"https://www.givedirectly.org/flintstudy2025/"},{"t":"Rx Kids, \"New rigorous research shows Rx Kids reduced infant maltreatment allegations in Flint, Michigan.\"","u":"https://rxkids.org/new-rigorous-research-shows-rx-kids-reduced-infant-maltreatment-allegations-in-flint-michigan/"},{"t":"Rx Kids, \"New research shows cash for moms and babies improves health, stabilizes families, and saves millions.\"","u":"https://rxkids.org/new-research-shows-cash-for-moms-and-babies-improves-health-stabilizes-families-and-saves-millions/"},{"t":"Rx Kids Research Brief, September 2024.","u":"https://rxkids.org/wp-content/uploads/2024/09/RxKids_Research_Brief.pdf"},{"t":"Your Children's Foundation, \"Rx Kids: helping families thrive from the start,\" September 30, 2025.","u":"https://yourchildrensfoundation.org/2025/09/30/rx-kids-helping-families-thrive-from-the-start/"},{"t":"Rx Kids, \"New analysis finds child cash benefits improve child health and development internationally.\"","u":"https://rxkids.org/new-analysis-finds-child-cash-benefits-improve-child-health-and-development-internationally/"},{"t":"Rx Kids, program impact summary.","u":"https://rxkids.org/impact/"},{"t":"W.E. Upjohn Institute, \"Study finds Rx Kids program supports families, drives jobs and income growth.\"","u":"https://www.upjohn.org/research-highlights/study-finds-rx-kids-program-supports-families-drives-jobs-and-income-growth"},{"t":"GiveDirectly, Rx Kids program overview.","u":"https://www.givedirectly.org/rxkids/"},{"t":"Rx Kids, \"Rx Kids survey results,\" November 2024.","u":"https://rxkids.org/rx-kids-survey-results-november-2024/"},{"t":"American Journal of Public Health, Flint Rx Kids outcomes study.","u":"https://ajph.aphapublications.org/doi/full/10.2105/AJPH.2025.308244"},{"t":"U.S. Census Bureau, poverty and income data.","u":"https://www.census.gov/topics/income-poverty/poverty/data.html"},{"t":"Child Care Aware of America, \"2024 Affordability Analysis.\"","u":"https://info.childcareaware.org/hubfs/Affordability_Analysis_2024.pdf"}];</script>
+<script>
+
+(function () {
+  var NOTES = window.RXK_NOTES || [];
+  if (!NOTES.length) return;
+  var fnp = document.createElement('div');
+  fnp.id = 'fnpop';
+  fnp.className = 'noprint';
+  fnp.hidden = true;
+  document.body.appendChild(fnp);
+  var fnPinned = false, fnTimer = null;
+
+  function fnHide() { fnp.hidden = true; fnPinned = false; }
+
+  function fnShow(n, anchor) {
+    var note = NOTES[n - 1];
+    if (!note) return;
+    var host = '';
+    try { host = new URL(note.u).hostname.replace(/^www\./, ''); } catch (err) { host = 'source'; }
+    fnp.textContent = '';
+    var lab = document.createElement('div');
+    lab.className = 'fn-n';
+    lab.textContent = 'Note ' + n;
+    var p = document.createElement('p');
+    p.textContent = note.t;          // textContent, not innerHTML: citation text is data
+    var a = document.createElement('a');
+    a.className = 'fn-cta';
+    a.href = note.u; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = host + ' \u2197';
+    fnp.appendChild(lab); fnp.appendChild(p); fnp.appendChild(a);
+    fnp.hidden = false;
+    var r = anchor.getBoundingClientRect();
+    var pw = fnp.offsetWidth, ph = fnp.offsetHeight;
+    var x = Math.min(Math.max(r.left + r.width / 2 - pw / 2, 10), window.innerWidth - pw - 10);
+    var y = r.bottom + 8;
+    if (y + ph > window.innerHeight - 10) y = Math.max(r.top - ph - 8, 10);
+    fnp.style.left = x + 'px';
+    fnp.style.top = y + 'px';
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    var a = e.target.closest ? e.target.closest('a.fn') : null;
+    if (a) {
+      clearTimeout(fnTimer);
+      fnShow(+a.dataset.fn, a);
+    } else if (e.target.closest && e.target.closest('#fnpop')) {
+      clearTimeout(fnTimer);   // inside the popover — keep it open so the link is reachable
+    } else if (!fnPinned && !fnp.hidden) {
+      clearTimeout(fnTimer);
+      fnTimer = setTimeout(fnHide, 250);   // grace period to reach the popover
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.fn') : null;
+    if (a) {
+      e.preventDefault();                  // stay put; the source link is in the popover
+      fnShow(+a.dataset.fn, a);
+      fnPinned = true;
+      return;
+    }
+    if (!(e.target.closest && e.target.closest('#fnpop'))) fnHide();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fnHide(); });
+  window.addEventListener('scroll', fnHide, { passive: true });
+})();
+
 </script>
 </body>
 </html>

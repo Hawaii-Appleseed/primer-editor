@@ -24,7 +24,9 @@ editor's iframe rather than just on the live site:
 from pathlib import Path
 import base64
 import html as _html
+import json
 import os
+import re
 import sys
 
 HERE = Path(__file__).resolve().parent           # projects/rxkids
@@ -679,7 +681,7 @@ def sources_section(entries) -> str:
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
             <h2 class="tfc-section-title">Sources</h2>
-            <ol style="font-size:0.95rem; color:#4a5568; line-height:1.7; padding-left:1.4em;">{items}</ol>
+            <ol class="rxk-endnotes">{items}</ol>
         </div>
     </div>
 </div>"""
@@ -704,6 +706,152 @@ BODY = f"""{MAIN_BODY}
 </div>"""
 
 BODY = C.fn.resolve(BODY)
+
+# ---- footnote refs: make the numbers reachable --------------------------------
+# resolve() leaves a bare <sup>N</sup>, which tells a reader a citation EXISTS
+# but gives them no way to reach it — the endnote_link() comment above always
+# intended otherwise, but only the destination was ever built, not the link.
+# This is report2027's linkify_footnotes, ported verbatim in behaviour: the href
+# points at the endnote anchor, so a marker still works with JS off and in
+# print, and the popover in FN_POPOVER_JS is pure enhancement on top.
+NOTES = C.fn.endnotes()                          # [(text, url)] in numbered order
+
+
+def linkify_footnotes(markup: str) -> str:
+    """Turn every <sup>N</sup> marker into a clickable ref the JS can pop.
+
+    Handles multi-note markers like <sup>4&thinsp;5</sup> — resolve() collapses
+    adjacent [^a][^b] tokens into ONE <sup> with thin-space separators, so this
+    has to split them back apart to link each number at its own anchor.
+    """
+    def repl(m):
+        nums = re.findall(r"\d+", m.group(1))
+        if not nums:
+            return m.group(0)
+        out = []
+        for n in nums:
+            i = int(n)
+            if 1 <= i <= len(NOTES):
+                out.append(f'<a class="fn" href="#en{i}" data-fn="{i}">{n}</a>')
+            else:
+                out.append(n)                    # out of range: leave it inert
+        return "<sup>" + "&thinsp;".join(out) + "</sup>"
+    return re.sub(r"<sup>(.*?)</sup>", repl, markup, flags=re.S)
+
+
+BODY = linkify_footnotes(BODY)
+
+# The note data the popover reads. Precomputed rather than inlined in the page
+# template: an f-string expression containing a dict literal AND quotes is a
+# needless portability trap, and "</" has to be broken up so a citation that
+# ever contains "</script>" can't close the block early.
+NOTES_JSON = (json.dumps([{"t": t, "u": u} for t, u in NOTES], separators=(",", ":"))
+              .replace("</", "<\\/"))
+
+# Defined as PLAIN strings, not inside the page's f-string template: both are
+# full of { } that would otherwise need doubling, and a single missed brace in
+# there fails far away from the edit that caused it. Interpolated values are not
+# re-scanned for placeholders, so these stay verbatim.
+FN_CSS = """
+  /* Footnote refs. rxkids' citations all sit on light ground (benefit-panel
+     bullets, the flint lead, the small source lines), so unlike report2027 this
+     needs no inverted variant for dark cards. Tinted pill in the brand blue so
+     the marker reads as a control rather than as body punctuation. */
+  sup { font-size: 11px; line-height: 0; }
+  @media screen {
+    a.fn { color: #00669E; font-weight: 700; text-decoration: none; cursor: pointer;
+           background: #DCEBF7; padding: 1px 4px; border-radius: 4px; margin: 0 1px; }
+    a.fn:hover { background: #0082C9; color: #fff; }
+  }
+  /* On paper the pill is noise and the popover is unreachable — the number
+     alone does the job, and the endnote list carries the URL. */
+  @media print { a.fn { color: inherit; background: none; text-decoration: none; } }
+  #fnpop { position: fixed; z-index: 110; width: 320px; max-width: calc(100vw - 20px);
+           background: #fff; border: 1.5px solid #BFDCF0; border-radius: 10px;
+           box-shadow: 0 10px 30px rgba(42,58,77,.22); padding: 12px 14px; font-size: 12.5px; }
+  #fnpop .fn-n { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: #6B8AA3;
+                 text-transform: uppercase; margin-bottom: 4px; }
+  #fnpop p { margin: 0 0 10px; color: #3A4A5C; line-height: 1.42; }
+  .fn-cta { display: inline-block; background: #0082C9; color: #fff !important;
+            font-weight: 700; padding: 6px 12px; border-radius: 7px;
+            text-decoration: none; font-size: 12px; }
+  /* The endnote list itself: two columns on a 12.5in sheet, which halves a
+     13-entry block that was running the full width one line at a time. */
+  .rxk-endnotes { columns: 2; column-gap: 48px; padding-left: 1.4em;
+                  font-size: 0.9rem; color: #4a5568; line-height: 1.6; }
+  .rxk-endnotes li { margin-bottom: 12px; break-inside: avoid; }
+  .rxk-endnotes a { word-break: break-all; }
+  /* Jumping to an endnote should say WHICH one you landed on. */
+  .rxk-endnotes li:target { background: #FFF6D8; border-radius: 6px;
+                            box-shadow: 0 0 0 6px #FFF6D8; }
+"""
+
+FN_POPOVER_JS = """
+(function () {
+  var NOTES = window.RXK_NOTES || [];
+  if (!NOTES.length) return;
+  var fnp = document.createElement('div');
+  fnp.id = 'fnpop';
+  fnp.className = 'noprint';
+  fnp.hidden = true;
+  document.body.appendChild(fnp);
+  var fnPinned = false, fnTimer = null;
+
+  function fnHide() { fnp.hidden = true; fnPinned = false; }
+
+  function fnShow(n, anchor) {
+    var note = NOTES[n - 1];
+    if (!note) return;
+    var host = '';
+    try { host = new URL(note.u).hostname.replace(/^www\\./, ''); } catch (err) { host = 'source'; }
+    fnp.textContent = '';
+    var lab = document.createElement('div');
+    lab.className = 'fn-n';
+    lab.textContent = 'Note ' + n;
+    var p = document.createElement('p');
+    p.textContent = note.t;          // textContent, not innerHTML: citation text is data
+    var a = document.createElement('a');
+    a.className = 'fn-cta';
+    a.href = note.u; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = host + ' \\u2197';
+    fnp.appendChild(lab); fnp.appendChild(p); fnp.appendChild(a);
+    fnp.hidden = false;
+    var r = anchor.getBoundingClientRect();
+    var pw = fnp.offsetWidth, ph = fnp.offsetHeight;
+    var x = Math.min(Math.max(r.left + r.width / 2 - pw / 2, 10), window.innerWidth - pw - 10);
+    var y = r.bottom + 8;
+    if (y + ph > window.innerHeight - 10) y = Math.max(r.top - ph - 8, 10);
+    fnp.style.left = x + 'px';
+    fnp.style.top = y + 'px';
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    var a = e.target.closest ? e.target.closest('a.fn') : null;
+    if (a) {
+      clearTimeout(fnTimer);
+      fnShow(+a.dataset.fn, a);
+    } else if (e.target.closest && e.target.closest('#fnpop')) {
+      clearTimeout(fnTimer);   // inside the popover — keep it open so the link is reachable
+    } else if (!fnPinned && !fnp.hidden) {
+      clearTimeout(fnTimer);
+      fnTimer = setTimeout(fnHide, 250);   // grace period to reach the popover
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.fn') : null;
+    if (a) {
+      e.preventDefault();                  // stay put; the source link is in the popover
+      fnShow(+a.dataset.fn, a);
+      fnPinned = true;
+      return;
+    }
+    if (!(e.target.closest && e.target.closest('#fnpop'))) fnHide();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fnHide(); });
+  window.addEventListener('scroll', fnHide, { passive: true });
+})();
+"""
 
 # The editor needs exactly one <section class="page"> as the coordinate origin
 # for every drag/resize/snap calculation (see the report-editor skill).
@@ -918,6 +1066,7 @@ html = f"""<!DOCTYPE html>
                       color: #1E9E57; font-weight: 800; font-size: 1.4rem; }}
   .tanf-choice-body {{ margin-bottom: 32px; }}
   .rxk-col--other {{ background: transparent; }}
+  {FN_CSS}
   {EDIT_OVERRIDES}
 </style>
 </head>
@@ -948,6 +1097,10 @@ function rxkToggle(btn, id) {{
         content.style.maxHeight = '0';
     }}
 }}
+</script>
+<script>window.RXK_NOTES = {NOTES_JSON};</script>
+<script>
+{FN_POPOVER_JS}
 </script>
 </body>
 </html>
