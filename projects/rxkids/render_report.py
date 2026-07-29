@@ -188,7 +188,7 @@ def what_is_rxkids() -> str:
 <div class="tfc-full-width tfc-bg-white tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
-            <h2 class="tfc-section-title">What is RxKids?</h2>
+            {L.spacer("what.h2")}<h2 class="tfc-section-title"{L.attr("what.h2")}>{C.t("what.h2")}</h2>
             {L.spacer("para.what.body")}
             <p class="tfc-section-subtitle tfc-subtitle-box"{L.attr("what.body")}><span class="tfc-subtitle-eyebrow"{L.attr("what.eyebrow")}>{C.t("what.eyebrow")}</span>{C.slot_span("what.body", C("what.body"))}</p>
 
@@ -246,7 +246,7 @@ def benefits_widget() -> str:
 <div class="tfc-full-width tfc-bg-blue tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section tfc-benefits-widget-section" style="margin: 0 auto;">
-            <h2 class="tfc-section-title">Benefits of RxKids</h2>
+            {L.spacer("benefits.h2")}<h2 class="tfc-section-title"{L.attr("benefits.h2")}>{C.t("benefits.h2")}</h2>
 
             <div class="tfc-benefits-layout">
             <div class="tfc-benefits-tabs">
@@ -325,7 +325,7 @@ def stats_carousel() -> str:
 <div class="tfc-full-width tfc-bg-white tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
-            <h2 class="tfc-section-title">Why Hawaiʻi's families need RxKids</h2>
+            {L.spacer("carousel.h2")}<h2 class="tfc-section-title"{L.attr("carousel.h2")}>{C.t("carousel.h2")}</h2>
 
             <div class="tfc-carousel-container">
                 <button class="tfc-carousel-arrow tfc-carousel-prev" onclick="moveCarousel(-1)">&#10094;</button>
@@ -410,7 +410,7 @@ def how_it_works() -> str:
 <div class="tfc-full-width rxk-hiw-bg tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
-            <h2 class="tfc-section-title">How RxKids would work in Hawaiʻi</h2>
+            {L.spacer("steps.h2")}<h2 class="tfc-section-title"{L.attr("steps.h2")}>{C.t("steps.h2")}</h2>
 
             {L.spacer("steps.banner.amount")}
             <div class="tfc-total-banner"{L.attr("steps.banner.amount")}>
@@ -581,7 +581,7 @@ def tanf_section() -> str:
 <div class="tfc-full-width rxk-tanf-top tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
-            <h2 class="tfc-section-title">How TANF helps pay for RxKids</h2>
+            {L.spacer("tanf.h2")}<h2 class="tfc-section-title"{L.attr("tanf.h2")}>{C.t("tanf.h2")}</h2>
             {C.html("tanf.intro", "tfc-section-subtitle")}
 
             <h3 class="rxk-tanf-h3" style="text-align:center; font-size:1.5rem; margin: 0 0 28px;">{C.t("tanf.compare1.title")}</h3>
@@ -680,7 +680,7 @@ def sources_section(entries) -> str:
 <div class="tfc-full-width tfc-bg-white tfc-reveal">
     <div class="tfc-content-container">
         <div class="tfc-section" style="margin-bottom: 0;">
-            <h2 class="tfc-section-title">Sources</h2>
+            {L.spacer("endnotes.h2")}<h2 class="tfc-section-title"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</h2>
             <ol class="rxk-endnotes">{items}</ol>
         </div>
     </div>

@@ -26,6 +26,9 @@ Direct cash support for expecting mothers and their infants
 [[hero.image.alt]]
 RxKids Hero Image
 
+[[what.h2]]
+What is RxKids?
+
 [[what.eyebrow]]
 The Program
 
@@ -55,6 +58,9 @@ Critical First Year
 
 [[what.scene.bottom.body]]
 Monthly payments continue throughout the baby's first year, providing stability during the most important developmental period.
+
+[[benefits.h2]]
+Benefits of RxKids
 
 [[benefits.health.title]]
 Better Health Outcomes
@@ -152,6 +158,9 @@ Reduction in screening positive for postpartum depression
 [[flint.stat.worrying.desc]]
 Reduction in uncontrollable worrying
 
+[[carousel.h2]]
+Why Hawaiʻi's families need RxKids
+
 [[carousel.poverty.quote]]
 In Hawaiʻi, more than 1 out of 4 children with single mothers are in poverty.
 
@@ -208,6 +217,9 @@ Percentage of married-couple median income
 
 [[carousel.childcare.source]]
 Source: Child Care Aware of America 2024 Analysis[^childcare-aware-2024]
+
+[[steps.h2]]
+How RxKids would work in Hawaiʻi
 
 [[steps.banner.label]]
 A Hawaiʻi family could receive
@@ -274,6 +286,9 @@ Nine more monthly payments, covered by state and other funds.
 
 [[steps.note]]
 Payment amounts mirror the Flint, Michigan model and are illustrative for a proposed Hawaiʻi program.
+
+[[tanf.h2]]
+How TANF helps pay for RxKids
 
 [[tanf.intro]]
 TANF (Temporary Assistance for Needy Families) is a federal program that gives each state a pot of money to help struggling families with children. A large part of the RxKids program is funded with TANF money.
@@ -349,6 +364,9 @@ Visit RxKids.org
 
 [[cta.link2.label]]
 About the Program
+
+[[endnotes.h2]]
+Sources
 
 [[sources]]
 [flint-preterm]: GiveDirectly, "Flint pregnancy and infancy study," 2025. — https://www.givedirectly.org/flintstudy2025/
