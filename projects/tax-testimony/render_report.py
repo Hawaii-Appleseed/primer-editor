@@ -126,21 +126,72 @@ def diverging_chart() -> str:
 ARG_COUNTS = [98, 53, 46, 30, 28, 19, 16, 12, 10, 10]
 
 
-def argument(i: int, count: int) -> str:
-    """One ranked argument: heading + tally, then the testimony it came from.
+ARGS_PER_PAGE = 4        # tuned so no argument block is ever split across a page
 
-    The rank and the tally are data, so they are rendered from ARG_COUNTS rather
-    than typed into content.md — the heading and the quotation are prose, so
-    they are slots.
+
+def argument(i: int, count: int) -> str:
+    """One ranked argument: heading + tally, the testimony, then its figures.
+
+    The rank and the tally are data, so they come from ARG_COUNTS rather than
+    being typed into content.md. The heading, the quotation and the figures are
+    prose, so they are slots.
     """
+    facts = C.list(f"arg.{i}.f")
+    facts_html = (
+        f'<div class="arg-f">'
+        f'<span class="arg-fl">Figures cited</span>'
+        f'<ul{C.ul_attr(f"arg.{i}.f")}>'
+        + "".join(f"<li>{f}</li>" for f in facts) +
+        f'</ul></div>') if facts else ""
     return (
         f'<li class="arg">'
+        f'<span class="arg-r">{i}</span>'
         f'<div class="arg-h">'
         f'<span class="arg-t"{C.slot_attr(f"arg.{i}.h")}>{C.text(f"arg.{i}.h")}</span>'
         f'<span class="arg-n">{count}</span>'
         f'</div>'
         f'<p class="arg-q"{C.slot_attr(f"arg.{i}.q")}>{C.text(f"arg.{i}.q")}</p>'
+        f'{facts_html}'
         f'</li>')
+
+
+def argument_pages(start_page: int) -> str:
+    """The ranked arguments, flowing over as many letter pages as they need.
+
+    The section grows with the evidence rather than being squeezed onto one
+    sheet: add an eleventh argument and it simply lands on the next page.
+    """
+    # Fill to the page cap, then spread the arguments EVENLY over that many
+    # pages. Naive chunking put 4+4+2 on three sheets and left the last one
+    # two-thirds empty; the same three sheets balance as 4+3+3.
+    total = len(ARG_COUNTS)
+    n_pages = max(1, -(-total // ARGS_PER_PAGE))     # ceil
+    base, extra = divmod(total, n_pages)
+    chunks, at = [], 1
+    for n in range(n_pages):
+        size = base + (1 if n < extra else 0)        # earlier pages take the remainder
+        chunks.append(list(range(at, at + size)))
+        at += size
+    out = []
+    for n, chunk in enumerate(chunks):
+        page_no = start_page + n
+        first = n == 0
+        head = (
+            f'<div class="eyebrow"{L.attr("p2.eyebrow")}>{C.t("p2.eyebrow")}</div>'
+            f'{L.spacer("p2.h1")}<h1 class="h1-b"{L.attr("p2.h1")}>{C.t("p2.h1")}</h1>'
+            f'{C.html("p2.standfirst", "standfirst")}'
+            if first else
+            f'<div class="eyebrow contd"{L.attr("p2.contd")}>{C.t("p2.contd")}</div>')
+        tail = (f'{C.html("p2.also", "also")}'
+                f'<div class="foot"{L.attr("p2.foot")}>{C.t("p2.foot")}</div>'
+                if n == len(chunks) - 1 else "")
+        body = "".join(argument(i, ARG_COUNTS[i - 1]) for i in chunk)
+        out.append(
+            f'\n<section class="page">\n  {head}\n'
+            f'  <ol class="args">{body}</ol>\n  {tail}\n'
+            f'{C.extras(f"page{page_no}")} {L.layer(page_no)}'
+            f'{L.text_boxes(page_no)}{L.tables_html(page_no)}\n</section>')
+    return "".join(out)
 
 
 def bullets(key: str) -> str:
@@ -193,19 +244,7 @@ page = f"""
 {C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
 </section>
 
-<section class="page">
-  <div class="eyebrow"{L.attr("p2.eyebrow")}>{C.t("p2.eyebrow")}</div>
-  {L.spacer("p2.h1")}<h1 class="h1-b"{L.attr("p2.h1")}>{C.t("p2.h1")}</h1>
-  {C.html("p2.standfirst", "standfirst")}
-
-  <ol class="args">
-    {"".join(argument(i + 1, n) for i, n in enumerate(ARG_COUNTS))}
-  </ol>
-
-  {C.html("p2.also", "also")}
-  <div class="foot"{L.attr("p2.foot")}>{C.t("p2.foot")}</div>
-{C.extras("page2")} {L.layer(2)}{L.text_boxes(2)}{L.tables_html(2)}
-</section>"""
+{argument_pages(2)}"""
 
 body = C.fn.resolve(page)
 notes = C.fn.endnotes()
@@ -261,14 +300,14 @@ html = f"""<!DOCTYPE html>
 
   /* --- page 2: the ranked case against ------------------------------- */
   .h1-b {{ font-size:1.9rem; }}
-  .args {{ list-style:none; counter-reset:arg; margin:4px 0 0; padding:0; }}
-  .arg {{ counter-increment:arg; padding:0 0 4px 30px; position:relative;
-          margin-bottom:3px; border-bottom:1px solid #EDF1EC; }}
+  .args {{ list-style:none; margin:10px 0 0; padding:0; }}
+  .arg {{ padding:0 0 9px 30px; position:relative;
+          margin-bottom:9px; border-bottom:1px solid #EDF1EC; }}
   .arg:last-child {{ border-bottom:0; }}
-  .arg::before {{ content:counter(arg); position:absolute; left:0; top:1px;
-                  width:21px; height:21px; border-radius:50%; background:{OPP};
-                  color:#fff; font-size:0.8rem; font-weight:700;
-                  display:flex; align-items:center; justify-content:center; }}
+  .arg-r {{ position:absolute; left:0; top:1px;
+            width:21px; height:21px; border-radius:50%; background:{OPP};
+            color:#fff; font-size:0.8rem; font-weight:700;
+            display:flex; align-items:center; justify-content:center; }}
   .arg-h {{ display:flex; align-items:baseline; gap:10px; margin-bottom:1px; }}
   .arg-t {{ font-family:Poppins, sans-serif; font-size:1.0rem; font-weight:600;
             color:{INK}; flex:1; }}
@@ -276,6 +315,16 @@ html = f"""<!DOCTYPE html>
   .arg-q {{ margin:0; font-size:0.92rem; line-height:1.36; color:{SLATE};
             border-left:2px solid {ASH}; padding-left:9px; }}
   .also {{ font-size:0.92rem; color:#7C8A80; margin:6px 0 0; }}
+  .contd {{ color:#9AA79E; margin-bottom:10px; }}
+  .arg-f {{ margin:5px 0 0 0; padding:6px 9px; background:#FAF7F4;
+            border-radius:6px; }}
+  .arg-fl {{ display:block; font-size:0.74rem; font-weight:700; color:{OPP};
+             letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }}
+  .arg-f ul {{ margin:0; padding-left:1.05em; }}
+  .arg-f li {{ font-size:0.92rem; line-height:1.36; color:{SLATE};
+               margin-bottom:2px; }}
+  .arg-f li strong {{ color:{INK}; }}
+  .arg-f li em {{ color:#8A968D; font-style:normal; font-size:0.86rem; }}
 
   .foot {{ margin-top:8px; padding-top:7px; border-top:1px solid {ASH};
            font-size:0.84rem; color:#7C8A80; }}

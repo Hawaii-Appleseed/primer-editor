@@ -46,14 +46,14 @@
 
   /* --- page 2: the ranked case against ------------------------------- */
   .h1-b { font-size:1.9rem; }
-  .args { list-style:none; counter-reset:arg; margin:4px 0 0; padding:0; }
-  .arg { counter-increment:arg; padding:0 0 4px 30px; position:relative;
-          margin-bottom:3px; border-bottom:1px solid #EDF1EC; }
+  .args { list-style:none; margin:10px 0 0; padding:0; }
+  .arg { padding:0 0 9px 30px; position:relative;
+          margin-bottom:9px; border-bottom:1px solid #EDF1EC; }
   .arg:last-child { border-bottom:0; }
-  .arg::before { content:counter(arg); position:absolute; left:0; top:1px;
-                  width:21px; height:21px; border-radius:50%; background:#C4602F;
-                  color:#fff; font-size:0.8rem; font-weight:700;
-                  display:flex; align-items:center; justify-content:center; }
+  .arg-r { position:absolute; left:0; top:1px;
+            width:21px; height:21px; border-radius:50%; background:#C4602F;
+            color:#fff; font-size:0.8rem; font-weight:700;
+            display:flex; align-items:center; justify-content:center; }
   .arg-h { display:flex; align-items:baseline; gap:10px; margin-bottom:1px; }
   .arg-t { font-family:Poppins, sans-serif; font-size:1.0rem; font-weight:600;
             color:#2F3E46; flex:1; }
@@ -61,6 +61,16 @@
   .arg-q { margin:0; font-size:0.92rem; line-height:1.36; color:#354F52;
             border-left:2px solid #CAD2C5; padding-left:9px; }
   .also { font-size:0.92rem; color:#7C8A80; margin:6px 0 0; }
+  .contd { color:#9AA79E; margin-bottom:10px; }
+  .arg-f { margin:5px 0 0 0; padding:6px 9px; background:#FAF7F4;
+            border-radius:6px; }
+  .arg-fl { display:block; font-size:0.74rem; font-weight:700; color:#C4602F;
+             letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }
+  .arg-f ul { margin:0; padding-left:1.05em; }
+  .arg-f li { font-size:0.92rem; line-height:1.36; color:#354F52;
+               margin-bottom:2px; }
+  .arg-f li strong { color:#2F3E46; }
+  .arg-f li em { color:#8A968D; font-style:normal; font-size:0.86rem; }
 
   .foot { margin-top:8px; padding-top:7px; border-top:1px solid #CAD2C5;
            font-size:0.84rem; color:#7C8A80; }
@@ -101,17 +111,23 @@
  
 </section>
 
+
 <section class="page">
-  <div class="eyebrow">THE CASE AGAINST · 406 SUBMISSIONS IN OPPOSITION</div>
-  <h1 class="h1-b">The ten arguments against raising taxes</h1>
-  <p class="standfirst">Ranked by frequency across the 406 opposing submissions — 347 from individuals, 59 from organizations. (×N) marks near-identical submissions; counts overlap.</p>
-
-  <ol class="args">
-    <li class="arg"><div class="arg-h"><span class="arg-t">It makes an expensive place harder to afford</span><span class="arg-n">98</span></div><p class="arg-q">"The tax cuts mattered to working people here, and we were counting on them. Pausing them will make it harder to afford life in Hawaii." — Individual (×6)</p></li><li class="arg"><div class="arg-h"><span class="arg-t">It costs jobs and shrinks the activity being taxed</span><span class="arg-n">53</span></div><p class="arg-q">"...fewer property transfers, lower redevelopment activity, fewer construction jobs, reduced general excise tax revenues." — NAIOP Hawaii (×5), HB2049</p></li><li class="arg"><div class="arg-h"><span class="arg-t">It breaks a promise already made</span><span class="arg-n">46</span></div><p class="arg-q">"I would feel very betrayed if you do not preserve the tax cut. It would be the last ultimate bait and switch." — Individual (×5)</p></li><li class="arg"><div class="arg-h"><span class="arg-t">Business taxes reach every consumer</span><span class="arg-n">30</span></div><p class="arg-q">"Repealing section 235-110.7, HRS will hit every resident of our State and further increase the cost of living." — Matson Navigation, SB3125</p></li><li class="arg"><div class="arg-h"><span class="arg-t">Pausing a scheduled cut is itself a tax increase</span><span class="arg-n">28</span></div><p class="arg-q">"A pause is still a tax hike in real life." — Individual (×4)</p></li><li class="arg"><div class="arg-h"><span class="arg-t">Small businesses absorb it worst</span><span class="arg-n">19</span></div><p class="arg-q">"Repealing this tax credit puts capital goods investment further out of reach for small businesses." — Chamber of Commerce Hawaii, SB3125</p></li><li class="arg"><div class="arg-h"><span class="arg-t">It undercuts clean-energy investment</span><span class="arg-n">16</span></div><p class="arg-q">"Eliminating this credit would increase the cost of solar and energy storage for Hawaii residents and businesses." — Solar industry write-in (×4), SB3125</p></li><li class="arg"><div class="arg-h"><span class="arg-t">It will not raise the revenue predicted</span><span class="arg-n">12</span></div><p class="arg-q">"While proponents suggest this tax will raise revenue, it is likely to have the opposite effect." — REIT industry testimony, SB2362</p></li><li class="arg"><div class="arg-h"><span class="arg-t">Tax increases are never reversed</span><span class="arg-n">10</span></div><p class="arg-q">"Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — Individual (×3)</p></li><li class="arg"><div class="arg-h"><span class="arg-t">Cut waste instead of raising revenue</span><span class="arg-n">10</span></div><p class="arg-q">"You need to balance the budget by cutting out waste and fraud - not on the backs of the honest taxpayers." — Individual (×6)</p></li>
-  </ol>
-
-  <p class="also"><b>Also raised:</b> it reaches retirement savings (9) · residents leave (5) · capital goes elsewhere (3)</p>
-  <div class="foot">406 opposing submissions, 2026 session · github.com/dtomkatsu/hawaii-tax-testimony</div>
+  <div class="eyebrow">THE CASE AGAINST · 406 SUBMISSIONS IN OPPOSITION</div><h1 class="h1-b">The ten arguments against raising taxes</h1><p class="standfirst">Ranked by frequency across the 406 opposing submissions — 347 from individuals, 59 from organizations. (×N) marks near-identical submissions; counts overlap.</p>
+  <ol class="args"><li class="arg"><span class="arg-r">1</span><div class="arg-h"><span class="arg-t">It makes an expensive place harder to afford</span><span class="arg-n">98</span></div><p class="arg-q">"The tax cuts mattered to working people here, and we were counting on them. Pausing them will make it harder to afford life in Hawaii." — Individual (×6)</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>A family of four at $100,000 income sees liability fall from <b>$6,034 (2023) to $2,133 (2031)</b> — nearly $4,000 a year. <i>Grassroot Institute, HB2306</i></li><li>On a <b>$88,005</b> household income, only Oregon taxes a family of four more heavily. <i>Grassroot Institute, HB2306</i></li></ul></div></li><li class="arg"><span class="arg-r">2</span><div class="arg-h"><span class="arg-t">It costs jobs and shrinks the activity being taxed</span><span class="arg-n">53</span></div><p class="arg-q">"...fewer property transfers, lower redevelopment activity, fewer construction jobs, reduced general excise tax revenues." — NAIOP Hawaii (×5), HB2049</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>REITs support an estimated <b>16,000 full-time jobs</b> in Hawaiʻi. <i>Nareit, SB2362</i></li><li>A tax increase equal to <b>1% of GDP</b> produced a <b>3% decline in GDP</b> after three years. <i>Grassroot Institute, HB2010</i></li></ul></div></li><li class="arg"><span class="arg-r">3</span><div class="arg-h"><span class="arg-t">It breaks a promise already made</span><span class="arg-n">46</span></div><p class="arg-q">"I would feel very betrayed if you do not preserve the tax cut. It would be the last ultimate bait and switch." — Individual (×5)</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>The freeze reaches brackets above <b>$350,000</b> joint, <b>$262,500</b> head of household, <b>$175,000</b> single. <i>Protect Democracy, SB3125</i></li><li>"A <b>$262,500</b> household income can easily" fall short of rich in Hawaiʻi. <i>Grassroot Institute, SB3125</i></li></ul></div></li><li class="arg"><span class="arg-r">4</span><div class="arg-h"><span class="arg-t">Business taxes reach every consumer</span><span class="arg-n">30</span></div><p class="arg-q">"Repealing section 235-110.7, HRS will hit every resident of our State and further increase the cost of living." — Matson Navigation, SB3125</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>Over <b>90 percent</b> of Hawaiʻi's imported goods pass through its harbors. <i>Matson Navigation, SB3125</i></li></ul></div></li></ol>
+  
+ 
+</section>
+<section class="page">
+  <div class="eyebrow contd">THE CASE AGAINST · CONTINUED</div>
+  <ol class="args"><li class="arg"><span class="arg-r">5</span><div class="arg-h"><span class="arg-t">Pausing a scheduled cut is itself a tax increase</span><span class="arg-n">28</span></div><p class="arg-q">"A pause is still a tax hike in real life." — Individual (×4)</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li><b>No figures are cited.</b> This argument is made entirely in terms of reliance and fairness, never in numbers.</li></ul></div></li><li class="arg"><span class="arg-r">6</span><div class="arg-h"><span class="arg-t">Small businesses absorb it worst</span><span class="arg-n">19</span></div><p class="arg-q">"Repealing this tax credit puts capital goods investment further out of reach for small businesses." — Chamber of Commerce Hawaii, SB3125</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>The millionaire's tax is a <b>2% surcharge</b> on income over <b>$1,000,000</b>. <i>Grassroot Institute, HB2010</i></li></ul></div></li><li class="arg"><span class="arg-r">7</span><div class="arg-h"><span class="arg-t">It undercuts clean-energy investment</span><span class="arg-n">16</span></div><p class="arg-q">"Eliminating this credit would increase the cost of solar and energy storage for Hawaii residents and businesses." — Solar industry write-in (×4), SB3125</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>Par Hawaiʻi is spending roughly <b>$100M</b> retrofitting its Kapolei refinery for renewable fuels. <i>SB3125</i></li><li>The solar industry has moved about <b>30%</b> of energy consumed annually to renewables over 15 years. <i>SB3125</i></li></ul></div></li></ol>
+  
+ 
+</section>
+<section class="page">
+  <div class="eyebrow contd">THE CASE AGAINST · CONTINUED</div>
+  <ol class="args"><li class="arg"><span class="arg-r">8</span><div class="arg-h"><span class="arg-t">It will not raise the revenue predicted</span><span class="arg-n">12</span></div><p class="arg-q">"While proponents suggest this tax will raise revenue, it is likely to have the opposite effect." — REIT industry testimony, SB2362</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>Federal law already requires REITs to distribute at least <b>90%</b> of taxable income to shareholders. <i>SB2362</i></li><li>Public Storage's 12 Hawaiʻi properties generated <b>$48.6M</b> gross revenue and paid <b>$2.2M</b> in GET in 2025. <i>SB2362</i></li></ul></div></li><li class="arg"><span class="arg-r">9</span><div class="arg-h"><span class="arg-t">Tax increases are never reversed</span><span class="arg-n">10</span></div><p class="arg-q">"Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — Individual (×3)</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li><b>No figures are cited.</b> Like argument 5, it rests on a prediction about future legislatures, not on data.</li></ul></div></li><li class="arg"><span class="arg-r">10</span><div class="arg-h"><span class="arg-t">Cut waste instead of raising revenue</span><span class="arg-n">10</span></div><p class="arg-q">"You need to balance the budget by cutting out waste and fraud - not on the backs of the honest taxpayers." — Individual (×6)</p><div class="arg-f"><span class="arg-fl">Figures cited</span><ul><li>"UH has over <b>$400 million</b> they never use." <i>Individual (×2), HB2306</i></li></ul></div></li></ol>
+  <p class="also"><b>Also raised:</b> it reaches retirement savings (9) · residents leave (5) · capital goes elsewhere (3)</p><div class="foot">406 opposing submissions, 2026 session · github.com/dtomkatsu/hawaii-tax-testimony</div>
  
 </section>
 </body>
