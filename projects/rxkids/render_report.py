@@ -749,8 +749,16 @@ html = f"""<!DOCTYPE html>
      the title block. Only the bottom is free to move. */
   .tfc-hero {{ padding-bottom: 44px !important; }}
   /* Trailing margins on a band's last child stack on top of the band's own
-     bottom padding — measured 196–200px of dead space where 140 was intended. */
-  .tfc-section > *:last-child {{ margin-bottom: 0 !important; }}
+     bottom padding — measured 196–200px of dead space where 140 was intended.
+     .tfc-scene-container is excluded because ITS trailing margin is
+     load-bearing, not slack: .tfc-scene-tag-bottom is absolutely positioned at
+     top:calc(100% + 40px), i.e. entirely OUTSIDE the container, and the
+     container's `margin: 60px auto 200px` ("room for floating heart above +
+     bottom box below") is what reserves room for it. Zeroing it dropped the
+     tag ~161px into the blue benefits band below. Any element that parks an
+     absolutely-positioned child past its own bottom edge belongs in this
+     exclusion list. */
+  .tfc-section > *:last-child:not(.tfc-scene-container) {{ margin-bottom: 0 !important; }}
   /* .tfc-container's 60px bottom padding sat below the final band's own
      padding, doubling the gap at the very end of the page. */
   .tfc-container {{ padding-bottom: 0 !important; }}
