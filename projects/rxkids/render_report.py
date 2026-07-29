@@ -614,7 +614,12 @@ def tanf_section() -> str:
             {C.html("tanf.note", "tfc-tanf-note")}
 
             {L.spacer("tanf.bottomline.title")}
-            <div class="tfc-highlight-box"{L.attr("tanf.bottomline.title", "margin-bottom:0")}>
+            <!-- margin-top is zeroed alongside margin-bottom: .tfc-highlight-box
+                 carries `margin: 60px 0`, and on an absolutely-positioned element
+                 that margin is ADDED to the `top` the editor stores — so a saved
+                 y landed the box 60px below the slot it was dragged to, and every
+                 later drag re-measured from the wrong place. -->
+            <div class="tfc-highlight-box"{L.attr("tanf.bottomline.title", "margin-top:0;margin-bottom:0")}>
                 <h3>{C.t("tanf.bottomline.title")}</h3>
                 <p>{C.t("tanf.bottomline.body")}</p>
             </div>
