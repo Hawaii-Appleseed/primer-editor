@@ -50,13 +50,13 @@ OPP = "#C4602F"
 
 # bill, campaign short, support, oppose, outcome
 DATA = [
-    ("HB2049", "Conveyance tax",   485, 20, "died"),
-    ("SB3028", "Conveyance tax",   111, 13, "died"),
-    ("SB2362", "REIT loophole",     75, 11, "died"),
-    ("HB1850", "Capital gains",     61, 10, "died"),
-    ("HB2010", "Millionaire's tax", 39,  1, "died"),
-    ("SB3125", "Act 46 freeze",     28, 180, "PASSED"),
-    ("HB2306", "Act 46 freeze",     24, 154, "died"),
+    ("HB2049", "Conveyance tax",   539, 28, "died"),
+    ("SB3028", "Conveyance tax",   127, 17, "died"),
+    ("SB2362", "REIT loophole",     80, 11, "died"),
+    ("HB1850", "Capital gains",     66, 11, "died"),
+    ("HB2010", "Millionaire's tax", 42,  2, "died"),
+    ("SB3125", "Act 46 freeze",     30, 181, "PASSED"),
+    ("HB2306", "Act 46 freeze",     30, 156, "died"),
 ]
 
 
@@ -119,6 +119,30 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
+# How many of the 389 opposition submissions raise each argument on page 2, in
+# the same order the page lists them. Measured, not estimated — regenerate from
+# ~/repos/hawaii-tax-testimony. Counts overlap: one submission usually makes
+# several of these arguments at once.
+ARG_COUNTS = [98, 53, 46, 30, 28, 19, 16, 12, 10, 10]
+
+
+def argument(i: int, count: int) -> str:
+    """One ranked argument: heading + tally, then the testimony it came from.
+
+    The rank and the tally are data, so they are rendered from ARG_COUNTS rather
+    than typed into content.md — the heading and the quotation are prose, so
+    they are slots.
+    """
+    return (
+        f'<li class="arg">'
+        f'<div class="arg-h">'
+        f'<span class="arg-t"{C.slot_attr(f"arg.{i}.h")}>{C.text(f"arg.{i}.h")}</span>'
+        f'<span class="arg-n">{count}</span>'
+        f'</div>'
+        f'<p class="arg-q"{C.slot_attr(f"arg.{i}.q")}>{C.text(f"arg.{i}.q")}</p>'
+        f'</li>')
+
+
 def bullets(key: str) -> str:
     """C.list() returns a list[str] of items — the caller builds the <li>s.
 
@@ -167,6 +191,20 @@ page = f"""
 
   <div class="foot"{L.attr("footer.note")}>{C.t("footer.note")}</div>
 {C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
+</section>
+
+<section class="page">
+  <div class="eyebrow"{L.attr("p2.eyebrow")}>{C.t("p2.eyebrow")}</div>
+  {L.spacer("p2.h1")}<h1 class="h1-b"{L.attr("p2.h1")}>{C.t("p2.h1")}</h1>
+  {C.html("p2.standfirst", "standfirst")}
+
+  <ol class="args">
+    {"".join(argument(i + 1, n) for i, n in enumerate(ARG_COUNTS))}
+  </ol>
+
+  {C.html("p2.also", "also")}
+  <div class="foot"{L.attr("p2.foot")}>{C.t("p2.foot")}</div>
+{C.extras("page2")} {L.layer(2)}{L.text_boxes(2)}{L.tables_html(2)}
 </section>"""
 
 body = C.fn.resolve(page)
@@ -220,6 +258,24 @@ html = f"""<!DOCTYPE html>
 
   .find {{ font-size:0.94rem; line-height:1.4; margin:0 0 4px; color:{SLATE}; }}
   .find strong {{ color:{INK}; }}
+
+  /* --- page 2: the ranked case against ------------------------------- */
+  .h1-b {{ font-size:1.9rem; }}
+  .args {{ list-style:none; counter-reset:arg; margin:4px 0 0; padding:0; }}
+  .arg {{ counter-increment:arg; padding:0 0 4px 30px; position:relative;
+          margin-bottom:3px; border-bottom:1px solid #EDF1EC; }}
+  .arg:last-child {{ border-bottom:0; }}
+  .arg::before {{ content:counter(arg); position:absolute; left:0; top:1px;
+                  width:21px; height:21px; border-radius:50%; background:{OPP};
+                  color:#fff; font-size:0.8rem; font-weight:700;
+                  display:flex; align-items:center; justify-content:center; }}
+  .arg-h {{ display:flex; align-items:baseline; gap:10px; margin-bottom:1px; }}
+  .arg-t {{ font-family:Poppins, sans-serif; font-size:1.0rem; font-weight:600;
+            color:{INK}; flex:1; }}
+  .arg-n {{ font-size:0.82rem; font-weight:700; color:{OPP}; white-space:nowrap; }}
+  .arg-q {{ margin:0; font-size:0.92rem; line-height:1.36; color:{SLATE};
+            border-left:2px solid {ASH}; padding-left:9px; }}
+  .also {{ font-size:0.92rem; color:#7C8A80; margin:6px 0 0; }}
 
   .foot {{ margin-top:8px; padding-top:7px; border-top:1px solid {ASH};
            font-size:0.84rem; color:#7C8A80; }}
