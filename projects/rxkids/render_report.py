@@ -34,7 +34,7 @@ REPO = HERE.parent.parent                        # repo root, where docsync/ liv
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from docsync.content import Content              # noqa: E402
+from docsync.content import Content, ContentError  # noqa: E402
 from docsync.layout import Layout                # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
@@ -706,6 +706,28 @@ BODY = f"""{MAIN_BODY}
 </div>"""
 
 BODY = C.fn.resolve(BODY)
+
+# ---- orphaned sources: edit-tolerant, publish-strict --------------------------
+# A declared source that nothing cites is silently dropped from the numbered
+# list (endnotes_with_ids only walks what was cited), so without this it fails
+# invisibly — the citation is just gone from the page and nothing says why.
+#
+# It is a HARD error only when PUBLISHING. While editing (DOCSYNC_EDIT) it is
+# almost always a normal in-between state: you cut a sentence to move it, and
+# for those few seconds its source has nothing pointing at it. Crashing the live
+# preview over that would make a routine move feel like a critical failure.
+# Ported from report2027/tools/render_report.py:1240-1265, minus its hidden-page
+# diagnosis — rxkids is a single flat page, so there is no page to hide.
+missing_src = C.fn.unused()
+if missing_src and os.environ.get("DOCSYNC_EDIT"):
+    print("  draft: source(s) not cited yet — normal while moving text: "
+          + ", ".join(missing_src))
+elif missing_src:
+    raise ContentError(
+        "content.md declares sources never cited in the prose: "
+        + ", ".join(f"[{s}]" for s in missing_src)
+        + " — if you're moving the text that cites one, finish the move (paste it "
+        + "back in); this blocks publishing only, not the live preview.")
 
 # ---- footnote refs: make the numbers reachable --------------------------------
 # resolve() leaves a bare <sup>N</sup>, which tells a reader a citation EXISTS
