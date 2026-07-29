@@ -197,11 +197,12 @@ def what_is_rxkids() -> str:
                 {scene_tag("left", "what.scene.left")}
                 {scene_tag("bottom", "what.scene.bottom")}
             </div>
-
-            <div class="tfc-cards-grid"></div>
         </div>
     </div>
 </div>"""
+# (Dropped an empty <div class="tfc-cards-grid"></div> that used to sit here:
+#  it held no cards but still carried margin:60px 0, contributing 120px of
+#  dead space to the bottom of the "What is RxKids?" band.)
 
 
 def scene_tag(side: str, key: str) -> str:
@@ -735,6 +736,28 @@ html = f"""<!DOCTYPE html>
   .tfc-hero, .tfc-full-width {{
       width: auto !important; left: 0 !important; right: auto !important;
       margin-left: -24px !important; margin-right: -24px !important; }}
+  /* Vertical rhythm. original.html gave every band `padding: 80px 0 140px`
+     (its own comment: "Increased bottom padding") — tuned for a Squarespace
+     page where sections scroll past one at a time. Stacked into one continuous
+     sheet that reads as a document, 80 over 140 leaves a visible dead strip at
+     every seam, and the lopsidedness makes each band look like it's drifted
+     up. 48/56 is snug and near-symmetric while still separating the bands. */
+  .tfc-full-width {{ padding-top: 48px !important; padding-bottom: 56px !important; }}
+  /* The hero keeps its 80px TOP: the title/logo/badge are absolutely
+     positioned from the hero's top edge, but the photo is in normal flow, so
+     shrinking the top padding would slide the photo up out of alignment with
+     the title block. Only the bottom is free to move. */
+  .tfc-hero {{ padding-bottom: 44px !important; }}
+  /* Trailing margins on a band's last child stack on top of the band's own
+     bottom padding — measured 196–200px of dead space where 140 was intended. */
+  .tfc-section > *:last-child {{ margin-bottom: 0 !important; }}
+  /* .tfc-container's 60px bottom padding sat below the final band's own
+     padding, doubling the gap at the very end of the page. */
+  .tfc-container {{ padding-bottom: 0 !important; }}
+  /* Same doubling at the CTA: its 60px top margin stacked on the last band's
+     bottom padding for a ~116px trough right before the closing call to
+     action. */
+  .tfc-cta-section {{ margin-top: 28px !important; margin-bottom: 0 !important; }}
   /* The logo is an absolute overlay inside the hero (positioned by the editor
      via layout.json), so it needs no box of its own — just block display. */
   .rxkeiki-logo {{ display: block; height: auto; }}
