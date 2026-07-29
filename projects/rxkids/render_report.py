@@ -1088,23 +1088,11 @@ html = f"""<!DOCTYPE html>
                       color: #1E9E57; font-weight: 800; font-size: 1.4rem; }}
   .tanf-choice-body {{ margin-bottom: 32px; }}
   .rxk-col--other {{ background: transparent; }}
-  /* Anything the layout system has positioned gets its margins zeroed.
-     docsync's Layout._style() emits position/left/top/width/z-index but NO
-     margin reset, and a margin on an absolutely-positioned element is ADDED to
-     its `top`/`left`. So the element renders somewhere other than the
-     coordinate that was saved — and because the editor re-measures the RENDERED
-     box on the next drag, the error compounds every save. That is exactly how
-     tanf.bottomline.title (margin-top:60px) walked off the bottom of an 84in
-     page to y=66in, and hero.badge (margin-top:30px) was drifting the same way.
-     Three call sites had already been patched by hand with margin-top:0 in
-     L.attr's `extra`; this makes it structural so the next positioned element
-     doesn't have to rediscover it.
-     Matching on the inline style is what keeps it precise: it hits exactly the
-     elements _style() positioned, in both edit and published builds, and never
-     the ones CSS positions on its own (the scene tags, whose margin-left:-125px
-     centering is load-bearing until they are actually dragged). Deliberate
-     margins passed through L.attr's `extra` are inline, so they still win. */
-  .page [style*="position:absolute"] {{ margin: 0; }}
+  /* (A local `.page [style*="position:absolute"] {{ margin:0 }}` rule used to
+     live here. docsync's Layout._style() now emits margin:0 itself, so every
+     report on the engine gets it — see the comment there for why a margin on a
+     positioned element compounds into its saved coordinate. hero.badge and
+     hero.hawaii keep the coordinates that were compensated for it.) */
   {FN_CSS}
   {EDIT_OVERRIDES}
 </style>
