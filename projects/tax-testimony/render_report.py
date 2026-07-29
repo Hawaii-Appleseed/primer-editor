@@ -56,8 +56,8 @@ DATA = [
     ("SB2362", "REIT loophole",     81, 12, "died"),
     ("HB1850", "Capital gains",     69, 11, "died"),
     ("HB2010", "Millionaire's tax", 42,  2, "died"),
-    ("SB3125", "Act 46 freeze",     30, 181, "PASSED"),
     ("HB2306", "Act 46 freeze",     30, 156, "died"),
+    ("SB3125", "Act 46 freeze",     26,  8, "PASSED"),
 ]
 
 
@@ -120,11 +120,11 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
-# How many of the 407 opposition submissions raise each argument, in
+# How many of the 234 opposition submissions raise each argument, in
 # the same order the page lists them. Measured, not estimated — regenerate from
 # ~/repos/hawaii-tax-testimony. Counts overlap: one submission usually makes
 # several of these arguments at once.
-ARG_COUNTS = [98, 54, 46, 30, 28, 19, 16, 12, 10, 10]
+ARG_COUNTS = [57, 41, 24, 19, 17, 16, 12, 6, 5, 5]
 
 
 # Argument blocks vary from ~240px to ~410px depending on how many examples and
@@ -358,7 +358,7 @@ html = f"""<!DOCTYPE html>
   .col li {{ font-size:0.94rem; line-height:1.38; margin-bottom:3px; color:{SLATE}; }}
   .col li strong {{ color:{INK}; }}
 
-  .find {{ font-size:0.94rem; line-height:1.4; margin:0 0 4px; color:{SLATE}; }}
+  .find {{ font-size:0.94rem; line-height:1.38; margin:0 0 3px; color:{SLATE}; }}
   .find strong {{ color:{INK}; }}
 
   /* --- page 2: the ranked case against ------------------------------- */

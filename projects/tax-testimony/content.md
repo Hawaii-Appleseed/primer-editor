@@ -19,20 +19,20 @@ HAWAIʻI TAX FAIRNESS COALITION
 # Testimony Analysis: 2026 session
 
 [[hero.standfirst]]
-All **1,471 public submissions** on the coalition's six 2026 tax priorities.
+All **1,285 public submissions** on the coalition's six 2026 tax priorities, excluding one hearing on a draft whose text was erroneous.
 
 [[stats.a.num]]
-1,471
+1,285
 [[stats.a.lab]]
 submissions coded
 
 [[stats.b.num]]
-1,044
+923
 [[stats.b.lab]]
 distinct arguments
 
 [[stats.c.num]]
-17
+16
 [[stats.c.lab]]
 hearings · 7 bills
 
@@ -42,10 +42,10 @@ hearings · 7 bills
 bills never heard
 
 [[chart.title]]
-### Testimony did not predict outcomes
+### Support was common. Passage was not.
 
 [[chart.note]]
-The only measure that passed drew the most opposition. The most lopsided support died first.
+Six of the seven bills heard drew more support than opposition. One passed.
 
 [[support.h]]
 ### What supporters argued
@@ -69,29 +69,29 @@ The only measure that passed drew the most opposition. The most lopsided support
 ### Three things the counts hide
 
 [[find.body]]
-**Much of the opposition to SB3125 was not over taxing the wealthy. **Many testifiers specifically defended the seven business tax credits that were targeted by Ways and Means. For example, the State Energy Office took "no position on Part I."[^themes]
+**SB3125's opposition was not over taxing the wealthy.** Six of its eight opponents singled out the seven business tax credits Ways and Means added in Part II. The State Energy Office took "no position on Part I."
 
-**The loudest objections came from allies.** Trust for Public Land and Molokai Land Trust filed *partial* opposition to the conveyance bill — they were defending a conservation earmark.
+**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 26 support to 8 opposition next hearing.[^themes]
 
-**Backlash tracked revocation, not redistribution.** Only the bills freezing already-announced Act 46 cuts drew mass individual opposition — 150+ each. The other four drew almost none.
+**Backlash tracked revocation, not redistribution.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
 
 [[footer.note]]
 1,925 pages · data.capitol.hawaii.gov · hitaxfairness.org · github.com/dtomkatsu/hawaii-tax-testimony
 
 [[p2.eyebrow]]
-THE CASE AGAINST · 407 SUBMISSIONS IN OPPOSITION
+THE CASE AGAINST · 234 SUBMISSIONS IN OPPOSITION
 
 [[p2.h1]]
 # The ten arguments against raising taxes
 
 [[p2.standfirst]]
-Ranked by frequency across the 407 opposing submissions — 347 from individuals, 60 from
+Ranked by frequency across the 234 opposing submissions — 184 from individuals, 50 from
 organizations. Each citation names the **policy** it addresses and links to the source PDF.
 SB3125 carried two parts; objections to its business-credit repeals are marked *Part II*, not
 as opposition to the wealth-tax freeze. (×N) marks near-identical submissions; counts overlap.
 
 [[arg.1.h]]
-It makes an expensive place harder to afford
+It makes an expensive place (Hawaiʻi) harder to afford
 
 [[arg.1.q]]
 "The tax cuts mattered to working people here, and we were counting on them. Pausing them will make it harder to afford life in Hawaii." — [Individual (×6), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=112)
@@ -133,8 +133,8 @@ It breaks a promise already made
 - "Families were counting on those tax cuts. Changing course now hurts trust in government." — [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=86)
 
 [[arg.3.f]]
-- The freeze reaches brackets above **$350,000** joint, **$262,500** head of household, **$175,000** single. [Grassroot Institute, Act 46 freeze · SB3125](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_TESTIMONY_WAM_03-05-26_.PDF#page=16)
-- "A **$262,500** household income can easily consist of a working parent with multiple dependents." [Grassroot Institute, Act 46 freeze · SB3125](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_TESTIMONY_WAM_03-05-26_.PDF#page=16)
+- The freeze eliminates brackets above **$350,000** joint, **$262,500** head of household and **$175,000** single, in 2027 and again in 2029. [Tax Foundation of Hawaii, Act 46 freeze · SB3125](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=17)
+- Stopping the phase-in "would prevent about **half of those savings** from kicking in." [Grassroot Institute, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=26)
 
 [[arg.4.h]]
 Business taxes reach every consumer
@@ -151,94 +151,93 @@ Business taxes reach every consumer
 - Over **90 percent** of Hawaiʻi's imported goods pass through its harbors. [Matson Navigation, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=40)
 
 [[arg.5.h]]
-Pausing a scheduled cut is itself a tax increase
-
-[[arg.5.q]]
-"A pause is still a tax hike in real life." — [Individual (×4), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=36)
-
-[[arg.5.more]]
-- "Pausing the cuts effectively raises taxes on residents." — [Individual (×4), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=146)
-- "A pause in tax cuts is still a tax increase." — [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=111)
-- "This bill feels like a tax increase disguised as a pause." — [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=187)
-
-[[arg.5.f]]
-- "This measure is not a 'pause' it is a repeal." Hawaiʻi ranked **worst state for overall taxation** in 2025 and **5th worst** for personal income taxes; total tax burden **13.92%**, highest of the 50 states. [Hawaiʻi Food Industry Association, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=22)
-
-[[arg.6.h]]
 Small businesses absorb it worst
 
-[[arg.6.q]]
+[[arg.5.q]]
 "Repealing this tax credit puts capital goods investment further out of reach for small businesses." — [Chamber of Commerce Hawaii, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=7)
 
-[[arg.6.more]]
+[[arg.5.more]]
 - "SB 3028 SD2 will therefore increase costs for small businesses leasing commercial space and for residents in multifamily housing." — [NAIOP Hawaii (×4), Conveyance tax · SB3028](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3028_HD1_TESTIMONY_FIN_04-02-26_.PDF#page=22)
 - "This proposal impacts the Small Business pillar of our 2030 Blueprint for Hawaii." — [Chamber of Commerce Hawaii, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=2)
 - "Over the long term, a tax increase on high earners will harm the economy and local businesses." — [Grassroot Institute, Millionaire's tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=25)
 
-[[arg.6.f]]
+[[arg.5.f]]
 - The millionaire's tax is a **2% surcharge** on income over **$1,000,000**. [Grassroot Institute, Millionaire's tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=25)
 - **Eight states** levy no capital gains tax at all: AL, FL, NV, NH, SD, TN, TX, WY. [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=44)
 - Up to **76%** of one resort renovation — over **$100 million** — went to local contractors, vendors and small businesses. [Sunstone Hotel Investors, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=29)
 
+[[arg.6.h]]
+Pausing a scheduled cut is itself a tax increase
+
+[[arg.6.q]]
+"A pause is still a tax hike in real life." — [Individual (×4), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=36)
+
+[[arg.6.more]]
+- "Pausing the cuts effectively raises taxes on residents." — [Individual (×4), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=146)
+- "A pause in tax cuts is still a tax increase." — [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=111)
+- "This bill feels like a tax increase disguised as a pause." — [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=187)
+
+[[arg.6.f]]
+- "This measure is not a 'pause' it is a repeal." Hawaiʻi ranked **worst state for overall taxation** in 2025 and **5th worst** for personal income taxes; total tax burden **13.92%**, highest of the 50 states. [Hawaiʻi Food Industry Association, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=22)
+
 [[arg.7.h]]
-It undercuts clean-energy investment
-
-[[arg.7.q]]
-"Eliminating this credit would increase the cost of solar and energy storage for Hawaii residents and businesses." — [Solar industry write-in (×4), SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_TESTIMONY_WAM_03-05-26_.PDF#page=55)
-
-[[arg.7.more]]
-- "Aviation alone accounts for more than half of the state's transportation fuel consumption, making it one of the most challenging sectors to decarbonize." — [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- Opposes "the provision that repeals the Renewable Fuels Production Tax Credit beginning January 1, 2029." — [Alaska Airlines and Hawaiian Airlines, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_TESTIMONY_WAM_03-05-26_.PDF#page=21)
-- "Pono Pacific respectfully opposes Section 7, which repeals §235-110.32, the renewable fuels production tax credit." — [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
-
-[[arg.7.f]]
-- Par Hawaiʻi announced a **$90 million** conversion of a Kapolei refinery unit to renewable fuel (April 2023), operational 2026. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- A second testifier puts the same Kapolei retrofit at **approximately $100M** — the two figures disagree. [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
-- Hawaiʻi has a statutory commitment to **100 percent renewable energy by 2045**. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-
-[[arg.8.h]]
 It will not raise the revenue predicted
 
-[[arg.8.q]]
+[[arg.7.q]]
 "While proponents suggest this tax will raise revenue, it is likely to have the opposite effect." — [Hawaiʻi LECET, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=21)
 
-[[arg.8.more]]
+[[arg.7.more]]
 - "Overall conveyance tax collections may not increase as anticipated. Reduced real estate activity also means fewer jobs and lower related tax revenues." — [Kobayashi Group, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_TESTIMONY_HSG-WAL_02-06-26_.PDF#page=38)
 - "While apparently motivated by an effort to raise added tax revenue, the bill can be expected to have the opposite effect." — [Public Storage, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=41)
 - "Reduced transaction activity would ultimately have the opposite of the intended effect." — [NAIOP Hawaii (×5), Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=26)
 
-[[arg.8.f]]
+[[arg.7.f]]
 - Federal law already requires REITs to distribute at least **90%** of taxable income to shareholders. [Hawaiʻi LECET, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=21)
 - Public Storage's 12 Hawaiʻi properties generated **$48.6M** gross revenue and paid **$2.2M** GET in 2025, plus **$2.74M** in real property tax. [Public Storage, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=41)
 - The state Employees' Retirement System holds an estimated **$183M** in REIT stock — about **4%** of its stock holdings. [IUOE Local 3, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=28)
 
-[[arg.9.h]]
-Tax increases are never reversed
-
-[[arg.9.q]]
-"Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — [Individual (×3), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=37)
-
-[[arg.9.more]]
-- "Taxes go up and up, and never rarely come back down. You promised to reverse that." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=95)
-- "Once taxes go up, they rarely come back down. Residents deserve policies they can rely on, yet this bill undermines trust." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=206)
-
-[[arg.9.f]]
-- **No figures are cited.** Like argument 5, this rests on a prediction about future legislatures, not on data.
-
-[[arg.10.h]]
+[[arg.8.h]]
 Cut waste instead of raising revenue
 
-[[arg.10.q]]
+[[arg.8.q]]
 "You need to balance the budget by cutting out waste and fraud - not on the backs of the honest taxpayers." — [Individual (×6), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=131)
 
-[[arg.10.more]]
+[[arg.8.more]]
 - "While residents have tightened their belts year after year, the State now proposes relief for itself instead of doing what families have done: cut spending." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=84)
 - "The Legislature should eliminate wasteful or duplicative budget items without eliminating vital services." — [Grassroot Institute, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=26)
 - "Look at all your wasteful expenditures before raising any more taxes." — [Individual, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_SD1_TESTIMONY_WAM_04-01-26_.PDF#page=73)
 
-[[arg.10.f]]
+[[arg.8.f]]
 - Hawaiʻi ranks **41 of 51** on the Tax Foundation's tax-competitiveness score. [Grassroot Institute, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=26)
 - "UH has over **$400 million** they never use." [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=131)
+
+[[arg.9.h]]
+It undercuts clean-energy investment
+
+[[arg.9.q]]
+"This legislation will have the unfortunate effect of reducing the availability and increasing the costs for renewable fuel in Hawaii." — [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
+
+[[arg.9.more]]
+- "Aviation alone accounts for more than half of the state's transportation fuel consumption, making it one of the most challenging sectors to decarbonize." — [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+- The RETITC repeal "will hinder solar investment for Hawaii's most vulnerable households facing the highest electricity costs in the nation." — [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
+
+[[arg.9.f]]
+- The RETITC lets owners claim **35% of system cost or $5,000**, whichever is lower, on a solar install. [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
+- Par Hawaiʻi announced a **$90 million** conversion of a Kapolei refinery unit to renewable fuel (April 2023), operational 2026. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+- Hawaiʻi has a statutory commitment to **100 percent renewable energy by 2045**. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+
+[[arg.10.h]]
+Tax increases are never reversed
+
+[[arg.10.q]]
+"Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — [Individual (×3), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=37)
+
+[[arg.10.more]]
+- "Taxes go up and up, and never rarely come back down. You promised to reverse that." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=95)
+- "Once taxes go up, they rarely come back down. Residents deserve policies they can rely on, yet this bill undermines trust." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=206)
+
+[[arg.10.f]]
+- **No figures are cited.** Like argument 5, this rests on a prediction about future legislatures, not on data.
 
 [[p2.contd]]
 THE CASE AGAINST · CONTINUED
@@ -247,7 +246,7 @@ THE CASE AGAINST · CONTINUED
 **Also raised:** it reaches retirement savings (9) · residents leave (5) · capital goes elsewhere (3)
 
 [[p2.foot]]
-407 opposing submissions, 2026 session · github.com/dtomkatsu/hawaii-tax-testimony
+234 opposing submissions, 2026 session · github.com/dtomkatsu/hawaii-tax-testimony
 
 [[sources]]
 [themes]: Cross-campaign analysis, Hawaiʻi tax testimony 2026 — https://github.com/dtomkatsu/hawaii-tax-testimony/blob/main/analysis/themes.md
