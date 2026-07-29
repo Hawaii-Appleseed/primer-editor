@@ -167,4 +167,6 @@ bindings:
       # poles, so recolouring in the editor stays on-palette.
       palette: ["#FFFFFF", "#2F3E46", "#354F52", "#52796F", "#84A98C", "#CAD2C5", "#00907A", "#C4602F"]
       page: [8.5, 11]
-      margins: [0.62, 0.75]
+      # Must match the .page padding in render_report.py, or the editor's guides
+      # sit where the text no longer does.
+      margins: [0.5, 0.55]

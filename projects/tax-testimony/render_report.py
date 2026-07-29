@@ -132,11 +132,11 @@ ARG_COUNTS = [98, 54, 46, 30, 28, 19, 16, 12, 10, 10]
 # or wastes a third of a sheet on the short ones. Pages are packed by ESTIMATED
 # height instead. The estimate is calibrated against measured render heights:
 # predicted vs. actual came within ~15px per block across all ten.
-PAGE_CONTENT_PX = 912          # 11in sheet less 0.75in top and bottom margins
-HEAD_FIRST_PX = 132            # eyebrow + h1 + standfirst on the first arg page
+PAGE_CONTENT_PX = 950          # 11in sheet less 0.55in top and bottom margins
+HEAD_FIRST_PX = 126            # eyebrow + h1 + standfirst on the first arg page
 HEAD_CONTD_PX = 42             # the short "continued" running head
-TAIL_PX = 96                   # the "also raised" line plus the footer rule
-CHARS_PER_LINE = 95            # at 0.92rem in the 7.26in text column
+TAIL_PX = 88                   # the "also raised" line plus the footer rule
+CHARS_PER_LINE = 108           # at 0.855rem in the 7.5in text column
 
 
 def _visible_len(s: str) -> int:
@@ -162,15 +162,15 @@ def estimate_height(i: int) -> int:
     more = [_visible_len(x) for x in C.list(f"arg.{i}.more")]
     figs = [_visible_len(x) for x in C.list(f"arg.{i}.f")]
 
-    h = 22 + 4                                    # rank/title row
-    h += _est_lines(q) * 19 + 6                   # the lead quotation
+    h = 21 + 2                                    # rank/title row
+    h += _est_lines(q) * 17 + 4                   # the lead quotation
     if more:
-        h += 16 + sum(_est_lines(m) * 17 + 3 for m in more) + 5
+        h += 13 + sum(_est_lines(m) * 15 + 2 for m in more) + 3
     if figs:
-        h += 16 + 12 + sum(_est_lines(f, 92) * 17 + 2 for f in figs)
+        h += 13 + 8 + sum(_est_lines(f, 105) * 15 + 1 for f in figs)
     # Deliberately biased to OVER-estimate by ~10-30px. Under-estimating
     # overflows the sheet; over-estimating only leaves a little whitespace.
-    return h + 45                                 # block padding + rule + margin
+    return h + 34                                 # block padding + rule + margin
 
 
 def argument(i: int, count: int) -> str:
@@ -326,7 +326,7 @@ html = f"""<!DOCTYPE html>
   body {{ margin:0; background:{CREAM};
          font:15.5px/1.55 Manrope, system-ui, sans-serif; color:{INK}; }}
   .page {{ width:8.5in; min-height:11in; margin:24px auto; background:#fff;
-           box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.75in 0.62in;
+           box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.55in 0.5in;
            box-sizing:border-box; position:relative; overflow:hidden; }}
 
   .eyebrow {{ font-size:0.95rem; font-weight:700; letter-spacing:.09em;
@@ -363,36 +363,36 @@ html = f"""<!DOCTYPE html>
 
   /* --- page 2: the ranked case against ------------------------------- */
   .h1-b {{ font-size:1.9rem; }}
-  .args {{ list-style:none; margin:10px 0 0; padding:0; }}
-  .arg {{ padding:0 0 9px 30px; position:relative;
-          margin-bottom:9px; border-bottom:1px solid #EDF1EC; }}
+  .args {{ list-style:none; margin:6px 0 0; padding:0; }}
+  .arg {{ padding:0 0 6px 26px; position:relative;
+          margin-bottom:6px; border-bottom:1px solid #EDF1EC; }}
   .arg:last-child {{ border-bottom:0; }}
   .arg-r {{ position:absolute; left:0; top:1px;
-            width:21px; height:21px; border-radius:50%; background:{OPP};
+            width:19px; height:19px; border-radius:50%; background:{OPP};
             color:#fff; font-size:0.8rem; font-weight:700;
             display:flex; align-items:center; justify-content:center; }}
-  .arg-h {{ display:flex; align-items:baseline; gap:10px; margin-bottom:1px; }}
-  .arg-t {{ font-family:Poppins, sans-serif; font-size:1.0rem; font-weight:600;
+  .arg-h {{ display:flex; align-items:baseline; gap:9px; margin-bottom:0; }}
+  .arg-t {{ font-family:Poppins, sans-serif; font-size:0.96rem; font-weight:600;
             color:{INK}; flex:1; }}
   .arg-n {{ font-size:0.82rem; font-weight:700; color:{OPP}; white-space:nowrap; }}
-  .arg-q {{ margin:0; font-size:0.92rem; line-height:1.36; color:{SLATE};
-            border-left:2px solid {ASH}; padding-left:9px; }}
+  .arg-q {{ margin:0; font-size:0.87rem; line-height:1.3; color:{SLATE};
+            border-left:2px solid {ASH}; padding-left:8px; }}
   .also {{ font-size:0.92rem; color:#7C8A80; margin:6px 0 0; }}
   .contd {{ color:#9AA79E; margin-bottom:10px; }}
-  .arg-m {{ margin:5px 0 0 0; padding-left:9px;
+  .arg-m {{ margin:3px 0 0 0; padding-left:8px;
             border-left:2px solid #E4EAE3; }}
-  .arg-ml {{ display:block; font-size:0.74rem; font-weight:700; color:#8A968D;
-             letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }}
-  .arg-m ul {{ margin:0; padding-left:1.05em; }}
-  .arg-m li {{ font-size:0.9rem; line-height:1.34; color:{SLATE};
-               margin-bottom:3px; }}
-  .arg-f {{ margin:5px 0 0 0; padding:6px 9px; background:#FAF7F4;
-            border-radius:6px; }}
-  .arg-fl {{ display:block; font-size:0.74rem; font-weight:700; color:{OPP};
-             letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }}
-  .arg-f ul {{ margin:0; padding-left:1.05em; }}
-  .arg-f li {{ font-size:0.92rem; line-height:1.36; color:{SLATE};
+  .arg-ml {{ display:block; font-size:0.67rem; font-weight:700; color:#8A968D;
+             letter-spacing:.06em; text-transform:uppercase; margin-bottom:1px; }}
+  .arg-m ul {{ margin:0; padding-left:0.95em; }}
+  .arg-m li {{ font-size:0.855rem; line-height:1.28; color:{SLATE};
                margin-bottom:2px; }}
+  .arg-f {{ margin:3px 0 0 0; padding:4px 8px; background:#FAF7F4;
+            border-radius:5px; }}
+  .arg-fl {{ display:block; font-size:0.67rem; font-weight:700; color:{OPP};
+             letter-spacing:.06em; text-transform:uppercase; margin-bottom:1px; }}
+  .arg-f ul {{ margin:0; padding-left:0.95em; }}
+  .arg-f li {{ font-size:0.855rem; line-height:1.28; color:{SLATE};
+               margin-bottom:1px; }}
   .arg-f li strong {{ color:{INK}; }}
   .arg-f li em {{ color:#8A968D; font-style:normal; font-size:0.86rem; }}
 
