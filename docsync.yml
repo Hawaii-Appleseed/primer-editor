@@ -145,3 +145,26 @@ bindings:
         # virtual filesystem won't have them ("draft does not build").
         - projects/our-mission/original.html
         - projects/our-mission/body.slotted.html
+
+  # Tax testimony one-pager — cross-campaign comparison of public testimony on
+  # the Hawaiʻi Tax Fairness Coalition's 2026 bills. Analysis pipeline lives in
+  # ~/repos/hawaii-tax-testimony; this page is the printable summary of it.
+  # A real letter page, not a scrolling web page — it is meant to be handed out.
+  - id: tax-testimony
+    content: projects/tax-testimony/content.md
+    # The stage half is required: without it the watcher rebuilds the published
+    # page but leaves the staged docs/tax-testimony/engine/ copy the in-browser
+    # editor actually reads from stale.
+    build: python3 projects/tax-testimony/render_report.py && python3 -m docsync.stage --id tax-testimony
+    outputs:
+      - projects/tax-testimony/index.html
+    editor:
+      dir: docs/tax-testimony
+      render: projects/tax-testimony/render_report.py
+      out: projects/tax-testimony/index.html
+      layout: projects/tax-testimony/layout.json
+      # Appleseed brand (ash/teal/slate/charcoal) plus the two validated chart
+      # poles, so recolouring in the editor stays on-palette.
+      palette: ["#FFFFFF", "#2F3E46", "#354F52", "#52796F", "#84A98C", "#CAD2C5", "#00907A", "#C4602F"]
+      page: [8.5, 11]
+      margins: [0.62, 0.75]
