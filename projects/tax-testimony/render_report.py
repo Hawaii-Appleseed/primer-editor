@@ -14,6 +14,7 @@ draft silently fails to build in Pyodide. Regenerate from
 """
 from pathlib import Path
 import os
+import re
 import sys
 
 HERE = Path(__file__).resolve().parent           # projects/tax-testimony
@@ -52,8 +53,8 @@ OPP = "#C4602F"
 DATA = [
     ("HB2049", "Conveyance tax",   539, 28, "died"),
     ("SB3028", "Conveyance tax",   127, 17, "died"),
-    ("SB2362", "REIT loophole",     80, 11, "died"),
-    ("HB1850", "Capital gains",     66, 11, "died"),
+    ("SB2362", "REIT loophole",     81, 12, "died"),
+    ("HB1850", "Capital gains",     69, 11, "died"),
     ("HB2010", "Millionaire's tax", 42,  2, "died"),
     ("SB3125", "Act 46 freeze",     30, 181, "PASSED"),
     ("HB2306", "Act 46 freeze",     30, 156, "died"),
@@ -119,14 +120,57 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
-# How many of the 389 opposition submissions raise each argument on page 2, in
+# How many of the 407 opposition submissions raise each argument, in
 # the same order the page lists them. Measured, not estimated — regenerate from
 # ~/repos/hawaii-tax-testimony. Counts overlap: one submission usually makes
 # several of these arguments at once.
-ARG_COUNTS = [98, 53, 46, 30, 28, 19, 16, 12, 10, 10]
+ARG_COUNTS = [98, 54, 46, 30, 28, 19, 16, 12, 10, 10]
 
 
-ARGS_PER_PAGE = 4        # tuned so no argument block is ever split across a page
+# Argument blocks vary from ~240px to ~410px depending on how many examples and
+# figures each carries, so a fixed count-per-page either overflows the tall ones
+# or wastes a third of a sheet on the short ones. Pages are packed by ESTIMATED
+# height instead. The estimate is calibrated against measured render heights:
+# predicted vs. actual came within ~15px per block across all ten.
+PAGE_CONTENT_PX = 912          # 11in sheet less 0.75in top and bottom margins
+HEAD_FIRST_PX = 132            # eyebrow + h1 + standfirst on the first arg page
+HEAD_CONTD_PX = 42             # the short "continued" running head
+TAIL_PX = 96                   # the "also raised" line plus the footer rule
+CHARS_PER_LINE = 95            # at 0.92rem in the 7.26in text column
+
+
+def _visible_len(s: str) -> int:
+    """Characters a reader actually sees.
+
+    C.text() hands back raw markdown and C.list() hands back rendered HTML, so
+    both carry the source-PDF URLs — around 120 characters each, none of which
+    occupy a single pixel on the page. Counting them made every block estimate
+    ~116px too tall.
+    """
+    s = re.sub(r"\]\(https?://[^)]+\)", "]", s)     # markdown links
+    s = re.sub(r"<[^>]+>", "", s)                    # rendered anchors/bold
+    return len(" ".join(s.split()))
+
+
+def _est_lines(chars: int, per_line: int = CHARS_PER_LINE) -> int:
+    return max(1, -(-chars // per_line))
+
+
+def estimate_height(i: int) -> int:
+    """Rendered height of one argument block, in CSS px, without rendering it."""
+    q = _visible_len(C.text(f"arg.{i}.q"))
+    more = [_visible_len(x) for x in C.list(f"arg.{i}.more")]
+    figs = [_visible_len(x) for x in C.list(f"arg.{i}.f")]
+
+    h = 22 + 4                                    # rank/title row
+    h += _est_lines(q) * 19 + 6                   # the lead quotation
+    if more:
+        h += 16 + sum(_est_lines(m) * 17 + 3 for m in more) + 5
+    if figs:
+        h += 16 + 12 + sum(_est_lines(f, 92) * 17 + 2 for f in figs)
+    # Deliberately biased to OVER-estimate by ~10-30px. Under-estimating
+    # overflows the sheet; over-estimating only leaves a little whitespace.
+    return h + 45                                 # block padding + rule + margin
 
 
 def argument(i: int, count: int) -> str:
@@ -136,6 +180,14 @@ def argument(i: int, count: int) -> str:
     being typed into content.md. The heading, the quotation and the figures are
     prose, so they are slots.
     """
+    more = C.list(f"arg.{i}.more")
+    more_html = (
+        f'<div class="arg-m">'
+        f'<span class="arg-ml">More from the record</span>'
+        f'<ul{C.ul_attr(f"arg.{i}.more")}>'
+        + "".join(f"<li>{m}</li>" for m in more) +
+        f'</ul></div>') if more else ""
+
     facts = C.list(f"arg.{i}.f")
     facts_html = (
         f'<div class="arg-f">'
@@ -150,7 +202,11 @@ def argument(i: int, count: int) -> str:
         f'<span class="arg-t"{C.slot_attr(f"arg.{i}.h")}>{C.text(f"arg.{i}.h")}</span>'
         f'<span class="arg-n">{count}</span>'
         f'</div>'
-        f'<p class="arg-q"{C.slot_attr(f"arg.{i}.q")}>{C.text(f"arg.{i}.q")}</p>'
+        # C.html, not C.t/C.text: the quotation carries a markdown link to the
+        # source PDF, and only html() runs the markdown pass. It emits its own
+        # <p> with the data-slot already on it.
+        f'{C.html(f"arg.{i}.q", "arg-q")}'
+        f'{more_html}'
         f'{facts_html}'
         f'</li>')
 
@@ -161,17 +217,24 @@ def argument_pages(start_page: int) -> str:
     The section grows with the evidence rather than being squeezed onto one
     sheet: add an eleventh argument and it simply lands on the next page.
     """
-    # Fill to the page cap, then spread the arguments EVENLY over that many
-    # pages. Naive chunking put 4+4+2 on three sheets and left the last one
-    # two-thirds empty; the same three sheets balance as 4+3+3.
-    total = len(ARG_COUNTS)
-    n_pages = max(1, -(-total // ARGS_PER_PAGE))     # ceil
-    base, extra = divmod(total, n_pages)
-    chunks, at = [], 1
-    for n in range(n_pages):
-        size = base + (1 if n < extra else 0)        # earlier pages take the remainder
-        chunks.append(list(range(at, at + size)))
-        at += size
+    # Pack greedily by estimated height. A block only moves to the next sheet
+    # when it genuinely will not fit, so a page holds two tall arguments or
+    # three short ones rather than a fixed count that has to suit both.
+    chunks: list[list[int]] = []
+    cur: list[int] = []
+    used = HEAD_FIRST_PX
+    for i in range(1, len(ARG_COUNTS) + 1):
+        h = estimate_height(i)
+        last = i == len(ARG_COUNTS)
+        budget = PAGE_CONTENT_PX - (TAIL_PX if last else 0)
+        if cur and used + h > budget:
+            chunks.append(cur)
+            cur, used = [], HEAD_CONTD_PX
+            budget = PAGE_CONTENT_PX - (TAIL_PX if last else 0)
+        cur.append(i)
+        used += h
+    if cur:
+        chunks.append(cur)
     out = []
     for n, chunk in enumerate(chunks):
         page_no = start_page + n
@@ -316,6 +379,13 @@ html = f"""<!DOCTYPE html>
             border-left:2px solid {ASH}; padding-left:9px; }}
   .also {{ font-size:0.92rem; color:#7C8A80; margin:6px 0 0; }}
   .contd {{ color:#9AA79E; margin-bottom:10px; }}
+  .arg-m {{ margin:5px 0 0 0; padding-left:9px;
+            border-left:2px solid #E4EAE3; }}
+  .arg-ml {{ display:block; font-size:0.74rem; font-weight:700; color:#8A968D;
+             letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }}
+  .arg-m ul {{ margin:0; padding-left:1.05em; }}
+  .arg-m li {{ font-size:0.9rem; line-height:1.34; color:{SLATE};
+               margin-bottom:3px; }}
   .arg-f {{ margin:5px 0 0 0; padding:6px 9px; background:#FAF7F4;
             border-radius:6px; }}
   .arg-fl {{ display:block; font-size:0.74rem; font-weight:700; color:{OPP};
@@ -328,6 +398,8 @@ html = f"""<!DOCTYPE html>
 
   .foot {{ margin-top:8px; padding-top:7px; border-top:1px solid {ASH};
            font-size:0.84rem; color:#7C8A80; }}
+  .arg a, .arg-f a, .arg-m a {{ color:{DEEP}; text-decoration:none;
+                                border-bottom:1px solid {ASH}; }}
   .endnotes {{ font-size:12px; }}
   sup a {{ color:{DEEP}; text-decoration:none; }}
 </style>
