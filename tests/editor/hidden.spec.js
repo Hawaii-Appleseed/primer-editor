@@ -3,9 +3,11 @@
 // overrides, and a designed element in its designed place is none of those —
 // touched stayed false and the history entry was popped. Now Delete stages:
 //   moved element   -> back to its designed spot (the old behavior, kept)
-//   designed spot   -> hidden (layout.hidden; ghost in the editor,
-//                      display:none when published)
-//   ghost           -> restored
+//   designed spot   -> hidden (layout.hidden; display:none in the editor AND
+//                      on the published page — a delete that half-fades an
+//                      element reads as a delete that did not work)
+// Reversal is Undo, or File > Restore deleted, which lists what is gone: a
+// deleted element draws nothing, so it cannot be clicked to bring it back.
 // Local mode; basics.h1 is the same guinea pig movable-headings.spec.js uses.
 // Delete goes through the KEYBOARD: for a single text object the toolbar row
 // shows the type controls, not the arrange strip, so #ar-del isn't on screen
@@ -25,7 +27,8 @@ test.describe('deleting a designed element hides it, reversibly', () => {
     await gotoEditor(page);
   });
 
-  test('delete hides, the ghost is marked, delete again restores', async ({ page }) => {
+  test('delete removes it from the canvas, and File > Restore brings it back',
+    async ({ page }) => {
     const frame = page.frameLocator('#out');
     await selectH1(page, frame);
 
@@ -33,16 +36,31 @@ test.describe('deleting a designed element hides it, reversibly', () => {
     await page.keyboard.press('Delete');
     await expect.poll(() => page.evaluate(() => layout.hidden)).toEqual([ID]);
 
-    // The re-render ghosts it: still present, still selectable, marked.
-    const ghost = frame.locator(`[data-el="${ID}"]`);
-    await expect(ghost).toHaveAttribute('data-hidden', '1');
-    await expect(ghost).toHaveCount(1);
+    // Gone, not faded. The element stays in the markup (the renderer would
+    // regenerate it anyway) but draws nothing and occupies no space.
+    const gone = frame.locator(`[data-el="${ID}"]`);
+    await expect(gone).toBeHidden();
+    expect(await gone.evaluate(el => getComputedStyle(el).display)).toBe('none');
+    expect(await gone.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+    expect(await gone.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
 
-    // Deleting the ghost restores — hidden clears, marker gone.
-    await ghost.click();
-    await page.keyboard.press('Delete');
+    // It is still marked, which is what lets the editor list it for restore.
+    await expect(gone).toHaveAttribute('data-hidden', '1');
+
+    // The File menu now offers it back, and names how many are gone.
+    await page.click('#file');
+    const restore = page.locator('#file-restore');
+    await expect(restore).toBeVisible();
+    await expect(restore).toHaveText('Restore deleted (1)…');
+    await restore.click();
+
+    const dlg = page.locator('dialog[open]');
+    await expect(dlg).toBeVisible();
+    await expect(dlg.locator('select option')).toHaveText([ID, 'Everything (1)']);
+    await dlg.getByRole('button', { name: 'Restore' }).click();
+
     await expect.poll(() => page.evaluate(() => layout.hidden)).toBeUndefined();
-    await expect(frame.locator(`[data-el="${ID}"]`)).not.toHaveAttribute('data-hidden', '1');
+    await expect(frame.locator(`[data-el="${ID}"]`)).toBeVisible();
   });
 
   test('a moved element resets first, hides second — the old behavior survives', async ({ page }) => {
@@ -71,22 +89,27 @@ test.describe('deleting a designed element hides it, reversibly', () => {
     await page.waitForTimeout(400);
   });
 
-  test('a hidden element publishes as display:none and gives back its flow slot', async ({ page }) => {
+  test('deleting closes the gap, so the page reflows as it will when published',
+    async ({ page }) => {
     const frame = page.frameLocator('#out');
+    const page3 = frame.locator('section.page').nth(2);
+    await page3.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const before = await page3.evaluate(el => el.scrollHeight);
+
     await selectH1(page, frame);
     await page.keyboard.press('Delete');
-
-    // The editor's own render runs with DOCSYNC_EDIT, so published bytes are
-    // asserted engine-side (test_docsync.py). Here: the ghost must not
-    // actually vanish from the editor canvas...
-    const ghost = frame.locator(`[data-el="${ID}"]`);
     // The re-render swaps documents in when Pyodide finishes — under a loaded
     // suite that can outlast any fixed sleep, so wait for the marker itself.
-    await expect(ghost).toHaveAttribute('data-hidden', '1', { timeout: 30000 });
-    await expect(ghost).toBeVisible();
-    // ...while carrying the ghost treatment, not the published hiding.
-    const style = await ghost.getAttribute('style');
-    expect(style).toContain('opacity:.35');
-    expect(style).not.toContain('display:none');
+    await expect(frame.locator(`[data-el="${ID}"]`))
+      .toHaveAttribute('data-hidden', '1', { timeout: 30000 });
+
+    // The heading's space is genuinely given back — no reserved hole where it
+    // used to be. That is the half the old ghost could not do. (A global
+    // .ds-spacer count would be wrong here: this page carries spacers for
+    // unrelated moved elements, as movable-headings.spec.js also notes.)
+    const after = await frame.locator('section.page').nth(2)
+      .evaluate(el => el.scrollHeight);
+    expect(after).toBeLessThan(before);
   });
 });
