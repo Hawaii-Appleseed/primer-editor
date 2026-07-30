@@ -36,6 +36,7 @@ if str(REPO) not in sys.path:
 
 from docsync.content import Content, ContentError  # noqa: E402
 from docsync.layout import Layout                # noqa: E402
+from docsync.okina import OKINA_FACES, okinafy  # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
 _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
@@ -132,6 +133,9 @@ def rebrand(css: str) -> str:
 
 
 STYLE = rebrand(STYLE)
+# Open Sans has no U+02BB, so every ʻokina fell back to the system UI font.
+# okinafy() rewrites the inherited stacks; original.html stays untouched.
+STYLE = okinafy(STYLE)
 
 # The hero's auto-cycling JS (setInterval over three hardcoded URLs) would
 # silently overwrite a user's "replace image" edit a few seconds later — cut
@@ -884,6 +888,7 @@ html = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{C.text("title")}</title>
 <style>
+{OKINA_FACES}
   body {{ margin:0; background:#EDF1EE; }}
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}

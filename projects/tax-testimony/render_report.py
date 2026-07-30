@@ -25,6 +25,7 @@ if str(REPO) not in sys.path:
 from docsync.content import Content              # noqa: E402
 from docsync.layout import Layout                # noqa: E402
 from docsync.blocks import graphic, pdf_button   # noqa: E402
+from docsync.okina import OKINA_FACES            # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
 _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
@@ -409,15 +410,20 @@ html = f"""<!DOCTYPE html>
 <title>{C.text("title")}</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
+  /* Neither Manrope nor Poppins encodes U+02BB, so every ʻokina used to fall
+     back to the OS UI font. These one-glyph faces re-encode each family's own
+     U+2018 outline at U+02BB; unicode-range keeps them from claiming anything
+     else, so they must come FIRST in a stack. See tools/build_okina_font.py. */
+{OKINA_FACES}
   body {{ margin:0; background:{CREAM};
-         font:15.5px/1.55 Manrope, system-ui, sans-serif; color:{INK}; }}
+         font:15.5px/1.55 OkinaManrope, Manrope, system-ui, sans-serif; color:{INK}; }}
   .page {{ width:8.5in; min-height:11in; margin:24px auto; background:#fff;
            box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.55in 0.5in;
            box-sizing:border-box; position:relative; overflow:hidden; }}
 
   .eyebrow {{ font-size:0.95rem; font-weight:700; letter-spacing:.09em;
               color:{DEEP}; margin-bottom:6px; }}
-  h1 {{ font-family:Poppins, Manrope, sans-serif; font-size:2.2rem;
+  h1 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif; font-size:2.2rem;
         line-height:1.08; margin:0 0 8px; color:{INK}; letter-spacing:-.015em; }}
   .standfirst {{ font-size:1.02rem; line-height:1.45; margin:0 0 10px;
                  color:{SLATE}; max-width:6.6in; }}
@@ -426,17 +432,17 @@ html = f"""<!DOCTYPE html>
   .stats {{ display:flex; gap:9px; margin:0 0 11px; }}
   .stat {{ flex:1; background:{CREAM}; border-left:3px solid {TEAL};
            padding:7px 11px; border-radius:0 8px 8px 0; }}
-  .stat-n {{ font-family:Poppins, sans-serif; font-size:1.42rem; font-weight:700;
+  .stat-n {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif; font-size:1.42rem; font-weight:700;
              line-height:1.1; color:{DEEP}; }}
   .stat-l {{ font-size:0.93rem; color:{SLATE}; line-height:1.3; margin-top:2px; }}
 
-  h2 {{ font-family:Poppins, sans-serif; font-size:1.16rem; margin:0 0 6px;
+  h2 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif; font-size:1.16rem; margin:0 0 6px;
         color:{INK}; }}
   .note {{ font-size:0.95rem; color:{SLATE}; margin:4px 0 9px; }}
 
   .cols {{ display:flex; gap:20px; margin:0 0 7px; }}
   .col {{ flex:1; }}
-  h3 {{ font-family:Poppins, sans-serif; font-size:1.02rem; margin:0 0 5px; }}
+  h3 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif; font-size:1.02rem; margin:0 0 5px; }}
   .h-sup {{ color:{SUP}; }}
   .h-opp {{ color:{OPP}; }}
   .h-find {{ color:{INK}; margin-top:2px; }}
@@ -458,7 +464,7 @@ html = f"""<!DOCTYPE html>
             color:#fff; font-size:0.8rem; font-weight:700;
             display:flex; align-items:center; justify-content:center; }}
   .arg-h {{ display:flex; align-items:baseline; gap:9px; margin-bottom:0; }}
-  .arg-t {{ font-family:Poppins, sans-serif; font-size:0.96rem; font-weight:600;
+  .arg-t {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif; font-size:0.96rem; font-weight:600;
             color:{INK}; flex:1; }}
   .arg-n {{ font-size:0.82rem; font-weight:700; color:{OPP}; white-space:nowrap; }}
   .arg-q {{ margin:0; font-size:0.87rem; line-height:1.3; color:{SLATE};

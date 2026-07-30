@@ -19,6 +19,7 @@ if str(REPO) not in sys.path:
 
 from docsync.content import Content              # noqa: E402
 from docsync.layout import Layout                # noqa: E402
+from docsync.okina import OKINA_FACES, okinafy   # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
 _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
@@ -40,6 +41,10 @@ SRC = (HERE / "original.html").read_text()
 _body_m = re.search(r"<body[^>]*>(.*)</body>", SRC, re.S | re.I)
 _head_src = SRC[:_body_m.start()] if _body_m else ""
 STYLE = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", _head_src, re.S | re.I))
+# Manrope and Poppins have no U+02BB, so every ʻokina in "Hawaiʻi" fell back to
+# the system UI font. okinafy() rewrites the inherited stacks rather than
+# hand-editing original.html, which stays a pristine copy of the live page.
+STYLE = okinafy(STYLE)
 
 BODY = (HERE / "body.slotted.html").read_text()
 # marker substitution: A=slot attr, T=slot text, S=movable spacer,
@@ -49,6 +54,7 @@ BODY = re.sub("\u27e6T:([a-z0-9_.-]+)\u27e7", lambda m: C(m.group(1)), BODY)
 BODY = re.sub("\u27e6S:([a-z0-9_.-]+)\u27e7", lambda m: L.spacer(m.group(1)), BODY)
 BODY = re.sub("\u27e6E:([a-z0-9_.-]+)\u27e7", lambda m: L.attr(m.group(1)), BODY)
 BODY = re.sub("\u27e6B:([a-z0-9_.-]+)\u27e7", lambda m: L.sec(m.group(1)), BODY)
+BODY = okinafy(BODY)                             # inline style= stacks too
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -57,6 +63,7 @@ html = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{C.text("title")}</title>
 <style>
+{OKINA_FACES}
   body {{ margin:0; background:#EDF1EE; }}
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}
