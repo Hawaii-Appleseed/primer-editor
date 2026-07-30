@@ -129,7 +129,7 @@ def diverging_chart() -> str:
 # they do not sum to 250. They are RAW submission counts, which is what the
 # (xN) markers in the citations describe; the distinct (deduped) count is lower
 # for every theme and is reported alongside by the command above.
-ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 5, 4]
+ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 7, 5]
 
 
 # Argument blocks vary from ~240px to ~410px depending on how many examples and

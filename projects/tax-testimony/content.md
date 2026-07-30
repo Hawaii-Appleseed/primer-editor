@@ -19,7 +19,7 @@ HAWAIʻI TAX FAIRNESS COALITION
 # Testimony Analysis: 2026 session
 
 [[hero.standfirst]]
-**1,285 public testimonies** on the coalition's six 2026 tax priorities, excluding one hearing on an incorrect SB 3125 draft.
+**1,285 public testimonies** on the coalition's six 2026 tax priorities
 
 [[stats.a.num]]
 1,285
@@ -73,10 +73,10 @@ Six of the seven bills heard drew more support than opposition. One passed.
 
 **One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
 
-**Backlash tracked revocation, not redistribution.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
+**Some backlash was in response to pausing all tax cuts, not necessarily taxing the wealthy.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
 
 [[footer.note]]
-1,925 pages · data.capitol.hawaii.gov · hitaxfairness.org · github.com/dtomkatsu/hawaii-tax-testimony
+
 
 [[p2.eyebrow]]
 THE CASE AGAINST · 250 SUBMISSIONS IN OPPOSITION
@@ -209,38 +209,35 @@ Cut waste instead of raising revenue
 - "UH has over **$400 million** they never use." [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=131)
 
 [[arg.9.h]]
+Investors will put their capital in another state
+[[arg.9.q]]
+"Should this bill pass OPTrust would be forced to direct its investment capital elsewhere." — [OPTrust pension fund, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=33)
+[[arg.9.more]]
+- "Potential REIT and non-REIT investors, fearing unexpected law changes post-investment, would choose to deploy their capital elsewhere, and Hawaii would be on the outside looking in." — [NAIOP Hawaii, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=7)
+- "Enactment of SB 2362 would create a strong disincentive ... and potentially lead us to deploy that capital at hotels in other states that do not have such anti-REIT provisions." — [Host Hotels & Resorts, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=35)
+- "Adding an additional state-level tax burden on REITs would reduce the attractiveness of investing in Hawaiʻi-based projects." — [Housing Hawaiʻi’s Future, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=44)
+[[arg.9.f]]
+- Taxing REIT income would make Hawaiʻi **an outlier compared to 48 other states**. [Hawaiʻi LECET, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=21)
+- REIT investment has already produced **several billion dollars** of construction activity in the state. [NAIOP Hawaii, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=7)
+- OPTrust names **Ka Makana Aliʻi** as the project it financed this way; the deduction "was paramount to OPTrust’s decision to invest in Hawaii." [OPTrust, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=33)
+[[arg.10.h]]
 Tax increases are never reversed
 
-[[arg.9.q]]
+[[arg.10.q]]
 "Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — [Individual (×3), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=37)
 
-[[arg.9.more]]
+[[arg.10.more]]
 - "Taxes go up and up, and never rarely come back down. You promised to reverse that." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=95)
 - "Once taxes go up, they rarely come back down. Residents deserve policies they can rely on, yet this bill undermines trust." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=206)
 
-[[arg.9.f]]
-- **No figures are cited.** This rests on a prediction about what future legislatures will do, not on data.
-
-[[arg.10.h]]
-It undercuts clean-energy investment
-
-[[arg.10.q]]
-"This legislation will have the unfortunate effect of reducing the availability and increasing the costs for renewable fuel in Hawaii." — [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
-
-[[arg.10.more]]
-- "Aviation alone accounts for more than half of the state's transportation fuel consumption, making it one of the most challenging sectors to decarbonize." — [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- The RETITC repeal "will hinder solar investment for Hawaii's most vulnerable households facing the highest electricity costs in the nation." — [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
-
 [[arg.10.f]]
-- The RETITC lets owners claim **35% of system cost or $5,000**, whichever is lower, on a solar install. [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
-- Par Hawaiʻi announced a **$90 million** conversion of a Kapolei refinery unit to renewable fuel (April 2023), operational 2026. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- Hawaiʻi has a statutory commitment to **100 percent renewable energy by 2045**. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+- **No figures are cited.** This rests on a prediction about what future legislatures will do, not on data.
 
 [[p2.contd]]
 THE CASE AGAINST · CONTINUED
 
 [[p2.also]]
-**Also raised:** capital goes elsewhere (12) · it reaches retirement savings (7) · residents leave (2)
+**Also raised:** it reaches retirement savings (7) · it undercuts clean-energy investment (4) · residents leave (2)
 
 [[p2.foot]]
 250 opposing submissions, 2026 session
