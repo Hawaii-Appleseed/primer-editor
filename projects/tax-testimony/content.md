@@ -69,7 +69,7 @@ Six of the seven bills heard drew more support than opposition. One passed.
 ### Three things the counts hide
 
 [[find.body]]
-**SB3125's opposition was not over taxing the wealthy.** Six of its eight opponents singled out the seven business tax credits Ways and Means added in Part II. The State Energy Office took "no position on Part I."
+**SB3125's opposition was not over taxing the wealthy.** Six of its eight opponents singled out the seven business tax credits Ways and Means targeted in Part II. The State Energy Office took "no position on Part I."
 
 **One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 26 support to 8 opposition next hearing.[^themes]
 
@@ -85,10 +85,7 @@ THE CASE AGAINST · 234 SUBMISSIONS IN OPPOSITION
 # The ten arguments against raising taxes
 
 [[p2.standfirst]]
-Ranked by frequency across the 234 opposing submissions — 184 from individuals, 50 from
-organizations. Each citation names the **policy** it addresses and links to the source PDF.
-SB3125 carried two parts; objections to its business-credit repeals are marked *Part II*, not
-as opposition to the wealth-tax freeze. (×N) marks near-identical submissions; counts overlap.
+Ranked by frequency across the 234 opposing submissions — 184 from individuals, 50 from organizations. Each citation names the **policy** it addresses and links to the source PDF. SB3125 carried two parts; objections to its business-credit repeals are marked *Part II*, not as opposition to the wealth-tax freeze. (×N) marks near-identical submissions; counts overlap.
 
 [[arg.1.h]]
 It makes an expensive place (Hawaiʻi) harder to afford

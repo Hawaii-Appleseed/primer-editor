@@ -114,6 +114,13 @@ fi
 # left another editor window behind — and each one is a full Pyodide boot.
 # Look for a window already showing this server and raise it instead.
 #
+# This is the DEFAULT, not the only option: a second editor is a real thing to
+# want (two projects side by side, one report open on two pages), and the
+# editor's own File ▸ New window asks the server for one. That way an extra
+# window is deliberate rather than the by-product of clicking the Dock icon
+# twice. Both windows share this one server; keep it to a handful — each holds
+# an SSE connection and browsers cap those at ~6 per host.
+#
 # This asks macOS for permission to control Chrome the first time (System
 # Settings > Privacy & Security > Automation). Declining is not fatal: the
 # lookup fails, and the old behaviour — open a window — is what happens.

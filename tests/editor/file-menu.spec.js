@@ -9,13 +9,15 @@
 const { test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 test.describe('File menu', () => {
-  test('collects Open, Resize, Download and Token', async ({ page }) => {
+  test('collects Open, New window, Resize, Download and Token', async ({ page }) => {
     await gotoEditor(page);
     // Closed until asked for — it is a menu, not a panel.
     await expect(page.locator('#filepop')).toBeHidden();
     await openFileMenu(page);
+    // New window is local-only (see new-window.spec.js) but always in the DOM,
+    // so it belongs in this list either way.
     await expect(page.locator('#filepop button')).toHaveText(
-      ['Open…', 'Resize…', 'Download…', 'Token…']);
+      ['Open…', 'New window', 'Resize…', 'Download…', 'Token…']);
   });
 
   test('Download and Token are no longer loose in the toolbar', async ({ page }) => {
