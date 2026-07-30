@@ -120,11 +120,16 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
-# How many of the 250 opposition submissions raise each argument, in
-# the same order the page lists them. Measured, not estimated — regenerate from
-# ~/repos/hawaii-tax-testimony. Counts overlap: one submission usually makes
-# several of these arguments at once.
-ARG_COUNTS = [57, 41, 24, 19, 17, 16, 12, 6, 5, 5]
+# How many of the 250 opposing submissions raise each argument, in the same
+# order the page lists them. Measured, and now RE-DERIVABLE rather than read by
+# hand: `python -m testimony arguments` in ~/repos/hawaii-tax-testimony prints
+# this list, from phrase sets committed in testimony/arguments.py.
+#
+# Counts overlap — one submission usually makes several of these at once — so
+# they do not sum to 250. They are RAW submission counts, which is what the
+# (xN) markers in the citations describe; the distinct (deduped) count is lower
+# for every theme and is reported alongside by the command above.
+ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 5, 4]
 
 
 # Argument blocks vary from ~240px to ~410px depending on how many examples and

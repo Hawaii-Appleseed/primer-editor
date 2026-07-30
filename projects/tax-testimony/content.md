@@ -209,38 +209,38 @@ Cut waste instead of raising revenue
 - "UH has over **$400 million** they never use." [Individual (×2), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=131)
 
 [[arg.9.h]]
-It undercuts clean-energy investment
-
-[[arg.9.q]]
-"This legislation will have the unfortunate effect of reducing the availability and increasing the costs for renewable fuel in Hawaii." — [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
-
-[[arg.9.more]]
-- "Aviation alone accounts for more than half of the state's transportation fuel consumption, making it one of the most challenging sectors to decarbonize." — [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- The RETITC repeal "will hinder solar investment for Hawaii's most vulnerable households facing the highest electricity costs in the nation." — [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
-
-[[arg.9.f]]
-- The RETITC lets owners claim **35% of system cost or $5,000**, whichever is lower, on a solar install. [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
-- Par Hawaiʻi announced a **$90 million** conversion of a Kapolei refinery unit to renewable fuel (April 2023), operational 2026. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-- Hawaiʻi has a statutory commitment to **100 percent renewable energy by 2045**. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
-
-[[arg.10.h]]
 Tax increases are never reversed
 
-[[arg.10.q]]
+[[arg.9.q]]
 "Once taxes go up, they rarely come back down. A pause today becomes permanent tomorrow." — [Individual (×3), Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=37)
 
-[[arg.10.more]]
+[[arg.9.more]]
 - "Taxes go up and up, and never rarely come back down. You promised to reverse that." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=95)
 - "Once taxes go up, they rarely come back down. Residents deserve policies they can rely on, yet this bill undermines trust." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=206)
 
+[[arg.9.f]]
+- **No figures are cited.** This rests on a prediction about what future legislatures will do, not on data.
+
+[[arg.10.h]]
+It undercuts clean-energy investment
+
+[[arg.10.q]]
+"This legislation will have the unfortunate effect of reducing the availability and increasing the costs for renewable fuel in Hawaii." — [Pono Pacific, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=50)
+
+[[arg.10.more]]
+- "Aviation alone accounts for more than half of the state's transportation fuel consumption, making it one of the most challenging sectors to decarbonize." — [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+- The RETITC repeal "will hinder solar investment for Hawaii's most vulnerable households facing the highest electricity costs in the nation." — [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
+
 [[arg.10.f]]
-- **No figures are cited.** Like argument 5, this rests on a prediction about future legislatures, not on data.
+- The RETITC lets owners claim **35% of system cost or $5,000**, whichever is lower, on a solar install. [Hawaiʻi Green Infrastructure Authority, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=38)
+- Par Hawaiʻi announced a **$90 million** conversion of a Kapolei refinery unit to renewable fuel (April 2023), operational 2026. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
+- Hawaiʻi has a statutory commitment to **100 percent renewable energy by 2045**. [Hawaiʻi Renewable Fuels Coalition, SB3125 Part II · credit repeals](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3125_SD1_TESTIMONY_FIN_04-07-26_.PDF#page=41)
 
 [[p2.contd]]
 THE CASE AGAINST · CONTINUED
 
 [[p2.also]]
-**Also raised:** it reaches retirement savings (9) · residents leave (5) · capital goes elsewhere (3)
+**Also raised:** capital goes elsewhere (12) · it reaches retirement savings (7) · residents leave (2)
 
 [[p2.foot]]
 250 opposing submissions, 2026 session
