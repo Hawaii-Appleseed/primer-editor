@@ -42,7 +42,7 @@ hearings · 7 bills
 bills never heard
 
 [[chart.title]]
-### Support was common. Passage was not.
+
 
 [[chart.note]]
 Six of the seven bills heard drew more support than opposition. One passed.
@@ -71,7 +71,7 @@ Six of the seven bills heard drew more support than opposition. One passed.
 [[find.body]]
 **SB3125's opposition was not over taxing the wealthy.** Nine of its eleven opponents singled out the business tax credits Ways and Means targeted in Part II. The State Energy Office took "no position on Part I."
 
-**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
+**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 175 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
 
 **Some backlash was in response to pausing all tax cuts, not necessarily taxing the wealthy.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
 
