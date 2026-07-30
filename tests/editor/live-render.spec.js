@@ -62,3 +62,31 @@ test('a bump that changes nothing does not re-render; one that changes the engin
   expect(verdicts, 'edit.html should expose __fileSig for this test').not.toBeNull();
   expect(verdicts).toEqual({ same: true, appended: true, oneChar: true, bytes: true, crossType: true });
 });
+
+// A file a rebuild ADDS to the engine must reach a tab that booted before it
+// existed. refreshEngineFiles used to walk M.files — the manifest snapshot
+// from boot — so the new module was never fetched, and the freshly
+// hot-reloaded renderer that imported it died with ModuleNotFoundError in a
+// tab doing everything right (docsync/okina.py was the live case).
+test('an engine file added after boot arrives on the next refresh', async ({ page }) => {
+  await gotoEditor(page);
+  await page.waitForTimeout(500);
+  const r = await page.evaluate(async () => {
+    const rel = 'docsync/okina.py';
+    const url = Object.keys(M.files).find(u => M.files[u] === rel);
+    if (!url) return { skip: 'okina not in this manifest' };
+    // Rewind this tab to a boot that predates the file: not in the manifest,
+    // not in Pyodide's filesystem, no signature on record.
+    delete M.files[url];
+    engineSig.delete('/repo/' + rel);
+    try { py.FS.unlink('/repo/' + rel); } catch (e) {}
+    const changed = await refreshEngineFiles();
+    let back = true;
+    try { py.FS.stat('/repo/' + rel); } catch (e) { back = false; }
+    return { changed, back, listed: Object.values(M.files).includes(rel) };
+  });
+  expect(r.skip).toBeUndefined();
+  expect(r.listed).toBe(true);   // the manifest itself was re-fetched
+  expect(r.back).toBe(true);     // and the file it names is in the engine
+  expect(r.changed).toBe(true);  // so the caller knows to re-render
+});
