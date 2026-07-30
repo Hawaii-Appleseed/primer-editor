@@ -401,5 +401,28 @@ It funds transit-oriented development
 [[p6.foot]]
 917 supporting submissions, 2026 session
 
+[[p10.eyebrow]]
+WHO SHOWED UP · 336 ORGANISATION SUBMISSIONS
+
+[[p10.h1]]
+# The organisations on each side
+
+[[p10.oppose.h]]
+### Opposed most often
+
+[[p10.support.h]]
+### Supported most often
+
+[[p10.standfirst]]
+Every organisation that filed on these seven bills, ranked by how many submissions it made. The second figure is how many of the seven bills it filed on — a group that testified four times on one bill is not the same as one that turned up for four.
+
+[[p10.note]]
+**Opposition was a small, repeat roster; support was broad.** 22 organisations opposed at least once and only six filed more than once. 91 organisations supported, 14 of them more than once — and the four most frequent supporters covered five, six, six and seven of the seven bills.
+
+**One organisation changed its mind in public.** The Trust for Public Land is the only filer recorded on both sides — and on the same bill. It filed in *partial opposition* to HB2049 HD1 over the cut to the Land Conservation Fund, then supported HD2 and SD1 once the allocation changed, while still opposing the Senate companion SB3028. The objection was to where the money went, never to the tax.
+
+[[p10.foot]]
+Organisation records only · individuals excluded · github.com/dtomkatsu/hawaii-tax-testimony
+
 [[sources]]
 [themes]: Cross-campaign analysis, Hawaiʻi tax testimony 2026 — https://github.com/dtomkatsu/hawaii-tax-testimony/blob/main/analysis/themes.md

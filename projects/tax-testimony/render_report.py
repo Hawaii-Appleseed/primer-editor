@@ -276,6 +276,60 @@ def _arg_pages() -> int:
     return ranked_pages("arg", "p2", ARG_COUNTS, 2).count('<section class="page"')
 
 
+
+# Organisations that filed more than once, measured over the 336 organisation
+# records with a resolved name. Two filters make these numbers safe to print,
+# because an ORGANISATIONS table is the one artifact where a bad attribution is
+# the headline rather than a footnote:
+#   - names are canonicalised through orgs.yml (a masthead that extracts as its
+#     chair's name, a hearing header that is not a filer at all);
+#   - records holding TWO organisations' letters are dropped, because the name
+#     comes from one and the position can come from the other. That is what had
+#     the Department of Taxation — which files comments, not positions — showing
+#     up as a supporter: DHHL's "strongly supports this bill" sat inside DOTAX's
+#     record.
+# Regenerate with `python -m testimony organisations`.
+ORG_OPPOSE = [
+    ("Hawaiʻi Association of REALTORS", 11, 4),
+    ("Grassroot Institute of Hawaii", 10, 4),
+    ("NAIOP Hawaii", 10, 3),
+    ("Chamber of Commerce Hawaii", 3, 2),
+    ("Land Use Research Foundation of Hawaii", 3, 2),
+    ("Hawaiʻi Food Industry Association", 2, 2),
+    ("Trust for Public Land", 1, 1),
+    ("Kobayashi Group", 1, 1),
+    ("Building Industry Association of Hawaii", 1, 1),
+    ("Hawaiʻi Laborers & Employers Cooperation", 1, 1),
+]
+ORG_SUPPORT = [
+    ("Hawaiʻi Appleseed Center for Law and Economic Justice", 14, 5),
+    ("Protect Democracy", 12, 6),
+    ("Hawaiʻi Children's Action Network Speaks!", 12, 6),
+    ("Hawaiʻi Public Health Institute", 10, 7),
+    ("Hawaiʻi YIMBY", 7, 2),
+    ("Department of Hawaiian Home Lands", 6, 1),
+    ("Women's Caucus", 5, 4),
+    ("Council for Native Hawaiian Advancement", 5, 2),
+    ("Office of the Governor", 5, 2),
+    ("The Nature Conservancy", 4, 1),
+]
+
+
+def org_column(rows, accent: str, head_key: str) -> str:
+    """One ranked column of organisations: name, submissions, bills."""
+    items = "".join(
+        f'<li class="org">'
+        f'<span class="org-r" style="background:{accent}">{i}</span>'
+        f'<span class="org-n">{name}</span>'
+        f'<span class="org-c" style="color:{accent}">{n}</span>'
+        f'<span class="org-b">{b} bill{"s" if b != 1 else ""}</span>'
+        f'</li>'
+        for i, (name, n, b) in enumerate(rows, 1))
+    return (f'<div class="col">'
+            f'<h3 style="color:{accent}"{L.attr(head_key)}>{C.t(head_key)}</h3>'
+            f'<ol class="orgs">{items}</ol></div>')
+
+
 def bullets(key: str) -> str:
     """C.list() returns a list[str] of items — the caller builds the <li>s.
 
@@ -327,7 +381,19 @@ page = f"""
 </section>
 
 {ranked_pages("arg", "p2", ARG_COUNTS, 2)}
-{ranked_pages("sup", "p6", SUPPORT_COUNTS, 2 + _arg_pages(), " sup")}"""
+{ranked_pages("sup", "p6", SUPPORT_COUNTS, 2 + _arg_pages(), " sup")}
+<section class="page">
+  <div class="eyebrow"{L.attr("p10.eyebrow")}>{C.t("p10.eyebrow")}</div>
+  {L.spacer("p10.h1")}<h1 class="h1-b"{L.attr("p10.h1")}>{C.t("p10.h1")}</h1>
+  {C.html("p10.standfirst", "standfirst")}
+  <div class="cols org-cols">
+    {org_column(ORG_OPPOSE, OPP, "p10.oppose.h")}
+    {org_column(ORG_SUPPORT, SUP, "p10.support.h")}
+  </div>
+  {C.html("p10.note", "find")}
+  <div class="foot"{L.attr("p10.foot")}>{C.t("p10.foot")}</div>
+{C.extras("page10")} {L.layer(10)}{L.text_boxes(10)}{L.tables_html(10)}
+</section>"""
 
 body = C.fn.resolve(page)
 notes = C.fn.endnotes()
@@ -421,6 +487,19 @@ html = f"""<!DOCTYPE html>
   .arg-f li strong {{ color:{INK}; }}
   .arg-f li em {{ color:#8A968D; font-style:normal; font-size:0.86rem; }}
 
+  /* --- the organisations page ---------------------------------------- */
+  .org-cols {{ gap:26px; margin-top:4px; }}
+  .orgs {{ list-style:none; margin:6px 0 0; padding:0; }}
+  .org {{ display:flex; align-items:baseline; gap:7px; padding:4px 0;
+          border-bottom:1px solid #EDF1EC; font-size:0.9rem; }}
+  .org:last-child {{ border-bottom:0; }}
+  .org-r {{ flex:0 0 auto; width:17px; height:17px; border-radius:50%;
+            color:#fff; font-size:0.7rem; font-weight:700; display:flex;
+            align-items:center; justify-content:center; }}
+  .org-n {{ flex:1; color:{INK}; line-height:1.25; }}
+  .org-c {{ font-weight:700; font-size:0.95rem; white-space:nowrap; }}
+  .org-b {{ flex:0 0 auto; font-size:0.78rem; color:#8A968D;
+            white-space:nowrap; width:46px; text-align:right; }}
   .foot {{ margin-top:8px; padding-top:7px; border-top:1px solid {ASH};
            font-size:0.84rem; color:#7C8A80; }}
   .arg a, .arg-f a, .arg-m a {{ color:{DEEP}; text-decoration:none;
