@@ -24,7 +24,7 @@ if str(REPO) not in sys.path:
 
 from docsync.content import Content              # noqa: E402
 from docsync.layout import Layout                # noqa: E402
-from docsync.blocks import graphic               # noqa: E402
+from docsync.blocks import graphic, pdf_button   # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
 _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
@@ -405,6 +405,7 @@ html = f"""<!DOCTYPE html>
 </style>
 </head>
 <body>
+{pdf_button(L, bg=DEEP)}
 {body}
 </body>
 </html>

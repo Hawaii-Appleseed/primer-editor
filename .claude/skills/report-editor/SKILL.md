@@ -18,7 +18,7 @@ Every project can import the engine's helpers — they are staged into the
 browser engine automatically:
 
 ```python
-from docsync.blocks import graphic, card, is_light_bg
+from docsync.blocks import graphic, card, is_light_bg, pdf_button
 
 # A movable/resizable/rotatable inline SVG. viewBox REQUIRED; w = default
 # width in inches (until the user resizes; then layout.json wins).
@@ -28,6 +28,10 @@ from docsync.blocks import graphic, card, is_light_bg
 # renders title/bullets as their own movables (seed a default group, below).
 {card(C, L, "page1.card.title", "page1.card.bullets", "#52796F",
       detachable=True, min_h=1.8)}
+
+# ONCE, just inside <body>: the reader-facing "Download PDF" in the upper-right
+# corner, plus the print CSS that makes the PDF come out right.
+{pdf_button(L, bg="#52796F")}
 ```
 
 - `L` is the project's `Layout`, `C` its `Content` — every renderer has both.
