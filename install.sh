@@ -17,6 +17,19 @@ REPO_URL="${PRIMER_REPO:-https://github.com/dtomkatsu/primer-editor.git}"
 DEST="${PRIMER_HOME:-$HOME/primer-editor}"
 BRANCH="${PRIMER_BRANCH:-main}"
 PORT="${PRIMER_PORT:-8010}"
+# Where the double-clickable app lands. Overridable so a test install can
+# build its launcher somewhere harmless instead of replacing the real one.
+APPS_DIR="${PRIMER_APPS_DIR:-$HOME/Applications}"
+# A LIVE report repo to set up alongside the editor. The editor alone serves
+# its bundled fixture; the live report lives in its own repo, cloned beside
+# this one and registered in the per-machine projects.json. One env makes a
+# colleague's install of the real report the same one line as the editor's:
+#   PRIMER_LIVE=dtomkatsu/BudgetPrimerFinal
+LIVE="${PRIMER_LIVE:-}"                       # owner/name on GitHub
+LIVE_URL="${PRIMER_LIVE_URL:-}"               # clone source override (tests)
+LIVE_DEST="${PRIMER_LIVE_HOME:-}"             # where to clone it
+LIVE_ID="${PRIMER_LIVE_ID:-budget-primer}"    # binding id in ITS docsync.yml
+LIVE_NAME="${PRIMER_LIVE_NAME:-Budget Primer FY2026-27}"
 
 say()  { printf '  %s\n' "$*"; }
 ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
@@ -79,14 +92,51 @@ fi
 .venv/bin/python -m pip install --quiet -r requirements.txt || die "dependency install failed"
 ok "dependencies installed"
 
+# --- the live report, when asked for -----------------------------------------
+# Clone it beside the editor and register it in projects.json, so the start
+# page and the editor serve the REAL report — not just the bundled fixture.
+# Without this step a fresh install looks right but every edit lands in the
+# fixture, which is the one mistake a new person cannot be expected to catch.
+if [ -n "$LIVE" ]; then
+  [ -n "$LIVE_URL" ] || LIVE_URL="https://github.com/$LIVE.git"
+  [ -n "$LIVE_DEST" ] || LIVE_DEST="$HOME/$(basename "$LIVE" .git)"
+  if [ -d "$LIVE_DEST/.git" ]; then
+    say "live report already at $LIVE_DEST — leaving it as it is"
+  else
+    say "cloning the live report into $LIVE_DEST"
+    git clone --quiet "$LIVE_URL" "$LIVE_DEST" \
+      || die "could not clone $LIVE_URL — do you have access?"
+  fi
+  # Merge, never clobber: projects.json is per-machine state the person may
+  # already have shaped. Written with the venv python (PyYAML-free, stdlib
+  # json), atomically enough for a file only this installer writes.
+  PRIMER_LIVE_ENTRY_ID="$LIVE_ID" PRIMER_LIVE_ENTRY_NAME="$LIVE_NAME" \
+  PRIMER_LIVE_ENTRY_REPO="$LIVE" PRIMER_LIVE_ENTRY_ROOT="$LIVE_DEST" \
+  .venv/bin/python - <<'REG' || die "could not write docs/primer/projects.json"
+import json, os, pathlib
+reg = pathlib.Path("docs/primer/projects.json")
+data = json.loads(reg.read_text()) if reg.is_file() else {}
+lid = os.environ["PRIMER_LIVE_ENTRY_ID"]
+data[lid] = {
+    "name": os.environ["PRIMER_LIVE_ENTRY_NAME"],
+    "base": "../_repo-" + lid,
+    "repo": os.environ["PRIMER_LIVE_ENTRY_REPO"],
+    "local_root": os.environ["PRIMER_LIVE_ENTRY_ROOT"],
+}
+reg.parent.mkdir(parents=True, exist_ok=True)
+reg.write_text(json.dumps(data, indent=2) + "\n")
+REG
+  ok "live report registered ($LIVE_ID -> $LIVE_DEST)"
+fi
+
 # --- check, then build the launcher ------------------------------------------
 .venv/bin/python tools/preflight.py || die "preflight failed — see above"
 
 if [ "$(uname -s)" = "Darwin" ]; then
-  PATH="$DEST/.venv/bin:$PATH" PRIMER_PORT="$PORT" ./report2027/tools/make_launcher.sh >/dev/null
-  ok "app installed — ~/Applications/Budget Primer Editor.app"
+  PATH="$DEST/.venv/bin:$PATH" PRIMER_PORT="$PORT" ./report2027/tools/make_launcher.sh "$APPS_DIR" >/dev/null
+  ok "app installed — $APPS_DIR/Budget Primer Editor.app"
   printf '\n  Done. Open the app from Finder, or:\n'
-  printf '    open ~/Applications/"Budget Primer Editor.app"\n\n'
+  printf '    open "%s/Budget Primer Editor.app"\n\n' "$APPS_DIR"
   printf '  It updates itself from GitHub each time you open it.\n'
   printf '  Your own commits are never touched — an update that would\n'
   printf '  overwrite them is skipped and explained instead.\n\n'

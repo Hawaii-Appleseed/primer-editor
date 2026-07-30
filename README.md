@@ -38,6 +38,44 @@ uninstall completely.
 `PRIMER_HOME=/some/dir`, `PRIMER_PORT=8011` and `PRIMER_BRANCH=…` override the
 defaults.
 
+### The live report too
+
+The editor alone serves its bundled fixture. To ALSO clone the live report
+beside it and register it on the start page:
+
+```
+PRIMER_LIVE=dtomkatsu/BudgetPrimerFinal \
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/dtomkatsu/primer-editor/main/install.sh)"
+```
+
+`PRIMER_LIVE_HOME`, `PRIMER_LIVE_ID` and `PRIMER_LIVE_NAME` override where it
+lands and how it is registered. Re-running is safe: an existing clone is left
+alone and the registry entry is merged, not clobbered.
+
+## Onboarding a colleague
+
+The zero-typing route — build a zip and send it:
+
+```
+./tools/make_installer_zip.sh          # -> dist/Budget-Primer-Editor-Installer.zip
+```
+
+Inside is a double-clickable **Install Budget Primer Editor** app (plus a
+two-line README covering the unsigned-app Gatekeeper prompt). Opening it runs
+the one-line installer above in a visible Terminal window with `PRIMER_LIVE`
+preset, then opens the editor. The zip carries no code of its own beyond the
+bootstrap, so it never goes stale — what installs is whatever is on `main`
+that day.
+
+Two things the installer cannot do for them:
+
+- **Pushing to the website** needs write access to the report's repo — add
+  their GitHub account as a collaborator, then have them run `gh auth login`
+  once. Saving works without any of this; edits are never lost.
+- Their commits sign with whatever git identity the machine has (macOS
+  auto-derives one from the username). `git config --global user.name/email`
+  makes it a real name.
+
 ### It updates itself
 
 The server checks for updates in the background every 20 minutes — not just at

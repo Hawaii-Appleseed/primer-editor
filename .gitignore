@@ -33,6 +33,10 @@ docs/primer/primer.css
 docs/primer/primer.js
 docs/primer/assets/
 
+# Built by tools/make_installer_zip.sh — the send-to-a-colleague zip. An
+# artifact you rebuild, never a source you track.
+/dist/
+
 # Written by tools/selfupdate.py before it moves the checkout: the way back
 # from a bad update. Per-machine state, never committed.
 .primer-previous-version
