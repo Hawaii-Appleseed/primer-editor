@@ -71,7 +71,7 @@ Six of the seven bills heard drew more support than opposition. One passed.
 [[find.body]]
 **SB3125's opposition was not over taxing the wealthy.** Nine of its eleven opponents singled out the business tax credits Ways and Means targeted in Part II. The State Energy Office took "no position on Part I."
 
-**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 175 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
+**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
 
 **Some backlash was in response to pausing all tax cuts, not necessarily taxing the wealthy.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
 
@@ -110,7 +110,7 @@ It costs jobs and shrinks the activity being taxed
 "...fewer property transfers, lower redevelopment activity, fewer construction jobs, reduced general excise tax revenues." — [NAIOP Hawaii (×5), Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=26)
 
 [[arg.2.more]]
-- "Transfer taxes reduce investment in both commercial and residential properties, leading to lost jobs and reduced economic activity." — [Grassroot Institute, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=24)
+- "When applied to higher-value properties, transfer taxes reduce investment in both commercial and residential properties, leading to lost jobs and reduced economic activity." — [Grassroot Institute, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=24)
 - "Increasing capital gains taxes could also slow business growth, drive investing dollars to other states, and weaken the broader capital ecosystem that supports job creation." — [Chamber of Commerce Hawaii, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=2)
 - "These projects already contribute disproportionately to State and County revenues through property taxes, construction-related GET revenues, and employment." — [NAIOP Hawaii (×4), Conveyance tax · SB3028](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3028_HD1_TESTIMONY_FIN_04-02-26_.PDF#page=22)
 
@@ -155,8 +155,8 @@ Small businesses absorb it worst
 
 [[arg.5.more]]
 - "SB 3028 SD2 will therefore increase costs for small businesses leasing commercial space and for residents in multifamily housing." — [NAIOP Hawaii (×4), Conveyance tax · SB3028](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB3028_HD1_TESTIMONY_FIN_04-02-26_.PDF#page=22)
-- "This proposal impacts the Small Business pillar of our 2030 Blueprint for Hawaii." — [Chamber of Commerce Hawaii, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=2)
-- "Over the long term, a tax increase on high earners will harm the economy and local businesses." — [Grassroot Institute, Millionaire's tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=25)
+- "...this proposal impacts the Small Business pillar of our 2030 Blueprint for Hawaii." — [Chamber of Commerce Hawaii, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=2)
+- "...over the long term, a tax increase on high earners will harm the economy and local businesses." — [Grassroot Institute, Millionaire's tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=25)
 
 [[arg.5.f]]
 - The millionaire's tax is a **2% surcharge** on income over **$1,000,000**. [Grassroot Institute, Millionaire's tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=25)
@@ -184,7 +184,7 @@ It will not raise the revenue predicted
 "While proponents suggest this tax will raise revenue, it is likely to have the opposite effect." — [Hawaiʻi LECET, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=21)
 
 [[arg.7.more]]
-- "Overall conveyance tax collections may not increase as anticipated. Reduced real estate activity also means fewer jobs and lower related tax revenues." — [Kobayashi Group, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_TESTIMONY_HSG-WAL_02-06-26_.PDF#page=38)
+- "...overall conveyance tax collections may not increase as anticipated. Reduced real estate activity also means fewer jobs and lower related tax revenues." — [Kobayashi Group, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_TESTIMONY_HSG-WAL_02-06-26_.PDF#page=38)
 - "While apparently motivated by an effort to raise added tax revenue, the bill can be expected to have the opposite effect." — [Public Storage, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=41)
 - "Reduced transaction activity would ultimately have the opposite of the intended effect." — [NAIOP Hawaii (×5), Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=26)
 
@@ -201,7 +201,7 @@ Cut waste instead of raising revenue
 
 [[arg.8.more]]
 - "While residents have tightened their belts year after year, the State now proposes relief for itself instead of doing what families have done: cut spending." — [Individual, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=84)
-- "The Legislature should eliminate wasteful or duplicative budget items without eliminating vital services." — [Grassroot Institute, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=26)
+- "...the Legislature should eliminate wasteful or duplicative budget items." — [Grassroot Institute, Act 46 freeze · HB2306](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2306_TESTIMONY_FIN_03-03-26_.PDF#page=26)
 - "Look at all your wasteful expenditures before raising any more taxes." — [Individual, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_SD1_TESTIMONY_WAM_04-01-26_.PDF#page=73)
 
 [[arg.8.f]]
@@ -213,7 +213,7 @@ Investors will put their capital in another state
 [[arg.9.q]]
 "Should this bill pass OPTrust would be forced to direct its investment capital elsewhere." — [OPTrust pension fund, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=33)
 [[arg.9.more]]
-- "Potential REIT and non-REIT investors, fearing unexpected law changes post-investment, would choose to deploy their capital elsewhere, and Hawaii would be on the outside looking in." — [NAIOP Hawaii, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=7)
+- "...potential REIT and non-REIT investors, fearing unexpected ... law changes post-investment, would choose to deploy their capital elsewhere, and Hawaii would be on the outside looking in." — [NAIOP Hawaii, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=7)
 - "Enactment of SB 2362 would create a strong disincentive ... and potentially lead us to deploy that capital at hotels in other states that do not have such anti-REIT provisions." — [Host Hotels & Resorts, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=35)
 - "Adding an additional state-level tax burden on REITs would reduce the attractiveness of investing in Hawaiʻi-based projects." — [Housing Hawaiʻi’s Future, REIT loophole · SB2362](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/SB2362_TESTIMONY_EDT-CPN_02-18-26_.PDF#page=44)
 [[arg.9.f]]
@@ -241,6 +241,165 @@ THE CASE AGAINST · CONTINUED
 
 [[p2.foot]]
 250 opposing submissions, 2026 session
+
+
+[[p6.eyebrow]]
+THE CASE FOR · 917 SUBMISSIONS IN SUPPORT
+
+[[p6.h1]]
+# The ten arguments for raising taxes
+
+[[p6.standfirst]]
+Ranked by frequency across the 917 supporting submissions — 657 of them distinct. Same citation format as the opposition: each names the **policy** it addresses and links to the source PDF. Support concentrated on where the money would GO, not on tax policy — the top three are all spending destinations.
+
+[[p6.contd]]
+The ten arguments for raising taxes *(continued)*
+
+[[sup.1.h]]
+Give Hawaiian Home Lands a permanent funding source
+
+[[sup.1.q]]
+"HB 2049 HD1 also establishes a permanent funding source for the Department of Hawaiian Home Lands." — [Hawaiʻi YIMBY, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=20)
+
+[[sup.1.more]]
+- "This measure establishes a permanent and predictable funding stream for DHHL by dedicating thirty percent of conveyance tax revenues, up to $60 million annually, to the Hawaiian Home Lands Trust Fund." — [Assn. of Hawaiian Homestead Lands, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=44)
+- "By restructuring the conveyance tax, this bill secures a dedicated and predictable annual funding stream for the Hawaiian Home Lands Trust Fund." — [Homestead beneficiary testimony, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=37)
+- "Unlike one-time appropriations, this measure creates a constant annual source of revenue that allows DHHL to plan, build infrastructure, leverage" other capital. — [Hawaiʻi Appleseed, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=14)
+
+[[sup.1.f]]
+- Nearly **30,000 beneficiaries** are waiting for a homestead lot — many kūpuna **on the list over four decades**. — [Hawaiʻi House of Representatives, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=36)
+- The bill routes **30% of conveyance tax revenue, or $60 million a year**, whichever is less, to the trust fund. — [Dept. of Hawaiian Home Lands, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=4)
+- Act 279's historic **$600M** one-time appropriation still left DHHL needing **$800M more** for about **6,000 lots**. — [Hawaiʻi Appleseed, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=14)
+
+[[sup.2.h]]
+Build affordable housing with the revenue
+
+[[sup.2.q]]
+"Our housing crisis has intensified while our infrastructure and housing needs, particularly around transit-oriented development, have grown substantially." — [Hawaiʻi Appleseed, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=14)
+
+[[sup.2.more]]
+- "This housing is essential to prevent homelessness and enable many local families to remain in Hawai`i." — [Catholic Charities Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=31)
+- "It also provides greater flexibility in affordable housing options, with a reliable income stream for the Rental Housing Revolving Fund, Dwelling Unit Revolving Fund, and Hawaiian Home Lands Trust Fund." — [Catholic Charities Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=32)
+- "Revenue from HB2010 could generate tens of millions of dollars each year to support affordable housing, education, healthcare, services for kupuna, and climate resilience." — [Individual, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=52)
+
+[[sup.2.f]]
+- The bill directs **20% of conveyance tax revenue** to the Dwelling Unit Revolving Fund, which finances housing infrastructure. — [Trust for Public Land, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD2_TESTIMONY_FIN_03-03-26_.PDF#page=40)
+
+[[sup.3.h]]
+Protect land, water and open space
+
+[[sup.3.q]]
+"The LCF supports the Legacy Land Conservation Program, which funds grants to state and county governments and non-profit land conservation organizations to acquire land and protect valuable resources for public benefit." — [The Nature Conservancy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=19)
+
+[[sup.3.more]]
+- "The additional tax revenue from tweaking the conveyance tax could also fund affordable housing, homeless programs, land conservation, and so on." — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- "Bolstering the Legacy Land Conservation Fund to protect ʻāina from development." — [Individual, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=55)
+
+[[sup.3.f]]
+- Supporters split on the allocation: the bill **cuts the Land Conservation Fund share from 10% to 5%**, which several otherwise-supportive groups opposed. — [Waiʻanae Coast CDC, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=32)
+
+[[sup.4.h]]
+Aim it at luxury and out-of-state buyers
+
+[[sup.4.q]]
+"It makes sense to ask wealthy sellers to pay a more when they sell their multi-million dollar properties – especially second homes or investment properties – and use those revenues to help those who are struggling to afford housing." — [Hawaiʻi Children’s Action Network, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=18)
+
+[[sup.4.more]]
+- "Even though property values have soared, especially for luxury homes, owners of expensive properties still pay very low conveyance tax rates." — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- "The capital gains tax loophole benefits the highest-income taxpayers, including non-residents who profit from investing in real estate in Hawaiʻi." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=46)
+- "Shifting the tax burden away from labor and toward excess wealth and speculative gains helps level the playing field and supports a healthier, regenerative local economy." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=7)
+
+[[sup.4.f]]
+- Luxury-home sellers pay conveyance tax of only about **0.5% to 1.25%** — below Seattle and San Francisco. — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- **Capital gains are concentrated at the top of the income distribution, especially for non-residents.** — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=22)
+
+[[sup.5.h]]
+The wealthy should pay their fair share
+
+[[sup.5.q]]
+"Hawaiʻi’s current state and local tax system is regressive, meaning that those with the lowest incomes pay a higher share of their income in taxes than the wealthiest households." — [Hawaiʻi Children’s Action Network, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=19)
+
+[[sup.5.more]]
+- "HB 1850 is about creating a more equitable and progressive tax system, one that ensures people are paying their fair share to support our community." — [Oʻahu Youth Action Board, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=21)
+- "HB 2010 ensures that those who have benefited the most from our economy contribute their fair share to maintain and strengthen the safety net that so many of our most vulnerable community members rely on." — [Individual, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=9)
+- "Studies show that the states with the most progressive tax system are ranked significantly better places to live, work and raise a family." — [Protect Democracy, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
+
+[[sup.5.f]]
+- Roughly **70% of long-term capital gains** in Hawaiʻi flow to taxpayers earning **over $400,000**. — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=29)
+- The **top 1%** would pay only about **0.1% more** of their income under the millionaire's surcharge. — [Hawaiʻi Appleseed, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=7)
+
+[[sup.6.h]]
+It pays for roads, schools and public services
+
+[[sup.6.q]]
+"That revenue would help Hawai‘i fund schools, health care, housing, and other services that directly benefit our keiki and kūpuna—all of which are under threat after federal cuts and recent state tax cuts." — [Hawaiʻi Appleseed, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=13)
+
+[[sup.6.more]]
+- "...ensure that the corporations benefitting from Hawaii's economy pay their fair share for the roads, schools, and infrastructure that ... make their success possible." — [Womenʻs Caucus, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=19)
+- "It represents classrooms with adequate resources, roads and buses that function, support for kupuna, and resilience against climate change." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=29)
+- "Small businesses rely on accessible health care, stable households, and functioning public systems." — [Small-business testimony, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=4)
+
+[[sup.6.f]]
+- **No figures are cited.** This argument is made as a value claim, not with data.
+
+[[sup.7.h]]
+The cost of living is driving locals away
+
+[[sup.7.q]]
+"I know many people born and raised here that have left because they cannot afford to live." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=46)
+
+[[sup.7.more]]
+- "At the same time, more people of Kanaka Maoli ancestry now live outside of Hawaiʻi than within their homeland, largely due to the lack of attainable housing and the rising cost of living." — [Assn. of Hawaiian Homestead Lands, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=44)
+- "It is time to raise taxes on the wealthy—the very group that has seen their wealth soar while our local families struggle with a regressive tax system and a rising cost of living." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=65)
+
+[[sup.7.f]]
+- **No figures are cited.** This argument is made as a value claim, not with data.
+
+[[sup.8.h]]
+It backfills the federal cuts
+
+[[sup.8.q]]
+"HB 2010 takes a targeted and responsible approach by asking those earning over $1,000,000 annually to contribute a modest surcharge to help stabilize Medicaid funding." — [Small-business testimony, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=4)
+
+[[sup.8.more]]
+- "We are facing an unprecedented crisis due to the massive reduction in federal funding triggered by the recent federal budget bill." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=65)
+- "Estimated revenues would be $71 million a year with a 2% surcharge, providing a strong source of funds to help fund our state's Medicaid program." — [Hawaiʻi Public Health Institute, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=4)
+
+[[sup.8.f]]
+- Federal changes could **trim Medicaid support by more than $1.2 billion**, on top of an estimated **$634 million** over three years. — [Hawaiʻi Public Health Institute, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=4)
+- A **2% surcharge** on income over $1 million would raise about **$71 million a year** for Medicaid. — [Hawaiʻi Appleseed, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=7)
+
+[[sup.9.h]]
+Investment income is taxed below a paycheck
+
+[[sup.9.q]]
+"Hawaiʻi is one of only nine states that allows capital gains to be taxed at a lower rate than ordinary income." — [Protect Democracy, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
+
+[[sup.9.more]]
+- "It’s simply not fair that working families in Hawaiʻi—many of whom are struggling to afford rent, food, and healthcare—pay higher tax rates on their wages than wealthy investors pay on their investment income." — [Voices of Hawaiʻi, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=6)
+- "Capital gains income is one of the most undertaxed forms of income in Hawaiʻi, despite being highly concentrated among the highest-earning households." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=7)
+
+[[sup.9.f]]
+- Capital gains are capped at **7.25%**, against a top rate of **11%** on income from wages. — [Hawaiʻi Appleseed, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=17)
+
+[[sup.10.h]]
+It funds transit-oriented development
+
+[[sup.10.q]]
+"HB2049's dedicated 20% allocation to DURF, focused on infrastructure programs in transit-oriented development areas, creates a predictable, stable funding stream—replacing the unreliable one-time appropriations that have hampered long-term planning." — [Trust for Public Land, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD2_TESTIMONY_FIN_03-03-26_.PDF#page=40)
+
+[[sup.10.more]]
+- "By allocating a portion of conveyance tax revenues to infrastructure that supports housing, including in transit-oriented areas, this bill helps address a key constraint that can delay or prevent new homes from being built." — [Hawaiʻi YIMBY, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=20)
+- "This is in line with the TOD Council’s Strategic Plan to have individuals and families living in a transit-friendly area where goods and services are near their residence." — [Office of the Governor, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD2_TESTIMONY_FIN_03-03-26_.PDF#page=8)
+
+[[sup.10.f]]
+- **No figures are cited.** This argument is made as a value claim, not with data.
+
+[[p6.also]]
+**Also raised:** close the REIT loophole (50) · fund climate resilience · protect kūpuna services
+
+[[p6.foot]]
+917 supporting submissions, 2026 session
 
 [[sources]]
 [themes]: Cross-campaign analysis, Hawaiʻi tax testimony 2026 — https://github.com/dtomkatsu/hawaii-tax-testimony/blob/main/analysis/themes.md

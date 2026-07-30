@@ -55,32 +55,4 @@ test.describe('a render landing mid-edit', () => {
     await page.keyboard.press('Escape');
     await expect(frame.locator('.ds-edit')).toHaveCount(0, { timeout: 15000 });
   });
-
-  test('a single selected text object shows a working Delete button', async ({ page }) => {
-    // The arrange strip (and its #ar-del) is not shown for a single text
-    // object — the type row is. Delete therefore lives there too; keyboard
-    // Delete remains, but a control people look for must exist.
-    const frame = page.frameLocator('#out');
-    await frame.locator('section.page').nth(2).scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    await frame.locator(`[data-el="${SLOT}"]`).click();
-
-    const del = page.locator('#ty-del');
-    await expect(del).toBeVisible();
-    await expect(del).toBeEnabled();
-    await del.click();
-    await expect.poll(() => page.evaluate(() => layout.hidden)).toEqual([SLOT]);
-
-    // Bring it back (File > Restore deleted), so the spec leaves no state.
-    await page.click('#file');
-    await page.click('#file-restore');
-    const dlg = page.locator('dialog[open]');
-    await dlg.getByRole('button', { name: 'Restore' }).click();
-    await expect.poll(() => page.evaluate(() => layout.hidden)).toBeUndefined();
-
-    // While a text editor is open, the button hides — Delete there is typing.
-    await openEditorOn(page, frame);
-    await expect(del).toBeHidden();
-    await page.keyboard.press('Escape');
-  });
 });

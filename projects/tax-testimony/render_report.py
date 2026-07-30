@@ -131,6 +131,12 @@ def diverging_chart() -> str:
 # for every theme and is reported alongside by the command above.
 ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 7, 5]
 
+# The same measurement over the 917 SUPPORTING submissions (657 distinct).
+# Printed by the same command. Note how differently the two sides argue: the
+# opposition's top theme is a claim about consequences, the support's top three
+# are all destinations for the money.
+SUPPORT_COUNTS = [451, 250, 164, 139, 135, 106, 81, 77, 75, 72]
+
 
 # Argument blocks vary from ~240px to ~410px depending on how many examples and
 # figures each carries, so a fixed count-per-page either overflows the tall ones
@@ -161,11 +167,11 @@ def _est_lines(chars: int, per_line: int = CHARS_PER_LINE) -> int:
     return max(1, -(-chars // per_line))
 
 
-def estimate_height(i: int) -> int:
+def estimate_height(pre: str, i: int) -> int:
     """Rendered height of one argument block, in CSS px, without rendering it."""
-    q = _visible_len(C.text(f"arg.{i}.q"))
-    more = [_visible_len(x) for x in C.list(f"arg.{i}.more")]
-    figs = [_visible_len(x) for x in C.list(f"arg.{i}.f")]
+    q = _visible_len(C.text(f"{pre}.{i}.q"))
+    more = [_visible_len(x) for x in C.list(f"{pre}.{i}.more")]
+    figs = [_visible_len(x) for x in C.list(f"{pre}.{i}.f")]
 
     h = 21 + 2                                    # rank/title row
     h += _est_lines(q) * 17 + 4                   # the lead quotation
@@ -178,45 +184,46 @@ def estimate_height(i: int) -> int:
     return h + 34                                 # block padding + rule + margin
 
 
-def argument(i: int, count: int) -> str:
+def argument(pre: str, i: int, count: int) -> str:
     """One ranked argument: heading + tally, the testimony, then its figures.
 
     The rank and the tally are data, so they come from ARG_COUNTS rather than
     being typed into content.md. The heading, the quotation and the figures are
     prose, so they are slots.
     """
-    more = C.list(f"arg.{i}.more")
+    more = C.list(f"{pre}.{i}.more")
     more_html = (
         f'<div class="arg-m">'
         f'<span class="arg-ml">More from the record</span>'
-        f'<ul{C.ul_attr(f"arg.{i}.more")}>'
+        f'<ul{C.ul_attr(f"{pre}.{i}.more")}>'
         + "".join(f"<li>{m}</li>" for m in more) +
         f'</ul></div>') if more else ""
 
-    facts = C.list(f"arg.{i}.f")
+    facts = C.list(f"{pre}.{i}.f")
     facts_html = (
         f'<div class="arg-f">'
         f'<span class="arg-fl">Figures cited</span>'
-        f'<ul{C.ul_attr(f"arg.{i}.f")}>'
+        f'<ul{C.ul_attr(f"{pre}.{i}.f")}>'
         + "".join(f"<li>{f}</li>" for f in facts) +
         f'</ul></div>') if facts else ""
     return (
         f'<li class="arg">'
         f'<span class="arg-r">{i}</span>'
         f'<div class="arg-h">'
-        f'<span class="arg-t"{C.slot_attr(f"arg.{i}.h")}>{C.text(f"arg.{i}.h")}</span>'
+        f'<span class="arg-t"{C.slot_attr(f"{pre}.{i}.h")}>{C.text(f"{pre}.{i}.h")}</span>'
         f'<span class="arg-n">{count}</span>'
         f'</div>'
         # C.html, not C.t/C.text: the quotation carries a markdown link to the
         # source PDF, and only html() runs the markdown pass. It emits its own
         # <p> with the data-slot already on it.
-        f'{C.html(f"arg.{i}.q", "arg-q")}'
+        f'{C.html(f"{pre}.{i}.q", "arg-q")}'
         f'{more_html}'
         f'{facts_html}'
         f'</li>')
 
 
-def argument_pages(start_page: int) -> str:
+def ranked_pages(pre: str, head_pre: str, counts: list[int],
+                 start_page: int, cls: str = "") -> str:
     """The ranked arguments, flowing over as many letter pages as they need.
 
     The section grows with the evidence rather than being squeezed onto one
@@ -228,9 +235,9 @@ def argument_pages(start_page: int) -> str:
     chunks: list[list[int]] = []
     cur: list[int] = []
     used = HEAD_FIRST_PX
-    for i in range(1, len(ARG_COUNTS) + 1):
-        h = estimate_height(i)
-        last = i == len(ARG_COUNTS)
+    for i in range(1, len(counts) + 1):
+        h = estimate_height(pre, i)
+        last = i == len(counts)
         budget = PAGE_CONTENT_PX - (TAIL_PX if last else 0)
         if cur and used + h > budget:
             chunks.append(cur)
@@ -245,21 +252,28 @@ def argument_pages(start_page: int) -> str:
         page_no = start_page + n
         first = n == 0
         head = (
-            f'<div class="eyebrow"{L.attr("p2.eyebrow")}>{C.t("p2.eyebrow")}</div>'
-            f'{L.spacer("p2.h1")}<h1 class="h1-b"{L.attr("p2.h1")}>{C.t("p2.h1")}</h1>'
-            f'{C.html("p2.standfirst", "standfirst")}'
+            f'<div class="eyebrow"{L.attr(f"{head_pre}.eyebrow")}>{C.t(f"{head_pre}.eyebrow")}</div>'
+            f'{L.spacer(f"{head_pre}.h1")}<h1 class="h1-b"{L.attr(f"{head_pre}.h1")}>{C.t(f"{head_pre}.h1")}</h1>'
+            f'{C.html(f"{head_pre}.standfirst", "standfirst")}'
             if first else
-            f'<div class="eyebrow contd"{L.attr("p2.contd")}>{C.t("p2.contd")}</div>')
-        tail = (f'{C.html("p2.also", "also")}'
-                f'<div class="foot"{L.attr("p2.foot")}>{C.t("p2.foot")}</div>'
+            f'<div class="eyebrow contd"{L.attr(f"{head_pre}.contd")}>{C.t(f"{head_pre}.contd")}</div>')
+        tail = (f'{C.html(f"{head_pre}.also", "also")}'
+                f'<div class="foot"{L.attr(f"{head_pre}.foot")}>{C.t(f"{head_pre}.foot")}</div>'
                 if n == len(chunks) - 1 else "")
-        body = "".join(argument(i, ARG_COUNTS[i - 1]) for i in chunk)
+        body = "".join(argument(pre, i, counts[i - 1]) for i in chunk)
         out.append(
             f'\n<section class="page">\n  {head}\n'
-            f'  <ol class="args">{body}</ol>\n  {tail}\n'
+            f'  <ol class="args{cls}">{body}</ol>\n  {tail}\n'
             f'{C.extras(f"page{page_no}")} {L.layer(page_no)}'
             f'{L.text_boxes(page_no)}{L.tables_html(page_no)}\n</section>')
     return "".join(out)
+
+
+def _arg_pages() -> int:
+    """How many sheets the opposition section takes, so the support section
+    starts on the one after it. Same packer, so the answer cannot drift from
+    what actually renders."""
+    return ranked_pages("arg", "p2", ARG_COUNTS, 2).count('<section class="page"')
 
 
 def bullets(key: str) -> str:
@@ -312,7 +326,8 @@ page = f"""
 {C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
 </section>
 
-{argument_pages(2)}"""
+{ranked_pages("arg", "p2", ARG_COUNTS, 2)}
+{ranked_pages("sup", "p6", SUPPORT_COUNTS, 2 + _arg_pages(), " sup")}"""
 
 body = C.fn.resolve(page)
 notes = C.fn.endnotes()
@@ -393,6 +408,11 @@ html = f"""<!DOCTYPE html>
                margin-bottom:2px; }}
   .arg-f {{ margin:3px 0 0 0; padding:4px 8px; background:#FAF7F4;
             border-radius:5px; }}
+  /* The support section reuses every .arg rule and only re-accents it, so the
+     two ranked sections stay identical in rhythm and differ only in colour. */
+  .args.sup .arg-r {{ background:{SUP}; }}
+  .args.sup .arg-n {{ color:{SUP}; }}
+  .args.sup .arg-fl {{ color:{SUP}; }}
   .arg-fl {{ display:block; font-size:0.67rem; font-weight:700; color:{OPP};
              letter-spacing:.06em; text-transform:uppercase; margin-bottom:1px; }}
   .arg-f ul {{ margin:0; padding-left:0.95em; }}
