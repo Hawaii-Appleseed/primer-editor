@@ -19,7 +19,7 @@ HAWAIʻI TAX FAIRNESS COALITION
 # Testimony Analysis: 2026 session
 
 [[hero.standfirst]]
-All **1,285 public submissions** on the coalition's six 2026 tax priorities, excluding one hearing on a draft whose text was erroneous.
+**1,285 public testimonies** on the coalition's six 2026 tax priorities, excluding one hearing on an incorrect SB 3125 draft.
 
 [[stats.a.num]]
 1,285
@@ -27,7 +27,7 @@ All **1,285 public submissions** on the coalition's six 2026 tax priorities, exc
 submissions coded
 
 [[stats.b.num]]
-923
+906
 [[stats.b.lab]]
 distinct arguments
 
@@ -51,27 +51,27 @@ Six of the seven bills heard drew more support than opposition. One passed.
 ### What supporters argued
 
 [[support.themes]]
-- **Revenue to backfill federal cuts** to SNAP and Medicaid — a gap put near $3 billion.
-- **Who actually benefits:** Act 46 gives the top 1% ~$13,000 a year by 2031; the bottom 20%, $134.
-- **Structural fairness** — investment income should not be taxed below income from work.
-- **Funding a named public good:** housing, health coverage, schools.
+- **Revenue is needed to backfill federal cuts** to SNAP and Medicaid — a gap at nearly $3 billion.
+- **The wealthy benefit the most from Act 46:** Act 46 gives the top 1% ~$13,000 a year by 2031; the bottom 20%, $134.
+- **Improving tax fairness** — investment income should not be taxed below income from work.
+- **Funding key public goods:** housing, health coverage, schools.
 
 [[oppose.h]]
 ### What opponents argued
 
 [[oppose.themes]]
-- **Costs pass through.** Repealing the capital goods credit reaches every imported good.
-- **Investment leaves.** Capital reacts to law changed after it is committed.
-- **Promise-breaking:** "a pause is still a tax hike"; "bait and switch."
-- **Cut spending instead** of raising revenue.
+- **Costs pass through to consumers.** Repealing the capital goods credit reaches every imported good.
+- **Businesses and investors will leave the market.** Capital reacts to changes in tax laws.
+- **Broken promises:** "a pause is still a tax hike"; "bait and switch."
+- **State should cut spending instead** of raising revenue.
 
 [[find.h]]
 ### Three things the counts hide
 
 [[find.body]]
-**SB3125's opposition was not over taxing the wealthy.** Six of its eight opponents singled out the seven business tax credits Ways and Means targeted in Part II. The State Energy Office took "no position on Part I."
+**SB3125's opposition was not over taxing the wealthy.** Nine of its eleven opponents singled out the business tax credits Ways and Means targeted in Part II. The State Energy Office took "no position on Part I."
 
-**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 26 support to 8 opposition next hearing.[^themes]
+**One hearing is excluded.** Ways and Means heard a draft of SB3125 whose text was erroneous; 173 of its 186 submissions opposed language that did not survive. Counting them inverts the record — the corrected bill drew 29 support to 11 opposition next hearing.[^themes]
 
 **Backlash tracked revocation, not redistribution.** Only HB2306, which paused already-legislated Act 46 cuts, drew mass individual opposition — 156 of its 189 submissions. The other five heard bills drew almost none.
 
@@ -79,13 +79,13 @@ Six of the seven bills heard drew more support than opposition. One passed.
 1,925 pages · data.capitol.hawaii.gov · hitaxfairness.org · github.com/dtomkatsu/hawaii-tax-testimony
 
 [[p2.eyebrow]]
-THE CASE AGAINST · 234 SUBMISSIONS IN OPPOSITION
+THE CASE AGAINST · 250 SUBMISSIONS IN OPPOSITION
 
 [[p2.h1]]
 # The ten arguments against raising taxes
 
 [[p2.standfirst]]
-Ranked by frequency across the 234 opposing submissions — 184 from individuals, 50 from organizations. Each citation names the **policy** it addresses and links to the source PDF. SB3125 carried two parts; objections to its business-credit repeals are marked *Part II*, not as opposition to the wealth-tax freeze. (×N) marks near-identical submissions; counts overlap.
+Ranked by frequency across the 250 opposing submissions — 184 from individuals, 66 from organizations. Each citation names the **policy** it addresses and links to the source PDF. SB3125 carried two parts; objections to its business-credit repeals are marked *Part II*, not as opposition to the wealth-tax freeze. (×N) marks near-identical submissions; counts overlap.
 
 [[arg.1.h]]
 It makes an expensive place (Hawaiʻi) harder to afford
@@ -243,7 +243,7 @@ THE CASE AGAINST · CONTINUED
 **Also raised:** it reaches retirement savings (9) · residents leave (5) · capital goes elsewhere (3)
 
 [[p2.foot]]
-234 opposing submissions, 2026 session · github.com/dtomkatsu/hawaii-tax-testimony
+250 opposing submissions, 2026 session
 
 [[sources]]
 [themes]: Cross-campaign analysis, Hawaiʻi tax testimony 2026 — https://github.com/dtomkatsu/hawaii-tax-testimony/blob/main/analysis/themes.md

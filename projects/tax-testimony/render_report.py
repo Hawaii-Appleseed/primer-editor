@@ -51,13 +51,13 @@ OPP = "#C4602F"
 
 # bill, campaign short, support, oppose, outcome
 DATA = [
-    ("HB2049", "Conveyance tax",   539, 28, "died"),
-    ("SB3028", "Conveyance tax",   127, 17, "died"),
-    ("SB2362", "REIT loophole",     81, 12, "died"),
-    ("HB1850", "Capital gains",     69, 11, "died"),
+    ("HB2049", "Conveyance tax",   538, 33, "died"),
+    ("SB3028", "Conveyance tax",   127, 21, "died"),
+    ("SB2362", "REIT loophole",     81, 14, "died"),
+    ("HB1850", "Capital gains",     69, 13, "died"),
     ("HB2010", "Millionaire's tax", 42,  2, "died"),
-    ("HB2306", "Act 46 freeze",     30, 156, "died"),
-    ("SB3125", "Act 46 freeze",     26,  8, "PASSED"),
+    ("HB2306", "Act 46 freeze",     31, 156, "died"),
+    ("SB3125", "Act 46 freeze",     29, 11, "PASSED"),
 ]
 
 
@@ -120,7 +120,7 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
-# How many of the 234 opposition submissions raise each argument, in
+# How many of the 250 opposition submissions raise each argument, in
 # the same order the page lists them. Measured, not estimated — regenerate from
 # ~/repos/hawaii-tax-testimony. Counts overlap: one submission usually makes
 # several of these arguments at once.
