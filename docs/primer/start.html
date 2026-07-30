@@ -106,11 +106,14 @@
   <div id="modal">
     <header><h2 id="np-title">New report</h2></header>
     <div class="body">
-      <label>Repo (owner/name)
+      <label id="np-repo-l">Repo (owner/name)
         <input id="np-repo" placeholder="owner/repository" autocomplete="off" spellcheck="false">
       </label>
-      <label>Deploy branch
+      <label id="np-branch-l">Deploy branch
         <input id="np-branch" placeholder="main" autocomplete="off" spellcheck="false">
+      </label>
+      <label id="np-root-l" hidden>Folder on this computer (the repo's clone)
+        <input id="np-root" placeholder="~/BudgetPrimerFinal" autocomplete="off" spellcheck="false">
       </label>
       <label id="np-path-l" hidden>Path to the project in the repo
         <input id="np-path" placeholder="docs/primer" autocomplete="off" spellcheck="false">
@@ -139,6 +142,16 @@
 
 <script>
 const $ = id => document.getElementById(id);
+
+// A LOCAL live server changes what this page can do: "+ New report" scaffolds
+// straight onto disk (no repo, no token, no GitHub at all), and "Adopt
+// existing" registers a repo already cloned on this computer by its folder
+// path. Detected once; everything gates on it.
+let LOCAL = false;
+async function detectLocal() {
+  try { LOCAL = (await fetch('/__oauth/status', { cache: 'no-store' })).ok; }
+  catch (e) { LOCAL = false; }
+}
 
 // --- registry ----------------------------------------------------------------
 let REGISTRY = {};
@@ -921,13 +934,20 @@ function openModal(opts = {}) {
   $('np-err').textContent = '';
   // Adopt asks where the project lives and (optionally) what to call it; a
   // scaffold asks for an id and a page size, which adoption reads instead.
-  $('np-path-l').hidden = !adopt;
+  $('np-path-l').hidden = !adopt || LOCAL;
+  // Local: a new report needs no repo at all, and adoption means a folder on
+  // this computer rather than an owner/name on GitHub.
+  $('np-repo-l').hidden = LOCAL;
+  $('np-branch-l').hidden = LOCAL;
+  $('np-root-l').hidden = !(LOCAL && adopt);
+  if (LOCAL && adopt) $('np-root').value = '';
   $('np-slug-l').hidden = adopt;
   $('np-size-l').hidden = adopt;
   $('np-name-l').textContent = adopt ? 'Display name (optional)' : 'Title';
   $('np-create').textContent = adopt ? 'Adopt' : 'Create';
   $('modal-bg').classList.add('open');
-  (modalMode === 'new' ? $('np-name') : $('np-repo')).focus();
+  (modalMode === 'new' ? $('np-name')
+   : LOCAL && adopt ? $('np-root') : $('np-repo')).focus();
 }
 function closeModal() { $('modal-bg').classList.remove('open'); }
 $('new').onclick = () => openModal();
@@ -939,6 +959,57 @@ $('modal-bg').addEventListener('click', e => { if (e.target === $('modal-bg')) c
 $('np-create').onclick = async () => {
   const repo = $('np-repo').value.trim();
   const branch = $('np-branch').value.trim() || 'main';
+
+  // LOCAL adopt: a folder on this computer. The server reads that repo's own
+  // docsync.yml, mounts every project it declares, and writes projects.json —
+  // nothing is written into the adopted repo.
+  if (LOCAL && modalMode === 'adopt') {
+    const root = $('np-root').value.trim();
+    if (!root) { $('np-err').textContent = 'name the folder the repo is cloned in'; return; }
+    $('np-create').disabled = true;
+    $('np-err').textContent = '';
+    $('stat').textContent = `reading ${root}…`;
+    try {
+      const r = await fetch('/__adopt', { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ root }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'adopt failed');
+      $('stat').textContent = `adopted ${j.added.join(', ')} — opening…`;
+      location.href = `edit.html?project=${encodeURIComponent(j.added[0])}`;
+    } catch (e) {
+      $('np-err').textContent = e.message;
+      $('stat').textContent = '';
+      $('np-create').disabled = false;
+    }
+    return;
+  }
+
+  // LOCAL new: scaffold straight onto disk — no repo, no token, no GitHub.
+  if (LOCAL && modalMode !== 'adopt') {
+    const name = $('np-name').value.trim();
+    const slug = slugify($('np-slug').value || name);
+    if (!name || !slug) { $('np-err').textContent = 'a title and a short id are both needed'; return; }
+    const size = PAGE_SIZES[$('np-size').value] || PAGE_SIZES.letter;
+    $('np-create').disabled = true;
+    $('np-err').textContent = '';
+    $('stat').textContent = `creating "${name}"…`;
+    try {
+      const r = await fetch('/__scaffold', { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug, size }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'could not create it');
+      $('stat').textContent = `"${name}" created — opening it…`;
+      location.href = `edit.html?project=${encodeURIComponent(j.slug)}`;
+    } catch (e) {
+      $('np-err').textContent = e.message;
+      $('stat').textContent = '';
+      $('np-create').disabled = false;
+    }
+    return;
+  }
+
   if (!repo) { $('np-err').textContent = 'name the repo (owner/name)'; return; }
 
   if (modalMode === 'adopt') {
@@ -977,11 +1048,17 @@ $('np-create').onclick = async () => {
 };
 
 (async () => {
+  await detectLocal();
   await loadRegistry();
   renderGrid();
   const n = Object.keys(REGISTRY).length;
   $('hstat').textContent = n ? `${n} report${n > 1 ? 's' : ''}` : '';
-  $('new').disabled = !currentRepo();
+  // A local server scaffolds on disk, so "+ New report" needs no repo at all;
+  // hosted, it still needs somewhere to commit to.
+  $('new').disabled = !LOCAL && !currentRepo();
+  // "Connect a repo…" is the HOSTED way to point at a new GitHub repo — with
+  // a local server the same door is "Adopt existing…" by folder path.
+  if (LOCAL) $('connect').hidden = true;
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>

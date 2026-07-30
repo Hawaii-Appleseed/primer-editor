@@ -6,8 +6,8 @@
 # preset — so the person ends up with the editor, the real Budget Primer,
 # and the Dock app, having typed nothing.
 #
-#   ./tools/make_installer_zip.sh                       # -> dist/….zip
-#   ./tools/make_installer_zip.sh owner/other-live-repo # a different report
+#   ./tools/make_installer_zip.sh                  # editor only (the default)
+#   ./tools/make_installer_zip.sh owner/live-repo  # ALSO set up that report
 #
 # The zip is deliberately TINY and never stale: it carries no code of its
 # own beyond the bootstrap, because the installer it runs is whatever is on
@@ -18,7 +18,11 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/.." && pwd)"
-LIVE="${1:-dtomkatsu/BudgetPrimerFinal}"
+# No live repo by default: the editor stands alone, working immediately with
+# its bundled demo and "+ New report". A specific report repo is opt-in — the
+# recipient can always add one themselves later (start page > Adopt existing,
+# or re-run the installer line with PRIMER_LIVE).
+LIVE="${1:-}"
 INSTALL_URL="${PRIMER_INSTALL_URL:-https://raw.githubusercontent.com/dtomkatsu/primer-editor/main/install.sh}"
 
 DIST="$REPO/dist"
@@ -37,10 +41,10 @@ cat > "$APP/Contents/Resources/run-install.command" <<CMD
 #!/bin/bash
 clear
 echo "  Budget Primer Editor — installing."
-echo "  This fetches the editor and the live report from GitHub;"
-echo "  a couple of minutes on a normal connection."
+echo "  This fetches the editor from GitHub — a couple of minutes"
+echo "  on a normal connection."
 echo
-export PRIMER_LIVE="$LIVE"
+$( [ -n "$LIVE" ] && echo "export PRIMER_LIVE=\"$LIVE\"" )
 if bash -c "\$(curl -fsSL $INSTALL_URL)"; then
   open "\$HOME/Applications/Budget Primer Editor.app" 2>/dev/null || true
   echo
@@ -111,9 +115,16 @@ Afterwards the editor lives in ~/Applications as
 "Budget Primer Editor" — drag it to the Dock. Opening it always
 brings you back to your work, and it keeps itself up to date.
 
-To be able to PUSH your edits to the website you also need access
-to the report's GitHub repository — ask whoever sent you this to
-add your GitHub account, then run:  gh auth login
+You start with the editor itself: the bundled demo, and
+"+ New report" for a blank page of your own — no accounts needed.
+
+To work on a SPECIFIC report later (for example the live Budget
+Primer), ask whoever sent you this for the repo name, then either
+re-run their install line with PRIMER_LIVE=owner/repo, or clone
+the repo and use the editor's start page > "Adopt existing…".
+
+To PUSH edits to a website you also need access to that repo —
+File > Connect GitHub inside the editor signs this computer in.
 (Saving works without any of that; your edits are never lost.)
 TXT
 
@@ -121,5 +132,5 @@ TXT
 rm -rf "$STAGE"
 
 echo "Built: $ZIP"
-echo "Live repo preset: $LIVE"
+echo "Live repo preset: ${LIVE:-none — editor only}"
 echo "Send the zip; the recipient double-clicks the app inside."

@@ -26,7 +26,17 @@ repositories** → `BudgetPrimerFinal`. Collaborators' access = their repo
 permission ∩ this install, so inviting someone = the normal GitHub
 collaborator invite, nothing extra.
 
-## 2. Deploy the relay (~3 min)
+## 2a. Local editor: no relay needed
+
+The LOCAL live server proxies the two login endpoints itself (`/__oauth/…`),
+so for everyone using the installed app the App registration above is the
+whole setup. Give the server the client id via the environment —
+`PRIMER_GH_CLIENT=Iv23…` — (or a manifest `oauth.client_id`); File ▸
+Connect GitHub inside the editor then does the rest, and the token it wins
+also authorises the server's own `git push`. The relay below is only for the
+HOSTED editor (GitHub Pages), which has no server to ask.
+
+## 2. Deploy the relay — hosted editor only (~3 min)
 
 GitHub's login endpoints refuse cross-origin browser calls (verified — no
 CORS on POST or preflight), so the device flow needs a ~40-line forwarder.

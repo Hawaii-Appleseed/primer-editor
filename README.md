@@ -52,6 +52,18 @@ PRIMER_LIVE=dtomkatsu/BudgetPrimerFinal \
 lands and how it is registered. Re-running is safe: an existing clone is left
 alone and the registry entry is merged, not clobbered.
 
+### Working with no repos at all
+
+A local install is complete in itself: the start page's **“+ New report”**
+scaffolds a blank project straight onto disk (no repo, no token, no GitHub —
+`docsync/new.py` via the server's `/__scaffold`), and **“Adopt existing…”**
+registers any docsync repo already cloned on this computer by its folder
+path (`/__adopt`). Inside the editor, **File ▸ Connect GitHub** signs the
+computer in with a one-time code (the local server proxies the device flow,
+so no relay worker is needed — just the one GitHub App client id via
+`PRIMER_GH_CLIENT` or the manifest's `oauth` block), after which Push works
+over https with no keychain setup.
+
 ## Onboarding a colleague
 
 The zero-typing route — build a zip and send it:

@@ -7,6 +7,11 @@ const { test, expect } = require('./fixtures/editor-test');
 
 test.describe('connect a repo', () => {
   test.beforeEach(async ({ page }) => {
+    // These specs are about the HOSTED flow. A live local server now flips
+    // start.html into local mode (folder-path adoption, no Connect button),
+    // so hosted-ness is pinned rather than inherited from the test machine.
+    await page.route(/\/__oauth\/status(\?|$)/, r =>
+      r.fulfill({ status: 404, contentType: 'application/json', body: '{}' }));
     await page.goto('start.html');
     await page.waitForFunction(() => typeof createProject === 'function');
   });

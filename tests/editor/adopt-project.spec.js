@@ -36,6 +36,11 @@ function installGh(page, { manifest, manifestRepo, manifestBranch = 'main', mani
 
 test.describe('adopt an existing project', () => {
   test.beforeEach(async ({ page }) => {
+    // These specs are about the HOSTED flow. A live local server now flips
+    // start.html into local mode (folder-path adoption, no Connect button),
+    // so hosted-ness is pinned rather than inherited from the test machine.
+    await page.route(/\/__oauth\/status(\?|$)/, r =>
+      r.fulfill({ status: 404, contentType: 'application/json', body: '{}' }));
     await page.goto('start.html');
     await page.waitForFunction(() => typeof adoptProject === 'function');
   });
@@ -111,10 +116,14 @@ test.describe('adopt an existing project', () => {
     });
     const msg = await page.evaluate(async () => {
       window.currentRepo = () => 'o/host';
+      // Pin the precondition instead of inheriting it from the machine's real
+      // projects.json — whose fetch can race a registry write elsewhere in
+      // the suite and come back empty, making this test about the race
+      // rather than about the refusal.
+      REGISTRY['budget-primer'] = REGISTRY['budget-primer'] || { name: 'x', base: '.' };
       try { await adoptProject('o/host', 'main', 'docs/primer', ''); return null; }
       catch (e) { return e.message; }
     });
-    // budget-primer is already in the real projects.json this page loaded.
     expect(msg).toMatch(/already in your list/);
   });
 

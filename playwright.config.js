@@ -30,6 +30,11 @@ module.exports = defineConfig({
     // PRIMER_OPEN=0: serve.py's default behavior opens a real browser tab on
     // startup (nice for `make live`, pointless — and awkward on a CI runner
     // with no display — when Playwright is about to drive its own browser).
-    env: { PRIMER_PORT: String(PORT), PRIMER_OPEN: '0' },
+    env: { PRIMER_PORT: String(PORT), PRIMER_OPEN: '0',
+           // The connect-github spec stands in for GitHub on this port; the
+           // fake client id keeps the device flow ON without a real App.
+           PRIMER_GH_BASE: 'http://localhost:8390',
+           PRIMER_GH_API: 'http://localhost:8390',
+           PRIMER_GH_CLIENT: 'Iv23TESTCLIENT' },
   },
 });

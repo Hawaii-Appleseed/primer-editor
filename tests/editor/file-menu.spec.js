@@ -9,7 +9,7 @@
 const { test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 test.describe('File menu', () => {
-  test('collects Open, New window, Resize, Download, Restore and Token', async ({ page }) => {
+  test('collects Open, New window, Connect GitHub, Resize, Download, Restore and Token', async ({ page }) => {
     await gotoEditor(page);
     // Closed until asked for — it is a menu, not a panel.
     await expect(page.locator('#filepop')).toBeHidden();
@@ -18,7 +18,7 @@ test.describe('File menu', () => {
     // only shows when something IS deleted (see hidden.spec.js) — both are
     // always in the DOM, so they belong in this list either way.
     await expect(page.locator('#filepop button')).toHaveText(
-      ['Open…', 'New window', 'Resize…', 'Download…', 'Restore deleted…', 'Token…']);
+      ['Open…', 'New window', 'Connect GitHub…', 'Resize…', 'Download…', 'Restore deleted…', 'Token…']);
   });
 
   test('Download and Token are no longer loose in the toolbar', async ({ page }) => {
