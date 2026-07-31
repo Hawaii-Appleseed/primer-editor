@@ -47,8 +47,21 @@ test.describe('local adopt', () => {
     ].join('\n') });
   });
   test.afterAll(() => {
+    // Restore, then make sure OUR key is gone regardless: if the snapshot
+    // was itself taken over a previous run's residue, a blanket restore puts
+    // that residue back — an entry pointing at a temp dir that no longer
+    // exists, which the next server start reports as a broken project.
     if (regExisted) fs.writeFileSync(REGISTRY, regBefore);
     else if (fs.existsSync(REGISTRY)) fs.unlinkSync(REGISTRY);
+    if (fs.existsSync(REGISTRY)) {
+      try {
+        const r = JSON.parse(fs.readFileSync(REGISTRY, 'utf8'));
+        if (SLUG in r) {
+          delete r[SLUG];
+          fs.writeFileSync(REGISTRY, JSON.stringify(r, null, 2) + '\n');
+        }
+      } catch (e) { /* unreadable registry is not this test's to repair */ }
+    }
     execSync(`rm -rf ${JSON.stringify(scratch)}`);
   });
 

@@ -52,6 +52,26 @@ PRIMER_LIVE=dtomkatsu/BudgetPrimerFinal \
 lands and how it is registered. Re-running is safe: an existing clone is left
 alone and the registry entry is merged, not clobbered.
 
+### Staying current
+
+Two independent things go stale, so there are two signals, deliberately
+different in colour so they never read as one control:
+
+- **The editor** — `tools/selfupdate.py` fast-forwards the checkout each time
+  the app opens, and the server re-checks every 20 min (`UPDATE_POLL`). A
+  sage `Update (n)` pill appears in the bar naming what is in it.
+- **A report living in its own repo** — the server fetches each external
+  project root every 5 min (`CONTENT_POLL`) and offers a blue
+  `Update report (n)`, tooltipped with the incoming commit subjects.
+  `/__pull` fast-forwards and rebuilds.
+
+Both follow the same contract: check in the background, tell the person,
+**never apply anything on its own** — a running editor holds unsaved work.
+Both refuse rather than merge when the person has uncommitted changes or
+unpushed commits, and say which it was. A report inside the editor's own
+repo is left to the version chip, so two mechanisms never fast-forward one
+checkout.
+
 ### Working with no repos at all
 
 A local install is complete in itself: the start page's **“+ New report”**

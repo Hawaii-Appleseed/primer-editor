@@ -36,6 +36,14 @@ async function blockDangerousLocalEndpoints(context) {
   await context.route('**/__push', route => route.fulfill({
     json: { ok: true, message: 'blocked in tests — no real save/push happens here', ahead: 0 },
   }));
+  // /__pull runs `git fetch` and a fast-forward merge on a project's OWN repo
+  // — on a developer's machine that is their real report checkout. Same hazard
+  // class as save/push, blocked in the same place. A spec that genuinely needs
+  // the endpoint (content-update.spec.js, against scratch clones it made
+  // itself) overrides this with a PAGE-level route, which takes precedence.
+  await context.route('**/__pull', route => route.fulfill({
+    json: { ok: false, error: 'blocked in tests — no real repo is updated here' },
+  }));
   await context.route('**/__export', route => route.fulfill({
     status: 200,
     contentType: 'application/pdf',
