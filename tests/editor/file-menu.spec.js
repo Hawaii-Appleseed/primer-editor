@@ -57,16 +57,16 @@ test.describe('File menu', () => {
 });
 
 test.describe('File ▸ Resize', () => {
-  test('offers the six doc sizes and marks the one in use', async ({ page }) => {
+  test('offers the seven doc and slide sizes and marks the one in use', async ({ page }) => {
     await gotoEditor(page);
     await openFileMenu(page);
     await page.click('#file-resize');
     await expect(page.locator('#resizepop')).toBeVisible();
 
     const tiles = page.locator('#size-list button');
-    await expect(tiles).toHaveCount(6);
+    await expect(tiles).toHaveCount(7);
     await expect(tiles).toHaveText([
-      /Doc \(Digital\)/, /Doc \(Pageless\)/, /Doc \(A4\)/,
+      /Slide \(16:9\)/, /Slide \(4:3\)/, /Doc \(Pageless\)/, /Doc \(A4\)/,
       /Doc \(A3\)/, /Doc \(Legal\)/, /Doc \(Letter\)/,
     ]);
     // The fixture report is 8.5x11, so Letter — and only Letter — is current.
@@ -85,9 +85,14 @@ test.describe('File ▸ Resize', () => {
     const shapes = await page.locator('#size-list .size-art i').evaluateAll(
       els => els.map(e => (parseFloat(e.style.height) / parseFloat(e.style.width)).toFixed(2)));
     expect(new Set(shapes).size).toBeGreaterThan(2);
-    // Digital is the only landscape one.
+    // The two slides are the landscape ones — and DIFFERENTLY landscape, or
+    // the 16:9/4:3 distinction is just a caption.
     expect(Number(shapes[0])).toBeLessThan(1);
-    await expect(page.locator('#size-list .size-dim').first()).toHaveText(/13\.33 × 7\.5 in/);
+    expect(Number(shapes[1])).toBeLessThan(1);
+    expect(shapes[0]).not.toBe(shapes[1]);
+    // 13.333 — PowerPoint's own number, shown as-is rather than rounded to a
+    // number no slide software uses.
+    await expect(page.locator('#size-list .size-dim').first()).toHaveText(/13\.333 × 7\.5 in/);
   });
 
   /** The rendered sheet, as the browser computes it. The assertion that

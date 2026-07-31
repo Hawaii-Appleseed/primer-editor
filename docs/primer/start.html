@@ -129,6 +129,8 @@
           <option value="letter" selected>Letter — 8.5 × 11 in</option>
           <option value="a4">A4 — 8.27 × 11.69 in</option>
           <option value="legal">Legal — 8.5 × 14 in</option>
+          <option value="slide169">Slide 16:9 — PowerPoint widescreen</option>
+          <option value="slide43">Slide 4:3 — classic PowerPoint</option>
         </select>
       </label>
       <p class="err" id="np-err"></p>
@@ -494,9 +496,13 @@ const PALETTE = ["#6B9E78","#95B7A2","#CAD2C5","#E8EDE6","#D6E0D2","#52796F","#3
 // lines of pixel-precise figure layout built for Letter, and retrofitting a
 // resize onto THAT is real, uninspected work (STANDALONE.md) this stays out of.
 const PAGE_SIZES = {
-  letter: { w: 8.5, h: 11.0 },
-  a4:     { w: 8.27, h: 11.69 },
-  legal:  { w: 8.5, h: 14.0 },
+  letter:   { w: 8.5, h: 11.0 },
+  a4:       { w: 8.27, h: 11.69 },
+  legal:    { w: 8.5, h: 14.0 },
+  // PowerPoint's own numbers, so a deck made here prints/exports at exactly
+  // the size a slide deck is expected to be.
+  slide169: { w: 13.333, h: 7.5 },
+  slide43:  { w: 10, h: 7.5 },
 };
 
 function contentTemplate(title) {
