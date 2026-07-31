@@ -53,6 +53,13 @@ test.describe('report content updates', () => {
       `from docsync.new import create`,
       `create(${JSON.stringify(SLUG)}, "Stale Spec Report", root=Path(${JSON.stringify(origin)}))`,
     ].join('\n') });
+    // create() spec-loads origin's own docsync/registry.py, which writes
+    // __pycache__ INSIDE origin — and `add -A` then commits the .pyc files.
+    // The clone's rebuilds regenerate them with different bytes, a tracked
+    // modification, and /__pull rightly refuses a "dirty" repo whose only
+    // dirt is bytecode. Ignore the cache like every real repo does.
+    execSync(`find ${JSON.stringify(origin)} -name __pycache__ -type d -exec rm -rf {} +`);
+    fs.writeFileSync(path.join(origin, '.gitignore'), '__pycache__/\nweb/\ndocs/\n');
     git(origin, 'init -q -b main');
     git(origin, '-c user.email=s@x -c user.name=S add -A');
     git(origin, '-c user.email=s@x -c user.name=S commit -q -m "first"');
@@ -111,6 +118,7 @@ test.describe('report content updates', () => {
         fetch('/__pull', { method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ project: M.id }) }).then(r => r.json()));
+      if (!pull.ok) console.log('PULL-REFUSED:', JSON.stringify(pull));
       expect(pull.ok).toBe(true);
       expect(pull.message).toMatch(/1 change/);
 
@@ -122,6 +130,17 @@ test.describe('report content updates', () => {
 
   test('unpushed work of your own blocks the update instead of being merged over',
     async ({ page }) => {
+      // The settle loop + boot + one reload fallback can honestly need more
+      // than the default 90s under load.
+      test.setTimeout(180000);
+      // KNOWN-INTERMITTENT (~1 in 3 in tight serial loops, rare in full runs,
+      // and OLDER than the features this file tests): booting the editor on a
+      // freshly adopted external project right after a commit lands sometimes
+      // hangs before first render — server healthy (__ping ok, no build
+      // error), detectLocal completed (#stat shows the live message), then
+      // nothing, and a reload does not recover it. The failure dump below
+      // prints the evidence when it happens. Root cause still unfound; if you
+      // are here chasing it, start at boot()'s engine-file fetch loop.
       // A local commit the colleague has not pushed: a real merge, which is a
       // decision — not something a button called "update" should make for them.
       fs.appendFileSync(path.join(clone, 'projects', SLUG, 'content.md'),
@@ -131,9 +150,37 @@ test.describe('report content updates', () => {
       fs.appendFileSync(md, '\nMore from upstream.\n');
       git(origin, '-c user.email=s@x -c user.name=S commit -aqm "upstream again"');
 
+      // The commits above just triggered the watcher's rebuild of the adopted
+      // project; booting the editor WHILE its staged engine is being re-copied
+      // can catch the manifest half-written. Let the build settle (version
+      // stable across two polls), then boot — with one reload as the fallback,
+      // which is exactly what the editor itself offers a person.
+      await page.waitForTimeout(500);
+      let v0 = -1;
+      for (let i = 0; i < 20; i++) {
+        const j = await page.evaluate(async s2 =>
+          fetch(`/__ping?project=${s2}`).then(r => r.json()).catch(() => null), SLUG);
+        if (j && j.v === v0 && !j.error) break;
+        v0 = j ? j.v : -1;
+        await page.waitForTimeout(700);
+      }
       await page.goto(`edit.html?project=${SLUG}`);
-      await page.frameLocator('#out').locator('section.page[data-page="1"]')
-        .waitFor({ state: 'visible', timeout: 75000 });
+      try {
+        await page.frameLocator('#out').locator('section.page[data-page="1"]')
+          .waitFor({ state: 'visible', timeout: 30000 });
+      } catch (e) {
+        await page.reload();
+        try {
+          await page.frameLocator('#out').locator('section.page[data-page="1"]')
+            .waitFor({ state: 'visible', timeout: 60000 });
+        } catch (e2) {
+          const stat = await page.locator('#stat').textContent().catch(() => '?');
+          const ping = await page.evaluate(async s2 =>
+            fetch(`/__ping?project=${s2}`).then(r => r.json()).catch(x => String(x)), SLUG);
+          console.log('STUCK stat:', stat, '| ping:', JSON.stringify(ping).slice(0, 400));
+          throw e2;
+        }
+      }
 
       const out = await page.evaluate(() =>
         fetch('/__pull', { method: 'POST',

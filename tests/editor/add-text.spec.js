@@ -11,7 +11,7 @@ test.describe('add text presets', () => {
   test('the Text button opens a preset popover', async ({ page }) => {
     await page.click('#text');
     await expect(page.locator('#textpop')).toBeVisible();
-    await expect(page.locator('#textpop .txtpreset')).toHaveCount(3);
+    await expect(page.locator('#textpop .txtpreset')).toHaveCount(4);
   });
 
   test('"Add a heading" creates a large, bold text box', async ({ page }) => {
