@@ -1,4 +1,12 @@
-# Turn on "Sign in with GitHub" — one-time setup (~5 min)
+# Turn on "Sign in with GitHub" — one-time setup
+
+> **Already done for this repo.** The App is **Primer Editor**
+> (`github.com/settings/apps/primer-editor`), Device Flow is on, and its
+> public client id lives in the tracked `github-app.json` — so every install,
+> including a colleague's, picks it up with no setup at all. Step 1 below is
+> the guide for the next organisation; `tools/register_github_app.py` does it
+> in one click.
+
 
 The editor already contains the whole sign-in flow (device flow + token
 refresh, PAT prompt kept as fallback). It stays dormant until the manifest
