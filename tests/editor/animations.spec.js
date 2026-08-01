@@ -105,6 +105,114 @@ test.describe('entrance animations', () => {
       await page.waitForTimeout(1200);
     });
 
+  // The editor keeps animated elements static, so the ONLY way to see an
+  // entrance without publishing or presenting is to ask for it. Three ways
+  // in, all one helper: picking a kind, releasing a timing slider, and the
+  // toolbar's play button. A TEXT BOX on purpose — the kind of element
+  // someone actually animates, and the one the first tests never covered.
+  test('a text box plays once on pick, and the toolbar grows a play button',
+    async ({ page }) => {
+      const frame = page.frameLocator('#out');
+      await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      const id = await page.evaluate(async () => {
+        pushHistory();
+        const tid = freeTId();
+        boxes().push({ id: tid, page: visiblePageId(), x: 1, y: 2, w: 3,
+                       md: 'Animate me' });
+        markDirty(); await render();
+        return 'text.' + tid;
+      });
+      await page.waitForTimeout(1200);
+
+      // no animation yet: no play button on the floating mini bar
+      await frame.locator(`[data-el="${id}"]`).click();
+      await page.waitForTimeout(400);
+      await expect(frame.locator('.ds-mini button[aria-label^="Play"]')).toHaveCount(0);
+
+      // pick one from the menu — it plays once, on the box itself
+      await frame.locator(`[data-el="${id}"]`).click({ button: 'right' });
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-submenu button', { hasText: 'Rise' }).click();
+      await page.waitForTimeout(1500);
+
+      const played = await page.evaluate(k => {
+        const d = document.getElementById('out').contentDocument;
+        const e = d.querySelector(`[data-el="${k}"]`);
+        return { on: e.classList.contains('ds-anim-in'),
+                 dur: e.style.animationDuration };
+      }, id);
+      expect(played.on).toBe(true);
+      expect(played.dur).toBe('0.6s');
+
+      // and now the mini bar above it offers to play it again
+      await frame.locator(`[data-el="${id}"]`).click();
+      await page.waitForTimeout(400);
+      const play = frame.locator('.ds-mini button[aria-label^="Play"]');
+      await expect(play).toHaveCount(1);
+      await expect(play).toHaveAttribute('aria-label', /rise/);
+
+      // Pressing it RESTARTS an entrance that has already played and is
+      // sitting finished with ds-anim-in still on it — the real replay case,
+      // asserted through actual animationstart events rather than the class,
+      // and twice over so a one-off cannot pass for a working button.
+      const settled = await page.evaluate(k => {
+        const d = document.getElementById('out').contentDocument;
+        return d.querySelector(`[data-el="${k}"]`).classList.contains('ds-anim-in');
+      }, id);
+      expect(settled).toBe(true);
+      await armListener(page);
+      await play.click();
+      await page.waitForTimeout(900);
+      expect(await animCount(page)).toBeGreaterThanOrEqual(1);
+      // and twice in a row, so it is repeatable rather than a one-off
+      await play.click();
+      await page.waitForTimeout(900);
+      expect(await animCount(page)).toBeGreaterThanOrEqual(2);
+    });
+
+  test('changing the speed plays it again, at the new speed', async ({ page }) => {
+    const frame = page.frameLocator('#out');
+    await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const id = await page.evaluate(async () => {
+      pushHistory();
+      const tid = freeTId();
+      boxes().push({ id: tid, page: visiblePageId(), x: 1, y: 2, w: 3,
+                     md: 'Timed', anim: { kind: 'fade', duration: 0.6, delay: 0 } });
+      markDirty(); await render();
+      return 'text.' + tid;
+    });
+    await page.waitForTimeout(1200);
+
+    await frame.locator(`[data-el="${id}"]`).click({ button: 'right' });
+    await page.waitForTimeout(400);
+    await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+    await page.waitForTimeout(400);
+    // the speed slider is the first one in the submenu
+    const slider = frame.locator('.ds-submenu .ds-menu-slider input').first();
+    await slider.evaluate(el => {
+      el.value = '1.5';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.waitForTimeout(1800);
+
+    // committed to the store, and played again at the NEW duration
+    const out = await page.evaluate(k => {
+      const d = document.getElementById('out').contentDocument;
+      const e = d.querySelector(`[data-el="${k}"]`);
+      const bx = boxes().find(b => 'text.' + b.id === k);
+      return { stored: bx.anim.duration, on: e.classList.contains('ds-anim-in'),
+               dur: e.style.animationDuration };
+    }, id);
+    expect(out.stored).toBe(1.5);
+    expect(out.on).toBe(true);
+    expect(out.dur).toBe('1.5s');
+  });
+
   test('presentation mode replays a slide’s entrances on entry, and again on return',
     async ({ page }) => {
       const frame = page.frameLocator('#out');
