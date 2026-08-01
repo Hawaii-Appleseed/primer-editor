@@ -1,0 +1,225 @@
+// Entrance animations (layout.py anim + edit.html's Animate submenu +
+// replayAnims). Editor: set from the right-click menu on any element, preview
+// plays immediately, presentation mode replays a slide's entrances on entry.
+// Published: observer-triggered, script-applied hiding, reduced-motion and
+// print always show content. Engine faces pinned in test_docsync.py. Local.
+const { test, expect, gotoEditor } = require('./fixtures/editor-test');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const REPO = path.resolve(__dirname, '..', '..');
+const YML = path.join(REPO, 'docsync.yml');
+const SLUG = 'zz-spec-anim';
+
+// One worker, in order: the publish test snapshots and restores docsync.yml.
+test.describe.configure({ mode: 'serial' });
+
+/** Listen for animationstart on the report document; returns a counter id. */
+const armListener = (page) => page.evaluate(() => {
+  const d = document.getElementById('out').contentDocument;
+  window.__animCount = 0;
+  d.addEventListener('animationstart', e => {
+    if (String(e.animationName).startsWith('ds-a-')) window.__animCount++;
+  }, true);
+});
+const animCount = (page) => page.evaluate(() => window.__animCount || 0);
+
+test.describe('entrance animations', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  test('the menu animates a ROTATED shape — store set, preview plays, rotation kept',
+    async ({ page }) => {
+      const frame = page.frameLocator('#out');
+      await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await page.click('#shape');
+      await page.click('#shapepop .shp[data-k="rect"]');
+      await frame.locator('[data-shape]').first().waitFor({ state: 'attached', timeout: 20000 });
+      await page.waitForTimeout(800);
+      const sid = await page.evaluate(async () => {
+        pushHistory();
+        layout.shapes[0].rot = 20;          // the collision case the keyframes avoid
+        markDirty(); await render();
+        return layout.shapes[0].id;
+      });
+      await page.waitForTimeout(1000);
+
+      const el = frame.locator(`[data-shape="${sid}"]`);
+      await el.click({ button: 'right' });
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-submenu button', { hasText: 'Rise' }).click();
+      await page.waitForTimeout(1500);
+
+      const st = await page.evaluate(id =>
+        layout.shapes.find(x => x.id === id), sid);
+      expect(st.anim).toEqual({ kind: 'rise', duration: 0.6, delay: 0 });
+      expect(st.rot).toBe(20);
+      // the re-rendered node carries the attributes and the preview PLAYED
+      // The preview's evidence is on the element itself: the picking click
+      // re-renders (replacing the document — and any listener armed before
+      // it), then replayAnims marks the NEW node and sets its timing.
+      const dom = await page.evaluate(id => {
+        const d = document.getElementById('out').contentDocument;
+        const e = d.querySelector(`[data-shape="${id}"]`);
+        return { anim: e.getAttribute('data-ds-anim'),
+                 rot: e.getAttribute('transform'),
+                 playing: e.classList.contains('ds-anim-in'),
+                 dur: e.style.animationDuration };
+      }, sid);
+      expect(dom.anim).toBe('rise');
+      expect(dom.rot).toContain('rotate(20');
+      expect(dom.playing).toBe(true);
+      expect(dom.dur).toBe('0.6s');
+    });
+
+  test('a designed element stores its animation in positions{}, like alpha does',
+    async ({ page }) => {
+      const frame = page.frameLocator('#out');
+      await frame.locator('section.page').nth(2).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      const h1 = frame.locator('[data-el="basics.h1"]');
+      await h1.click({ button: 'right' });
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-submenu button', { hasText: 'Fade in' }).click();
+      await page.waitForTimeout(1500);
+
+      const pos = await page.evaluate(() => layout.positions['basics.h1']);
+      expect(pos.anim.kind).toBe('fade');
+      const attr = await page.evaluate(() => {
+        const d = document.getElementById('out').contentDocument;
+        return d.querySelector('[data-el="basics.h1"]').getAttribute('data-ds-anim');
+      });
+      expect(attr).toBe('fade');
+      // clean up so later tests see the pristine fixture heading
+      await page.evaluate(async () => {
+        pushHistory();
+        delete layout.positions['basics.h1'].anim;
+        markDirty(); await render();
+      });
+      await page.waitForTimeout(1200);
+    });
+
+  test('presentation mode replays a slide’s entrances on entry, and again on return',
+    async ({ page }) => {
+      const frame = page.frameLocator('#out');
+      await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await page.evaluate(async () => {
+        pushHistory();
+        const id = freeTId();
+        boxes().push({ id, page: visiblePageId(), x: 1, y: 2, w: 3,
+                       md: 'Slides in on the slide', anim: { kind: 'slide-left',
+                       duration: 0.3, delay: 0 } });
+        markDirty(); await render();
+      });
+      await page.waitForTimeout(1500);
+      await armListener(page);
+
+      await page.click('#present');
+      await page.waitForTimeout(900);
+      const onEntry = await animCount(page);
+      expect(onEntry).toBeGreaterThanOrEqual(1);
+
+      // leave the slide and come back: it plays again
+      await page.keyboard.press('ArrowLeft');
+      await page.waitForTimeout(500);
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(900);
+      expect(await animCount(page)).toBeGreaterThan(onEntry);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+    });
+});
+
+// Published, end to end: real disk build; on-screen element animates in, an
+// off-screen one stays hidden until scrolled to, and a reduced-motion reader
+// gets everything immediately with no animation at all.
+test('the published page reveals on scroll, and respects reduced motion',
+  async ({ page }) => {
+    const ymlBefore = fs.readFileSync(YML, 'utf8');
+    try {
+      await page.goto('start.html');
+      await page.waitForTimeout(600);
+      await page.click('#new');
+      await page.fill('#np-name', 'Anim Report');
+      await page.fill('#np-slug', SLUG);
+      await page.click('#np-create');
+      await page.waitForURL(`**/edit.html?project=${SLUG}`, { timeout: 30000 });
+      await page.frameLocator('#out').locator('section.page[data-page="1"]')
+        .waitFor({ state: 'visible', timeout: 75000 });
+
+      const lj = path.join(REPO, 'projects', SLUG, 'layout.json');
+      const d = JSON.parse(fs.readFileSync(lj, 'utf8'));
+      d.boxes = [
+        { id: 't1', page: 1, x: 1, y: 1, w: 3, md: 'Near the top',
+          anim: { kind: 'fade', duration: 0.2 } },
+        { id: 't2', page: 1, x: 1, y: 9.8, w: 3, md: 'Far below the fold',
+          anim: { kind: 'rise', duration: 0.2 } },
+      ];
+      fs.writeFileSync(lj, JSON.stringify(d, null, 2));
+      execSync(`python3 ${JSON.stringify(path.join(REPO, 'projects', SLUG, 'render_report.py'))}`,
+        { cwd: REPO });
+      const html = fs.readFileSync(
+        path.join(REPO, 'projects', SLUG, 'web', 'index.html'), 'utf8');
+
+      const run = await page.evaluate(async raw => {
+        const fr = document.createElement('iframe');
+        fr.style.cssText = 'position:fixed;left:0;top:0;width:900px;height:500px';
+        document.body.appendChild(fr);
+        fr.contentDocument.write(raw); fr.contentDocument.close();
+        const w = fr.contentWindow, doc = fr.contentDocument;
+        const t1 = doc.querySelector('[data-ds-anim="fade"]');
+        const t2 = doc.querySelector('[data-ds-anim="rise"]');
+        const state = el => ({
+          wait: el.classList.contains('ds-anim-wait'),
+          got: el.classList.contains('ds-anim-in'),
+          shown: w.getComputedStyle(el).opacity !== '0',
+        });
+        await new Promise(r => setTimeout(r, 600));      // observer settles
+        const out = { top: state(t1), farBefore: state(t2) };
+        t2.scrollIntoView();
+        await new Promise(r => setTimeout(r, 700));
+        out.farAfter = state(t2);
+        fr.remove();
+        return out;
+      }, html);
+      // near the top: observed immediately, animated in
+      expect(run.top.got).toBe(true);
+      expect(run.top.shown).toBe(true);
+      // below the fold: script-hidden until scrolled to, then revealed
+      expect(run.farBefore.wait).toBe(true);
+      expect(run.farBefore.shown).toBe(false);
+      expect(run.farAfter.got).toBe(true);
+      expect(run.farAfter.shown).toBe(true);
+
+      // A reduced-motion reader: nothing hides, nothing animates.
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const calm = await page.evaluate(async raw => {
+        const fr = document.createElement('iframe');
+        fr.style.cssText = 'position:fixed;left:0;top:0;width:900px;height:500px';
+        document.body.appendChild(fr);
+        fr.contentDocument.write(raw); fr.contentDocument.close();
+        const w = fr.contentWindow, doc = fr.contentDocument;
+        await new Promise(r => setTimeout(r, 500));
+        const t2 = doc.querySelector('[data-ds-anim="rise"]');
+        const out = { wait: t2.classList.contains('ds-anim-wait'),
+                      shown: w.getComputedStyle(t2).opacity !== '0' };
+        fr.remove();
+        return out;
+      }, html);
+      expect(calm.wait).toBe(false);
+      expect(calm.shown).toBe(true);
+      await page.emulateMedia({ reducedMotion: null });
+    } finally {
+      fs.writeFileSync(YML, ymlBefore);
+      for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
+        execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
+      }
+    }
+  });
