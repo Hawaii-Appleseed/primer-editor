@@ -55,7 +55,12 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_VERSION && k !== PYODIDE_CACHE)
+      // ds-preview-* is the editor's own warm-boot snapshot (the last
+      // successful render, painted read-only while Pyodide compiles). It is
+      // versioned by the editor, not by this worker, so a shell update must
+      // not throw it away — that is the one moment a fast boot matters most.
+      keys.filter(k => k !== CACHE_VERSION && k !== PYODIDE_CACHE
+                    && !k.startsWith('ds-preview'))
           .map(k => caches.delete(k))
     )).then(() => self.clients.claim())
   );

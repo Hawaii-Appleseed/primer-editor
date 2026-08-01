@@ -65,8 +65,17 @@ async function blockDangerousLocalEndpoints(context) {
 
 /** Wait for Pyodide to finish the first render: the report's page divs land
  *  inside the #out iframe via srcdoc once render() completes. Generous
- *  timeout — a cold Pyodide CDN fetch (~30MB) can take a while in CI. */
+ *  timeout — a cold Pyodide CDN fetch (~30MB) can take a while in CI.
+ *
+ *  data-ds-live FIRST, and it is load-bearing: the warm-boot preview (the
+ *  last render, painted read-only while the engine compiles) contains the
+ *  same .page divs, so waiting on those alone returned during the preview —
+ *  and the whole test then raced the real first render, which replaces the
+ *  document wholesale. The attribute is stamped only by render()'s swap. */
 async function waitForFirstRender(page) {
+  await page.waitForSelector('#out[data-ds-live]', {
+    state: 'attached', timeout: 75_000,
+  });
   await page.frameLocator('#out').locator('.page').first().waitFor({
     state: 'visible', timeout: 75_000,
   });
