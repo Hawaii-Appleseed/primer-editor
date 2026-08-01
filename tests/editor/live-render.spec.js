@@ -63,6 +63,32 @@ test('a bump that changes nothing does not re-render; one that changes the engin
   expect(verdicts).toEqual({ same: true, appended: true, oneChar: true, bytes: true, crossType: true });
 });
 
+// The engine import cache: a render purges sys.modules ONLY after the engine
+// files really moved (engineDirty, set by refreshEngineFiles' verdict). It
+// used to purge on EVERY render — re-importing and re-compiling the whole
+// docsync package per committed edit, the biggest slice of a 12-page
+// re-render — to buy a hot-reload that happens maybe once a session. Both
+// directions matter: reuse when clean (the speed), purge when dirty (or a
+// hot-reloaded engine silently keeps running the OLD Python forever).
+test('renders reuse the imported engine until it really changes', async ({ page }) => {
+  await gotoEditor(page);
+  const moduleId = () => page.evaluate(() =>
+    py.runPython("import sys; id(sys.modules.get('docsync.layout'))"));
+
+  const a = await moduleId();
+  expect(a).toBeTruthy();                       // the first render imported it
+  await page.evaluate(async () => { await render(); });
+  const b = await moduleId();
+  expect(b).toBe(a);                            // clean engine: same module object
+
+  await page.evaluate(async () => { engineDirty = true; await render(); });
+  const c = await moduleId();
+  expect(c).not.toBe(a);                        // dirty engine: really re-imported
+  // and the flag is spent — the render after that reuses again
+  await page.evaluate(async () => { await render(); });
+  expect(await moduleId()).toBe(c);
+});
+
 // A file a rebuild ADDS to the engine must reach a tab that booted before it
 // existed. refreshEngineFiles used to walk M.files — the manifest snapshot
 // from boot — so the new module was never fetched, and the freshly
