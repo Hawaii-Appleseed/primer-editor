@@ -74,6 +74,35 @@ test.describe('expandable sections', () => {
       expect(after).toBeGreaterThan(before + 0.3);
     });
 
+  // The gesture people actually use to mean "just this one". It fires a
+  // mouseup AND a dblclick, so the drill-in and the text editor both wanted
+  // the same burst: the drill narrowed the selection, then dblclick found a
+  // solo box and opened the editor — landing in the words instead of on the
+  // handles, which is exactly what "there are no size handles" looked like.
+  test('double-clicking a grouped piece gets inside it, not into its words',
+    async ({ page }) => {
+      const { btn } = await addPair(page);
+      const frame = page.frameLocator('#out');
+      const el = frame.locator(`[data-el="text.${btn.id}"]`);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      await el.click();                       // the group
+      await page.waitForTimeout(350);
+      await el.dblclick();                    // get inside
+      await page.waitForTimeout(600);
+
+      expect(await page.evaluate(() => [...selIds])).toEqual([`text.${btn.id}`]);
+      expect(await page.evaluate(() => !!editing)).toBe(false);
+      await expect(frame.locator('.ds-handles')).toHaveCount(1);
+
+      // editing the words is still reachable — one more double-click, once
+      // the piece is already the selection on its own
+      await page.waitForTimeout(900);         // past the just-drilled window
+      await el.dblclick();
+      await page.waitForTimeout(600);
+      expect(await page.evaluate(() => !!editing)).toBe(true);
+    });
+
   test('the revealed content resizes on its own too, in both directions',
     async ({ page }) => {
       const { btn, content } = await addPair(page);
