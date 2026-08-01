@@ -217,6 +217,79 @@ test.describe('entrance animations', () => {
     expect(out.dur).toBe(`${out.stored}s`);       // and replayed at that speed
   });
 
+  // A chart can animate its parts instead of itself: axes and labels stay
+  // put, the bars grow out of the baseline one after the next.
+  test('a bar chart is offered "Bars grow in", and its bars stagger',
+    async ({ page }) => {
+      const frame = page.frameLocator('#out');
+      await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      const id = await page.evaluate(async () => {
+        pushHistory();
+        const sid = freeShapeId('chart');
+        layout.shapes.push({ id: sid, page: visiblePageId(), kind: 'chart',
+          x: 1, y: 2, w: 4, h: 2.6, z: 3, fill: 'none',
+          chart: { type: 'bar', labels: ['A', 'B', 'C'],
+                   series: [{ name: 'S', data: [12, 19, 8] }] } });
+        markDirty(); await render();
+        return sid;
+      });
+      await page.waitForTimeout(1500);
+
+      await frame.locator(`[data-shape="${id}"]`).click({ button: 'right' });
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+      await page.waitForTimeout(400);
+      const bars = frame.locator('.ds-submenu button', { hasText: 'Bars grow in' });
+      await expect(bars).toHaveCount(1);
+      await bars.click();
+      await page.waitForTimeout(1500);
+
+      expect(await page.evaluate(i => layout.shapes.find(s => s.id === i).anim, id))
+        .toEqual({ kind: 'bars', duration: 0.6, delay: 0 });
+
+      const seen = await page.evaluate(() => {
+        const d = document.getElementById('out').contentDocument;
+        const g = d.querySelector('[data-ds-anim="bars"]');
+        const bs = [...d.querySelectorAll('.ds-cbar')];
+        return { playing: g.classList.contains('ds-anim-in'),
+                 n: bs.length,
+                 delays: bs.map(b => d.defaultView.getComputedStyle(b).animationDelay),
+                 names: bs.map(b => d.defaultView.getComputedStyle(b).animationName) };
+      });
+      expect(seen.playing).toBe(true);         // previewed once on pick
+      expect(seen.n).toBe(3);
+      expect(seen.names).toEqual(['ds-a-bar', 'ds-a-bar', 'ds-a-bar']);
+      // each starts after the one before it, so the row reads across
+      expect(seen.delays).toEqual(['0s', '0.075s', '0.15s']);
+    });
+
+  test('a pie chart is not offered bars — it has none', async ({ page }) => {
+    const frame = page.frameLocator('#out');
+    await frame.locator('section.page').nth(3).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const id = await page.evaluate(async () => {
+      pushHistory();
+      const sid = freeShapeId('chart');
+      layout.shapes.push({ id: sid, page: visiblePageId(), kind: 'chart',
+        x: 1, y: 2, w: 3, h: 2.6, z: 3, fill: 'none',
+        chart: { type: 'pie', labels: ['A', 'B'],
+                 series: [{ name: 'S', data: [3, 7] }] } });
+      markDirty(); await render();
+      return sid;
+    });
+    await page.waitForTimeout(1500);
+    await frame.locator(`[data-shape="${id}"]`).click({ button: 'right' });
+    await page.waitForTimeout(400);
+    await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
+    await page.waitForTimeout(400);
+    await expect(frame.locator('.ds-submenu button', { hasText: 'Bars grow in' }))
+      .toHaveCount(0);
+    // the whole-element entrances are still all there
+    await expect(frame.locator('.ds-submenu button', { hasText: 'Fade in' }))
+      .toHaveCount(1);
+  });
+
   test('presentation mode replays a slide’s entrances on entry, and again on return',
     async ({ page }) => {
       const frame = page.frameLocator('#out');
@@ -274,6 +347,12 @@ test('the published page reveals on scroll, and respects reduced motion',
         { id: 't2', page: 1, x: 1, y: 9.8, w: 3, md: 'Far below the fold',
           anim: { kind: 'rise', duration: 0.2 } },
       ];
+      // A chart below the fold, animating its PARTS: the drawing stays
+      // visible the whole time and only the bars are held back.
+      d.shapes = [{ id: 'c1', page: 1, kind: 'chart', x: 1, y: 6, w: 4, h: 2.5,
+                    fill: 'none', anim: { kind: 'bars', duration: 0.25 },
+                    chart: { type: 'bar', labels: ['A', 'B', 'C'],
+                             series: [{ name: 'S', data: [12, 19, 8] }] } }];
       fs.writeFileSync(lj, JSON.stringify(d, null, 2));
       execSync(`python3 ${JSON.stringify(path.join(REPO, 'projects', SLUG, 'render_report.py'))}`,
         { cwd: REPO });
@@ -293,14 +372,32 @@ test('the published page reveals on scroll, and respects reduced motion',
           got: el.classList.contains('ds-anim-in'),
           shown: w.getComputedStyle(el).opacity !== '0',
         });
+        // the chart, and the bars inside it
+        const ch = doc.querySelector('[data-ds-anim="bars"]');
+        const bar = doc.querySelector('.ds-cbar');
+        const barState = () => ({
+          chartShown: w.getComputedStyle(ch).opacity !== '0',
+          barScale: w.getComputedStyle(bar).scale,
+          barAnim: w.getComputedStyle(bar).animationName,
+        });
         await new Promise(r => setTimeout(r, 600));      // observer settles
-        const out = { top: state(t1), farBefore: state(t2) };
+        const out = { top: state(t1), farBefore: state(t2),
+                      chartBefore: barState() };
         t2.scrollIntoView();
         await new Promise(r => setTimeout(r, 700));
         out.farAfter = state(t2);
+        ch.scrollIntoView();
+        await new Promise(r => setTimeout(r, 900));
+        out.chartAfter = barState();
         fr.remove();
         return out;
       }, html);
+      // The chart never hides — a part animation holds back the BARS, and a
+      // chart blanked to opacity 0 would read as a missing figure.
+      expect(run.chartBefore.chartShown).toBe(true);
+      expect(run.chartBefore.barScale).toBe('1 0');       // collapsed, waiting
+      expect(run.chartAfter.chartShown).toBe(true);
+      expect(run.chartAfter.barAnim).toBe('ds-a-bar');    // it really grows
       // near the top: observed immediately, animated in
       expect(run.top.got).toBe(true);
       expect(run.top.shown).toBe(true);

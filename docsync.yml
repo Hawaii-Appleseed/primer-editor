@@ -170,17 +170,3 @@ bindings:
       # Must match the .page padding in render_report.py, or the editor's guides
       # sit where the text no longer does.
       margins: [0.5, 0.55]
-
-  # Added by "+ New report" (docsync/new.py) — a blank local project.
-  - id: zz-spec-blank
-    content: projects/zz-spec-blank/content.md
-    build: python3 projects/zz-spec-blank/render_report.py && python3 -m docsync.stage --id zz-spec-blank
-    outputs:
-      - projects/zz-spec-blank/web/index.html
-    editor:
-      dir: docs/zz-spec-blank
-      render: projects/zz-spec-blank/render_report.py
-      out: projects/zz-spec-blank/web/index.html
-      layout: projects/zz-spec-blank/layout.json
-      palette: ["#6B9E78", "#95B7A2", "#CAD2C5", "#E8EDE6", "#D6E0D2", "#52796F", "#354F52", "#2F3E46", "#FFFFFF"]
-      page: [8.5, 11.0]
