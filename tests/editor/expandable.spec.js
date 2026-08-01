@@ -135,6 +135,94 @@ test.describe('expandable sections', () => {
     });
 });
 
+// The increment: a toggle reveals shapes, tables and several things at once,
+// wired through the button's own right-click menu.
+test.describe('multi-kind targets', () => {
+  test.beforeEach(async ({ page }) => {
+    await gotoEditor(page);
+  });
+
+  /** A pair plus a shape and a table on the same page, ids returned. */
+  async function menagerie(page) {
+    const { btn, content } = await addPair(page);
+    const extra = await page.evaluate(async () => {
+      pushHistory();
+      const sid = freeShapeId ? freeShapeId('rect') : freeTId();
+      layout.shapes.push({ id: sid, page: visiblePageId(), kind: 'rect',
+                           x: 1, y: 4.2, w: 1.5, h: 0.8, fill: '#84A98C', z: 2 });
+      const tid = freeTId();
+      tables().push({ id: tid, page: visiblePageId(), x: 3, y: 4.2, w: 2.5,
+                      rows: [['A', 'B']] });
+      markDirty(); await render();
+      return { sid, tid };
+    });
+    await page.waitForTimeout(1200);
+    return { btn, content, ...extra };
+  }
+
+  test('right-click wires the button to the whole selection — box, shape, table',
+    async ({ page }) => {
+      const m = await menagerie(page);
+      // select button + shape + table, then use the button's own menu
+      await page.evaluate(ids => {
+        setSel($('out').contentDocument, ids);
+      }, ['text.' + m.btn.id, m.sid, 'table.' + m.tid]);
+      await page.waitForTimeout(400);
+      const frame = page.frameLocator('#out');
+      await frame.locator(`[data-el="text.${m.btn.id}"]`).click({ button: 'right' });
+      await page.waitForTimeout(400);
+      await frame.locator('.ds-menu button', { hasText: 'Reveal the 2 selected' }).click();
+      await page.waitForTimeout(1500);
+
+      const t = await page.evaluate(id =>
+        boxes().find(b => b.id === id).target, m.btn.id);
+      expect([...t].sort()).toEqual([m.sid, m.tid].sort());
+    });
+
+  test('deleting one revealed element prunes the list; the last demotes',
+    async ({ page }) => {
+      const m = await menagerie(page);
+      await page.evaluate(([bid, sid, tid]) => {
+        pushHistory();
+        boxes().find(b => b.id === bid).target = [sid, tid];
+        markDirty();
+      }, [m.btn.id, m.sid, m.tid]);
+      // delete the shape: list prunes, button still a toggle
+      await page.evaluate(async sid => {
+        const d = $('out').contentDocument;
+        setSel(d, [sid]);
+        await deleteSel(d);
+      }, m.sid);
+      await page.waitForTimeout(1200);
+      let bx = await page.evaluate(id => boxes().find(b => b.id === id), m.btn.id);
+      expect(bx.act).toBe('toggle');
+      expect(bx.target).toBe(m.tid);
+      await expect(page.locator('#stat')).toContainText('still reveals the other');
+      // delete the table too: nothing left, demoted
+      await page.evaluate(async tid => {
+        const d = $('out').contentDocument;
+        setSel(d, ['table.' + tid]);
+        await deleteSel(d);
+      }, m.tid);
+      await page.waitForTimeout(1200);
+      bx = await page.evaluate(id => boxes().find(b => b.id === id), m.btn.id);
+      expect(bx.act).toBeUndefined();
+      expect(bx.target).toBeUndefined();
+    });
+
+  test('"Stop revealing" demotes on purpose too', async ({ page }) => {
+    const { btn } = await addPair(page);
+    const frame = page.frameLocator('#out');
+    await frame.locator(`[data-el="text.${btn.id}"]`).click({ button: 'right' });
+    await page.waitForTimeout(400);
+    await frame.locator('.ds-menu button', { hasText: 'Stop revealing' }).click();
+    await page.waitForTimeout(1500);
+    const bx = await page.evaluate(id => boxes().find(b => b.id === id), btn.id);
+    expect(bx.act).toBeUndefined();
+    expect(bx.target).toBeUndefined();
+  });
+});
+
 // The other face, end to end: a scaffolded project built by the REAL renderer
 // on disk, its published page opened and the button actually clicked — closed,
 // open, closed again, aria tracking all the way.
@@ -156,9 +244,12 @@ test('the published page expands and collapses for real', async ({ page }) => {
     d.boxes = [
       { id: 't1', page: 1, x: 1, y: 1, w: 2.6, md: 'Show details',
         fill: '#52796F', style: { color: '#FFFFFF', weight: 700 },
-        act: 'toggle', target: 't2' },
+        act: 'toggle', target: ['t2', 's9', 't8'] },
       { id: 't2', page: 1, x: 1, y: 1.6, w: 5, md: 'The hidden half.' },
     ];
+    d.shapes = [{ id: 's9', page: 1, kind: 'rect', x: 1, y: 3.2, w: 2, h: 1,
+                  fill: '#84A98C' }];
+    d.tables = [{ id: 't8', page: 1, x: 1, y: 4.6, w: 3, rows: [['A', 'B']] }];
     fs.writeFileSync(lj, JSON.stringify(d, null, 2));
     execSync(`python3 ${JSON.stringify(path.join(REPO, 'projects', SLUG, 'render_report.py'))}`,
       { cwd: REPO });
@@ -169,9 +260,11 @@ test('the published page expands and collapses for real', async ({ page }) => {
       const w = window.open('', '_blank');
       w.document.write(raw); w.document.close();
       const btn = w.document.querySelector('.ds-tglbtn');
-      const tgt = w.document.getElementById('ds-x-t2');
-      const vis = () => w.getComputedStyle(tgt).display !== 'none';
-      const out = { start: vis(), aria0: btn.getAttribute('aria-expanded') };
+      const ts = ['ds-x-t2', 'ds-x-s9', 'ds-x-t8']
+        .map(i => w.document.getElementById(i));
+      const vis = () => ts.map(e => w.getComputedStyle(e).display !== 'none');
+      const out = { kinds: ts.map(e => e && e.tagName),
+                    start: vis(), aria0: btn.getAttribute('aria-expanded') };
       btn.click();
       out.open = vis(); out.aria1 = btn.getAttribute('aria-expanded');
       out.arrowTurned = btn.classList.contains('ds-tgl-on');
@@ -180,12 +273,14 @@ test('the published page expands and collapses for real', async ({ page }) => {
       w.close();
       return out;
     }, html);
-    expect(run.start).toBe(false);          // collapsed until asked for
+    // a DIV, an SVG node and a TABLE — three kinds, one button
+    expect(run.kinds).toEqual(['DIV', 'rect', 'TABLE']);
+    expect(run.start).toEqual([false, false, false]);
     expect(run.aria0).toBe('false');
-    expect(run.open).toBe(true);            // one click reveals it
+    expect(run.open).toEqual([true, true, true]);
     expect(run.aria1).toBe('true');
     expect(run.arrowTurned).toBe(true);
-    expect(run.closed).toBe(false);         // and a second puts it away
+    expect(run.closed).toEqual([false, false, false]);
     expect(run.aria2).toBe('false');
   } finally {
     fs.writeFileSync(YML, ymlBefore);
