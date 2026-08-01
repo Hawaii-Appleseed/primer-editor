@@ -191,16 +191,20 @@ test.describe('entrance animations', () => {
     await page.waitForTimeout(400);
     await frame.locator('.ds-menu button.ds-sub', { hasText: 'Animate' }).hover();
     await page.waitForTimeout(400);
-    // the speed slider is the first one in the submenu
+    // Drag the speed slider with a REAL mouse, left to right. Dispatching
+    // input/change by hand passes even when the control is unusable: every
+    // menu cancels mousedown to protect the editor's caret, and cancelling
+    // it on a range also cancels the thumb-drag that IS the control — the
+    // slider rendered, reported its value, and could not be moved at all.
     const slider = frame.locator('.ds-submenu .ds-menu-slider input').first();
-    await slider.evaluate(el => {
-      el.value = '1.5';
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    const sb = await slider.boundingBox();
+    await page.mouse.move(sb.x + sb.width * 0.2, sb.y + sb.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(sb.x + sb.width * 0.85, sb.y + sb.height / 2, { steps: 10 });
+    await page.mouse.up();
     await page.waitForTimeout(1800);
 
-    // committed to the store, and played again at the NEW duration
+    // committed to the store, and played again at whatever the drag chose
     const out = await page.evaluate(k => {
       const d = document.getElementById('out').contentDocument;
       const e = d.querySelector(`[data-el="${k}"]`);
@@ -208,9 +212,9 @@ test.describe('entrance animations', () => {
       return { stored: bx.anim.duration, on: e.classList.contains('ds-anim-in'),
                dur: e.style.animationDuration };
     }, id);
-    expect(out.stored).toBe(1.5);
+    expect(out.stored).toBeGreaterThan(0.6);      // it actually moved
     expect(out.on).toBe(true);
-    expect(out.dur).toBe('1.5s');
+    expect(out.dur).toBe(`${out.stored}s`);       // and replayed at that speed
   });
 
   test('presentation mode replays a slide’s entrances on entry, and again on return',

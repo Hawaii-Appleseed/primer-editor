@@ -33,6 +33,75 @@ test.describe('expandable sections', () => {
     await gotoEditor(page);
   });
 
+  // The pair is grouped so it travels as one — which also meant neither
+  // piece could ever be RESIZED: handles only appear for a selection of
+  // exactly one, and clicking a group always selects all of it. A second
+  // click that does not move drills in, Canva-style.
+  test('a second click gets inside the group, so the button can be resized',
+    async ({ page }) => {
+      const { btn } = await addPair(page);
+      const frame = page.frameLocator('#out');
+      const el = frame.locator(`[data-el="text.${btn.id}"]`);
+      // insertion leaves the new pair selected; start from nothing so the
+      // two-click sequence is the one being tested
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+
+      // first click: the whole pair, and no resize handles
+      await el.click();
+      await page.waitForTimeout(400);
+      expect(await page.evaluate(() => selIds.size)).toBe(2);
+      await expect(frame.locator('.ds-handles')).toHaveCount(0);
+
+      // second click, no movement: just this piece — and handles appear
+      await el.click();
+      await page.waitForTimeout(400);
+      expect(await page.evaluate(() => [...selIds])).toEqual([`text.${btn.id}`]);
+      await expect(frame.locator('.ds-handles')).toHaveCount(1);
+
+      // and it really resizes: drag the east handle out, width follows
+      const before = await page.evaluate(id =>
+        boxes().find(b => b.id === id).w, btn.id);
+      const h = frame.locator('.ds-handles .ds-h-e');
+      const hb = await h.boundingBox();
+      await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(hb.x + hb.width / 2 + 90, hb.y + hb.height / 2, { steps: 8 });
+      await page.mouse.up();
+      await page.waitForTimeout(600);
+      const after = await page.evaluate(id =>
+        boxes().find(b => b.id === id).w, btn.id);
+      expect(after).toBeGreaterThan(before + 0.3);
+    });
+
+  test('the revealed content resizes on its own too, in both directions',
+    async ({ page }) => {
+      const { btn, content } = await addPair(page);
+      const frame = page.frameLocator('#out');
+      const el = frame.locator(`[data-el="text.${content.id}"]`);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      await el.click();                       // the group
+      await page.waitForTimeout(300);
+      await el.click();                       // drill in
+      await page.waitForTimeout(400);
+      expect(await page.evaluate(() => [...selIds])).toEqual([`text.${content.id}`]);
+
+      // the south handle sets a min-height floor (never clips the words)
+      const h = frame.locator('.ds-handles .ds-h-s');
+      const hb = await h.boundingBox();
+      await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2 + 80, { steps: 8 });
+      await page.mouse.up();
+      await page.waitForTimeout(600);
+      const box = await page.evaluate(id => boxes().find(b => b.id === id), content.id);
+      expect(box.h).toBeGreaterThan(0.5);
+      // the button was NOT dragged along with it
+      const btnBox = await page.evaluate(id => boxes().find(b => b.id === id), btn.id);
+      expect(btnBox.h == null || btnBox.h < box.h).toBe(true);
+    });
+
   test('inserts as a wired pair — grouped, both visible, both movable',
     async ({ page }) => {
       const { btn, content } = await addPair(page);
