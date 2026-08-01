@@ -103,6 +103,51 @@ test.describe('expandable sections', () => {
       expect(await page.evaluate(() => !!editing)).toBe(true);
     });
 
+  // The chevron is drawn art the person placing the button can restyle —
+  // clicked directly, recoloured from the toolbar like any other artwork, and
+  // deliberately NOT movable: it belongs inside its button.
+  test('the arrow is selectable and recolours, but never leaves its button',
+    async ({ page }) => {
+      const { btn } = await addPair(page);
+      const frame = page.frameLocator('#out');
+      const arrow = frame.locator('svg.ds-tgl-svg');
+      await expect(arrow).toHaveCount(1);
+      await expect(arrow).toHaveAttribute('data-el', `tglarrow.${btn.id}`);
+
+      await arrow.click();
+      await page.waitForTimeout(400);
+      expect(await page.evaluate(() => [...selIds]))
+        .toEqual([`tglarrow.${btn.id}`]);
+      // it is a colour target, and offers "Colour", not "Background"
+      await expect(page.locator('#ar-fill')).toBeVisible();
+      expect(await page.evaluate(id => fillTargets(id).label,
+        `tglarrow.${btn.id}`)).toBe('Colour');
+      // nothing to resize — its size comes from the button's type
+      await expect(frame.locator('.ds-handles .ds-h')).toHaveCount(0);
+
+      // recolour: stored under its own key, and it reaches the drawn stroke
+      await page.evaluate(async id => {
+        pushHistory(); fillTargets(id).set('#C0603F');
+        markDirty(); await render();
+      }, `tglarrow.${btn.id}`);
+      await page.waitForTimeout(1200);
+      expect(await page.evaluate(id => layout.fill[id], `tglarrow.${btn.id}`))
+        .toBe('#C0603F');
+      await expect(frame.locator('svg.ds-tgl-svg path'))
+        .toHaveAttribute('stroke', '#C0603F');
+
+      // dragging it must not pin it into positions{} — that would position it
+      // absolutely and tear it out of the button it labels
+      const ab = await frame.locator('svg.ds-tgl-svg').boundingBox();
+      await page.mouse.move(ab.x + ab.width / 2, ab.y + ab.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(ab.x + 120, ab.y + 90, { steps: 8 });
+      await page.mouse.up();
+      await page.waitForTimeout(500);
+      expect(await page.evaluate(id => layout.positions[id] || null,
+        `tglarrow.${btn.id}`)).toBeNull();
+    });
+
   test('the revealed content resizes on its own too, in both directions',
     async ({ page }) => {
       const { btn, content } = await addPair(page);
@@ -361,11 +406,19 @@ test('the published page expands and collapses for real', async ({ page }) => {
       const ts = ['ds-x-t2', 'ds-x-s9', 'ds-x-t8']
         .map(i => w.document.getElementById(i));
       const vis = () => ts.map(e => w.getComputedStyle(e).display !== 'none');
+      const arrow = btn.querySelector('svg.ds-tgl-svg');
+      const spin = () => arrow
+        ? w.getComputedStyle(arrow).transform : 'none';
       const out = { kinds: ts.map(e => e && e.tagName),
-                    start: vis(), aria0: btn.getAttribute('aria-expanded') };
+                    start: vis(), aria0: btn.getAttribute('aria-expanded'),
+                    hasArrow: !!arrow, shutSpin: spin() };
       btn.click();
       out.open = vis(); out.aria1 = btn.getAttribute('aria-expanded');
       out.arrowTurned = btn.classList.contains('ds-tgl-on');
+      // the turn is a .15s transition — read it once it has finished, or
+      // getComputedStyle hands back an interpolated value near the start
+      await new Promise(r => setTimeout(r, 400));
+      out.openSpin = spin();
       btn.click();
       out.closed = vis(); out.aria2 = btn.getAttribute('aria-expanded');
       w.close();
@@ -378,6 +431,11 @@ test('the published page expands and collapses for real', async ({ page }) => {
     expect(run.open).toEqual([true, true, true]);
     expect(run.aria1).toBe('true');
     expect(run.arrowTurned).toBe(true);
+    // The chevron is real drawn art, and it really turns: shut it is
+    // untransformed, open it carries the 180° rotate that points it up.
+    expect(run.hasArrow).toBe(true);
+    expect(run.shutSpin === 'none' || run.shutSpin === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true);
+    expect(run.openSpin).toContain('matrix(-1, 0, 0, -1');
     expect(run.closed).toEqual([false, false, false]);
     expect(run.aria2).toBe('false');
   } finally {
