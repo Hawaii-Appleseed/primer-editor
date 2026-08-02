@@ -83,10 +83,17 @@ test.describe('deleting a designed element hides it, reversibly', () => {
     await page.keyboard.press('Delete');
     await expect.poll(() => page.evaluate(() => layout.hidden)).toEqual([ID]);
 
-    // Restore so this spec leaves no state behind for the next one.
-    await frame.locator(`[data-el="${ID}"]`).click();
-    await page.keyboard.press('Delete');
-    await page.waitForTimeout(400);
+    // Restore so this spec leaves no state behind for the next one — through
+    // File ▸ Restore, the way the test above establishes. Clicking the element
+    // itself cannot work and never really did: a hidden one is display:none
+    // with a zero box (asserted above), so the click only ever landed while
+    // the canvas still lagged the data. Incremental rendering applies the
+    // hide immediately, and the lag it leaned on is gone.
+    await page.click('#file');
+    await page.locator('#file-restore').click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByRole('button', { name: 'Restore' }).click();
+    await expect.poll(() => page.evaluate(() => layout.hidden)).toBeUndefined();
   });
 
   test('deleting closes the gap, so the page reflows as it will when published',
