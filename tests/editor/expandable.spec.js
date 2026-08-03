@@ -385,9 +385,13 @@ test('the published page expands and collapses for real', async ({ page }) => {
     const lj = path.join(REPO, 'projects', SLUG, 'layout.json');
     const d = JSON.parse(fs.readFileSync(lj, 'utf8'));
     d.boxes = [
+      // tglSpeed pinned well above the .3s default: the test waits past it
+      // to read the SETTLED state, and a slow, deliberately generous speed
+      // makes that wait unambiguous rather than a race against a fast
+      // transition on a loaded CI runner.
       { id: 't1', page: 1, x: 1, y: 1, w: 2.6, md: 'Show details',
         fill: '#52796F', style: { color: '#FFFFFF', weight: 700 },
-        act: 'toggle', target: ['t2', 's9', 't8'] },
+        act: 'toggle', target: ['t2', 's9', 't8'], tglSpeed: 1.6 },
       { id: 't2', page: 1, x: 1, y: 1.6, w: 5, md: 'The hidden half.' },
     ];
     d.shapes = [{ id: 's9', page: 1, kind: 'rect', x: 1, y: 3.2, w: 2, h: 1,
@@ -405,39 +409,61 @@ test('the published page expands and collapses for real', async ({ page }) => {
       const btn = w.document.querySelector('.ds-tglbtn');
       const ts = ['ds-x-t2', 'ds-x-s9', 'ds-x-t8']
         .map(i => w.document.getElementById(i));
-      const vis = () => ts.map(e => w.getComputedStyle(e).display !== 'none');
+      // The published toggle is a REAL height transition now (__dsTgl,
+      // JS-measured — see docsync.layout._anim_check et al.), not an instant
+      // display:none flip, so "is it open" has two different honest answers
+      // at two different moments. Right after the click it is CLASS state —
+      // deterministic and synchronous, the one thing not still animating.
+      // Once the transition has had time to finish, it is genuinely
+      // rendered: opacity settled at 1, and a laid-out box's max-height at
+      // 'none' (a shape's never moves — see layout.py's own comment on why
+      // max-height is inert on SVG) rather than still clamped to 0.
+      const cls = () => ts.map(e => e.classList.contains('ds-tgl-open'));
+      const rendered = () => ts.map(e => {
+        const cs = w.getComputedStyle(e);
+        return e.tagName === 'rect' ? cs.opacity !== '0'
+          : cs.opacity !== '0' && cs.maxHeight !== '0px';
+      });
       const arrow = btn.querySelector('svg.ds-tgl-svg');
       const spin = () => arrow
         ? w.getComputedStyle(arrow).transform : 'none';
       const out = { kinds: ts.map(e => e && e.tagName),
-                    start: vis(), aria0: btn.getAttribute('aria-expanded'),
+                    startClosed: rendered().every(v => v === false),
+                    aria0: btn.getAttribute('aria-expanded'),
                     hasArrow: !!arrow, shutSpin: spin() };
       btn.click();
-      out.open = vis(); out.aria1 = btn.getAttribute('aria-expanded');
+      out.openClassImmediate = cls();     // true before any frame has painted
+      out.aria1 = btn.getAttribute('aria-expanded');
       out.arrowTurned = btn.classList.contains('ds-tgl-on');
-      // the turn is a .15s transition — read it once it has finished, or
-      // getComputedStyle hands back an interpolated value near the start
-      await new Promise(r => setTimeout(r, 400));
+      // Real duration is 1.6s in this layout — wait past it, or a transition
+      // still mid-flight would read as neither open nor closed.
+      await new Promise(r => setTimeout(r, 1800));
+      out.openRendered = rendered();
       out.openSpin = spin();
       btn.click();
-      out.closed = vis(); out.aria2 = btn.getAttribute('aria-expanded');
+      out.closedClassImmediate = cls();
+      out.aria2 = btn.getAttribute('aria-expanded');
+      await new Promise(r => setTimeout(r, 1800));
+      out.closedRendered = rendered();
       w.close();
       return out;
     }, html);
     // a DIV, an SVG node and a TABLE — three kinds, one button
     expect(run.kinds).toEqual(['DIV', 'rect', 'TABLE']);
-    expect(run.start).toEqual([false, false, false]);
+    expect(run.startClosed).toBe(true);
     expect(run.aria0).toBe('false');
-    expect(run.open).toEqual([true, true, true]);
+    expect(run.openClassImmediate).toEqual([true, true, true]);
     expect(run.aria1).toBe('true');
+    expect(run.openRendered).toEqual([true, true, true]);
     expect(run.arrowTurned).toBe(true);
     // The chevron is real drawn art, and it really turns: shut it is
     // untransformed, open it carries the 180° rotate that points it up.
     expect(run.hasArrow).toBe(true);
     expect(run.shutSpin === 'none' || run.shutSpin === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true);
     expect(run.openSpin).toContain('matrix(-1, 0, 0, -1');
-    expect(run.closed).toEqual([false, false, false]);
+    expect(run.closedClassImmediate).toEqual([false, false, false]);
     expect(run.aria2).toBe('false');
+    expect(run.closedRendered).toEqual([false, false, false]);
   } finally {
     fs.writeFileSync(YML, ymlBefore);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
