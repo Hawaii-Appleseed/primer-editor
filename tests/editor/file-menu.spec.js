@@ -9,16 +9,45 @@
 const { test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 test.describe('File menu', () => {
-  test('collects Open, New window, Connect GitHub, Resize, Download, Restore and Token', async ({ page }) => {
+  test('collects Open, New window, Connect GitHub, Repo, Resize, Download, Restore and Token', async ({ page }) => {
     await gotoEditor(page);
     // Closed until asked for — it is a menu, not a panel.
     await expect(page.locator('#filepop')).toBeHidden();
     await openFileMenu(page);
     // New window is local-only (see new-window.spec.js) and Restore deleted
     // only shows when something IS deleted (see hidden.spec.js) — both are
-    // always in the DOM, so they belong in this list either way.
+    // always in the DOM, so they belong in this list either way. The Repo row
+    // names the GitHub repo this report pushes to, and reads its slug from the
+    // staged manifest, so the fixture's own origin appears here.
     await expect(page.locator('#filepop button')).toHaveText(
-      ['Open…', 'New window', 'Connect GitHub…', 'Resize…', 'Download…', 'Restore deleted…', 'Token…']);
+      ['Open…', 'New window', 'Connect GitHub…', /^Repo: /, 'Resize…', 'Download…',
+       'Restore deleted…', 'Token…']);
+  });
+
+  test('the Repo row names the repo, and says so plainly when there is none',
+    async ({ page }) => {
+    // The empty case is the one that mattered: with no origin the manifest's
+    // repo is null, every GitHub call built /repos// and 404'd, and tokenWhy()
+    // explained that 404 as a PERMISSIONS problem — sending people to
+    // regenerate a token that was never at fault.
+    await gotoEditor(page);
+    await openFileMenu(page);
+    await expect(page.locator('#file-repo')).toBeVisible();
+    await expect(page.locator('#file-repo')).toHaveText(/^Repo: \S+\/\S+$/);
+
+    // Re-open rather than toggle: clicking #file again would CLOSE the menu,
+    // and the row is refreshed by the open handler, so drive that directly.
+    await page.evaluate(() => {
+      REPO = '';
+      $('filepop').hidden = true;
+      $('file').click();
+    });
+    await expect(page.locator('#file-repo')).toHaveText('Repo: not connected');
+
+    // And the guard fires instead of a bogus GitHub call.
+    expect(await page.evaluate(() => requireRepo())).toBe(false);
+    await expect(page.locator('#stat')).toContainText('not connected to a GitHub repo');
+    expect(await page.evaluate(() => ensureAuth())).toBe(null);
   });
 
   test('Download and Token are no longer loose in the toolbar', async ({ page }) => {
