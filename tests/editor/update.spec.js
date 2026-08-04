@@ -26,11 +26,14 @@ async function withUpdate(context, update) {
 }
 
 test.describe('version and updates', () => {
-  test('the running version is shown, and says it is the latest', async ({ page, context }) => {
+  test('the running version is reported, without a sha sitting in the toolbar',
+    async ({ page, context }) => {
     await withUpdate(context, { sha: 'abc1234', date: '2026-07-26', behind: 0, can: false, log: [] });
     await gotoEditor(page);
-    await expect(ver(page)).toBeVisible();
-    await expect(ver(page)).toHaveText('abc1234');
+    // On the latest version with nothing to undo, the chip has nothing to do
+    // and shows nothing — but still ANSWERS "what am I running?" on hover.
+    await expect(ver(page)).toBeHidden();
+    await expect(ver(page)).toHaveAttribute('title', /abc1234/);
     await expect(ver(page)).toHaveAttribute('title', /2026-07-26[\s\S]*latest version/);
     await expect(upd(page)).toBeHidden();      // nothing to offer
   });
@@ -99,14 +102,22 @@ test.describe('version and updates', () => {
     await upd(page).click();
     await expect(page.locator('#stat')).toContainText(/restarting/);
     await reloaded;
-    // Back up on the new version.
-    await expect(ver(page)).toHaveText('def5678', { timeout: 30000 });
+    // Back up on the new version — which the chip reports in its TOOLTIP now,
+    // not as a sha sitting in the toolbar (see "the version chip stays out of
+    // the way" below).
+    await expect(ver(page)).toHaveAttribute('title', /def5678/, { timeout: 30000 });
   });
 
-  test('with no earlier version there is nothing to go back to', async ({ page, context }) => {
+  test('the version chip stays out of the way when it can do nothing',
+    async ({ page, context }) => {
+    // It used to sit in the toolbar showing the running sha permanently —
+    // seven hex characters beside the zoom bar that read as a stray colour
+    // code. With no earlier version there is nothing to undo, so there is
+    // nothing for it to say: it is hidden, and the version lives in the
+    // tooltip for anyone who goes looking.
     await withUpdate(context, { sha: 'abc1234', date: '2026-07-26', behind: 0, can: false, rollback: '' });
     await gotoEditor(page);
-    // The chip must not LOOK clickable when clicking it would do nothing.
+    await expect(ver(page)).toBeHidden();
     await expect(ver(page)).not.toHaveClass(/can-undo/);
     await expect(ver(page)).toHaveAttribute('title', /latest version/);
     await expect(ver(page)).not.toHaveAttribute('title', /go back/);
@@ -115,6 +126,10 @@ test.describe('version and updates', () => {
   test('after an update the version chip offers the way back', async ({ page, context }) => {
     await withUpdate(context, { sha: 'def5678', date: '2026-07-26', behind: 0, can: false, rollback: 'abc1234' });
     await gotoEditor(page);
+    // Visible ONLY here — when there is genuinely something to undo — and
+    // labelled in words rather than in a sha.
+    await expect(ver(page)).toBeVisible();
+    await expect(ver(page)).toHaveText('Undo update');
     await expect(ver(page)).toHaveClass(/can-undo/);
     await expect(ver(page)).toHaveAttribute('title', /Click to go back to abc1234/);
 
