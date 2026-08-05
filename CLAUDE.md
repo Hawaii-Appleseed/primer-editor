@@ -4,15 +4,35 @@
 > — load it when building or changing anything a report's user should be able
 > to edit. This file is the always-on summary.
 
-## Default to driving the editor UI, not editing files
+## Default to driving the editor, not editing files
 
 When the user asks for a visual/content change — move, resize, restyle,
 retext, recolor an element, swap an image, adjust a chart — **drive
-`edit.html` in the browser** (open it, click, drag, type) instead of editing
-`content.md` / `layout.json` / any file directly. That is what the editor is
-*for*: a drag writes `layout.json` and nothing else, Save is a local commit
-the user reviews before Push, and the browser session has no reach into
-`docsync/*.py` or the renderer even by accident.
+`edit.html`** instead of editing `content.md` / `layout.json` / any file
+directly. That is what the editor is *for*: a drag writes `layout.json` and
+nothing else, Save is a local commit the user reviews before Push, and the
+browser session has no reach into `docsync/*.py` or the renderer even by
+accident.
+
+**Drive it through `window.docsync.api`, not through clicks.** The editor
+exposes a pilot API — one JS eval per action, same safety as the UI (every
+verb runs `pushHistory()` first so ⌘Z undoes it, writes land through the one
+`render()` with all its validation, and every verb returns plain JSON with
+geometry in page inches so no screenshot round-trips are needed). The loop
+is: `docsync.api.inventory()` once to learn every element id, slot key and
+bounding box, then act by id:
+
+```js
+await docsync.api.setSlot('whopays.p1', '…new markdown…')
+await docsync.api.place('cover.logo', { x: 1, y: 4 })   // inches; clamps like a drag
+await docsync.api.recolor('page.3', '#FFF6D8')          // null = reset
+await docsync.api.addTextBox({ page: 3, x: 1, y: 1, w: 2.5, md: 'Note' })
+docsync.api.save()      // presses the real Save; Push stays with the human
+```
+
+Full verb list and contract: `pilot-api.spec.js` is the executable spec;
+the `report-editor` skill documents it. Reserve clicking/dragging for what
+the API doesn't cover, and screenshots for visual judgement calls only.
 
 Only edit repo files directly when the user's instruction is explicitly about
 the files or the code — "edit content.md", "fix the renderer", "change how

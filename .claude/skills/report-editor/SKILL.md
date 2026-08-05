@@ -98,6 +98,37 @@ edit-tolerant, publish-strict: an uncited source, a typo'd token (renders a
 red ? naming the missing id), and an emptied bullet list all RENDER in edit
 mode and REFUSE at publish. Never retype a token by hand — copy it exactly.
 
+## Piloting the editor programmatically: `window.docsync.api`
+
+When YOU (an AI, a script) are the one making changes in an open editor,
+don't click and drag — drive the pilot API by JS eval in the editor's top
+window. It is the editor's own verbs, blessed and held stable
+(`tests/editor/pilot-api.spec.js` is the executable contract). Same safety
+as the UI: every mutator runs `pushHistory()` first (⌘Z undoes a pilot like
+a human), writes land through the one `render()` with all its validation,
+and every verb returns plain JSON — geometry in page INCHES — so no
+screenshot round-trips.
+
+Start with `inventory()`; act by the ids it returns:
+
+| verb | does |
+|---|---|
+| `status()` | `{dirty, editing, page:{w,h,pageless}, overflow, selected}` — cheap, poll it |
+| `inventory()` | every page: elements `{id, kind, box, locked, text}`, slots `{key, text}`, plus sources and status |
+| `getSlot(key)` / `setSlot(key, md)` | a slot's markdown, read / replaced (renderer's grammar applies) |
+| `place(id, {x,y,w,h})` | move/size in inches — placer's coordinate correction, clamps to the page like a drag; returns where it really landed |
+| `recolor(id, fill)` | shape/box/mark id or `'page.<pid>'`; `null` resets to the design |
+| `addTextBox({page,x,y,w,md,style,fill})` | returns `'text.<n>'` for further verbs |
+| `addPage(at?)` | blank page; returns its id |
+| `addSource(id, text, url)` / `addEndnotesSection()` | declare a source (cite via `[^id]` in slot text) / the synced endnotes section |
+| `undo()` / `redo()` | the same history a human's ⌘Z walks |
+| `save()` | presses the real Save; refuses (with the pages named) while content overflows the print cut. Push stays with the human |
+
+Mutators refuse while an inline text editor is open (`editing`) — close it
+first. Coordinates clamp to the sheet, so read the RETURNED box rather than
+assuming the request landed verbatim. Reserve real clicks for what the API
+doesn't cover, and screenshots for visual judgement only.
+
 ## Editing the editor itself (`edit.html`)
 
 Its whole stylesheet is one JS **template literal**: a backtick or `${…}` in a
