@@ -106,6 +106,51 @@ test.describe('paste', () => {
     expect(committed).toContain('inner');
   });
 
+  // Pasting INTO a paragraph, rather than into an emptied editor. Every test
+  // above either selects all first or drops the caret at the very end of an
+  // empty block, so none of them ever put the caret inside live prose — which
+  // is where this broke: mdToHtml wraps everything in a block, even one word,
+  // so the paste arrived as <p>WORD</p> INSIDE the caret's own <p>. That is
+  // not valid HTML and the browser lays the inner one out as its own block,
+  // so the pasted word jumped to the next line. htmlToMd flattened it again
+  // at commit, so nothing was ever lost and the next render quietly put it
+  // back — which is exactly why it read as happening only "sometimes".
+  test('a word pasted mid-paragraph joins the line instead of breaking it',
+    async ({ page }) => {
+      const ta = await openSection(page);
+      await ta.evaluate(el => { el.innerHTML = '<p>Alpha beta gamma delta.</p>'; });
+
+      await page.evaluate(() => {
+        const d = document.querySelector('#out').contentDocument;
+        const host = d.querySelector('.ds-edit');
+        host.focus();
+        const tn = d.createTreeWalker(host, NodeFilter.SHOW_TEXT).nextNode();
+        const r = d.createRange();
+        r.setStart(tn, 11); r.collapse(true);       // "Alpha beta |gamma…"
+        const s = d.getSelection(); s.removeAllRanges(); s.addRange(r);
+        const dt = new DataTransfer();
+        dt.setData('text/plain', 'WORD');
+        host.dispatchEvent(new ClipboardEvent('paste', {
+          clipboardData: dt, bubbles: true, cancelable: true,
+        }));
+      });
+      await page.waitForTimeout(200);
+
+      // One paragraph, and no block nested inside it.
+      expect(await ta.evaluate(el => el.querySelectorAll('p').length)).toBe(1);
+      expect(await ta.evaluate(el => el.innerHTML)).toBe('<p>Alpha beta WORDgamma delta.</p>');
+      expect(await md(page)).toBe('Alpha beta WORDgamma delta.');
+    });
+
+  test('several pasted paragraphs are still several paragraphs', async ({ page }) => {
+    // The other side of the rule above: a real multi-block paste must not be
+    // flattened into the caret's paragraph just because one block is.
+    const ta = await openSection(page);
+    await ta.evaluate(el => { el.innerHTML = '<p></p>'; });
+    await pasteHtml(page, '<p>first para</p><p>second para</p>', true);
+    expect(await md(page)).toBe('first para\n\nsecond para');
+  });
+
   test('a plain-text slot takes the text literally — pasted stars stay stars', async ({ page }) => {
     const frame = page.frameLocator('#out');
     // cover.title is not run through md_inline, so it gets no markdown.
