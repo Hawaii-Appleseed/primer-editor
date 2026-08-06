@@ -28,6 +28,16 @@ await docsync.api.place('cover.logo', { x: 1, y: 4 })   // inches; clamps like a
 await docsync.api.recolor('page.3', '#FFF6D8')          // null = reset
 await docsync.api.addTextBox({ page: 3, x: 1, y: 1, w: 2.5, md: 'Note' })
 docsync.api.save()      // presses the real Save; Push stays with the human
+
+// Several edits as ONE undo step and ONE render — batch() over separate
+// calls whenever the edits are related. All-or-nothing: a bad op refuses
+// the whole batch before anything mutates. Verbs: setSlot, place, recolor,
+// addTextBox, addSource — not addPage/addEndnotesSection, which push their
+// own history internally and so cannot join one.
+await docsync.api.batch([
+  { verb: 'setSlot', args: ['whopays.p1', '…new markdown…'] },
+  { verb: 'place', args: ['cover.logo', { x: 1, y: 4 }] },
+])
 ```
 
 Full verb list and contract: `pilot-api.spec.js` is the executable spec;

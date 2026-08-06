@@ -164,4 +164,83 @@ test.describe('pilot api', () => {
       expect(r.error).toContain('cut off in print');
       await page.evaluate(() => { lastFit = []; });
     });
+
+  test.describe('batch', () => {
+    test('several ops apply as ONE history entry and ONE render', async ({ page }) => {
+      const pastBefore = await page.evaluate(() => past.length);
+
+      const r = await page.evaluate(async () => docsync.api.batch([
+        { verb: 'setSlot', args: ['basics.h1', 'BATCHED HEADING'] },
+        { verb: 'place', args: ['cover.logo', { x: 1, y: 4 }] },
+        { verb: 'recolor', args: ['page.3', '#FFF6D8'] },
+      ]));
+
+      expect(r.ok).toBe(true);
+      expect(r.results).toHaveLength(3);
+      expect(r.results[0]).toMatchObject({ verb: 'setSlot', key: 'basics.h1' });
+      expect(r.results[1].verb).toBe('place');
+      expect(Math.abs(r.results[1].box.x - 1)).toBeLessThan(0.1);
+      expect(r.results[2]).toMatchObject({ verb: 'recolor', id: 'page.3', fill: '#FFF6D8' });
+
+      // ONE history entry for all three — not three.
+      expect(await page.evaluate(() => past.length)).toBe(pastBefore + 1);
+
+      // All three landed.
+      expect((await api(page, `getSlot('basics.h1')`)).md).toBe('BATCHED HEADING');
+      expect(await page.evaluate(() => layout.fill['page.3'])).toBe('#FFF6D8');
+      await expect(page.frameLocator('#out').locator('[data-slot="basics.h1"]'))
+        .toContainText('BATCHED HEADING');
+
+      // ONE undo reverts all three together.
+      const u = await api(page, 'undo()');
+      expect(u.ok).toBe(true);
+      expect((await api(page, `getSlot('basics.h1')`)).md).not.toBe('BATCHED HEADING');
+      expect(await page.evaluate(() => (layout.fill || {})['page.3'])).toBeUndefined();
+    });
+
+    test('a bad op refuses the WHOLE batch — nothing partially applies',
+      async ({ page }) => {
+        const before = (await api(page, `getSlot('basics.h1')`)).md;
+        const pastBefore = await page.evaluate(() => past.length);
+
+        const r = await page.evaluate(async () => docsync.api.batch([
+          { verb: 'setSlot', args: ['basics.h1', 'SHOULD NOT LAND'] },
+          { verb: 'place', args: ['no.such.element', { x: 1, y: 1 }] },  // fails validation
+        ]));
+
+        expect(r.ok).toBe(false);
+        expect(r.error).toContain('op 1 (place)');
+        // Op 0 was VALIDATED but never applied — validation is a full pass
+        // before any mutation, precisely so this could not half-land.
+        expect((await api(page, `getSlot('basics.h1')`)).md).toBe(before);
+        expect(await page.evaluate(() => dirty)).toBe(false);
+        expect(await page.evaluate(() => past.length)).toBe(pastBefore);
+      });
+
+    test('an unsupported verb is refused by name, not attempted', async ({ page }) => {
+      const r = await page.evaluate(async () => docsync.api.batch([
+        { verb: 'addPage', args: [] },
+      ]));
+      expect(r.ok).toBe(false);
+      expect(r.error).toContain("op 0: unsupported verb 'addPage'");
+      expect(r.error).toContain('setSlot');   // names what IS supported
+    });
+
+    test('an empty or missing ops array is refused', async ({ page }) => {
+      expect((await api(page, 'batch([])')).ok).toBe(false);
+      expect((await api(page, 'batch(null)')).ok).toBe(false);
+    });
+
+    test('refuses while an inline editor is open, like every other mutator',
+      async ({ page }) => {
+        await page.evaluate(() => edit($('out').contentDocument, 'basics.h1'));
+        await page.frameLocator('#out').locator('.ds-edit').waitFor({ state: 'visible' });
+        const r = await page.evaluate(async () => docsync.api.batch([
+          { verb: 'setSlot', args: ['basics.h1', 'x'] },
+        ]));
+        expect(r.ok).toBe(false);
+        expect(r.error).toContain('editor is open');
+        await page.keyboard.press('Escape');
+      });
+  });
 });

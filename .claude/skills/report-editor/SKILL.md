@@ -121,12 +121,18 @@ Start with `inventory()`; act by the ids it returns:
 | `addTextBox({page,x,y,w,md,style,fill})` | returns `'text.<n>'` for further verbs |
 | `addPage(at?)` | blank page; returns its id |
 | `addSource(id, text, url)` / `addEndnotesSection()` | declare a source (cite via `[^id]` in slot text) / the synced endnotes section |
+| `batch(ops)` | `[{verb, args}]` for `setSlot`/`place`/`recolor`/`addTextBox`/`addSource` — one history entry, one render. ALL-OR-NOTHING: every op validates before any mutates, so a bad op refuses the whole batch rather than half-landing |
 | `undo()` / `redo()` | the same history a human's ⌘Z walks |
 | `save()` | presses the real Save; refuses (with the pages named) while content overflows the print cut. Push stays with the human |
 
 Mutators refuse while an inline text editor is open (`editing`) — close it
 first. Coordinates clamp to the sheet, so read the RETURNED box rather than
-assuming the request landed verbatim. Reserve real clicks for what the API
+assuming the request landed verbatim. A `batch()` op cannot reference
+something an EARLIER op in the same batch creates — a fresh `addTextBox`'s
+id doesn't exist until that batch's own render runs — so chain create-then-
+place across two calls, not one. `addPage`/`addEndnotesSection` push their
+own history internally and cannot join a batch either; call them singly.
+Reserve real clicks for what the API
 doesn't cover, and screenshots for visual judgement only.
 
 ## Editing the editor itself (`edit.html`)
