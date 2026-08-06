@@ -8,11 +8,10 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const { removeYmlBindings, YML } = require('./fixtures/host-state');
+
 const REPO = path.resolve(__dirname, '..', '..');
 const SLUG = 'zz-spec-blank';
-const YML = path.join(REPO, 'docsync.yml');
-
-let ymlBefore;
 
 // One worker, in order: these tests share a socket (the GitHub stand-in) or
 // on-disk state their before/after hooks snapshot and restore — fullyParallel
@@ -22,12 +21,12 @@ let ymlBefore;
 test.describe.configure({ mode: 'serial' });
 
 test.describe('local scaffold', () => {
-  test.beforeAll(() => { ymlBefore = fs.readFileSync(YML, 'utf8'); });
   test.afterEach(() => {
-    // Restore the registry byte-for-byte and remove everything the scaffold
-    // and its first build wrote. rm -rf on a fixed literal, never a variable
-    // that could be empty.
-    fs.writeFileSync(YML, ymlBefore);
+    // Remove OUR binding and nothing else — a whole-file snapshot restore
+    // here was the docsync.yml scaffold race: it resurrected residue and
+    // stomped concurrent workers' bindings (see fixtures/host-state.js).
+    // rm -rf on a fixed literal, never a variable that could be empty.
+    removeYmlBindings(SLUG);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
       execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
     }
@@ -74,8 +73,13 @@ test.describe('local scaffold', () => {
     await page.fill('#np-slug', 'budget-primer');       // the fixture's own id
     await page.click('#np-create');
     await expect(page.locator('#np-err')).toContainText('already exists');
-    // still on the start page, modal still open — nothing half-created
+    // still on the start page, modal still open — nothing half-created.
+    // Asserted about OUR OWN slug and the refused one, not byte-identity of
+    // the whole file — a parallel worker may legitimately append its own
+    // binding between snapshot and here.
     expect(page.url()).toContain('start.html');
-    expect(fs.readFileSync(YML, 'utf8')).toBe(ymlBefore);
+    const yml = fs.readFileSync(YML, 'utf8');
+    expect(yml).not.toContain('id: Anything');
+    expect(yml.match(/- id: budget-primer\b/g)).toHaveLength(1);   // no half-write
   });
 });

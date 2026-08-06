@@ -138,13 +138,11 @@ test.describe('download-pdf button', () => {
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { removeYmlBindings } = require('./fixtures/host-state');
 const REPO = path.resolve(__dirname, '..', '..');
 const SLUG = 'zz-spec-btn';
-const YML = path.join(REPO, 'docsync.yml');
-let ymlBefore;
 
 test('published output of a real build carries the working button', async ({ page }) => {
-  ymlBefore = fs.readFileSync(YML, 'utf8');
   try {
     await page.goto('start.html');
     await page.waitForTimeout(600);
@@ -188,7 +186,9 @@ test('published output of a real build carries the working button', async ({ pag
     }, html);
     expect(fired).toBe(true);
   } finally {
-    fs.writeFileSync(YML, ymlBefore);
+    // Our binding only — a whole-file restore was the scaffold race
+    // (fixtures/host-state.js).
+    removeYmlBindings(SLUG);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
       execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
     }

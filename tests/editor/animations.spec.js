@@ -7,8 +7,8 @@ const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { removeYmlBindings } = require('./fixtures/host-state');
 const REPO = path.resolve(__dirname, '..', '..');
-const YML = path.join(REPO, 'docsync.yml');
 const SLUG = 'zz-spec-anim';
 
 // One worker, in order: the publish test snapshots and restores docsync.yml.
@@ -327,7 +327,6 @@ test.describe('entrance animations', () => {
 // gets everything immediately with no animation at all.
 test('the published page reveals on scroll, and respects reduced motion',
   async ({ page }) => {
-    const ymlBefore = fs.readFileSync(YML, 'utf8');
     try {
       await page.goto('start.html');
       await page.waitForTimeout(600);
@@ -426,7 +425,9 @@ test('the published page reveals on scroll, and respects reduced motion',
       expect(calm.shown).toBe(true);
       await page.emulateMedia({ reducedMotion: null });
     } finally {
-      fs.writeFileSync(YML, ymlBefore);
+      // Our binding only — a whole-file restore was the scaffold race
+      // (fixtures/host-state.js).
+      removeYmlBindings(SLUG);
       for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
         execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
       }

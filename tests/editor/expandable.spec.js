@@ -8,8 +8,8 @@ const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { removeYmlBindings } = require('./fixtures/host-state');
 const REPO = path.resolve(__dirname, '..', '..');
-const YML = path.join(REPO, 'docsync.yml');
 const SLUG = 'zz-spec-expand';
 
 // One worker, in order: the publish test snapshots and restores docsync.yml.
@@ -370,7 +370,6 @@ test.describe('multi-kind targets', () => {
 // on disk, its published page opened and the button actually clicked — closed,
 // open, closed again, aria tracking all the way.
 test('the published page expands and collapses for real', async ({ page }) => {
-  const ymlBefore = fs.readFileSync(YML, 'utf8');
   try {
     await page.goto('start.html');
     await page.waitForTimeout(600);
@@ -465,7 +464,9 @@ test('the published page expands and collapses for real', async ({ page }) => {
     expect(run.aria2).toBe('false');
     expect(run.closedRendered).toEqual([false, false, false]);
   } finally {
-    fs.writeFileSync(YML, ymlBefore);
+    // Our binding only — a whole-file restore was the scaffold race
+      // (fixtures/host-state.js).
+      removeYmlBindings(SLUG);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
       execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
     }

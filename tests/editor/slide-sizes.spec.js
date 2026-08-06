@@ -7,20 +7,20 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const { removeYmlBindings } = require('./fixtures/host-state');
+
 const REPO = path.resolve(__dirname, '..', '..');
-const YML = path.join(REPO, 'docsync.yml');
 const SLUG = 'zz-spec-deck';
 
-let ymlBefore;
-
-// Serial: both tests snapshot/restore the same on-disk registry state, and
-// fullyParallel would run each test's hooks in its own worker.
+// Serial: both tests scaffold and clean the same slug, and fullyParallel
+// would run each test's hooks in its own worker.
 test.describe.configure({ mode: 'serial' });
 
 test.describe('slide sizes', () => {
-  test.beforeAll(() => { ymlBefore = fs.readFileSync(YML, 'utf8'); });
   test.afterEach(() => {
-    fs.writeFileSync(YML, ymlBefore);
+    // Our binding only — a whole-file restore was the scaffold race
+    // (fixtures/host-state.js).
+    removeYmlBindings(SLUG);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
       execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
     }

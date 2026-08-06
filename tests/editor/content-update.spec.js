@@ -10,12 +10,12 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const REPO = path.resolve(__dirname, '..', '..');
-const REGISTRY = path.join(REPO, 'docs', 'primer', 'projects.json');
 const SLUG = 'zz-spec-stale';
 
-let scratch, origin, clone, regBefore, regExisted;
+let scratch, origin, clone;
 const git = (cwd, cmd) => execSync(`git -C ${JSON.stringify(cwd)} ${cmd}`,
   { stdio: 'pipe' }).toString();
+const { removeRegistryKeys } = require('./fixtures/host-state');
 
 // Serial: shares the host registry, which the hooks snapshot and restore.
 test.describe.configure({ mode: 'serial' });
@@ -30,9 +30,6 @@ test.describe('report content updates', () => {
   });
 
   test.beforeAll(() => {
-    regExisted = fs.existsSync(REGISTRY);
-    regBefore = regExisted ? fs.readFileSync(REGISTRY, 'utf8') : null;
-
     scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'stale-'));
     origin = path.join(scratch, 'origin');
 
@@ -70,21 +67,11 @@ test.describe('report content updates', () => {
   });
 
   test.afterAll(() => {
-    // Restore, then make sure OUR key is gone regardless: if the snapshot
-    // was itself taken over a previous run's residue, a blanket restore puts
-    // that residue back — an entry pointing at a temp dir that no longer
-    // exists, which the next server start reports as a broken project.
-    if (regExisted) fs.writeFileSync(REGISTRY, regBefore);
-    else if (fs.existsSync(REGISTRY)) fs.unlinkSync(REGISTRY);
-    if (fs.existsSync(REGISTRY)) {
-      try {
-        const r = JSON.parse(fs.readFileSync(REGISTRY, 'utf8'));
-        if (SLUG in r) {
-          delete r[SLUG];
-          fs.writeFileSync(REGISTRY, JSON.stringify(r, null, 2) + '\n');
-        }
-      } catch (e) { /* unreadable registry is not this test's to repair */ }
-    }
+    // OUR key only, under the cross-process lock — a blanket snapshot
+    // restore here stomped concurrent workers' registry entries (the same
+    // lost-update race as the docsync.yml scaffold one; see
+    // fixtures/host-state.js) and could resurrect a previous run's residue.
+    removeRegistryKeys(SLUG);
     execSync(`rm -rf ${JSON.stringify(scratch)}`);
   });
 

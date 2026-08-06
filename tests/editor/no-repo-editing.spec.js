@@ -14,17 +14,18 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const { removeYmlBindings } = require('./fixtures/host-state');
+
 const REPO = path.resolve(__dirname, '..', '..');
 const SLUG = 'zz-spec-norepo';
-const YML = path.join(REPO, 'docsync.yml');
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('a freshly scaffolded project, before anyone touches GitHub', () => {
-  let ymlBefore;
-  test.beforeAll(() => { ymlBefore = fs.readFileSync(YML, 'utf8'); });
   test.afterEach(() => {
-    fs.writeFileSync(YML, ymlBefore);
+    // Our binding only — a whole-file restore was the scaffold race
+    // (fixtures/host-state.js).
+    removeYmlBindings(SLUG);
     for (const dir of [`projects/${SLUG}`, `docs/${SLUG}`]) {
       execSync(`rm -rf ${JSON.stringify(path.join(REPO, dir))}`);
     }

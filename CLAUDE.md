@@ -96,14 +96,20 @@ Rules that bite:
   `card(detachable=…)`, `is_light_bg`) — zero-stylesheet, importable by any
   project renderer, staged into the browser engine automatically. Add new
   reusable capabilities there, not in one report's renderer.
-- **Tests:** `npx playwright test` (editor behaviour; 276 specs),
+- **Tests:** `npx playwright test` (editor behaviour; ~425 specs),
   `python3 docsync/test_docsync.py` (engine round-trip),
   `python3 report2027/tools/test_render.py` (render tolerances + edit.html
   syntax guard). `make -C report2027 validate` chains them but its
   build_data step needs fixture data files this repo doesn't carry — run the
-  three directly. All 276 pass clean as of 2026-07-27 — if you inherit a
-  failure, suspect your own change first, but see the two traps below before
-  chasing a ghost.
+  three directly. If you inherit a full-suite failure, attribute it by
+  running the suspect spec IN ISOLATION with and without your change —
+  never from one full-suite run. Two known intermittents remain under
+  parallel load (content-update's documented boot hang on a freshly adopted
+  project — see the note in that spec — and toolbar's font-pick wedge);
+  both pass in isolation. The old docsync.yml scaffold race (zz-spec-*
+  residue, stomped registries) is FIXED: server writes hold a cross-process
+  lock and specs clean up surgically — see tests/editor/fixtures/
+  host-state.js before writing any spec that scaffolds or adopts.
 - **Never launch or kill a dev server the user owns**; Playwright starts its
   own throwaway servers and that's fine.
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
