@@ -132,6 +132,24 @@ something an EARLIER op in the same batch creates — a fresh `addTextBox`'s
 id doesn't exist until that batch's own render runs — so chain create-then-
 place across two calls, not one. `addPage`/`addEndnotesSection` push their
 own history internally and cannot join a batch either; call them singly.
+
+**Headless (no browser): `GET /__inventory?project=<id>`.** The same document
+as data, from the FILES rather than the DOM — every slot's full markdown (not
+the browser's 80-char snippet), every source with its citation count, the
+geometry of everything placed, and unless `&elements=0`, every addressable
+element/slot/fill id plus the page count (discovered by an edit-mode render,
+cached per build). `docsync/mcp_server.py` wraps it as a stdlib-only MCP
+server — `list_reports`, `status`, `inventory`, `get_slot`, `search`,
+`uncited_sources`.
+
+The boundary worth knowing: layout.json stores geometry only for things
+somebody PLACED, so an unmoved designed element has ids here but no
+coordinates — those exist only once a browser lays the page out, which is
+what `docsync.api.inventory()` measures. And both are READ-only deliberately:
+the editor holds the document in memory, so a write from outside would be
+overwritten by its next Save, silently and un-undoably. Decide WHAT to change
+headlessly; make the change through `docsync.api` in the open editor.
+
 Reserve real clicks for what the API
 doesn't cover, and screenshots for visual judgement only.
 

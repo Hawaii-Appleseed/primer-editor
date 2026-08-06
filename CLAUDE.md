@@ -40,6 +40,16 @@ await docsync.api.batch([
 ])
 ```
 
+**Without a browser** — a CI check, a shell script, an MCP client — read the
+same document over HTTP instead: `GET /__inventory?project=<id>` returns every
+slot's full markdown, every source with its citation count, the geometry of
+everything placed, and (unless `&elements=0`) every addressable element id.
+`docsync/mcp_server.py` wraps that as an MCP server (stdlib only, read-only:
+`claude mcp add primer -- python3 docsync/mcp_server.py`). Both are READ-only
+on purpose — the editor holds the document in memory, so an out-of-band write
+would be overwritten by its next Save with nothing to see and nothing to undo.
+Decide *what* to change with these; make the change through `docsync.api`.
+
 Full verb list and contract: `pilot-api.spec.js` is the executable spec;
 the `report-editor` skill documents it. Reserve clicking/dragging for what
 the API doesn't cover, and screenshots for visual judgement calls only.
