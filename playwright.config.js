@@ -31,6 +31,10 @@ module.exports = defineConfig({
     // startup (nice for `make live`, pointless — and awkward on a CI runner
     // with no display — when Playwright is about to drive its own browser).
     env: { PRIMER_PORT: String(PORT), PRIMER_OPEN: '0',
+           // No network from the suite: the push-health probe asks GitHub
+           // whether a push would work, and a real answer for a real
+           // checkout would bleed into specs that mock everything else.
+           PRIMER_PUSH_PROBE: '0',
            // The connect-github spec stands in for GitHub on this port; the
            // fake client id keeps the device flow ON without a real App.
            PRIMER_GH_BASE: 'http://localhost:8390',
