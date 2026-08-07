@@ -8,6 +8,14 @@
 // them would push a test commit to the live repo. Blocking happens here, once,
 // so no individual spec file can opt out by omission.
 //
+// THE GAP THESE ROUTES DO NOT COVER: Playwright's `request` fixture is its own
+// APIRequestContext, and browser-context routes never touch it. A spec that
+// POSTs to /__save, /__push, /__export or /__upload through `request` reaches
+// the REAL endpoint — and for the default project that means a real render, a
+// real commit, or a real write inside /Users/…/BudgetPrimerFinal. Use `request`
+// against the harmless endpoints only (/__ping, /__inventory, /__pilot, and
+// argument-validation paths that refuse before doing any work).
+//
 // Routes are registered on the BROWSER CONTEXT, not the page: a page-level
 // page.route() races the very first requests of an immediately-following
 // goto() (Chromium's boot() fires /__ping, the Pyodide fetch, etc. before

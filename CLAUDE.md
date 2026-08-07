@@ -40,15 +40,28 @@ await docsync.api.batch([
 ])
 ```
 
-**Without a browser** — a CI check, a shell script, an MCP client — read the
-same document over HTTP instead: `GET /__inventory?project=<id>` returns every
+**Prefer HTTP over a browser eval.** `POST /__pilot` relays a verb to the open
+editor, so the whole loop is `curl` — no browser extension, no JS escaping, no
+dependence on which tab is fronted. The verb still runs *inside* the editor
+through `docsync.api`, so it is not an out-of-band write:
+
+```bash
+curl -s localhost:8010/__pilot -H 'Content-Type: application/json' \
+  -d '{"project":"budget-primer","verb":"audit"}'
+```
+
+Needs an editor tab open and not backgrounded; it says so plainly otherwise.
+
+**Without a browser at all** — a CI check, a shell script, an MCP client —
+read the document over HTTP: `GET /__inventory?project=<id>` returns every
 slot's full markdown, every source with its citation count, the geometry of
 everything placed, and (unless `&elements=0`) every addressable element id.
-`docsync/mcp_server.py` wraps that as an MCP server (stdlib only, read-only:
-`claude mcp add primer -- python3 docsync/mcp_server.py`). Both are READ-only
-on purpose — the editor holds the document in memory, so an out-of-band write
-would be overwritten by its next Save with nothing to see and nothing to undo.
-Decide *what* to change with these; make the change through `docsync.api`.
+`docsync/mcp_server.py` wraps both halves as an MCP server (stdlib only:
+`claude mcp add primer -- python3 docsync/mcp_server.py`) — read tools plus
+`pilot`. Never write content.md/layout.json directly while an editor is open:
+it holds the document in memory, so the write is overwritten by its next Save
+with nothing to see and nothing to undo. Decide *what* to change with the
+reads; make the change with a verb.
 
 Full verb list and contract: `pilot-api.spec.js` is the executable spec;
 the `report-editor` skill documents it. Reserve clicking/dragging for what
