@@ -31,6 +31,9 @@ module.exports = defineConfig({
     // startup (nice for `make live`, pointless — and awkward on a CI runner
     // with no display — when Playwright is about to drive its own browser).
     env: { PRIMER_PORT: String(PORT), PRIMER_OPEN: '0',
+           // Never let the suite's shared server idle-exit mid-run: spec
+           // pages come and go by design, so their goodbyes would reap it.
+           PRIMER_LINGER: '0',
            // No network from the suite: the push-health probe asks GitHub
            // whether a push would work, and a real answer for a real
            // checkout would bleed into specs that mock everything else.

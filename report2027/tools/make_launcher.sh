@@ -89,6 +89,15 @@ if up && ! mine; then
   lsof -nP -iTCP:\$PORT -sTCP:LISTEN -t 2>/dev/null | xargs kill 2>/dev/null
   sleep 1
 fi
+# Ownership is not FRESHNESS. The selfupdate above may have just moved the
+# checkout forward while our own surviving server keeps running the code it
+# imported at boot — the exact "I relaunched the app and the fix still is not
+# there" report. The server hashes its own sources per ping (serverStale), so
+# ask it, and replace a stale own-server exactly like a foreign one.
+if up && mine && curl -sf "http://localhost:\$PORT/__ping" | grep -q '"serverStale": *true'; then
+  kill "\$(cat "\$PIDFILE")" 2>/dev/null
+  sleep 1
+fi
 if ! up; then
   # PRIMER_PORT must be PASSED, not just baked into the URL: without it the
   # server took its own default (8010) while the app polled the port it was
