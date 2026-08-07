@@ -81,11 +81,18 @@ async function blockDangerousLocalEndpoints(context) {
  *  and the whole test then raced the real first render, which replaces the
  *  document wholesale. The attribute is stamped only by render()'s swap. */
 async function waitForFirstRender(page) {
+  // 75s is calibrated to Chromium. Firefox compiles the same Pyodide WASM
+  // noticeably slower, and under a fullyParallel run several boots compile at
+  // once — the project-switching specs (a SECOND full boot inside one test)
+  // were the ones that blew the budget, while the identical boot passed in
+  // isolation with a minute to spare. Same code, slower clock: a cross-engine
+  // run gets double the allowance rather than a skewed pass/fail line.
+  const T = base.test.info().project.name === 'chromium' ? 75_000 : 150_000;
   await page.waitForSelector('#out[data-ds-live]', {
-    state: 'attached', timeout: 75_000,
+    state: 'attached', timeout: T,
   });
   await page.frameLocator('#out').locator('.page').first().waitFor({
-    state: 'visible', timeout: 75_000,
+    state: 'visible', timeout: T,
   });
 }
 

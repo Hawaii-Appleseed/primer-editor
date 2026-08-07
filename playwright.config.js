@@ -12,7 +12,14 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   // Pyodide (~30MB, cdn.jsdelivr.net) boots once per test — generous timeouts.
-  timeout: 90_000,
+  // Non-Chromium engines compile that WASM measurably slower, and a parallel
+  // run stacks several boots at once; the first-render wait in editor-test.js
+  // doubles its budget off-Chromium, so the per-test ceiling must clear it.
+  timeout: process.env.ALL_BROWSERS ? 180_000 : 90_000,
+  // And fewer of them at once: a matrix run stacks WASM compiles, and it was
+  // the CONTENTION, not the engine, that pushed heavy boots past any budget —
+  // the same specs pass with room to spare when four run instead of ten.
+  workers: process.env.ALL_BROWSERS ? 4 : undefined,
   expect: { timeout: 15_000 },
   reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : 'list',
   use: {
@@ -21,6 +28,14 @@ module.exports = defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // The cross-engine matrix is opt-in (ALL_BROWSERS=1): tripling every
+    // local run would triple a ~14-minute suite for work that is almost
+    // always engine-neutral. CI or an explicit compatibility pass turns
+    // them on with --project=firefox / --project=webkit.
+    ...(process.env.ALL_BROWSERS ? [
+      { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+      { name: 'webkit',  use: { ...devices['Desktop Safari'] } },
+    ] : []),
   ],
   webServer: {
     command: 'python3 report2027/tools/serve.py',

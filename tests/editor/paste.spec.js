@@ -34,9 +34,15 @@ async function pasteHtml(page, html, selectAll = false) {
     const dt = new DataTransfer();
     dt.setData('text/html', html);
     dt.setData('text/plain', html.replace(/<[^>]+>/g, ''));
-    host.dispatchEvent(new ClipboardEvent('paste', {
-      clipboardData: dt, bubbles: true, cancelable: true,
-    }));
+    // Not passed through the constructor: Gecko accepts the option but hands
+    // the event a NEUTERED clipboardData whose getData returns "" — every
+    // paste spec then failed on Firefox with an empty host while real user
+    // pastes (trusted events, real clipboard) work fine. An own property
+    // shadows the getter in every engine, so the handler under test reads
+    // the actual payload everywhere.
+    const ev = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'clipboardData', { value: dt });
+    host.dispatchEvent(ev);
   }, { html, selectAll });
   await page.waitForTimeout(150);
 }
@@ -130,9 +136,10 @@ test.describe('paste', () => {
         const s = d.getSelection(); s.removeAllRanges(); s.addRange(r);
         const dt = new DataTransfer();
         dt.setData('text/plain', 'WORD');
-        host.dispatchEvent(new ClipboardEvent('paste', {
-          clipboardData: dt, bubbles: true, cancelable: true,
-        }));
+        // Same Gecko shim as pasteHtml: the constructor neuters the payload.
+        const ev = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+        Object.defineProperty(ev, 'clipboardData', { value: dt });
+        host.dispatchEvent(ev);
       });
       await page.waitForTimeout(200);
 
