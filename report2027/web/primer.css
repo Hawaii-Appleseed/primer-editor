@@ -83,7 +83,13 @@ a { color: var(--dark); }
   background: var(--sage); transform: rotate(-38deg); }
 .cover::before { top: 1.1in; right: -0.7in; }
 .cover::after { bottom: 1.6in; left: -0.7in; }
-.cover-inner { position: relative; z-index: 2; padding: 2.2in .7in 0; }
+/* z-index 1, NOT 2. It only has to clear the ribbons (which set none at all);
+   2 collided exactly with the z-index layout.py gives every placed text box,
+   and this wrapper comes later in the markup, so it won the tie. A note
+   dropped on the cover then painted UNDERNEATH the cover's own title and this
+   wrapper — visible, because both are transparent, and completely unclickable.
+   Anything that raises this back to 2 buries the editable layer again. */
+.cover-inner { position: relative; z-index: 1; padding: 2.2in .7in 0; }
 .logo-lockup { display: flex; align-items: center; }
 .logo-lockup.light { justify-content: center; }
 .logo-img { height: 40px; width: auto; display: block; }
