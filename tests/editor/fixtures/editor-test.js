@@ -38,37 +38,16 @@ const EVENTS = /\/__events(\?|$)/;
 const UPDATE = /\/__update(\?|$)/;
 
 async function blockDangerousLocalEndpoints(context) {
-  await context.route('**/__save', route => route.fulfill({
-    json: { ok: true, message: 'blocked in tests — no real save/push happens here', ahead: 0 },
-  }));
-  await context.route('**/__push', route => route.fulfill({
-    json: { ok: true, message: 'blocked in tests — no real save/push happens here', ahead: 0 },
-  }));
-  // /__pull runs `git fetch` and a fast-forward merge on a project's OWN repo
-  // — on a developer's machine that is their real report checkout. Same hazard
-  // class as save/push, blocked in the same place. A spec that genuinely needs
-  // the endpoint (content-update.spec.js, against scratch clones it made
-  // itself) overrides this with a PAGE-level route, which takes precedence.
-  await context.route('**/__pull', route => route.fulfill({
-    json: { ok: false, error: 'blocked in tests — no real repo is updated here' },
-  }));
-  await context.route('**/__export', route => route.fulfill({
-    status: 200,
-    contentType: 'application/pdf',
-    body: Buffer.from('%PDF-1.4 fake export for tests'),
-  }));
-  // /__upload writes an image into the BINDING's repo — which for the grid's
-  // default project is a real checkout elsewhere on this machine, not the
-  // fixture. Same hazard class as save/push: mock it here, once. The mock
-  // honours the real contract ({ok, src, path}) so the editor-side flow
-  // (box creation, preview, markdown path) is still fully exercised.
-  await context.route('**/__upload', route => {
-    let name = 'upload.png';
-    try { name = JSON.parse(route.request().postData() || '{}').name || name; }
-    catch (e) {}
-    route.fulfill({ json: { ok: true, src: 'assets/' + name,
-                            path: 'report2027/web/assets/' + name } });
-  });
+  // Now a NO-OP, kept so call sites and imports stay valid. The guard lives
+  // in serve.py behind PRIMER_TEST_SAFE=1 (set on the suite webServer): the
+  // context.route() blocks that used to live here turned on full request
+  // interception, and Firefox's interception pipe wedges streaming the ~30MB
+  // Pyodide fetch on a second boot — every multi-boot spec timed out at
+  // first render, on an app that was fine. Server-side answering needs no
+  // interception, and it also covers the `request`-fixture gap the old
+  // comment above warns about: those POSTs never touched browser routes,
+  // but they do hit the server. Specs that need a DIFFERENT response (e.g.
+  // content-update's real scratch-clone pulls) still page.route() their own.
 }
 
 /** Wait for Pyodide to finish the first render: the report's page divs land

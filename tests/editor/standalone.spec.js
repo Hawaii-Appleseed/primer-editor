@@ -3,6 +3,10 @@
 // from "a link into one report" into something with its own front door.
 const { test, expect } = require('./fixtures/editor-test');
 
+// The ONE file that needs a real worker: the config blocks service workers
+// suite-wide (see playwright.config.js), and these tests assert registration.
+test.use({ serviceWorkers: 'allow' });
+
 test.describe('installable shell', () => {
   test('manifest.webmanifest is valid and linked from both app pages', async ({ page }) => {
     const res = await page.request.get('manifest.webmanifest');

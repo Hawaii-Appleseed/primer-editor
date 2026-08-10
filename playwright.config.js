@@ -25,6 +25,14 @@ module.exports = defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}/primer/`,
     trace: 'retain-on-failure',
+    // No service worker under test, except where a spec opts back in
+    // (standalone.spec.js asserts registration itself). A second Pyodide
+    // boot is served from the SW's cache, and Playwright's Firefox
+    // instrumentation — tracing OR any route interception — wedges on that
+    // SW-served ~30MB stream: every multi-boot spec timed out at first
+    // render on an app that was fine in a bare browser. Blocked, boots pull
+    // through the ordinary HTTP cache, which every engine instruments fine.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
@@ -46,6 +54,10 @@ module.exports = defineConfig({
     // startup (nice for `make live`, pointless — and awkward on a CI runner
     // with no display — when Playwright is about to drive its own browser).
     env: { PRIMER_PORT: String(PORT), PRIMER_OPEN: '0',
+           // Save/Push/export/upload answer with test-safe mocks SERVER-side
+           // (see serve.py) — context.route() blocks would turn on request
+           // interception, whose Firefox pipe wedges a second Pyodide boot.
+           PRIMER_TEST_SAFE: '1',
            // Never let the suite's shared server idle-exit mid-run: spec
            // pages come and go by design, so their goodbyes would reap it.
            PRIMER_LINGER: '0',
