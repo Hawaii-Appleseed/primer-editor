@@ -70,18 +70,20 @@ test.describe('pages: create & delete', () => {
     expect(await page.evaluate(() => (layout.pages && layout.pages.blanks || []).length)).toBe(0);
   });
 
-  test('a designed page can only be hidden, never deleted — hiding it is undoable', async ({ page }) => {
-    // Designed pages (content.md-backed) carry no × control at all.
+  test('a designed page can be neither deleted nor hidden', async ({ page }) => {
+    // Designed pages (content.md-backed) carry no × control — deleting one
+    // would mean deleting content.md prose from a page control, which is what
+    // editing the content is for.
     const designedChip = page.locator('#rail-list .chip').first();
     await expect(designedChip.locator('.chip-x')).toHaveCount(0);
-    await expect(designedChip.locator('.chip-eye')).toHaveCount(1);
 
-    const before = await page.evaluate(() => (layout.pages && layout.pages.order || []).length);
-    await designedChip.locator('.chip-eye').click();
-    await page.waitForTimeout(600);
-    // Hidden pages move to their own "Hidden" section — content preserved,
-    // not deleted, and the count of undo history grows (recoverable).
-    await expect(page.locator('#undo')).toBeEnabled();
-    await expect(page.locator('.chip.hidden-pg')).toHaveCount(1);
+    // And no hide control either, on any chip. Hiding put a page somewhere it
+    // was invisible everywhere except this strip; it is gone rather than
+    // relocated, so nothing in the editor can produce a hidden page.
+    await expect(page.locator('#rail-list .chip-eye')).toHaveCount(0);
+    await expect(page.locator('.chip.hidden-pg')).toHaveCount(0);
+
+    // Nothing about the strip wrote an override just by being drawn.
+    expect(await page.evaluate(() => layout.pages)).toBeUndefined();
   });
 });
