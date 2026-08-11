@@ -222,6 +222,31 @@ test.describe('File ▸ Open', () => {
     await other.click();
     await page.waitForURL(new RegExp('project=' + id));
   });
+
+  test('"+ New report…" creates one and opens it in THIS window', async ({ page }) => {
+    await gotoEditor(page);
+    // Mocked: a real /__scaffold writes docsync.yml and projects/<slug>/ on
+    // this machine (see host-state.js before letting one through for real).
+    let scaffolded = null;
+    await page.route('**/__scaffold*', async route => {
+      scaffolded = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: 'application/json',
+                            body: JSON.stringify({ ok: true, slug: scaffolded.slug }) });
+    });
+    await openFileMenu(page);
+    await page.click('#file-open');
+    await expect(page.locator('#open-new')).toBeVisible();
+    await page.click('#open-new');
+
+    const form = page.locator('dialog[open]');
+    await expect(form).toContainText('New report');
+    await form.locator('input[name="name"]').fill('Draft Two');
+    await form.getByRole('button', { name: 'Create' }).click();
+
+    // Creation lands here, in this window — not in a second one.
+    await page.waitForURL(/project=draft-two/);
+    expect(scaffolded.name).toBe('Draft Two');
+  });
 });
 
 // The chrome's two folding surfaces and what the contextual strip says about
