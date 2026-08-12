@@ -95,9 +95,35 @@ test.describe('force quit', () => {
     await page.locator('dialog[open]').getByRole('button', { name: 'Force quit' }).click();
 
     await expect.poll(() => method).toBe('POST');
-    // window.close() is not granted to a window the script did not open, so the
-    // outcome has to be stated rather than assumed.
+    // window.close() is not granted to a window the script did not open — the
+    // SERVER closes the editor's windows on its way down (serve.py
+    // _close_own_windows). The page still states the outcome rather than
+    // assuming it, for the cases nothing can close: its fallback line only
+    // draws if the window survived to draw it.
     await expect(page.locator('#stat')).toContainText(/stopped|stopping/);
+  });
+
+  test('the server closes its own windows as it stops', async () => {
+    // The AppleScript walk itself cannot run here (it needs macOS, Chrome and
+    // an Automation grant — and against the suite's shared server it would
+    // close real windows), so this pins the two halves of the contract that
+    // CAN be held: the quit path calls the close before any shutdown, and the
+    // close is keyed to every origin a window of this server may carry.
+    const text = require('fs').readFileSync(
+      require('path').join(__dirname, '../../report2027/tools/serve.py'), 'utf8');
+    const quit = text.slice(text.indexOf('def _quit'), text.indexOf('def _restart_soon'));
+    expect(quit.indexOf('_close_own_windows()')).toBeGreaterThan(-1);
+    // Before shutdown, not after: a closed server cannot close anything.
+    expect(quit.indexOf('_close_own_windows()'))
+      .toBeLessThan(quit.indexOf('srv.shutdown'));
+    const helper = text.slice(text.indexOf('def _close_own_windows'),
+                              text.indexOf('def _idle_reaper'));
+    for (const origin of ['http://localhost:{PORT}/', 'http://127.0.0.1:{PORT}/',
+                          'http://[::1]:{PORT}/']) {
+      expect(helper).toContain(origin);
+    }
+    // And never anywhere but macOS — osascript does not exist elsewhere.
+    expect(helper).toContain('darwin');
   });
 
   test('a refusal is reported, not swallowed', async ({ page }) => {
