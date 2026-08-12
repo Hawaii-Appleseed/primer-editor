@@ -4,19 +4,37 @@
 // validator refuses one without a real page number, so getting this wrong
 // bricks the draft on the very FIRST thing someone adds.
 //
-// The whole rest of the suite drives the Budget Primer fixture, which is the
-// one renderer that stamps data-page on its sections. These tests deliberately
-// drive demo-report, which (like our-mission, rxkids and tax-testimony, and
-// anything docsync.scaffold builds) stamps nothing — the case that shipped
-// broken precisely because no test looked at it. Local mode; nothing is saved.
+// The whole rest of the suite drives the Budget Primer fixture, which stamps
+// data-page on its sections. These tests deliberately drive demo-report, which
+// stamps nothing — the case that shipped broken precisely because no test
+// looked at it. Local mode; nothing is saved.
+//
+// demo-report is now the DESIGNATED renderer for that case, and is kept
+// unstamped on purpose: our-mission, rxkids and everything docsync.scaffold
+// builds went over to L.page_order()/L.pagemeta(), and a report that declares
+// its pages exercises the stamped path instead. If demo-report is ever
+// converted too, these tests would keep passing while testing nothing at all —
+// so the premise is asserted below rather than assumed.
 const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 
 const DEMO = '?project=demo-report';
+
+/** Fails loudly, naming the cause, if the subject stops being the unstamped
+ *  case — the alternative is silent loss of the only coverage this path has. */
+async function expectNoStampedPages(page) {
+  const stamped = await page.frameLocator('#out')
+    .locator('section.page[data-page]').count();
+  expect(stamped,
+    'demo-report is the designated renderer with NO stamped page ids; it now '
+    + 'stamps them, so this file needs a different subject (or a fixture that '
+    + 'declares nothing) to keep covering the fallback').toBe(0);
+}
 
 test.describe('insert target on a report with no stamped page ids', () => {
   test('adding a text box yields a real page number, and the draft still builds',
     async ({ page }) => {
       await gotoEditor(page, DEMO);
+      await expectNoStampedPages(page);
       await page.click('#text');
       await page.click('#textpop .txtpreset[data-k="body"]');
       await page.frameLocator('#out').locator('.ds-textbox').first()
@@ -44,6 +62,7 @@ test.describe('insert target on a report with no stamped page ids', () => {
   test('a shape added there is stamped too, so the draft survives it',
     async ({ page }) => {
       await gotoEditor(page, DEMO);
+      await expectNoStampedPages(page);
       await page.click('#shape');
       await page.click('#shapepop .shp[data-k="rect"]');
       await page.frameLocator('#out').locator('[data-shape]').first()
@@ -66,6 +85,7 @@ test.describe('insert target on a report with no stamped page ids', () => {
   test('an insert made while viewing an unmountable sheet lands where it will show',
     async ({ page }) => {
       await gotoEditor(page, DEMO);
+      await expectNoStampedPages(page);
       // scroll the endnotes sheet into view, so it is the "page in view"
       await page.frameLocator('#out').locator('section.page').last()
         .scrollIntoViewIfNeeded();

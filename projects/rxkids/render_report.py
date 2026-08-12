@@ -879,8 +879,35 @@ FN_POPOVER_JS = """
 })();
 """
 
-# The editor needs exactly one <section class="page"> as the coordinate origin
-# for every drag/resize/snap calculation (see the report-editor skill).
+# Each <section class="page"> is the coordinate origin for every
+# drag/resize/snap calculation on that page (see the report-editor skill).
+#
+# Every sheet, in order: this page, then any blank page added in the editor.
+# Going through L.page_order() plus L.pagemeta() is what lets the page strip
+# offer "+ Page" and reordering — the editor withholds both from a renderer
+# that never declared its pages, since an order nothing reads draws nothing.
+DESIGNED_PAGES = 1
+
+
+def sheet(pid):
+    """One page section: this report's markup for the designed page, empty for
+    a blank page added in the editor.
+
+    data-page carries the page's IDENTITY, which stops matching its position
+    the moment the order can be changed.
+    """
+    inner = BODY if pid == DESIGNED_PAGES else ""
+    return (f'<section class="page" data-page="{pid}"{L.fill_attr(f"page.{pid}")}>'
+            f'{inner}'
+            # Inside the section: .page is the positioning context every placed
+            # element is measured against, so as siblings they sat a box out.
+            f'{L.layer(pid)}{L.text_boxes(pid)}{L.tables_html(pid)}'
+            f'</section>')
+
+
+SHEETS = ("".join(sheet(pid) for pid in L.page_order(DESIGNED_PAGES))
+          + L.pagemeta(range(1, DESIGNED_PAGES + 1)))
+
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1103,10 +1130,7 @@ html = f"""<!DOCTYPE html>
 </style>
 </head>
 <body>
-<section class="page">
-{BODY}
-</section>
-{L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
+{SHEETS}
 <script>
 {SCRIPT}
 // Generic expand/collapse for sections added on the Hawaii page (the Cost

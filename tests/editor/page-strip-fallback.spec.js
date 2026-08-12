@@ -27,9 +27,18 @@ test.describe('page strip: renderer declares no pages', () => {
   test.beforeEach(async ({ page }) => {
     // demo-report's renderer emits no ds-pagemeta and no data-page — the case
     // the whole strip used to be invisible for. A tracked binding in this
-    // repo's docsync.yml, so it is here in every clone.
+    // repo's docsync.yml, so it is here in every clone, and kept unstamped on
+    // purpose now that our-mission, rxkids and docsync.scaffold's output all
+    // declare their pages (see insert-page-target.spec.js, which relies on the
+    // same thing).
     await gotoEditor(page, '?project=demo-report');
     await page.waitForTimeout(800);
+    // The premise, asserted rather than assumed: every check below is about
+    // what the editor does with NO declaration, so a converted subject would
+    // quietly turn this file into a test of the other branch.
+    expect(await page.evaluate(() => pagesDeclared),
+      'demo-report is the designated undeclared renderer; it now declares its '
+      + 'pages, so this file needs a different subject').toBe(false);
   });
 
   test('the strip appears, with a real preview for every sheet', async ({ page }) => {
