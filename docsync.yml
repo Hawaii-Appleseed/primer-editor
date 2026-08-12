@@ -170,3 +170,26 @@ bindings:
       # Must match the .page padding in render_report.py, or the editor's guides
       # sit where the text no longer does.
       margins: [0.5, 0.55]
+
+  # Tax Fairness Coalition — 2027 Priorities: What the Poll Said — scaffolded by docsync.scaffold as STAGE ONE: openable in the
+  # draft editor, not yet editable. STAGE TWO (wiring slots/graphics) is a
+  # per-page job — see the report-editor skill. page height is a generous
+  # no-clip default for a scrolling web page; trim once visible.
+  - id: tfc-2027-priorities
+    content: projects/tfc-2027-priorities/content.md
+    build: python3 projects/tfc-2027-priorities/render_report.py
+    outputs:
+      - projects/tfc-2027-priorities/index.html
+    editor:
+      dir: docs/tfc-2027-priorities
+      render: projects/tfc-2027-priorities/render_report.py
+      out: projects/tfc-2027-priorities/index.html
+      layout: projects/tfc-2027-priorities/layout.json
+      palette: ["#52796F", "#FFFFFF", "#FBFCFA", "#222E33", "#5A6B6C", "#8A9899", "#DCE3DC", "#C3CEC5"]
+      page: [12.5, 27]
+      margins: [0.3, 0.3]
+      engine:
+        # Files render_report.py reads MUST be listed here or the browser's
+        # virtual filesystem won't have them ("draft does not build").
+        - projects/tfc-2027-priorities/original.html
+        - projects/tfc-2027-priorities/body.slotted.html

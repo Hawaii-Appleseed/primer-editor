@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tax Fairness Coalition — 2027 Priorities: What the Poll Said</title>
+<style>
+  body { margin:0; background:#EDF1EE; }
+  .page { width:12.5in; min-height:27.0in; margin:0 auto;
+           background:#fff; position:relative; overflow:hidden; }
+  
+  :root{
+    --ash:#CAD2C5; --teal:#84A98C; --deep:#52796F; --slate:#354F52; --char:#2F3E46;
+    --bg:#FBFCFA;
+    --panel:#FFFFFF;
+    --ink:#222E33;
+    --ink-soft:#5A6B6C;
+    --ink-faint:#8A9899;
+    --rule:#DCE3DC;
+    --accent:var(--deep);
+    --agree:#52796F;
+    --pass:#C3CEC5;
+    --against:#A8603F;
+    --empty:#EDF1EC;
+    --shadow:0 1px 2px rgba(47,62,70,.06), 0 8px 24px -16px rgba(47,62,70,.30);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1B2427; --panel:#222D30; --ink:#E8EEE9; --ink-soft:#A9B8B4; --ink-faint:#7C8C8A;
+      --rule:#33413F; --accent:#9DBFA6; --agree:#8FB79A; --pass:#4B5C58; --against:#C98862;
+      --empty:#2B3739; --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px -18px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B2427; --panel:#222D30; --ink:#E8EEE9; --ink-soft:#A9B8B4; --ink-faint:#7C8C8A;
+    --rule:#33413F; --accent:#9DBFA6; --agree:#8FB79A; --pass:#4B5C58; --against:#C98862;
+    --empty:#2B3739; --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px -18px rgba(0,0,0,.8);
+  }
+  :root[data-theme="light"]{
+    --bg:#FBFCFA; --panel:#FFFFFF; --ink:#222E33; --ink-soft:#5A6B6C; --ink-faint:#8A9899;
+    --rule:#DCE3DC; --accent:#52796F; --agree:#52796F; --pass:#C3CEC5; --against:#A8603F;
+    --empty:#EDF1EC; --shadow:0 1px 2px rgba(47,62,70,.06), 0 8px 24px -16px rgba(47,62,70,.30);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Poppins","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:60rem; margin:0 auto; padding:2.75rem 1.5rem 4rem;}
+  h1,h2,h3,.eyebrow,.num{font-family:"Manrope","Helvetica Neue",Helvetica,Arial,sans-serif;}
+
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+    font-weight:700; color:var(--accent); margin:0 0 .6rem;
+  }
+  h1{
+    font-size:clamp(1.9rem,4.4vw,2.9rem); line-height:1.12; letter-spacing:-.022em;
+    font-weight:800; margin:0 0 .7rem; text-wrap:balance;
+  }
+  .standfirst{
+    font-size:1.06rem; color:var(--ink-soft); max-width:44rem; margin:0;
+  }
+  .meta{
+    margin-top:1.5rem; padding-top:1.1rem; border-top:2px solid var(--ink);
+    display:flex; flex-wrap:wrap; gap:1.75rem 2.5rem; align-items:flex-end;
+  }
+  .stat{display:flex; flex-direction:column; gap:.15rem;}
+  .stat .num{
+    font-size:1.85rem; font-weight:800; line-height:1; letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums; color:var(--ink);
+  }
+  .stat .num .of{font-size:1.1rem; font-weight:700; color:var(--ink-faint);}
+  .stat .lbl{font-size:.76rem; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); font-weight:600;}
+
+  .turnout{
+    margin-top:1.1rem; display:flex; flex-direction:column; gap:.4rem; max-width:32rem;
+  }
+  .turnout-bar{height:6px; border-radius:3px; background:var(--empty); overflow:hidden;}
+  .turnout-bar i{display:block; height:100%; background:var(--accent); border-radius:3px;}
+  .turnout p{margin:0; font-size:.83rem; color:var(--ink-faint); line-height:1.5;}
+  .turnout strong{color:var(--ink-soft); font-weight:700;}
+
+  section{margin-top:2.75rem;}
+  h2{
+    font-size:1.18rem; font-weight:800; letter-spacing:-.01em; margin:0 0 .35rem;
+  }
+  .sub{font-size:.92rem; color:var(--ink-soft); margin:0 0 1.15rem; max-width:46rem;}
+
+  .headline-box{
+    background:var(--panel); border:1px solid var(--rule); border-left:5px solid var(--accent);
+    border-radius:3px; padding:1.35rem 1.5rem; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:.6rem;
+  }
+  .headline-box p{margin:0; color:var(--ink-soft); font-size:.95rem;}
+  .headline-box .lede{color:var(--ink); font-size:1.12rem; font-weight:600; line-height:1.4; text-wrap:balance;}
+  .headline-box strong{color:var(--ink); font-weight:600;}
+
+  .tier{margin-bottom:2rem;}
+  .tier-head{
+    display:flex; align-items:baseline; gap:.75rem; flex-wrap:wrap;
+    padding-bottom:.5rem; border-bottom:1px solid var(--rule); margin-bottom:.35rem;
+  }
+  .tier-head h3{font-size:1rem; font-weight:800; margin:0; letter-spacing:-.005em;}
+  .tier-head .note{font-size:.82rem; color:var(--ink-faint); font-weight:500;}
+
+  ol.items{list-style:none; margin:0; padding:0;}
+  ol.items li{
+    display:grid; grid-template-columns:1fr 11.5rem; gap:.35rem 1.5rem;
+    align-items:center; padding:.72rem 0; border-bottom:1px solid var(--rule);
+  }
+  ol.items li:last-child{border-bottom:none;}
+  .idea{font-size:.97rem; line-height:1.35; font-weight:500;}
+  .idea .gloss{display:block; font-size:.82rem; color:var(--ink-faint); font-weight:400; margin-top:.15rem;}
+  .gauge{display:flex; flex-direction:column; gap:.3rem;}
+  .bar{display:flex; height:9px; border-radius:2px; overflow:hidden; background:var(--empty);}
+  .bar i{display:block; height:100%;}
+  .bar .a{background:var(--agree);}
+  .bar .p{background:var(--pass);}
+  .bar .d{background:var(--against);}
+  .tally{
+    font-size:.74rem; color:var(--ink-faint); font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .tally b{color:var(--ink-soft); font-weight:700;}
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap:.35rem 1.25rem; margin:.9rem 0 1.75rem;
+    font-size:.78rem; color:var(--ink-faint);
+  }
+  .legend span{display:inline-flex; align-items:center; gap:.4rem;}
+  .swatch{width:.7rem; height:.7rem; border-radius:2px; display:inline-block;}
+
+  .groups{display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:1rem;}
+  .group{
+    background:var(--panel); border:1px solid var(--rule); border-radius:3px;
+    padding:1rem 1.1rem; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:.4rem;
+  }
+  .group .who{font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--accent);}
+  .group h3{margin:0; font-size:1rem; font-weight:800; letter-spacing:-.005em;}
+  .group p{margin:0; font-size:.88rem; color:var(--ink-soft);}
+
+  .actions{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.7rem;}
+  .actions li{
+    display:grid; grid-template-columns:auto 1fr; gap:.85rem; align-items:start;
+    font-size:.95rem; color:var(--ink-soft);
+  }
+  .actions .k{
+    font-family:"Manrope","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--panel); background:var(--accent); padding:.28rem .5rem; border-radius:2px;
+    white-space:nowrap; margin-top:.08rem;
+  }
+  .actions li strong{color:var(--ink); font-weight:600;}
+
+  footer{
+    margin-top:3rem; padding-top:1.1rem; border-top:1px solid var(--rule);
+    font-size:.8rem; color:var(--ink-faint); display:flex; flex-wrap:wrap; gap:.4rem 1.5rem;
+    justify-content:space-between;
+  }
+  footer a{color:var(--accent);}
+  footer a:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  @media (max-width:34rem){
+    ol.items li{grid-template-columns:1fr;}
+    .gauge{max-width:14rem;}
+    .meta{gap:1.1rem 1.75rem;}
+  }
+
+  @media print{
+    :root{
+      --bg:#FBFCFA; --panel:#FFFFFF; --ink:#222E33; --ink-soft:#5A6B6C; --ink-faint:#8A9899;
+      --rule:#DCE3DC; --accent:#52796F; --agree:#52796F; --pass:#C3CEC5; --against:#A8603F;
+      --empty:#EDF1EC; --shadow:none;
+    }
+    body{background:#fff;}
+    .sheet{max-width:100%; padding:0.25in 0.35in;}
+    * {-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    section{margin-top:1.6rem; break-inside:avoid;}
+    .tier{break-inside:avoid;}
+    .groups{break-inside:avoid;}
+    .headline-box{box-shadow:none;}
+  }
+
+  
+</style>
+</head>
+<body>
+<section class="page">
+
+<div class="sheet">
+
+  <header>
+    <p class="eyebrow">Member poll · Results brief</p>
+    <h1>What the coalition wants to fight for in 2027</h1>
+    <p class="standfirst">Results of the Pol.is poll on 2027 legislative priorities: 14 ideas, voted agree / disagree / pass.</p>
+
+    <div class="meta">
+      <div class="stat"><span class="num">12<span class="of">/28</span></span><span class="lbl">Members voted · 43%</span></div>
+      <div class="stat"><span class="num">7</span><span class="lbl">Put up ideas</span></div>
+      <div class="stat"><span class="num">14</span><span class="lbl">Ideas on the table</span></div>
+      <div class="stat"><span class="num">102</span><span class="lbl">Votes cast</span></div>
+      <div class="stat"><span class="num">3</span><span class="lbl">Were "disagree"</span></div>
+    </div>
+    <div class="turnout">
+      <div class="turnout-bar" role="img" aria-label="12 of 28 coalition members voted, 43 percent">
+        <i style="width:42.9%"></i>
+      </div>
+      <p><b>12 of 28</b> invited coalition members cast at least one vote (43% turnout).</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="headline-box">
+      <p class="lede">3 of 102 votes were "disagree" — from 2 people, on 3 items. The real split is agree vs. pass, not agree vs. disagree.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The fourteen ideas, sorted by how settled they are</h2>
+    <p class="sub">Each bar shows all 12 voters: agree / pass / disagree / no vote.</p>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--agree)"></i> Agree</span>
+      <span><i class="swatch" style="background:var(--pass)"></i> Pass / unsure</span>
+      <span><i class="swatch" style="background:var(--against)"></i> Disagree</span>
+      <span><i class="swatch" style="background:var(--empty)"></i> Didn't vote on it</span>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <h3>Settled</h3>
+        <span class="note">Broad agreement, few passes, zero opposition</span>
+      </div>
+      <ol class="items">
+        <li>
+          <span class="idea"><span>Fix last session's renewable energy tax cuts</span><span class="gloss">Identify a more appropriate threshold</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="7 agree, 0 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:58.3%"></i>
+            </span>
+            <span class="tally"><b>7 of 7</b> votes agreed · no passes</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>Conveyance tax</span><span class="gloss">The most-voted item in the poll</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="9 agree, 2 pass, 0 disagree, 1 did not vote">
+              <i class="a" style="width:75%"></i><i class="p" style="width:16.7%"></i>
+            </span>
+            <span class="tally"><b>9 of 11</b> votes agreed · 2 passes</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">Save the working family tax credits set to expire</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">Tax capital gains at the same rate as ordinary income</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">Close the REIT tax loophole</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>Create a state-level Child Tax Credit</span><span class="gloss">Posted last — fewest people saw it</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="4 agree, 1 pass, 0 disagree, 7 did not vote">
+              <i class="a" style="width:33.3%"></i><i class="p" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>4 of 5</b> votes agreed · 1 pass</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">Strengthen the caregiver tax credit for kūpuna caregivers</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="5 agree, 2 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:41.7%"></i><i class="p" style="width:16.7%"></i>
+            </span>
+            <span class="tally"><b>5 of 7</b> votes agreed · 2 passes</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <h3>Liked, not understood</h3>
+        <span class="note">Zero opposition, 1/3–1/2 passed</span>
+      </div>
+      <ol class="items">
+        <li>
+          <span class="idea"><span>Keiki Rx</span><span class="gloss">Funding for first-year post-partum women, partly through TANF</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="5 agree, 3 pass, 0 disagree, 4 did not vote">
+              <i class="a" style="width:41.7%"></i><i class="p" style="width:25%"></i>
+            </span>
+            <span class="tally"><b>5 of 8</b> votes agreed · 3 passes</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>Pair a progressive revenue raiser with cutting the GET on food</span><span class="gloss">Net effect: a more progressive system overall</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="5 agree, 4 pass, 0 disagree, 3 did not vote">
+              <i class="a" style="width:41.7%"></i><i class="p" style="width:33.3%"></i>
+            </span>
+            <span class="tally"><b>5 of 9</b> votes agreed · 4 passes</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>Institute worldwide combined reporting</span><span class="gloss">Stops multinationals shifting profit offshore</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="3 agree, 4 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:25%"></i><i class="p" style="width:33.3%"></i>
+            </span>
+            <span class="tally"><b>3 of 7</b> votes agreed · 4 passes</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>Reform the 2011 historic-home tax exemption</span><span class="gloss">City &amp; County of Honolulu — a county fight, not a state one</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="2 agree, 2 pass, 0 disagree, 8 did not vote">
+              <i class="a" style="width:16.7%"></i><i class="p" style="width:16.7%"></i>
+            </span>
+            <span class="tally"><b>2 of 4</b> votes agreed · 2 passes</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <h3>Unresolved</h3>
+        <span class="note">Passes > agrees; all 3 disagree votes landed here</span>
+      </div>
+      <ol class="items">
+        <li>
+          <span class="idea">Fix the child and dependent care tax credit</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="2 agree, 4 pass, 1 disagree, 5 did not vote">
+              <i class="a" style="width:16.7%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>2 of 7</b> votes agreed · 4 passes · 1 disagree</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea"><span>GET reform or replacement</span><span class="gloss">The biggest structural swing on the list</span></span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="2 agree, 4 pass, 1 disagree, 5 did not vote">
+              <i class="a" style="width:16.7%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>2 of 7</b> votes agreed · 4 passes · 1 disagree</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">Constitutional amendment to let the state tax high-value investment properties</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="1 agree, 6 pass, 1 disagree, 4 did not vote">
+              <i class="a" style="width:8.3%"></i><i class="p" style="width:50%"></i><i class="d" style="width:8.3%"></i>
+            </span>
+            <span class="tally"><b>1 of 8</b> votes agreed · 6 passes · 1 disagree</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>The three clusters the tool found</h2>
+    <p class="sub">Pol.is grouped the 12 voters by voting pattern.</p>
+    <div class="groups">
+      <div class="group">
+        <span class="who">Group A · 3 members</span>
+        <h3>Cautious</h3>
+        <p>Mostly passed. Clear yeses only on REIT loophole, kūpuna caregiver credit, renewable energy fix.</p>
+      </div>
+      <div class="group">
+        <span class="who">Group B · 3 members</span>
+        <h3>Revenue-side</h3>
+        <p>Strong on structural raisers (conveyance, capital gains, renewable energy, expiring credits). Source of 2 of the 3 disagree votes.</p>
+      </div>
+      <div class="group">
+        <span class="who">Group C · 6 members</span>
+        <h3>Broad coalition</h3>
+        <p>Agreed with nearly everything. One disagree, on GET replacement.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What to do with this</h2>
+    <ol class="actions">
+      <li><span class="k">Lead</span><span><b>Build the 2027 ask around the 7 settled items.</b></span></li>
+      <li><span class="k">Teach</span><span><b>Brief the coalition on worldwide combined reporting, Keiki Rx, and the GET-on-food pairing</b> before re-polling — high pass rates there read as a knowledge gap.</span></li>
+      <li><span class="k">Discuss</span><span><b>Put the ConAm and GET replacement on a meeting agenda, not the platform.</b> 6 of 8 voters passed on the ConAm.</span></li>
+      <li><span class="k">Route</span><span><b>Send the Oʻahu historic-home exemption to a county track</b> — the only county-level item on the list.</span></li>
+      <li><span class="k">Re-poll</span><span><b>Chase the other 16 members before locking the platform.</b></span></li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Source: Pol.is conversation <a href="https://pol.is/7bvwfhpf8x">7bvwfhpf8x</a> · votes collected 30 July 2026 · 28 members invited, 12 voted</span>
+    <span>Prepared for the Tax Fairness Coalition</span>
+  </footer>
+
+</div>
+
+</section>
+
+</body>
+</html>
