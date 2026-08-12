@@ -15,15 +15,22 @@
 // machine, not serve.py's actual git plumbing.
 const { test, hostedTest, expect, gotoEditor, submitDialogIfPresent, PING } = require('./fixtures/editor-test');
 
-/** Navigate with /__ping pinned to a fixed `ahead`, registered before the
- *  page ever loads — detectLocal()'s first ping (which decides `local` and
- *  the button's initial state) must see the same value the 1.5s poll will
- *  keep reporting for the rest of the test. */
+/** Navigate with /__ping pinned to an `ahead`, registered before the page ever
+ *  loads — detectLocal()'s first ping (which decides `local` and the button's
+ *  initial state) must see the same value the 1.5s poll will keep reporting for
+ *  the rest of the test.
+ *
+ *  A FUNCTION may be passed instead of a number when the scenario moves the
+ *  count mid-test: the poll then follows it instead of contradicting it. A
+ *  fixed number could only ever describe a report whose backlog never changes,
+ *  and the push test is exactly the one where it does. */
 async function gotoWithAhead(page, context, ahead) {
+  const read = typeof ahead === 'function' ? ahead : () => ahead;
   // PING, not '**/__ping': the editor asks for /__ping?project=<id>, which a
   // bare-path glob does not match — the mock was dead and the real server's
   // count (this machine's unpushed commits) answered instead.
-  await context.route(PING, route => route.fulfill({ json: { ok: true, v: 1, ahead } }));
+  await context.route(PING, route =>
+    route.fulfill({ json: { ok: true, v: 1, ahead: read() } }));
   await gotoEditor(page);
 }
 
@@ -78,10 +85,19 @@ test.describe('local Save vs Push', () => {
   });
 
   test('clicking Push calls /__push and reflects the response', async ({ page, context }) => {
-    await gotoWithAhead(page, context, 1);
-    await context.route('**/__push', route => route.fulfill({
-      json: { ok: true, message: 'pushed — GitHub Pages deploys in about a minute', ahead: 0 },
-    }));
+    // One mutable count, read by BOTH mocks. Pinned to a fixed 1, the 1.5s poll
+    // kept reporting a backlog the push had just cleared, so setPushState(1)
+    // re-enabled the button behind the assertion — it only passed when it won a
+    // race, and lost it about 1 run in 12 under load. A push that succeeds
+    // really does leave nothing to push, and now the poll says so too.
+    let ahead = 1;
+    await gotoWithAhead(page, context, () => ahead);
+    await context.route('**/__push', route => {
+      ahead = 0;
+      route.fulfill({
+        json: { ok: true, message: 'pushed — GitHub Pages deploys in about a minute', ahead: 0 },
+      });
+    });
     await expect(page.locator('#push')).toBeEnabled();
     await page.click('#push');
     await expect(page.locator('#stat')).toContainText('pushed', { timeout: 5000 });
