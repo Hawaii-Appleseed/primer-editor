@@ -139,6 +139,26 @@ Rules that bite:
 
 ## Recent architecture (2026-07), so you don't rediscover it
 
+- **The Squarespace block is a FROZEN render, not a responsive one.**
+  `exportHtml(true)` emits a fixed-width design scaled into the host's column,
+  so anything in the CSS that re-asks a question about the viewport is a leak:
+  once pasted, it is answered by *Squarespace's* page, not by the report.
+  Three things therefore happen at export time, in `edit.html`:
+  `flattenMedia()` resolves every width-conditional `@media` at `VIEW_W` (the
+  width the report is composed against) and inlines the winner — the primer's
+  own `@media (min-width:1120px){.page{zoom:1.25}}` used to fire on a desktop
+  host page and blow the sheet up 25% inside a wrapper built for 1×, with
+  `overflow:hidden` eating the right-hand inch; `freezeViewportUnits()` turns
+  `vw` lengths into px at the same width; and `measureDesignWidth()` renders
+  the export offscreen and reads the width off `section.page` instead of
+  taking it from the manifest, so a resize, a zoom or a bleed page can't put
+  the wrapper and its contents at different sizes. `@media print` is dropped
+  (a fragment in someone else's page is not a printed sheet). The scaled box
+  is centred in the column — pinned left, a wide column read as skewed.
+  **If you add a report-level media query or a `vw` length, it will be
+  resolved, not carried** — that is deliberate. Chrome that should adapt
+  (toolbars, download bars) belongs OUTSIDE `section.page`, which is the only
+  element the design width is measured from.
 - **Page resize is real, not cosmetic.** `layout.py`'s `Layout` reads an
   optional `"page": {"w": 8.5, "h": 11}` (or `"h": null` for pageless) from
   layout.json and emits matching `.page`/`@page` CSS via `layer()`'s
