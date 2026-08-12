@@ -53,6 +53,31 @@ test.describe('File menu', () => {
     expect(await page.evaluate(() => ensureAuth())).toBe(null);
   });
 
+  // Every row is an icon plus a label span, and three of the labels are
+  // rewritten at runtime (the repo slug, the deleted count, the GitHub login).
+  // Written as textContent — which is what they used to be — that rewrite takes
+  // the icon with it, and the row is left as the only bare one in the menu.
+  test('every row keeps its icon, including the ones whose label is rewritten',
+    async ({ page }) => {
+    await gotoEditor(page);
+    await openFileMenu(page);
+    const rows = page.locator('#filepop button.shp');
+    const n = await rows.count();
+    expect(n).toBeGreaterThan(5);
+    for (let i = 0; i < n; i++) {
+      await expect(rows.nth(i).locator('svg.shp-i')).toHaveCount(1);
+      await expect(rows.nth(i).locator('span.shp-t')).toHaveCount(1);
+    }
+    // Re-open with a different repo state: the label changes, the icon stays.
+    await page.evaluate(() => {
+      REPO = '';
+      $('filepop').hidden = true;
+      $('file').click();
+    });
+    await expect(page.locator('#file-repo')).toHaveText('Repo: not connected');
+    await expect(page.locator('#file-repo svg.shp-i')).toHaveCount(1);
+  });
+
   test('Download and Token are no longer loose in the toolbar', async ({ page }) => {
     await gotoEditor(page);
     // Moved, not duplicated: exactly one of each, and neither is a direct
