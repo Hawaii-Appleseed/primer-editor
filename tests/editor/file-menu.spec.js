@@ -19,9 +19,12 @@ test.describe('File menu', () => {
     // always in the DOM, so they belong in this list either way. The Repo row
     // names the GitHub repo this report pushes to, and reads its slug from the
     // staged manifest, so the fixture's own origin appears here.
+    // Force quit is local-only too (see quit-and-reload.spec.js) and closes the
+    // list — it stops the editor for every window, so it sits apart from the
+    // rows that act on the report.
     await expect(page.locator('#filepop button')).toHaveText(
       ['Open…', 'New window', 'Connect GitHub…', /^Repo: /, 'Resize…', 'Download…',
-       'Restore deleted…', 'Token…']);
+       'Restore deleted…', 'Token…', 'Force quit']);
   });
 
   test('the Repo row names the repo, and says so plainly when there is none',
