@@ -115,7 +115,7 @@ Strengthen the caregiver tax credit for kūpuna caregivers
 **5 of 7** votes agreed · 2 passes
 
 [[tier-head.h3-2]]
-Liked, not understood
+Agreement, with some passes
 
 [[note.span-2]]
 Zero opposition, 1/3–1/2 passed
@@ -139,7 +139,7 @@ Stops multinationals shifting profit offshore
 **3 of 7** votes agreed · 4 passes
 
 [[gloss.span-7]]
-City & County of Honolulu — a county fight, not a state one
+City & County of Honolulu — a county issue
 
 [[tally.span-11]]
 **2 of 4** votes agreed · 2 passes
@@ -167,6 +167,51 @@ Constitutional amendment to let the state tax high-value investment properties
 
 [[tally.span-14]]
 **1 of 8** votes agreed · 6 passes · 1 disagree
+
+[[split.h2]]
+Credits or raisers?
+
+[[split.sub]]
+The same 14 ideas re-sorted by what they do — put money in people's pockets, or raise it. Each bar is that family's combined votes.
+
+[[fam.who-1]]
+5 ideas · 34 votes
+
+[[fam.h3-1]]
+Tax credits & direct support
+
+[[fam.tally-1]]
+**22 of 34** votes agreed · 11 passes · 1 disagree
+
+[[fam.p-1]]
+Saving the expiring working family credits, a state Child Tax Credit, the kūpuna caregiver credit, Keiki Rx, and the child & dependent care credit. Strongest at the top (6 of 7 on the expiring credits); the child & dependent care fix is the least agreed item.
+
+[[fam.who-2]]
+7 ideas · 51 votes
+
+[[fam.h3-2]]
+Revenue raisers
+
+[[fam.tally-2]]
+**34 of 51** votes agreed · 16 passes · 1 disagree
+
+[[fam.p-2]]
+The renewable energy fix, conveyance tax, capital gains, the REIT loophole, worldwide combined reporting, the historic-home exemption, and the ConAm.
+
+[[fam.who-3]]
+2 ideas · 16 votes
+
+[[fam.h3-3]]
+GET restructuring
+
+[[fam.tally-3]]
+**7 of 16** votes agreed · 8 passes · 1 disagree
+
+[[fam.p-3]]
+Pairing a progressive raiser with a GET cut on food, and GET reform or replacement.
+
+[[split.note]]
+**Credits and raisers poll the same.** 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. The split that matters is GET restructuring at 44%, with more passes than agrees. A 2027 platform can carry both families; the GET questions need a conversation first.
 
 [[sheet.h2-2]]
 The three clusters the tool found
