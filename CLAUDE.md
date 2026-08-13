@@ -149,7 +149,14 @@ Rules that bite:
   `font_link()` scans box styles as well as slot styles, and the scaffolded
   renderer emits it. If you add a template, keep every element inside the
   page (`check_bounds()` refuses a draft that hangs off it — that would
-  brick the first render).
+  brick the first render). Templates carry colour SCHEMES (the topic
+  colours; `create(scheme=)`, both pickers offer them), and the report's
+  page 4 is the replicable SECTION PAGE. The whole house style is data:
+  `docsync.templates.style_guide()` — patterns as ready `addTextBox`/
+  `addShape` dicts plus the build-out recipe — rides on `GET /__templates`
+  and the MCP `style_guide` tool. When a user says "make a report from this
+  text", start there (the report-editor skill's "Make me a report from this
+  text" section is the walkthrough).
 - **Bringing in a static HTML page**: `python3 -m docsync.scaffold page.html
   --id <slug>` does STAGE ONE (openable) automatically — project dir, wrapper
   renderer, docsync.yml binding, build + stage. Then `python3 -m

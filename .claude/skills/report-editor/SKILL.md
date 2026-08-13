@@ -149,6 +149,7 @@ ids it returns:
 | `group(ids)` / `ungroup(id)` | tie 2+ elements so they move as one (membership is exclusive) / dissolve |
 | `remove(ids)` / `duplicate(ids)` | the UI's own Delete and Duplicate, selection handled for you |
 | `addTextBox({page,x,y,w,h,md,style,fill})` | returns `'text.<n>'` for further verbs |
+| `addShape({page,kind,x,y,w,h,fill,stroke,sw,z,rx})` | a Shapes-panel shape (`rect\|ellipse\|line\|triangle\|arrow`) on ANY page — the way a hairline rule or panel lands on a page `duplicate()` can't reach |
 | `addPage(at?)` | blank page; returns its id |
 | `addSource(id, text, url)` / `addEndnotesSection()` | declare a source (cite via `[^id]` in slot text) / the synced endnotes section |
 | `batch(ops)` | `[{verb, args, as?}]` — one history entry, one render. See below |
@@ -163,7 +164,7 @@ batch; call them singly.
 
 **`batch()` — the multi-edit fast path.** Verbs: `setSlot`, `setBoxText`,
 `setStyle`, `place`, `recolor`, `rotate`, `lock`, `group`, `ungroup`,
-`addTextBox`, `addSource`. Name an op with `as` and later ops can say `'@name'`
+`addTextBox`, `addShape`, `addSource`. Name an op with `as` and later ops can say `'@name'`
 wherever an id goes, so create-then-place is ONE call:
 
 ```js
@@ -196,8 +197,8 @@ the browser's 80-char snippet), every source with its citation count, the
 geometry of everything placed, and unless `&elements=0`, every addressable
 element/slot/fill id plus the page count (discovered by an edit-mode render,
 cached per build). `docsync/mcp_server.py` wraps it as a stdlib-only MCP
-server — `list_reports`, `status`, `inventory`, `get_slot`, `search`,
-`uncited_sources`, plus `pilot` for the writes.
+server — `list_reports`, `status`, `style_guide`, `inventory`,
+`get_slot`, `search`, `uncited_sources`, plus `pilot` for the writes.
 
 The boundary worth knowing: layout.json stores geometry only for things
 somebody PLACED, so an unmoved designed element has ids here but no
@@ -212,6 +213,36 @@ change with the read tools; make the change with a verb.
 
 Reserve real clicks for what the API doesn't cover, and screenshots for
 visual judgement only.
+
+## "Make me a report from this text" — the house-style build-out
+
+The Appleseed house style is DATA, not lore: `docsync.templates.style_guide()`
+returns the fonts, page metrics, colour schemes and every pattern — section
+heading, hairline, body, callout, pull-quote, figure caption, footer — as the
+exact `style` dicts `addTextBox`/`setStyle` accept and `addShape` arguments.
+It rides along on `GET /__templates`, and the MCP server serves it as
+`style_guide`. Read it first; never invent fonts or sizes.
+
+The flow when a user hands you text and asks for a report:
+
+1. **Scaffold from a template, not blank**: `POST /__scaffold` with
+   `{name, slug, template: 'appleseed-report' | 'appleseed-brief',
+   scheme: 'blue'|'slate'|'teal'|'charcoal'}` (scheme optional — each
+   template's default first in its `schemes` listing). The scaffold lands a
+   cover with placeholder art, inside cover/contents, the executive-summary
+   page, and — on the report — **page 4, the section page**: headline over a
+   hairline, bold-caps lead-in, body, subheading, footer, already placed in
+   the right styles.
+2. **Fill what exists** with `setBoxText` (template words live in text boxes,
+   so `setSlot` reaches only the title) — title, subtitle, date, TOC entries,
+   the summary and section-page text.
+3. **Each further section**: `addPage`, then one `batch()` of
+   `addTextBox`/`addShape` ops copied from the style guide's patterns
+   (heading at 0.7,0.7; hairline rect at y 1.62 filled with the topic
+   colour; body at 15px over 7.1in; footer `"<n> · <TITLE>"`).
+4. **Citations**: `addSource(id, text, url)` and `[^id]` tokens in the text.
+5. **Check with `audit()`**, fix what it names, then `save()`. Push stays
+   with the human.
 
 ## Editing the editor itself (`edit.html`)
 

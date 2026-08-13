@@ -109,6 +109,34 @@ test.describe('pilot api', () => {
     expect(fill).toBe('#E23B3B');
   });
 
+  test('addShape lands a Shapes-panel shape on the page a pilot names',
+    async ({ page }) => {
+    // The build-out case: a hairline rule, exact geometry, exact fill, on a
+    // page duplicate() could never reach (it clones same-page only).
+    const r = await api(page,
+      `addShape({ page: 3, kind: 'rect', x: 0.7, y: 1.62, w: 7.1, h: 0.02,
+                  fill: '#1E6194', z: 2 })`);
+    expect(r.ok).toBe(true);
+    expect(r.id).toMatch(/-rect$/);
+    expect(r.page).toBe(3);
+    const stored = await page.evaluate(id =>
+      layout.shapes.find(s => s.id === id), r.id);
+    expect(stored).toMatchObject(
+      { page: 3, kind: 'rect', x: 0.7, y: 1.62, w: 7.1, h: 0.02,
+        fill: '#1E6194', z: 2 });
+
+    // One undo withdraws it — a pilot's shape is a human's shape.
+    const u = await api(page, 'undo()');
+    expect(u.ok).toBe(true);
+    expect(await page.evaluate(id =>
+      layout.shapes.some(s => s.id === id), r.id)).toBe(false);
+
+    // A kind the Shapes panel does not offer is refused, naming the menu.
+    const bad = await api(page, `addShape({ kind: 'star' })`);
+    expect(bad.ok).toBe(false);
+    expect(bad.error).toContain('rect');
+  });
+
   test('recolor takes a page id, and null resets it', async ({ page }) => {
     const r = await api(page, `recolor('page.3', '#FFF6D8')`);
     expect(r.ok).toBe(true);
