@@ -236,7 +236,9 @@ The flow when a user hands you text and asks for a report:
 2. **Fill what exists** with `setBoxText` (template words live in text boxes,
    so `setSlot` reaches only the title) — title, subtitle, date, TOC entries,
    the summary and section-page text.
-3. **Each further section**: `addPage`, then one `batch()` of
+3. **Each further section**: `addPage(<current page count>)` — the
+   argument APPENDS (argless inserts after the page in view) — then one
+   `batch()` of
    `addTextBox`/`addShape` ops copied from the style guide's patterns
    (heading at 0.7,0.7; hairline rect at y 1.62 filled with the topic
    colour; body at 15px over 7.1in; footer `"<n> · <TITLE>"`).
