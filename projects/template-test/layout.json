@@ -1,0 +1,504 @@
+{
+  "positions": {},
+  "fill": {
+    "page.1": "#4E9685",
+    "page.2": "#4E9685"
+  },
+  "shapes": [
+    {
+      "id": "tpl-rule3",
+      "page": 3,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.62,
+      "w": 7.1,
+      "h": 0.02,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "tpl-tocrule2",
+      "page": 2,
+      "kind": "rect",
+      "x": 3.65,
+      "y": 6.22,
+      "w": 1.2,
+      "h": 0.035,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "tpl-rule4",
+      "page": 4,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.62,
+      "w": 7.1,
+      "h": 0.02,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "s4-rect",
+      "page": "p1",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.62,
+      "w": 7.1,
+      "h": 0.02,
+      "fill": "#4E9685",
+      "stroke": "none",
+      "sw": 0.02,
+      "z": 2
+    }
+  ],
+  "boxes": [
+    {
+      "id": "tpl-photo",
+      "page": 1,
+      "x": 0,
+      "y": 0,
+      "w": 8.5,
+      "z": 1,
+      "md": "![Cover photo placeholder](assets/cover-photo-placeholder.svg)"
+    },
+    {
+      "id": "tpl-logo",
+      "page": 1,
+      "x": 6.35,
+      "y": 0.6,
+      "w": 1.55,
+      "z": 3,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo-white.svg)"
+    },
+    {
+      "id": "tpl-title",
+      "page": 1,
+      "x": 0.7,
+      "y": 1.05,
+      "w": 5.9,
+      "z": 3,
+      "md": "Your report title here",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 58,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "leading": 1.08
+      }
+    },
+    {
+      "id": "tpl-sub",
+      "page": 1,
+      "x": 0.7,
+      "y": 4.7,
+      "w": 3.9,
+      "z": 3,
+      "md": "A template-and-scheme scaffold, piloted end to end",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 19,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "tracking": 1.2,
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "tpl-date",
+      "page": 1,
+      "x": 0.7,
+      "y": 6.6,
+      "w": 2.6,
+      "z": 3,
+      "md": "AUGUST 2026",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 14,
+        "color": "#FDCF21",
+        "tracking": 1.5
+      }
+    },
+    {
+      "id": "tpl-covernote",
+      "page": 1,
+      "x": 0.7,
+      "y": 9.9,
+      "w": 4.8,
+      "z": 3,
+      "md": "The backdrop is a placeholder — swap it for a cover photo (Insert ▸ Image, size to the page, send to back), then delete this note.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#DCE5E9",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "tpl-logo2",
+      "page": 2,
+      "x": 2.9,
+      "y": 0.85,
+      "w": 2.7,
+      "z": 2,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo-white.svg)"
+    },
+    {
+      "id": "tpl-url2",
+      "page": 2,
+      "x": 0.7,
+      "y": 1.75,
+      "w": 7.1,
+      "z": 2,
+      "md": "www.hiappleseed.org",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#FDCF21",
+        "align": "center"
+      }
+    },
+    {
+      "id": "tpl-author2",
+      "page": 2,
+      "x": 0.7,
+      "y": 2.12,
+      "w": 7.1,
+      "z": 2,
+      "md": "Author: Your Name",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "align": "center"
+      }
+    },
+    {
+      "id": "tpl-mission2",
+      "page": 2,
+      "x": 0.85,
+      "y": 2.85,
+      "w": 6.8,
+      "z": 2,
+      "md": "Hawaiʻi Appleseed is committed to a more socially and economically just Hawaiʻi, where everyone has genuine opportunities to achieve economic security and fulfill their potential. We change systems to address inequity and foster greater opportunity by conducting data analysis and research to address income inequality, educating policymakers and the public, engaging in collaborative problem solving and coalition building, and advocating for policy and systems change.\n\nThe work of Hawaiʻi Appleseed is about people. The issues we work on—housing, food, wages, mobility, the state budget and taxation, and racial and indigenous equity—are important because they ensure people have access to shelter, sustenance, and the means to survive and thrive individually and collectively.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14.5,
+        "color": "#FFFFFF",
+        "align": "center",
+        "leading": 1.55
+      }
+    },
+    {
+      "id": "tpl-tochead2",
+      "page": 2,
+      "x": 0.7,
+      "y": 5.6,
+      "w": 7.1,
+      "z": 2,
+      "md": "TABLE OF CONTENTS",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 30,
+        "color": "#A5CCB4",
+        "align": "center"
+      }
+    },
+    {
+      "id": "tpl-toc2",
+      "page": 2,
+      "x": 1.5,
+      "y": 6.5,
+      "w": 5.5,
+      "z": 2,
+      "md": "Introduction — 3\n\nThe first section — 5\n\nThe second section — 9\n\nConclusion — 14\n\nEndnotes — 15",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 16,
+        "color": "#A5CCB4",
+        "align": "center",
+        "leading": 1.55
+      }
+    },
+    {
+      "id": "tpl-copy2",
+      "page": 2,
+      "x": 0.7,
+      "y": 9.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Copyright © 20XX Hawaiʻi Appleseed Center for Law & Economic Justice. All rights reserved.\n\n733 Bishop Street, Suite 1180, Honolulu, HI 96813",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12,
+        "color": "#FFFFFF",
+        "align": "center",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "tpl-foot2",
+      "page": 2,
+      "x": 0.55,
+      "y": 10.55,
+      "w": 3.4,
+      "z": 2,
+      "md": "2 · YOUR REPORT",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 12,
+        "color": "#FFFFFF",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "tpl-h3",
+      "page": 3,
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Executive summary",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 44,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "tpl-body3",
+      "page": 3,
+      "x": 0.7,
+      "y": 1.95,
+      "w": 4.35,
+      "z": 2,
+      "md": "**YOUR FIRST WORDS, IN BOLD CAPITALS,** set the stage the way every report in this series opens. Source Sans carries the body; keep paragraphs short and the argument moving.\n\nA second paragraph continues here — replace all of this, or delete the box and lay the page out your own way.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "tpl-callout3",
+      "page": 3,
+      "x": 5.3,
+      "y": 1.95,
+      "w": 2.5,
+      "z": 2,
+      "fill": "#303030",
+      "md": "- **Key term** is defined in a sentence, white on the dark panel.\n- **Second term** — one line each.\n- **Third term** — kept tight.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "tpl-pull3",
+      "page": 3,
+      "x": 0.7,
+      "y": 5.6,
+      "w": 7.1,
+      "z": 2,
+      "md": "IN TOTAL, THE HEADLINE FINDING GOES HERE — WITH THE NUMBER **IN BOLD**.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 21,
+        "color": "#4E9685",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "tpl-chart3",
+      "page": 3,
+      "x": 0.7,
+      "y": 6.45,
+      "w": 7.1,
+      "z": 1,
+      "md": "![Chart placeholder](assets/chart-placeholder.svg)"
+    },
+    {
+      "id": "tpl-fig3",
+      "page": 3,
+      "x": 0.7,
+      "y": 9.5,
+      "w": 7.1,
+      "z": 2,
+      "md": "**Figure 1.** A caption for the chart that goes here — add one with the Chart tool; the series colours are in the swatches.",
+      "style": {
+        "font": "Manrope",
+        "size": 15,
+        "color": "#464646"
+      }
+    },
+    {
+      "id": "tpl-foot3",
+      "page": 3,
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "3 · YOUR REPORT",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "tpl-h4",
+      "page": 4,
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Your first section",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 44,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "tpl-body4a",
+      "page": 4,
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THE SECTION'S FIRST WORDS, IN BOLD CAPITALS,** open it the way every page of this report does. Source Sans carries the body over the full text width; keep paragraphs to three or four sentences and the argument moving.\n\nThis page is the pattern the rest of the report repeats — headline, hairline, body. Copy its elements onto a new page and replace the words.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "tpl-sub4",
+      "page": 4,
+      "x": 0.7,
+      "y": 3.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "A second-level heading, in the topic colour",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 22,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "tpl-body4b",
+      "page": 4,
+      "x": 0.7,
+      "y": 4.2,
+      "w": 7.1,
+      "z": 2,
+      "md": "Under a subheading the body simply continues. Numbers that matter can step out into a pull-quote (page 3 shows one), evidence into a chart with a **Figure** caption — every device this report uses is already on these pages, styled and movable.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "tpl-foot4",
+      "page": 4,
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "4 · YOUR REPORT",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "t1",
+      "page": "p1",
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Findings from the data",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 44,
+        "case": "upper",
+        "color": "#232322",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "t2",
+      "page": "p1",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**PILOTED END-TO-END,** this page was laid out by the style-guide recipe: addPage to append, then one batch of addTextBox and addShape ops copied from the served patterns.\n\nEvery element here is movable, restylable and undoable exactly as if a person had placed it.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "t3",
+      "page": "p1",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "5 · TEMPLATE TEST",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    }
+  ],
+  "tables": [],
+  "sections": {},
+  "pages": {
+    "order": [
+      1,
+      2,
+      3,
+      4,
+      "p1"
+    ],
+    "blanks": [
+      {
+        "id": "p1"
+      }
+    ]
+  }
+}
