@@ -46,10 +46,10 @@ Were "disagree"
 **12 of 28** invited coalition members cast at least one vote (43% turnout).
 
 [[lede.p-1]]
-3 of 102 votes were "disagree" — from 2 people, on 3 items. The real split is agree vs. pass, not agree vs. disagree.
+
 
 [[sheet.h2-1]]
-The fourteen ideas, sorted by how settled they are
+14 ideas
 
 [[sub.p-1]]
 Each bar shows all 12 voters: agree / pass / disagree / no vote.
@@ -220,7 +220,7 @@ Teach
 Discuss
 
 [[actions.span-3]]
-**Put the ConAm and GET replacement on a meeting agenda, not the platform.** 6 of 8 voters passed on the ConAm.
+The coalition priorities
 
 [[k.span-4]]
 Route
@@ -232,7 +232,7 @@ Route
 Re-poll
 
 [[actions.span-5]]
-**Chase the other 16 members before locking the platform.**
+**Seek further input before next policy working group meeting.**
 
 [[sheet.span-1]]
 Source: Pol.is conversation [7bvwfhpf8x](https://pol.is/7bvwfhpf8x) · votes collected 30 July 2026 · 28 members invited, 12 voted
