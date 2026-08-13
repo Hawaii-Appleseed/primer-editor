@@ -140,9 +140,13 @@ Rules that bite:
   Free" Feb 2026, "Pedestrian Head Start" Mar 2026, "Stalled" Oct 2025)
   and the cycle's web one-pagers: report (tax-blue #1E6194 cover/contents/
   body), policy brief (charcoal #232322 + gold #FDCF21), one-pager. The
-  PDFs set Glober + Source Sans Pro; the web stand-ins per the brand guide
-  are Manrope + Source Sans 3 (Manrope and Poppins are in layout.py's
-  FONTS). Palettes ride the bindings (which is what fills every colour
+  PDFs set Glober + Source Sans Pro. Glober is commercial (Fontfabric,
+  $39/style — scoped 2026-08, no free weights); report/brief display is
+  Barlow (OFL, same DIN-grotesque genre, checked against the real specimen,
+  and already the live primer's own display face per layout.py's
+  BRAND_FONTS). Source Sans 3 IS Source Sans Pro (Adobe OFL, renamed at
+  v3). Only the one-pager keeps the website brand pair Manrope/Poppins.
+  Palettes ride the bindings (which is what fills every colour
   menu's swatches); the logo SVGs land in the project's assets — Insert
   image lists a project's bundled images (manifest `images`, staged by
   docsync.stage into `docs/<id>/assets/`) before offering the file dialog.
