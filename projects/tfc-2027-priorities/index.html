@@ -207,8 +207,12 @@
      and move the no-break rule down to the units that genuinely must not
      split: one idea's row, one family card, a tier's heading. Headings hold
      onto what follows them so nothing is left stranded at a page foot. */
-  section, .tier, .groups { break-inside:auto; }
-  ol.items li, .group, .tier-head, .legend, p.sub { break-inside:avoid; }
+  section, .tier { break-inside:auto; }
+  /* .groups stays atomic: it is a 2-column grid, so a break through it does
+     not read as "continued" — it drops one card alone onto the next sheet
+     beside the whitespace where its row-mates should be. It is ~300pt, well
+     under a sheet, so holding it together costs a page break, not a page. */
+  ol.items li, .group, .groups, .tier-head, .legend, p.sub { break-inside:avoid; }
   h2, h3, .tier-head, p.sub { break-after:avoid; }
 }
 
@@ -241,20 +245,14 @@
   </header>
 
   <section>
-    <div class="headline-box">
-      <p class="lede"></p>
-    </div>
-  </section>
-
-  <section>
     <h2>14 ideas</h2>
     <p class="sub">Each bar shows all 12 voters: agree / pass / disagree / no vote.</p>
 
     <div class="legend">
-      <span><i class="swatch" style="background:var(--agree)"></i> Agree</span>
-      <span><i class="swatch" style="background:var(--pass)"></i> Pass / unsure</span>
-      <span><i class="swatch" style="background:var(--against)"></i> Disagree</span>
-      <span><i class="swatch" style="background:var(--empty)"></i> Didn't vote on it</span>
+      <span><i class="swatch" style="background:var(--agree)"></i> <span>Agree</span></span>
+      <span><i class="swatch" style="background:var(--pass)"></i> <span>Pass / unsure</span></span>
+      <span><i class="swatch" style="background:var(--against)"></i> <span>Disagree</span></span>
+      <span><i class="swatch" style="background:var(--empty)"></i> <span>Didn't vote on it</span></span>
     </div>
 
     <div class="tier">
@@ -412,8 +410,8 @@
   </section>
 
   <section>
-    <h2>Credits or raisers?</h2>
-    <p class="sub">The same 14 ideas re-sorted by what they do — put money in people's pockets, or raise it. Each bar is that family's combined votes.</p>
+    <h2>Tax credits vs revenue raisers</h2>
+    <p class="sub"></p>
     <div class="groups">
       <div class="group">
         <span class="who">5 ideas · 34 votes</span>

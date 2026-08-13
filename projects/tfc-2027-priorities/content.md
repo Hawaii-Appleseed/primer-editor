@@ -45,9 +45,6 @@ Were "disagree"
 [[turnout.p-1]]
 **12 of 28** invited coalition members cast at least one vote (43% turnout).
 
-[[lede.p-1]]
-
-
 [[sheet.h2-1]]
 14 ideas
 
@@ -169,10 +166,10 @@ Constitutional amendment to let the state tax high-value investment properties
 **1 of 8** votes agreed · 6 passes · 1 disagree
 
 [[split.h2]]
-Credits or raisers?
+Tax credits vs revenue raisers
 
 [[split.sub]]
-The same 14 ideas re-sorted by what they do — put money in people's pockets, or raise it. Each bar is that family's combined votes.
+
 
 [[fam.who-1]]
 5 ideas · 34 votes
@@ -212,72 +209,6 @@ Pairing a progressive raiser with a GET cut on food, and GET reform or replaceme
 
 [[split.note]]
 **Credits and raisers poll the same.** 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. The split that matters is GET restructuring at 44%, with more passes than agrees. A 2027 platform can carry both families; the GET questions need a conversation first.
-
-[[sheet.h2-2]]
-The three clusters the tool found
-
-[[sub.p-2]]
-Pol.is grouped the 12 voters by voting pattern.
-
-[[who.span-1]]
-Group A · 3 members
-
-[[group.h3-1]]
-Cautious
-
-[[group.p-1]]
-Mostly passed. Clear yeses only on REIT loophole, kūpuna caregiver credit, renewable energy fix.
-
-[[who.span-2]]
-Group B · 3 members
-
-[[group.h3-2]]
-Revenue-side
-
-[[group.p-2]]
-Strong on structural raisers (conveyance, capital gains, renewable energy, expiring credits). Source of 2 of the 3 disagree votes.
-
-[[who.span-3]]
-Group C · 6 members
-
-[[group.h3-3]]
-Broad coalition
-
-[[group.p-3]]
-Agreed with nearly everything. One disagree, on GET replacement.
-
-[[sheet.h2-3]]
-What to do with this
-
-[[k.span-1]]
-Lead
-
-[[actions.span-1]]
-**Build the 2027 ask around the 7 settled items.**
-
-[[k.span-2]]
-Teach
-
-[[actions.span-2]]
-**Brief the coalition on worldwide combined reporting, Keiki Rx, and the GET-on-food pairing** before re-polling — high pass rates there read as a knowledge gap.
-
-[[k.span-3]]
-Discuss
-
-[[actions.span-3]]
-The coalition priorities
-
-[[k.span-4]]
-Route
-
-[[actions.span-4]]
-**Send the Oʻahu historic-home exemption to a county track** — the only county-level item on the list.
-
-[[k.span-5]]
-Re-poll
-
-[[actions.span-5]]
-**Seek further input before next policy working group meeting.**
 
 [[sheet.span-1]]
 Source: Pol.is conversation [7bvwfhpf8x](https://pol.is/7bvwfhpf8x) · votes collected 30 July 2026 · 28 members invited, 12 voted
