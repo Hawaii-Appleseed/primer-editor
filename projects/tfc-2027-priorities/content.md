@@ -154,7 +154,7 @@ Fix the child and dependent care tax credit
 **2 of 7** votes agreed · 4 passes · 1 disagree
 
 [[gloss.span-8]]
-The biggest structural swing on the list
+Largest dissent
 
 [[tally.span-13]]
 **2 of 7** votes agreed · 4 passes · 1 disagree
@@ -170,6 +170,18 @@ Tax credits vs revenue raisers
 
 [[split.sub]]
 
+
+[[famsplit.key-1]]
+Tax credits & direct support · 5 ideas
+
+[[famsplit.key-2]]
+Revenue raisers · 7 ideas
+
+[[famsplit.key-3]]
+GET restructuring · 2 ideas
+
+[[famsplit.cap]]
+Share of the 101 votes cast, by family. Revenue raisers took half the coalition's attention; the two GET questions took a sixth.
 
 [[fam.who-1]]
 5 ideas · 34 votes
@@ -208,7 +220,7 @@ GET restructuring
 Pairing a progressive raiser with a GET cut on food, and GET reform or replacement.
 
 [[split.note]]
-**Credits and raisers poll the same.** 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. The split that matters is GET restructuring at 44%, with more passes than agrees. A 2027 platform can carry both families; the GET questions need a conversation first.
+**Credits and raisers poll the same.** 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. However, GET restructuring polled at 44%, with more passes than agrees.
 
 [[sheet.span-1]]
 Source: Pol.is conversation [7bvwfhpf8x](https://pol.is/7bvwfhpf8x) · votes collected 30 July 2026 · 28 members invited, 12 voted
@@ -241,4 +253,4 @@ Reform the 2011 historic-home tax exemption
 GET reform or replacement
 
 [[sources]]
-[example]: Replace or delete this placeholder source — https://example.com
+[polis]: Pol.is conversation 7bvwfhpf8x, votes collected 30 July 2026 — https://pol.is/7bvwfhpf8x

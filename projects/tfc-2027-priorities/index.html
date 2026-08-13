@@ -184,6 +184,44 @@
   }
 
   
+:root{
+  --fam1:#52796F; --fam1-ink:#FFFFFF;
+  --fam2:#8AA79E; --fam2-ink:#1F2E2A;
+  --fam3:#C3CEC5; --fam3-ink:#1F2E2A;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --fam1:#9DBFA6; --fam1-ink:#16211E;
+    --fam2:#5E8177; --fam2-ink:#EAF2EE;
+    --fam3:#3A4A4A; --fam3-ink:#DCE6E1;
+  }
+}
+:root[data-theme="dark"]{
+  --fam1:#9DBFA6; --fam1-ink:#16211E;
+  --fam2:#5E8177; --fam2-ink:#EAF2EE;
+  --fam3:#3A4A4A; --fam3-ink:#DCE6E1;
+}
+:root[data-theme="light"]{
+  --fam1:#52796F; --fam1-ink:#FFFFFF;
+  --fam2:#8AA79E; --fam2-ink:#1F2E2A;
+  --fam3:#C3CEC5; --fam3-ink:#1F2E2A;
+}
+.famsplit{margin:.2rem 0 1.5rem;}
+.famsplit-bar{display:flex; height:2.1rem; border-radius:3px; overflow:hidden;
+  background:var(--empty);}
+.famsplit-bar i{display:flex; align-items:center; justify-content:center;
+  font-style:normal; font-size:.9rem; font-weight:700; letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;}
+.famsplit-bar .f1{background:var(--fam1); color:var(--fam1-ink);}
+.famsplit-bar .f2{background:var(--fam2); color:var(--fam2-ink);}
+.famsplit-bar .f3{background:var(--fam3); color:var(--fam3-ink);}
+.famsplit-key{display:flex; flex-wrap:wrap; gap:.35rem 1.25rem; margin-top:.55rem;
+  font-size:.8rem; color:var(--ink-faint);}
+.famsplit-key > span{display:inline-flex; align-items:center; gap:.4rem;}
+.famsplit-cap{margin:.55rem 0 0; font-size:.84rem; color:var(--ink-soft);
+  max-width:46rem;}
+
+  
 @page { size: letter; margin: 0.25in; }
 @media print {
   body { background:#fff; }
@@ -212,8 +250,12 @@
      not read as "continued" — it drops one card alone onto the next sheet
      beside the whitespace where its row-mates should be. It is ~300pt, well
      under a sheet, so holding it together costs a page break, not a page. */
-  ol.items li, .group, .groups, .tier-head, .legend, p.sub { break-inside:avoid; }
-  h2, h3, .tier-head, p.sub { break-after:avoid; }
+  ol.items li, .group, .groups, .tier-head, .legend, p.sub,
+  .famsplit { break-inside:avoid; }
+  /* .famsplit joins the heading-chain: the bar is the section's summary and
+     the cards are its detail, so a break between them reads as two unrelated
+     graphics. Chained with h2/p.sub above, the whole block moves together. */
+  h2, h3, .tier-head, p.sub, .famsplit { break-after:avoid; }
 }
 
   
@@ -388,7 +430,7 @@
           </span>
         </li>
         <li>
-          <span class="idea"><span>GET reform or replacement</span><span class="gloss">The biggest structural swing on the list</span></span>
+          <span class="idea"><span>GET reform or replacement</span><span class="gloss">Largest dissent</span></span>
           <span class="gauge">
             <span class="bar" role="img" aria-label="2 agree, 4 pass, 1 disagree, 5 did not vote">
               <i class="a" style="width:16.7%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:8.3%"></i>
@@ -412,6 +454,17 @@
   <section>
     <h2>Tax credits vs revenue raisers</h2>
     <p class="sub"></p>
+    <div class="famsplit">
+      <span class="famsplit-bar" role="img" aria-label="Of 101 votes cast: 34 on tax credits and direct support, 51 on revenue raisers, 16 on GET restructuring">
+        <i class="f1" style="width:33.7%">34</i><i class="f2" style="width:50.5%">51</i><i class="f3" style="width:15.8%">16</i>
+      </span>
+      <div class="famsplit-key">
+        <span><i class="swatch" style="background:var(--fam1)"></i> <span>Tax credits &amp; direct support · 5 ideas</span></span>
+        <span><i class="swatch" style="background:var(--fam2)"></i> <span>Revenue raisers · 7 ideas</span></span>
+        <span><i class="swatch" style="background:var(--fam3)"></i> <span>GET restructuring · 2 ideas</span></span>
+      </div>
+      <p class="famsplit-cap">Share of the 101 votes cast, by family. Revenue raisers took half the coalition's attention; the two GET questions took a sixth.</p>
+    </div>
     <div class="groups">
       <div class="group">
         <span class="who">5 ideas · 34 votes</span>
@@ -447,7 +500,7 @@
         <p>Pairing a progressive raiser with a GET cut on food, and GET reform or replacement.</p>
       </div>
     </div>
-    <p class="sub"><b>Credits and raisers poll the same.</b> 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. The split that matters is GET restructuring at 44%, with more passes than agrees. A 2027 platform can carry both families; the GET questions need a conversation first.</p>
+    <p class="sub"><b>Credits and raisers poll the same.</b> 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. However, GET restructuring polled at 44%, with more passes than agrees.</p>
   </section>
 
   <footer>
