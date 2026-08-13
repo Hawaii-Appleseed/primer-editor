@@ -41,6 +41,23 @@ test.describe('a stale editor server', () => {
     await expect(page.locator('#stat')).not.toHaveText(/running old code/i);
   });
 
+  // The LAUNCHER's half of this. The app bundle greps a bare /__ping — no
+  // ?project= — and replaces its own server when the answer says stale. That
+  // ping used to take an early return that omitted the key entirely, so the
+  // grep never matched and a stale server survived every relaunch: the one
+  // failure this whole feature exists to prevent, reachable only through the
+  // path no test covered. serverStale is a property of the SERVER, so it must
+  // be in every ping answer, project or not.
+  test('the bare ping the app launcher reads carries serverStale',
+    async ({ request }) => {
+    for (const url of ['/__ping', '/__ping?project=budget-primer',
+                       '/__ping?project=no-such-project']) {
+      const j = await (await request.get(url)).json();
+      expect(j.ok, url).toBe(true);
+      expect(typeof j.serverStale, url).toBe('boolean');
+    }
+  });
+
   test('a dead watcher outranks it — that stops reload entirely', async ({ page }) => {
     await pingWith(page, { serverStale: true, watchAge: 99 });
     await gotoEditor(page);
