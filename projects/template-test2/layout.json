@@ -1,0 +1,169 @@
+{
+  "positions": {},
+  "fill": {
+    "page.1": "#354F52"
+  },
+  "shapes": [
+    {
+      "id": "tpl-rule2",
+      "page": 2,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.52,
+      "w": 1.2,
+      "h": 0.05,
+      "fill": "#FDCF21"
+    }
+  ],
+  "boxes": [
+    {
+      "id": "tpl-photo",
+      "page": 1,
+      "x": 0,
+      "y": 0,
+      "w": 8.5,
+      "z": 1,
+      "md": "![Cover photo placeholder](assets/cover-photo-placeholder.svg)"
+    },
+    {
+      "id": "tpl-kick",
+      "page": 1,
+      "x": 0.7,
+      "y": 8,
+      "w": 3,
+      "z": 3,
+      "md": "POLICY BRIEF",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 14,
+        "color": "#FDCF21",
+        "tracking": 1.5
+      }
+    },
+    {
+      "id": "tpl-title",
+      "page": 1,
+      "x": 0.7,
+      "y": 8.35,
+      "w": 5.2,
+      "z": 3,
+      "md": "First-save commit test",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 44,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "leading": 1.1
+      }
+    },
+    {
+      "id": "tpl-date",
+      "page": 1,
+      "x": 5.6,
+      "y": 8,
+      "w": 2.2,
+      "z": 3,
+      "md": "MONTH 20XX",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 14,
+        "color": "#FDCF21",
+        "align": "right",
+        "tracking": 1.5
+      }
+    },
+    {
+      "id": "tpl-logo",
+      "page": 1,
+      "x": 6.15,
+      "y": 9.55,
+      "w": 1.65,
+      "z": 3,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo-white.svg)"
+    },
+    {
+      "id": "tpl-covernote",
+      "page": 1,
+      "x": 0.7,
+      "y": 0.7,
+      "w": 4.6,
+      "z": 3,
+      "md": "The backdrop is a placeholder — swap it for a cover photo (Insert ▸ Image, size to the page, send to back), then delete this note.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#9C9C98",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "tpl-h2",
+      "page": 2,
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Background",
+      "style": {
+        "font": "Manrope",
+        "weight": 800,
+        "size": 38,
+        "color": "#232322",
+        "case": "upper"
+      }
+    },
+    {
+      "id": "tpl-body2",
+      "page": 2,
+      "x": 0.7,
+      "y": 1.85,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THE BRIEF'S FIRST WORDS, IN BOLD CAPITALS,** state the problem in a sentence. Two or three short paragraphs follow — what the policy is, where it works, what it costs.\n\nReplace all of this, or delete the box and lay the page out your own way.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "tpl-rec2",
+      "page": 2,
+      "x": 0.7,
+      "y": 4.6,
+      "w": 7.1,
+      "z": 2,
+      "fill": "#F4F1E7",
+      "md": "**Recommendations for Hawaiʻi**\n\n- The first recommendation, one line.\n- The second.\n- The third.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#232322",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "tpl-foot",
+      "page": 2,
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "2 · YOUR BRIEF",
+      "style": {
+        "font": "Manrope",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    }
+  ],
+  "tables": [],
+  "sections": {}
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Template Test Two</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#D6E0D2; font:15px/1.5 system-ui, sans-serif;
+         color:#2F3E46; }
+  /* position:relative is load-bearing: every placed object is absolute
+     against its page, so the page must be the containing block or the whole
+     document stacks at the window's origin. isolation:isolate equally so:
+     it makes the page a stacking context, which is what keeps a
+     send-to-back shape (z-index -1) ABOVE the page's own background — on a
+     page with a fill, a plain relative page painted that shape underneath
+     its background, i.e. invisible. */
+  .page { width:8.5in; min-height:11.0in; margin:24px auto; background:#fff;
+          box-shadow:0 4px 18px rgba(0,0,0,.12); position:relative;
+          isolation:isolate; overflow:hidden; box-sizing:border-box; }
+  .ds-textbox p { margin:0 0 .5em; }
+  .ds-textbox p:last-child { margin-bottom:0; }
+  .ds-table { border-collapse:collapse; }
+  .ds-table td, .ds-table th { border:1px solid #C9D6CD; padding:4px 7px;
+          text-align:left; }
+  .endnotes { font-size:13px; color:#52796F; }
+  @media print {
+    @page { size: 8.5in 11.0in; margin: 0; }
+    body { background:#fff; }
+    .page { box-shadow:none; margin:0; width:8.5in; height:11.0in; }
+  }
+</style>
+</head>
+<body>
+<section class="page" data-page="1" style="background:#354F52"><style>.ds-textbox img.inline-img{display:block;width:100%;height:auto;margin:0}</style><div class="ds-textbox" style="position:absolute;left:0in;top:0in;width:8.5in;z-index:1"><p><img class="inline-img" src="assets/cover-photo-placeholder.svg" alt="Cover photo placeholder"></p></div><div class="ds-textbox" style="font-family:'Source Sans 3';font-size:14px;font-weight:700;color:#FDCF21;letter-spacing:1.5px;position:absolute;left:0.7in;top:8in;width:3in;z-index:3"><p>POLICY BRIEF</p></div><div class="ds-textbox" style="font-family:'Manrope';font-size:44px;font-weight:800;color:#FFFFFF;line-height:1.1;text-transform:uppercase;position:absolute;left:0.7in;top:8.35in;width:5.2in;z-index:3"><p>First-save commit test</p></div><div class="ds-textbox" style="font-family:'Source Sans 3';font-size:14px;font-weight:700;color:#FDCF21;letter-spacing:1.5px;text-align:right;display:inline-block;width:100%;position:absolute;left:5.6in;top:8in;width:2.2in;z-index:3"><p>MONTH 20XX</p></div><div class="ds-textbox" style="position:absolute;left:6.15in;top:9.55in;width:1.65in;z-index:3"><p><img class="inline-img" src="assets/appleseed-logo-white.svg" alt="Hawaiʻi Appleseed"></p></div><div class="ds-textbox" style="font-family:'Source Sans 3';font-size:11px;color:#9C9C98;line-height:1.4;position:absolute;left:0.7in;top:0.7in;width:4.6in;z-index:3"><p>The backdrop is a placeholder — swap it for a cover photo (Insert ▸ Image, size to the page, send to back), then delete this note.</p></div></section><section class="page" data-page="2"><svg class="shape-layer" style="position:absolute;left:0;top:0;width:8.5in;height:11.0in;pointer-events:none;z-index:-1" viewBox="0 0 8.5 11.0"><rect x="0.7" y="1.52" width="1.2" height="0.05" rx="0" fill="#FDCF21" stroke="none" stroke-width="0.02" data-shape="tpl-rule2"/></svg><style>.ds-textbox img.inline-img{display:block;width:100%;height:auto;margin:0}</style><div class="ds-textbox" style="font-family:'Manrope';font-size:38px;font-weight:800;color:#232322;text-transform:uppercase;position:absolute;left:0.7in;top:0.7in;width:7.1in;z-index:2"><p>Background</p></div><div class="ds-textbox" style="font-family:'Source Sans 3';font-size:15px;color:#1F1F1F;line-height:1.5;position:absolute;left:0.7in;top:1.85in;width:7.1in;z-index:2"><p><b>THE BRIEF'S FIRST WORDS, IN BOLD CAPITALS,</b> state the problem in a sentence. Two or three short paragraphs follow — what the policy is, where it works, what it costs.</p><p>Replace all of this, or delete the box and lay the page out your own way.</p></div><div class="ds-textbox" style="font-family:'Source Sans 3';font-size:14px;color:#232322;line-height:1.5;position:absolute;left:0.7in;top:4.6in;width:7.1in;z-index:2;background:#F4F1E7;padding:.08in .12in;border-radius:8px"><p><b>Recommendations for Hawaiʻi</b></p><ul class="extra-bullets"><li>The first recommendation, one line.</li><li>The second.</li><li>The third.</li></ul></div><div class="ds-textbox" style="font-family:'Manrope';font-size:12px;font-weight:700;color:#464646;letter-spacing:0.8px;text-align:right;display:inline-block;width:100%;position:absolute;left:4.9in;top:10.55in;width:2.9in;z-index:2"><p>2 · YOUR BRIEF</p></div></section>
+
+</body>
+</html>
