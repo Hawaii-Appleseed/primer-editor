@@ -13,10 +13,10 @@ Tax Fairness Coalition — 2027 Priorities: What the Poll Said
 <!-- slots below proposed by `python3 -m docsync.propose` — keys are mechanical (ctx.tag-n); rename in BOTH this file and body.slotted.html -->
 
 [[eyebrow.p-1]]
-Member poll · Results brief
+
 
 [[sheet.h1-1]]
-What the coalition wants to fight for in 2027
+Coalition Priorities Survey
 
 [[standfirst.p-1]]
 Results of the Pol.is poll on 2027 legislative priorities: 14 ideas, voted agree / disagree / pass.
