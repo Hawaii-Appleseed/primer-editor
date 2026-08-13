@@ -193,3 +193,17 @@ bindings:
         # virtual filesystem won't have them ("draft does not build").
         - projects/tfc-2027-priorities/original.html
         - projects/tfc-2027-priorities/body.slotted.html
+
+  # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed policy brief" template.
+  - id: my-report
+    content: projects/my-report/content.md
+    build: python3 projects/my-report/render_report.py && python3 -m docsync.stage --id my-report
+    outputs:
+      - projects/my-report/web/index.html
+    editor:
+      dir: docs/my-report
+      render: projects/my-report/render_report.py
+      out: projects/my-report/web/index.html
+      layout: projects/my-report/layout.json
+      palette: ["#232322", "#FDCF21", "#7E6B3B", "#1E6194", "#A5CCB4", "#4E9685", "#464646", "#FFFFFF"]
+      page: [8.5, 11.0]
