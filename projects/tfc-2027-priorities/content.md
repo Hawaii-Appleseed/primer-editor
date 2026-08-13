@@ -70,13 +70,13 @@ Settled
 Broad agreement, few passes, zero opposition
 
 [[gloss.span-1]]
-Identify a more appropriate threshold
+By reducing the proposed phase-out
 
 [[tally.span-1]]
 **7 of 7** votes agreed · no passes
 
 [[gloss.span-2]]
-The most-voted item in the poll
+
 
 [[tally.span-2]]
 **9 of 11** votes agreed · 2 passes
@@ -232,7 +232,7 @@ Prepared for the Tax Fairness Coalition
 Fix last session's renewable energy tax cuts
 
 [[idea.span-txt-2]]
-Conveyance tax
+Conveyance tax reform
 
 [[idea.span-txt-3]]
 Create a state-level Child Tax Credit
