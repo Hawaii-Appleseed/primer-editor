@@ -124,6 +124,15 @@
       <label id="np-slug-l">Short id (used in the URL and file paths)
         <input id="np-slug" placeholder="housing-report-2027" autocomplete="off">
       </label>
+      <!-- Templates come from the LOCAL server's engine (/__templates), so
+           this row exists only when there is one to ask and it lists any.
+           A template is a designed layout measured against its own sheet,
+           so picking one stands the size select down. -->
+      <label id="np-tpl-l" hidden>Start from
+        <select id="np-tpl">
+          <option value="" selected>Blank canvas</option>
+        </select>
+      </label>
       <label id="np-size-l">Page size
         <select id="np-size">
           <option value="letter" selected>Letter — 8.5 × 11 in</option>
@@ -937,7 +946,33 @@ function openModal(opts = {}) {
   $('np-path').value = 'docs/primer';
   $('np-name').value = ''; $('np-slug').value = ''; $('np-slug').dataset.touched = '';
   $('np-size').value = 'letter';
+  $('np-size').disabled = false;
+  $('np-tpl').value = '';
   $('np-err').textContent = '';
+  // Offer the engine's templates — local only (the hosted scaffold builds
+  // through the GitHub API and has no /__templates to ask), fetched when the
+  // form opens so a template added to the engine appears without a reload.
+  $('np-tpl-l').hidden = true;
+  if (LOCAL && modalMode === 'new') {
+    fetch('/__templates').then(r => r.json()).then(j => {
+      const list = (j && j.templates) || [];
+      if (!list.length || modalMode !== 'new') return;
+      const sel = $('np-tpl');
+      sel.length = 1;                       // keep only "Blank canvas"
+      for (const t of list) {
+        const o = document.createElement('option');
+        o.value = t.id;
+        o.textContent = `${t.name} — ${t.blurb}`;
+        sel.appendChild(o);
+      }
+      $('np-tpl-l').hidden = false;
+      // The size select speaks only for the blank canvas; a template brings
+      // its own sheet. Grey it out rather than hide it, so the form doesn't
+      // jump under the pointer.
+      sel.onchange = () => { $('np-size').disabled = !!sel.value; };
+      sel.onchange();
+    }).catch(() => {});
+  }
   // Adopt asks where the project lives and (optionally) what to call it; a
   // scaffold asks for an id and a page size, which adoption reads instead.
   $('np-path-l').hidden = !adopt || LOCAL;
@@ -1003,7 +1038,8 @@ $('np-create').onclick = async () => {
     try {
       const r = await fetch('/__scaffold', { method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, slug, size }) });
+        body: JSON.stringify({ name, slug, size,
+                               template: $('np-tpl').value || '' }) });
       const j = await r.json();
       if (!j.ok) throw new Error(j.error || 'could not create it');
       $('stat').textContent = `"${name}" created — opening it…`;

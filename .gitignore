@@ -31,7 +31,9 @@ docs/*/engine/
 docs/primer/index.html
 docs/primer/primer.css
 docs/primer/primer.js
-docs/primer/assets/
+# Staged by docsync.stage for EVERY project now (the editor's iframe reads a
+# box's "assets/…" src against the editor's page), not just the primer's build.
+docs/*/assets/
 
 # Built by tools/make_installer_zip.sh — the send-to-a-colleague zip. An
 # artifact you rebuild, never a source you track.

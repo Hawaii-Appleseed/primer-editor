@@ -128,6 +128,28 @@ Rules that bite:
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
   block); `python3 -m docsync.stage --id <id>` stages the editor + engine next
   to that report's published dir.
+- **Report templates live in `docsync/templates/`** (registry + logo assets;
+  engine files, so they vendor to consumers like the rest of the package).
+  "+ New report" offers them beside the blank canvas — editor File ▸ Open ▸
+  New report and start.html both read `GET /__templates`; `/__scaffold`
+  takes a `template` field; `docsync.new.create(template=…)` does the work.
+  A template is DATA riding the one blank renderer (layout.json + palette +
+  copied assets), never a different renderer. The three shipped templates
+  are digested from Hawaiʻi Appleseed's PUBLISHED 2025–26 reports
+  (hiappleseed.org/research — "A Fairer Tax Code" Jan 2026, "Keiki Ride
+  Free" Feb 2026, "Pedestrian Head Start" Mar 2026, "Stalled" Oct 2025)
+  and the cycle's web one-pagers: report (tax-blue #1E6194 cover/contents/
+  body), policy brief (charcoal #232322 + gold #FDCF21), one-pager. The
+  PDFs set Glober + Source Sans Pro; the web stand-ins per the brand guide
+  are Manrope + Source Sans 3 (Manrope and Poppins are in layout.py's
+  FONTS). Palettes ride the bindings (which is what fills every colour
+  menu's swatches); the logo SVGs land in the project's assets — Insert
+  image lists a project's bundled images (manifest `images`, staged by
+  docsync.stage into `docs/<id>/assets/`) before offering the file dialog.
+  `font_link()` scans box styles as well as slot styles, and the scaffolded
+  renderer emits it. If you add a template, keep every element inside the
+  page (`check_bounds()` refuses a draft that hangs off it — that would
+  brick the first render).
 - **Bringing in a static HTML page**: `python3 -m docsync.scaffold page.html
   --id <slug>` does STAGE ONE (openable) automatically — project dir, wrapper
   renderer, docsync.yml binding, build + stage. Then `python3 -m
