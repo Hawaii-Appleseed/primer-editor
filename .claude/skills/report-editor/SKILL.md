@@ -150,6 +150,7 @@ ids it returns:
 | `remove(ids)` / `duplicate(ids)` | the UI's own Delete and Duplicate, selection handled for you |
 | `addTextBox({page,x,y,w,h,md,style,fill})` | returns `'text.<n>'` for further verbs |
 | `addShape({page,kind,x,y,w,h,fill,stroke,sw,z,rx})` | a Shapes-panel shape (`rect\|ellipse\|line\|triangle\|arrow`) on ANY page — the way a hairline rule or panel lands on a page `duplicate()` can't reach |
+| `applyScheme(idOrHex)` | retint the report to another house scheme ('slate' or a hex) — every use of the current topic colour swaps, one undo step; the Colors rail panel's Apply |
 | `addPage(at?)` | blank page; returns its id |
 | `addSource(id, text, url)` / `addEndnotesSection()` | declare a source (cite via `[^id]` in slot text) / the synced endnotes section |
 | `batch(ops)` | `[{verb, args, as?}]` — one history entry, one render. See below |

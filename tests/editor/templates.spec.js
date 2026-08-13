@@ -134,6 +134,33 @@ test.describe('report templates', () => {
     await rows.filter({ hasText: 'appleseed-logo-white.svg' }).click();
     await expect(frame.locator('img[src*="appleseed-logo-white"]'))
       .toHaveCount(before + 1, { timeout: 30000 });
+
+    // The Colors rail panel: the report's palette plus the published schemes,
+    // each with an Apply — the post-creation twin of the scaffold's scheme
+    // picker.
+    await page.click('#colors');
+    await expect(page.locator('#side-title')).toHaveText('Colors');
+    await expect(page.locator('#side-body .scheme-apply').first()).toBeVisible();
+    expect(await page.locator('#side-body .cdot').count()).toBeGreaterThan(8);
+
+    // applyScheme retints the whole report — cover fills, hairlines, the
+    // pull-quote — from the current topic colour, and one undo restores.
+    const r = await page.evaluate(() => docsync.api.applyScheme('slate'));
+    expect(r.ok, r.error).toBe(true);
+    expect(r.from).toBe('#1E6194');
+    expect(r.to).toBe('#354F52');
+    expect(r.swapped).toBeGreaterThanOrEqual(4);
+    expect(await page.evaluate(() => layout.fill['page.1'])).toBe('#354F52');
+    const u = await page.evaluate(() => docsync.api.undo());
+    expect(u.ok).toBe(true);
+    expect(await page.evaluate(() => layout.fill['page.1'])).toBe('#1E6194');
+    // The panel is a TOOL panel: renders and selection changes must not
+    // dismiss it (the selection-follow close is for the per-element colour
+    // panel only).
+    await expect(page.locator('#side-title')).toHaveText('Colors');
+    // A scheme nothing offers is refused by name.
+    const bad = await page.evaluate(() => docsync.api.applyScheme('mauve'));
+    expect(bad.ok).toBe(false);
   });
 
   test('the blank canvas is untouched by all of this', async ({ request }) => {
