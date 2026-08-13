@@ -221,17 +221,3 @@ bindings:
       layout: projects/template-test/layout.json
       palette: ["#4E9685", "#1E6194", "#FDCF21", "#A5CCB4", "#354F52", "#232322", "#464646", "#FFFFFF"]
       page: [8.5, 11.0]
-
-  # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed policy brief" template.
-  - id: template-test2
-    content: projects/template-test2/content.md
-    build: python3 projects/template-test2/render_report.py && python3 -m docsync.stage --id template-test2
-    outputs:
-      - projects/template-test2/web/index.html
-    editor:
-      dir: docs/template-test2
-      render: projects/template-test2/render_report.py
-      out: projects/template-test2/web/index.html
-      layout: projects/template-test2/layout.json
-      palette: ["#354F52", "#232322", "#FDCF21", "#7E6B3B", "#1E6194", "#A5CCB4", "#4E9685", "#464646", "#FFFFFF"]
-      page: [8.5, 11.0]
