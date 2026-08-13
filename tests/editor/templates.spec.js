@@ -42,6 +42,44 @@ test.describe('report templates', () => {
       expect(t.blurb).toBeTruthy();
       expect(t.page.w).toBeGreaterThan(0);
     }
+    // The listing carries each template's colour schemes resolved — id, a
+    // human name, a swatch colour — with the template's own default first.
+    const report = j.templates.find(t => t.id === 'appleseed-report');
+    expect(report.schemes[0]).toEqual(
+      { id: 'blue', name: 'Tax blue', color: '#1E6194' });
+    const brief = j.templates.find(t => t.id === 'appleseed-brief');
+    expect(brief.schemes[0].id).toBe('charcoal');
+  });
+
+  test('a scheme recolours the scaffold; a bad one is refused before files land',
+    async ({ request }) => {
+    const j = await (await request.post('/__scaffold', { data: {
+      name: 'Spec Slate Report', slug: SLUG,
+      template: 'appleseed-report', scheme: 'slate',
+    } })).json();
+    expect(j.ok, j.error).toBe(true);
+    const lay = JSON.parse(fs.readFileSync(
+      path.join(REPO, 'projects', SLUG, 'layout.json'), 'utf8'));
+    // The cover fields and the accents that echo them took the slate; the
+    // brand accents (gold TOC rule) did not.
+    expect(lay.fill['page.1']).toBe('#354F52');
+    expect(lay.fill['page.2']).toBe('#354F52');
+    expect(lay.shapes.find(s => s.id === 'tpl-rule3').fill).toBe('#354F52');
+    expect(lay.shapes.find(s => s.id === 'tpl-tocrule2').fill).toBe('#FDCF21');
+    // And the scheme's colour leads the binding's swatches.
+    const yml = fs.readFileSync(YML, 'utf8');
+    const block = yml.slice(yml.indexOf(`id: ${SLUG}`));
+    expect(block).toContain('palette: ["#354F52"');
+
+    // A scheme the template does not offer is refused, naming the real ones,
+    // with nothing written.
+    const bad = await (await request.post('/__scaffold', { data: {
+      name: 'Nope', slug: SLUG + '-bad',
+      template: 'appleseed-report', scheme: 'mauve',
+    } })).json();
+    expect(bad.ok).toBe(false);
+    expect(bad.error).toContain('slate');
+    expect(fs.existsSync(path.join(REPO, 'projects', SLUG + '-bad'))).toBe(false);
   });
 
   test('a template scaffolds placed content, its palette and the logos',

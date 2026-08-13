@@ -133,6 +133,11 @@
           <option value="" selected>Blank canvas</option>
         </select>
       </label>
+      <!-- The template's topic colours, its own default first — filled in
+           when a template is picked, hidden for the blank canvas. -->
+      <label id="np-scheme-l" hidden>Colour scheme
+        <select id="np-scheme"></select>
+      </label>
       <label id="np-size-l">Page size
         <select id="np-size">
           <option value="letter" selected>Letter — 8.5 × 11 in</option>
@@ -953,6 +958,7 @@ function openModal(opts = {}) {
   // through the GitHub API and has no /__templates to ask), fetched when the
   // form opens so a template added to the engine appears without a reload.
   $('np-tpl-l').hidden = true;
+  $('np-scheme-l').hidden = true;
   if (LOCAL && modalMode === 'new') {
     fetch('/__templates').then(r => r.json()).then(j => {
       const list = (j && j.templates) || [];
@@ -968,8 +974,22 @@ function openModal(opts = {}) {
       $('np-tpl-l').hidden = false;
       // The size select speaks only for the blank canvas; a template brings
       // its own sheet. Grey it out rather than hide it, so the form doesn't
-      // jump under the pointer.
-      sel.onchange = () => { $('np-size').disabled = !!sel.value; };
+      // jump under the pointer. The scheme row is the template's topic
+      // colours, its own default first — blank canvas has none to offer.
+      sel.onchange = () => {
+        $('np-size').disabled = !!sel.value;
+        const t = list.find(x => x.id === sel.value);
+        const schemes = (t && t.schemes) || [];
+        const sch = $('np-scheme');
+        sch.length = 0;
+        schemes.forEach((s, i) => {
+          const o = document.createElement('option');
+          o.value = s.id;
+          o.textContent = s.name + (i === 0 ? ' (default)' : '');
+          sch.appendChild(o);
+        });
+        $('np-scheme-l').hidden = !schemes.length;
+      };
       sel.onchange();
     }).catch(() => {});
   }
@@ -1039,7 +1059,9 @@ $('np-create').onclick = async () => {
       const r = await fetch('/__scaffold', { method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, slug, size,
-                               template: $('np-tpl').value || '' }) });
+                               template: $('np-tpl').value || '',
+                               scheme: $('np-scheme-l').hidden
+                                 ? '' : $('np-scheme').value || '' }) });
       const j = await r.json();
       if (!j.ok) throw new Error(j.error || 'could not create it');
       $('stat').textContent = `"${name}" created — opening it…`;
