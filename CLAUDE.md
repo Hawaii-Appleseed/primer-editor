@@ -169,6 +169,19 @@ Rules that bite:
   remaining STAGE TWO judgment work (renames, chrome pruning, widget
   restructuring) and what's still automatable is scoped in
   `docsync/STAGE2_AUTOMATION.md`.
+  **Do not call a project done — or hand it back as "ready to edit" —
+  once propose finishes.** Slots and movable images are all it wires;
+  everything else in the page (stat cards, poll bars, any structural
+  "content box") stays completely inert: no selection, no floating mini
+  toolbar, and nothing anywhere says so unless you do. `propose` prints
+  this same warning at the end of every run — it is not a courtesy note.
+  Before finishing an ingestion, either do the STAGE TWO widget pass
+  (`docsync/blocks.py`'s `graphic()`/`card()`, the report-editor skill)
+  or tell the person plainly what remains unwired and why. The editor
+  itself now carries a standing amber notice for this (`#s2` /
+  `checkStage2()` in `edit.html`, keyed off `body.slotted.html` in the
+  engine list, dismissible per project) — a net for the case this gets
+  skipped anyway, not a substitute for saying so.
 
 ## Recent architecture (2026-07), so you don't rediscover it
 
