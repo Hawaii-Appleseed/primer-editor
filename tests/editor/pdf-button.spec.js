@@ -188,12 +188,24 @@ test('published output of a real build carries the working button', async ({ pag
 
     // And the button really fires: open the built page in the browser, stub
     // print, click it.
+    // A BLOB URL, not document.write. The published page now carries an inline
+    // <script> inside section.page (the toggle animation's __dsTgl), and
+    // document.write's parser STOPS at a script: everything after it —
+    // including this button — was silently dropped, so the page under test was
+    // never the page that shipped. A blob url is a real navigation, which
+    // parses the bytes exactly as a browser opening the file would.
     const fired = await page.evaluate(async raw => {
-      const w = window.open('', '_blank');
-      w.document.write(raw); w.document.close();
+      const w = window.open(
+        URL.createObjectURL(new Blob([raw], { type: 'text/html' })), '_blank');
+      const t0 = Date.now();
+      let btn;
+      while (!(btn = w.document && w.document.querySelector('.ds-actbtn'))) {
+        if (Date.now() - t0 > 5000) throw new Error('published page never loaded');
+        await new Promise(r => setTimeout(r, 50));
+      }
       let called = false;
       w.print = () => { called = true; };
-      w.document.querySelector('.ds-actbtn').click();
+      btn.click();
       const out = called; w.close();
       return out;
     }, html);

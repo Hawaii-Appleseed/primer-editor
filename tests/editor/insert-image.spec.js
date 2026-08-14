@@ -27,6 +27,12 @@ test.describe('insert image', () => {
     const uploaded = page.waitForRequest('**/__upload');
     const chooser = page.waitForEvent('filechooser');
     await page.click('#ar-img');
+    // Insert Image goes straight to the file dialog only for a project with
+    // NOTHING bundled. This fixture's project carries images (the template
+    // logos in its assets), so the button opens the picker first and "Upload
+    // from computer…" is what reaches the dialog — without this the chooser
+    // simply never fired and the spec timed out at 90s.
+    if (await page.locator('#imgpop').isVisible()) await page.click('#img-upload');
     await (await chooser).setFiles(PIXEL);
     // the editor posted real image bytes with the sanitised name
     const req = JSON.parse((await uploaded).postData());

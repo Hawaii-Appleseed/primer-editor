@@ -21,12 +21,20 @@ const { removeRegistryKeys } = require('./fixtures/host-state');
 test.describe.configure({ mode: 'serial' });
 
 test.describe('report content updates', () => {
-  // The shared fixture blocks /__pull for every spec, because it fetches and
+  // The suite blocks /__pull for every spec, because it fetches and
   // fast-forwards a REAL repo. This file is the exception: it only ever aims
-  // at scratch clones it built itself, so it lets the endpoint through — at
-  // page level, which Playwright checks before context-level routes.
+  // at scratch clones it built itself, so it lets the endpoint through.
+  //
+  // The opt-out is a HEADER now, not a bare route.continue(). The block used
+  // to be a browser route the fixture registered, so overriding it at page
+  // level was enough; it since moved server-side (PRIMER_TEST_SAFE, see
+  // serve.py's do_POST) where no browser route can reach it, and this spec
+  // silently started getting "blocked in tests — no real repo is updated
+  // here" for a pull it is the only test of.
   test.beforeEach(async ({ page }) => {
-    await page.route('**/__pull', route => route.continue());
+    await page.route('**/__pull', route => route.continue({
+      headers: { ...route.request().headers(), 'x-primer-test-pull': '1' },
+    }));
   });
 
   test.beforeAll(() => {

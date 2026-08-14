@@ -170,7 +170,14 @@ test.describe('selection-contextual arrange strip', () => {
       const g = await page.evaluate(() => {
         const rail = document.getElementById('leftrail');
         const r = rail.getBoundingClientRect();
-        const last = rail.querySelector('button:last-of-type').getBoundingClientRect();
+        // :scope > — the rail also CONTAINS buttons that are not tools: the
+        // Insert Image picker (#imgpop) is a child div holding an upload
+        // button, and a bare `button:last-of-type` matched THAT first (it is
+        // the last button of its own parent, and earlier in document order
+        // than the last tool). Hidden, so its rect read all zeros and the
+        // "nothing below the last tool" gap came back as the rail's own
+        // bottom — 454px of imaginary emptiness under a rail that was fine.
+        const last = rail.querySelector(':scope > button:last-of-type').getBoundingClientRect();
         const work = document.getElementById('work').getBoundingClientRect();
         const stage = document.getElementById('stage').getBoundingClientRect();
         return { railBottom: r.bottom, lastBottom: last.bottom, workBottom: work.bottom,

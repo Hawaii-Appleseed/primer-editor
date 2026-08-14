@@ -403,9 +403,20 @@ test('the published page expands and collapses for real', async ({ page }) => {
       path.join(REPO, 'projects', SLUG, 'web', 'index.html'), 'utf8');
 
     const run = await page.evaluate(async raw => {
-      const w = window.open('', '_blank');
-      w.document.write(raw); w.document.close();
-      const btn = w.document.querySelector('.ds-tglbtn');
+      // A BLOB URL, not document.write — and this spec's own subject is why.
+      // The toggle is a real animation now, which means the published page
+      // carries an inline <script> (__dsTgl) inside section.page, and
+      // document.write's parser STOPS at a script: the button and everything
+      // after it never entered the document. The page under test has to be
+      // parsed the way a browser opening the file parses it.
+      const w = window.open(
+        URL.createObjectURL(new Blob([raw], { type: 'text/html' })), '_blank');
+      const t0 = Date.now();
+      let btn;
+      while (!(btn = w.document && w.document.querySelector('.ds-tglbtn'))) {
+        if (Date.now() - t0 > 5000) throw new Error('published page never loaded');
+        await new Promise(r => setTimeout(r, 50));
+      }
       const ts = ['ds-x-t2', 'ds-x-s9', 'ds-x-t8']
         .map(i => w.document.getElementById(i));
       // The published toggle is a REAL height transition now (__dsTgl,
