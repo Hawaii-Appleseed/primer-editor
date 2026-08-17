@@ -34,7 +34,7 @@ Put up ideas
 Ideas on the table
 
 [[num.span-1]]
-102
+101
 
 [[lbl.span-4]]
 Votes cast
