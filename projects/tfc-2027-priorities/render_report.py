@@ -69,6 +69,102 @@ BODY = re.sub("\u27e6S:([a-z0-9_.-]+)\u27e7", lambda m: L.spacer(m.group(1)), BO
 BODY = re.sub("\u27e6E:([a-z0-9_.-]+)\u27e7", lambda m: L.attr(m.group(1)), BODY)
 BODY = re.sub("\u27e6B:([a-z0-9_.-]+)\u27e7", lambda m: L.sec(m.group(1)), BODY)
 
+# The one component this report has that original.html never had: the stacked
+# family bar. Its CSS lives here rather than in original.html, which stays the
+# untouched import. The three fills are TINTS OF ONE HUE, not the agree/pass/
+# disagree palette — those three colours already mean a vote type everywhere
+# else on the page, and reusing them for policy families would read as though
+# credits were "agree" and GET were "disagree". A sequential ramp says "three
+# parts of one whole", which is what this bar is. Each fill carries its own ink
+# colour because the label sits INSIDE the segment, and dark mode is redefined
+# in both places original.html defines it (media query and [data-theme]) so a
+# themed editor and a themed browser agree.
+FAMILY_CSS = """
+:root{
+  --fam1:#52796F; --fam1-ink:#FFFFFF;
+  --fam2:#8AA79E; --fam2-ink:#1F2E2A;
+  --fam3:#C3CEC5; --fam3-ink:#1F2E2A;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --fam1:#9DBFA6; --fam1-ink:#16211E;
+    --fam2:#5E8177; --fam2-ink:#EAF2EE;
+    --fam3:#3A4A4A; --fam3-ink:#DCE6E1;
+  }
+}
+:root[data-theme="dark"]{
+  --fam1:#9DBFA6; --fam1-ink:#16211E;
+  --fam2:#5E8177; --fam2-ink:#EAF2EE;
+  --fam3:#3A4A4A; --fam3-ink:#DCE6E1;
+}
+:root[data-theme="light"]{
+  --fam1:#52796F; --fam1-ink:#FFFFFF;
+  --fam2:#8AA79E; --fam2-ink:#1F2E2A;
+  --fam3:#C3CEC5; --fam3-ink:#1F2E2A;
+}
+.famsplit{margin:.2rem 0 1.5rem;}
+.famsplit-bar{display:flex; height:2.1rem; border-radius:3px; overflow:hidden;
+  background:var(--empty);}
+.famsplit-bar i{display:flex; align-items:center; justify-content:center;
+  font-style:normal; font-size:.9rem; font-weight:700; letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;}
+.famsplit-bar .f1{background:var(--fam1); color:var(--fam1-ink);}
+.famsplit-bar .f2{background:var(--fam2); color:var(--fam2-ink);}
+.famsplit-bar .f3{background:var(--fam3); color:var(--fam3-ink);}
+.famsplit-key{display:flex; flex-wrap:wrap; gap:.35rem 1.25rem; margin-top:.55rem;
+  font-size:.8rem; color:var(--ink-faint);}
+.famsplit-key > span{display:inline-flex; align-items:center; gap:.4rem;}
+.famsplit-cap{margin:.55rem 0 0; font-size:.84rem; color:var(--ink-soft);
+  max-width:46rem;}
+"""
+
+# The wrapper's .page is a 12.5in-wide SCREEN canvas with overflow:hidden. Send
+# that to a printer and Chrome lays it on Letter: the right four inches \u2014 every
+# vote tally on every row \u2014 are clipped away, and the 27in column collapses to
+# three sheets of half-drawn rows. The page's own @media print block (in
+# original.html) already says what this document means on paper \u2014 .sheet at
+# max-width:100% with break-inside rules per section \u2014 but it can't be reached
+# while the wrapper holds a fixed width above it. Released here, printing only:
+# the screen canvas is unchanged, and @page names the paper Chrome was assuming
+# anyway rather than leaving it to the default margin box.
+PRINT_CSS = """
+@page { size: letter; margin: 0.25in; }
+@media print {
+  body { background:#fff; }
+  .page { width:auto; min-height:0; margin:0; overflow:visible; }
+  /* The last page held nothing but the source line: the document ran about
+     three quarters of an inch past the third sheet, all of it whitespace the
+     screen layout wants and paper does not. Reclaimed from the four places
+     that had slack — the paper margin, the sheet's own vertical padding, the
+     gap between sections, and footer's 3rem lead-in, which is generous even
+     on screen. Nothing here changes type size or the space INSIDE a block, so
+     the design reads the same; it just stops paying for a fourth sheet. */
+  .sheet { padding:0.12in 0.3in; }
+  section { margin-top:1.3rem; }
+  footer { margin-top:1.25rem; padding-top:0.8rem; break-before:avoid; }
+  /* The bigger win was pagination, not whitespace. original.html marks whole
+     sections and whole tiers break-inside:avoid, and by now both are taller
+     than a sheet: the Settled tier alone is ~400pt and the credits/raisers
+     section ~550pt, so each one refuses to start unless a full sheet is free.
+     That stranded 500pt at the foot of page 1 and 550pt on page 3 — the
+     document was not too long, it was packed badly. Let the containers flow
+     and move the no-break rule down to the units that genuinely must not
+     split: one idea's row, one family card, a tier's heading. Headings hold
+     onto what follows them so nothing is left stranded at a page foot. */
+  section, .tier { break-inside:auto; }
+  /* .groups stays atomic: it is a 2-column grid, so a break through it does
+     not read as "continued" — it drops one card alone onto the next sheet
+     beside the whitespace where its row-mates should be. It is ~300pt, well
+     under a sheet, so holding it together costs a page break, not a page. */
+  ol.items li, .group, .groups, .tier-head, .legend, p.sub,
+  .famsplit { break-inside:avoid; }
+  /* .famsplit joins the heading-chain: the bar is the section's summary and
+     the cards are its detail, so a break between them reads as two unrelated
+     graphics. Chained with h2/p.sub above, the whole block moves together. */
+  h2, h3, .tier-head, p.sub, .famsplit { break-after:avoid; }
+}
+"""
+
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,6 +176,8 @@ html = f"""<!DOCTYPE html>
   .page {{ width:{L.page_w}in; min-height:{L.page_h}in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }}
   {STYLE}
+  {FAMILY_CSS}
+  {PRINT_CSS}
   {EDIT_CSS}
 </style>
 </head>
