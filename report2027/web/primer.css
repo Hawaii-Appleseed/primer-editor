@@ -264,9 +264,21 @@ svg .brk { stroke: var(--sage); stroke-width: 2; fill: none; stroke-linecap: rou
   .pie-row { margin-inline: 0; }
   .pie-row .pie { width: 100% !important; max-width: 3.6in; }
   .pie-row .legend { flex: 0 0 auto; width: 100%; }
-  .lifecycle-wrap { width: 100%; }
+  .lifecycle-wrap { width: 100%; height: auto; }
+  /* .lifecycle-wrap svg is (0,0,2) and beats .chart's width:100%, so the
+     wheel kept its 5.8in and ran off the edge. The wrap's fixed 6.45in went
+     with it: with the callouts released it only has to hold the wheel. */
+  .lifecycle-wrap svg { width: 100%; max-width: 100%; height: auto; margin: 8px auto; }
   .lc { position: static; width: auto; margin: 4px 0;
         transform: none !important; text-align: left !important; }
+  /* Page furniture hangs off the BOTTOM of the sheet (bottom:1in / .45in),
+     which clears the text only while .page keeps its 11in min-height. This
+     query drops that, so the page collapses to its content and both land in
+     the middle of it. layout.py's mobile release frees what the ENGINE
+     pinned; class names like these are the report's own to know about. */
+  .copyright { position: static; margin: 28px 0 0; }
+  .folio, .folio.r { position: static; left: auto; right: auto; bottom: auto;
+                     margin-top: 22px; text-align: left; }
   .cover-title { font-size: 64px; }
   .endnotes { columns: 1; }
 }
