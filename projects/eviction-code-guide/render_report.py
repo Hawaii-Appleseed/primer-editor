@@ -29,7 +29,12 @@ C = Content(_CONTENT, styles=L)
 # Page 1 always exists; pages added in the editor land in layout.pages and
 # come back through the same helper every renderer uses. A converted document
 # starts with the page count it had.
-DESIGNED_PAGES = 4
+# Derived from the layout rather than hardcoded: Save commits layout.json
+# but NOT this file, so a hardcoded count silently goes stale the moment
+# a page is added — and page_order() then refuses to render at all.
+DESIGNED_PAGES = max(
+    [p for p in (L.pages.get("order") or []) if isinstance(p, int)]
+    or [1])
 PAGES = L.page_order(DESIGNED_PAGES)
 
 # What conversion had to decide for you, said in the editor rather than in
