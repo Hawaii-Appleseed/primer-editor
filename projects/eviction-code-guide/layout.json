@@ -1,0 +1,3437 @@
+{
+  "positions": {},
+  "fill": {
+    "page.1": "#4E9685",
+    "page.2": "#4E9685",
+    "page.b11": "#232322"
+  },
+  "shapes": [
+    {
+      "id": "cover-badge",
+      "page": 1,
+      "kind": "ellipse",
+      "x": 6.03,
+      "y": 6.04,
+      "w": 1.85,
+      "h": 1.85,
+      "z": 3,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "in-tocrule",
+      "page": 2,
+      "kind": "rect",
+      "x": 3.65,
+      "y": 6.44,
+      "w": 1.2,
+      "h": 0.035,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-3",
+      "page": 3,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.62,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p3-sbar0",
+      "page": 3,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 5.35,
+      "w": 0.05,
+      "h": 0.9,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p3-sbar1",
+      "page": 3,
+      "kind": "rect",
+      "x": 2.1399999999999997,
+      "y": 5.35,
+      "w": 0.05,
+      "h": 0.9,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p3-sbar2",
+      "page": 3,
+      "kind": "rect",
+      "x": 3.58,
+      "y": 5.35,
+      "w": 0.05,
+      "h": 0.9,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p3-sbar3",
+      "page": 3,
+      "kind": "rect",
+      "x": 5.0200000000000005,
+      "y": 5.35,
+      "w": 0.05,
+      "h": 0.9,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p3-sbar4",
+      "page": 3,
+      "kind": "rect",
+      "x": 6.46,
+      "y": 5.35,
+      "w": 0.05,
+      "h": 0.9,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "badge-4",
+      "page": 4,
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-4",
+      "page": 4,
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "badge-b5",
+      "page": "b5",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b5",
+      "page": "b5",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "badge-b6",
+      "page": "b6",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b6",
+      "page": "b6",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p6-r1bar",
+      "page": "b6",
+      "kind": "rect",
+      "x": 2.7,
+      "y": 3.5,
+      "w": 2.79,
+      "h": 0.34,
+      "z": 2,
+      "fill": "#4E9685",
+      "r": 0.06
+    },
+    {
+      "id": "p6-r2bar",
+      "page": "b6",
+      "kind": "rect",
+      "x": 2.7,
+      "y": 4.05,
+      "w": 0.93,
+      "h": 0.34,
+      "z": 2,
+      "fill": "#4E9685",
+      "r": 0.06
+    },
+    {
+      "id": "badge-b7",
+      "page": "b7",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b7",
+      "page": "b7",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "badge-b8",
+      "page": "b8",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b8",
+      "page": "b8",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p8-ic-clock",
+      "page": "b8",
+      "kind": "icon",
+      "x": 0.7,
+      "y": 1.98,
+      "w": 0.5,
+      "h": 0.5,
+      "z": 2,
+      "fill": "#4E9685",
+      "svg": "<circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><polyline points=\"12 7 12 12 15.5 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+    },
+    {
+      "id": "p8-l1-bar",
+      "page": "b8",
+      "kind": "rect",
+      "x": 3.35,
+      "y": 4.2,
+      "w": 0.784,
+      "h": 0.32,
+      "z": 2,
+      "fill": "#4E9685",
+      "r": 0.06
+    },
+    {
+      "id": "p8-l2-bar",
+      "page": "b8",
+      "kind": "rect",
+      "x": 3.35,
+      "y": 4.82,
+      "w": 1.26,
+      "h": 0.32,
+      "z": 2,
+      "fill": "#4E9685",
+      "r": 0.06
+    },
+    {
+      "id": "p8-l3-bar",
+      "page": "b8",
+      "kind": "rect",
+      "x": 3.35,
+      "y": 5.44,
+      "w": 3.36,
+      "h": 0.32,
+      "z": 2,
+      "fill": "#4E9685",
+      "r": 0.06
+    },
+    {
+      "id": "badge-b9",
+      "page": "b9",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b9",
+      "page": "b9",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p9-f1-arr",
+      "page": "b9",
+      "kind": "arrow",
+      "x": 2.72,
+      "y": 3.6999999999999997,
+      "w": 0.28,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21",
+      "rot": 90
+    },
+    {
+      "id": "p9-f2-arr",
+      "page": "b9",
+      "kind": "arrow",
+      "x": 2.72,
+      "y": 5.12,
+      "w": 0.28,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21",
+      "rot": 90
+    },
+    {
+      "id": "p9-f3-arr",
+      "page": "b9",
+      "kind": "arrow",
+      "x": 2.72,
+      "y": 6.08,
+      "w": 0.28,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21",
+      "rot": 90
+    },
+    {
+      "id": "p9-f4-arr",
+      "page": "b9",
+      "kind": "arrow",
+      "x": 2.72,
+      "y": 7.04,
+      "w": 0.28,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21",
+      "rot": 90
+    },
+    {
+      "id": "p9-ic-alert",
+      "page": "b9",
+      "kind": "icon",
+      "x": 5.35,
+      "y": 3.1,
+      "w": 0.42,
+      "h": 0.42,
+      "z": 3,
+      "fill": "#FDCF21",
+      "svg": "<path d=\"M12 3.5 L21.5 20 H2.5 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"/><line x1=\"12\" y1=\"9.5\" x2=\"12\" y2=\"14.5\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"12\" cy=\"17\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>"
+    },
+    {
+      "id": "badge-b10",
+      "page": "b10",
+      "kind": "ellipse",
+      "x": 0.7,
+      "y": 0.8,
+      "w": 0.56,
+      "h": 0.56,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "rule-b10",
+      "page": "b10",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p10-rd-arr",
+      "page": "b10",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 3.82,
+      "w": 0.3,
+      "h": 0.28,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p11-rule",
+      "page": "b11",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p11-t-bar",
+      "page": "b11",
+      "kind": "rect",
+      "x": 2.5,
+      "y": 4.95,
+      "w": 0.31,
+      "h": 0.34,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p11-ll-bar",
+      "page": "b11",
+      "kind": "rect",
+      "x": 2.5,
+      "y": 5.47,
+      "w": 5,
+      "h": 0.34,
+      "z": 2,
+      "fill": "#A5CCB4"
+    },
+    {
+      "id": "p12-rule",
+      "page": "b12",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.72,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    },
+    {
+      "id": "p12-arr0",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 3.41,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p12-arr1",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 4.39,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p12-arr2",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 5.369999999999999,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p12-arr3",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 6.35,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p12-arr4",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 7.33,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p12-arr5",
+      "page": "b12",
+      "kind": "arrow",
+      "x": 4.08,
+      "y": 8.31,
+      "w": 0.3,
+      "h": 0.26,
+      "z": 2,
+      "fill": "#FDCF21"
+    },
+    {
+      "id": "p13-rule",
+      "page": "b13",
+      "kind": "rect",
+      "x": 0.7,
+      "y": 1.58,
+      "w": 7.1,
+      "h": 0.022,
+      "z": 2,
+      "fill": "#4E9685"
+    }
+  ],
+  "boxes": [
+    {
+      "id": "cover-photo",
+      "page": 1,
+      "x": 0,
+      "y": 0,
+      "w": 8.5,
+      "z": 1,
+      "md": "![Cover photo placeholder](assets/cover-photo-placeholder.svg)"
+    },
+    {
+      "id": "cover-logo",
+      "page": 1,
+      "x": 6.35,
+      "y": 0.6,
+      "w": 1.55,
+      "z": 3,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo-white.svg)"
+    },
+    {
+      "id": "cover-kick",
+      "page": 1,
+      "x": 0.7,
+      "y": 1.02,
+      "w": 5.6,
+      "z": 3,
+      "md": "A PLAIN-LANGUAGE GUIDE FOR RENTERS",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 14,
+        "color": "#FDCF21",
+        "tracking": 1.5
+      }
+    },
+    {
+      "id": "cover-title",
+      "page": 1,
+      "x": 0.7,
+      "y": 1.42,
+      "w": 6.7,
+      "z": 3,
+      "md": "Understanding Hawaiʻi's Landlord-Tenant Code",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 52,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "leading": 1.08
+      }
+    },
+    {
+      "id": "cover-sub",
+      "page": 1,
+      "x": 0.7,
+      "y": 4.85,
+      "w": 4.4,
+      "z": 3,
+      "md": "Current protections, gaps & a case for reform — minus the legalese",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 19,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "tracking": 1.2,
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "cover-badge-t",
+      "page": 1,
+      "x": 6.15,
+      "y": 6.75,
+      "w": 1.6,
+      "z": 4,
+      "md": "KNOW YOUR RIGHTS",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 17,
+        "color": "#232322",
+        "align": "center",
+        "case": "upper",
+        "leading": 1.15
+      },
+      "rot": 8
+    },
+    {
+      "id": "cover-date",
+      "page": 1,
+      "x": 0.7,
+      "y": 6.75,
+      "w": 2.6,
+      "z": 3,
+      "md": "AUGUST 2026",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 14,
+        "color": "#FDCF21",
+        "tracking": 1.5
+      }
+    },
+    {
+      "id": "cover-note",
+      "page": 1,
+      "x": 0.7,
+      "y": 9.9,
+      "w": 4.8,
+      "z": 3,
+      "md": "The backdrop is a placeholder — swap it for a cover photo (Insert ▸ Image, size to the page, send to back), then delete this note.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#DCE5E9",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "in-logo",
+      "page": 2,
+      "x": 2.9,
+      "y": 0.85,
+      "w": 2.7,
+      "z": 2,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo-white.svg)"
+    },
+    {
+      "id": "in-url",
+      "page": 2,
+      "x": 0.7,
+      "y": 1.75,
+      "w": 7.1,
+      "z": 2,
+      "md": "www.hiappleseed.org",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#FDCF21",
+        "align": "center"
+      }
+    },
+    {
+      "id": "in-author",
+      "page": 2,
+      "x": 0.7,
+      "y": 2.12,
+      "w": 7.1,
+      "z": 2,
+      "md": "Hawaiʻi Appleseed Center for Law & Economic Justice",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "align": "center"
+      }
+    },
+    {
+      "id": "in-mission",
+      "page": 2,
+      "x": 0.85,
+      "y": 2.75,
+      "w": 6.8,
+      "z": 2,
+      "md": "Hawaiʻi Appleseed is committed to a more socially and economically just Hawaiʻi, where everyone has genuine opportunities to achieve economic security and fulfill their potential. We change systems to address inequity and foster greater opportunity by conducting data analysis and research to address income inequality, educating policymakers and the public, engaging in collaborative problem solving and coalition building, and advocating for policy and systems change.\n\nThe work of Hawaiʻi Appleseed is about people. The issues we work on—housing, food, wages, mobility, the state budget and taxation, and racial and indigenous equity—are important because they ensure people have access to shelter, sustenance, and the means to survive and thrive individually and collectively.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#FFFFFF",
+        "align": "center",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "in-tochead",
+      "page": 2,
+      "x": 0.7,
+      "y": 5.85,
+      "w": 7.1,
+      "z": 2,
+      "md": "TABLE OF CONTENTS",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#A5CCB4",
+        "align": "center"
+      }
+    },
+    {
+      "id": "in-toc",
+      "page": 2,
+      "x": 1.2,
+      "y": 6.7,
+      "w": 6.1,
+      "z": 2,
+      "md": "The code in 60 seconds — 3\n\nPart I · Your guide to the code, sections 1–8 — 4\n\nPart II · Where the code falls short — 11\n\nPart III · What reform looks like — 12\n\nResources & endnotes — 13",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 16,
+        "color": "#A5CCB4",
+        "align": "center",
+        "leading": 1.55
+      }
+    },
+    {
+      "id": "in-copy",
+      "page": 2,
+      "x": 0.7,
+      "y": 9.55,
+      "w": 7.1,
+      "z": 2,
+      "md": "Copyright © 2026 Hawaiʻi Appleseed Center for Law & Economic Justice. All rights reserved.\n\n733 Bishop Street, Suite 1180, Honolulu, HI 96813",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12,
+        "color": "#FFFFFF",
+        "align": "center",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "foot-2",
+      "page": 2,
+      "x": 0.55,
+      "y": 10.55,
+      "w": 3.4,
+      "z": 2,
+      "md": "2 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#FFFFFF",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "h-3",
+      "page": 3,
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "The code in 60 seconds",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 44,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "lede-3",
+      "page": 3,
+      "x": 0.7,
+      "y": 1.85,
+      "w": 7.1,
+      "z": 2,
+      "md": "**RENTING IN HAWAIʻI RUNS ON ONE LAW:** HRS Chapter 521, the Landlord-Tenant Code. It sets the rules for deposits, repairs, privacy, rent hikes, and evictions — but it was written by lawyers, for lawyers. This guide translates it into plain language, so you know exactly what you're owed and what you owe.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p3-part1",
+      "page": 3,
+      "x": 0.7,
+      "y": 3.1,
+      "w": 2.26,
+      "z": 2,
+      "md": "**PART I — THE GUIDE**\n\nYour rights and duties under today's code, section by section.",
+      "h": 1.35,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p3-part2",
+      "page": 3,
+      "x": 3.12,
+      "y": 3.1,
+      "w": 2.26,
+      "z": 2,
+      "md": "**PART II — THE GAPS**\n\nWhere the code falls short, and who falls through.",
+      "h": 1.35,
+      "fill": "#232322",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p3-part3",
+      "page": 3,
+      "x": 5.54,
+      "y": 3.1,
+      "w": 2.26,
+      "z": 2,
+      "md": "**PART III — THE FIX**\n\nWhat just-cause eviction reform would change.",
+      "h": 1.35,
+      "fill": "#FDCF21",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p3-numhead",
+      "page": 3,
+      "x": 0.7,
+      "y": 4.85,
+      "w": 7.1,
+      "z": 2,
+      "md": "Know your numbers",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 22,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p3-snum0",
+      "page": 3,
+      "x": 0.84,
+      "y": 5.32,
+      "w": 1.26,
+      "z": 2,
+      "md": "45",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#232322"
+      }
+    },
+    {
+      "id": "p3-sunit0",
+      "page": 3,
+      "x": 0.84,
+      "y": 5.78,
+      "w": 1.26,
+      "z": 2,
+      "md": "DAYS",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 13,
+        "color": "#4E9685",
+        "tracking": 1.2
+      }
+    },
+    {
+      "id": "p3-slab0",
+      "page": 3,
+      "x": 0.84,
+      "y": 6.06,
+      "w": 1.28,
+      "z": 2,
+      "md": "notice to end a month-to-month or raise your rent",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "p3-snum1",
+      "page": 3,
+      "x": 2.28,
+      "y": 5.32,
+      "w": 1.26,
+      "z": 2,
+      "md": "14",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#232322"
+      }
+    },
+    {
+      "id": "p3-sunit1",
+      "page": 3,
+      "x": 2.28,
+      "y": 5.78,
+      "w": 1.26,
+      "z": 2,
+      "md": "DAYS",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 13,
+        "color": "#4E9685",
+        "tracking": 1.2
+      }
+    },
+    {
+      "id": "p3-slab1",
+      "page": 3,
+      "x": 2.28,
+      "y": 6.06,
+      "w": 1.28,
+      "z": 2,
+      "md": "to get your deposit back after you hand over keys",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "p3-snum2",
+      "page": 3,
+      "x": 3.72,
+      "y": 5.32,
+      "w": 1.26,
+      "z": 2,
+      "md": "2",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#232322"
+      }
+    },
+    {
+      "id": "p3-sunit2",
+      "page": 3,
+      "x": 3.72,
+      "y": 5.78,
+      "w": 1.26,
+      "z": 2,
+      "md": "DAYS",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 13,
+        "color": "#4E9685",
+        "tracking": 1.2
+      }
+    },
+    {
+      "id": "p3-slab2",
+      "page": 3,
+      "x": 3.72,
+      "y": 6.06,
+      "w": 1.28,
+      "z": 2,
+      "md": "written notice before your landlord can enter",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "p3-snum3",
+      "page": 3,
+      "x": 5.16,
+      "y": 5.32,
+      "w": 1.26,
+      "z": 2,
+      "md": "1",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#232322"
+      }
+    },
+    {
+      "id": "p3-sunit3",
+      "page": 3,
+      "x": 5.16,
+      "y": 5.78,
+      "w": 1.26,
+      "z": 2,
+      "md": "MONTH",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 13,
+        "color": "#4E9685",
+        "tracking": 1.2
+      }
+    },
+    {
+      "id": "p3-slab3",
+      "page": 3,
+      "x": 5.16,
+      "y": 6.06,
+      "w": 1.28,
+      "z": 2,
+      "md": "the most a security deposit can be (pets: +1)",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "p3-snum4",
+      "page": 3,
+      "x": 6.6,
+      "y": 5.32,
+      "w": 1.26,
+      "z": 2,
+      "md": "$10K",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 30,
+        "color": "#232322"
+      }
+    },
+    {
+      "id": "p3-sunit4",
+      "page": 3,
+      "x": 6.6,
+      "y": 5.78,
+      "w": 1.26,
+      "z": 2,
+      "md": "CAP",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 13,
+        "color": "#4E9685",
+        "tracking": 1.2
+      }
+    },
+    {
+      "id": "p3-slab4",
+      "page": 3,
+      "x": 6.6,
+      "y": 6.06,
+      "w": 1.28,
+      "z": 2,
+      "md": "what small claims court can award",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "leading": 1.35
+      }
+    },
+    {
+      "id": "p3-howto",
+      "page": 3,
+      "x": 0.7,
+      "y": 7.45,
+      "w": 7.1,
+      "z": 2,
+      "md": "**HOW TO USE THIS GUIDE.** Find your situation, read the section, and note the § numbers — they point to the exact law, so you can quote it in a letter, a complaint, or in court. A reference like §521-44(b) means: chapter 521, section 44, subsection (b). Look any of them up free at capitol.hawaii.gov.",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p3-disclaimer",
+      "page": 3,
+      "x": 0.7,
+      "y": 9.6,
+      "w": 7.1,
+      "z": 2,
+      "md": "*This guide is a plain-language summary for information only — it is not legal advice. Laws change: verify current statutes at capitol.hawaii.gov.*",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 10.5,
+        "color": "#464646",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "foot-3",
+      "page": 3,
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "3 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-4-n",
+      "page": 4,
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "1",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 24,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-4",
+      "page": 4,
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-4",
+      "page": 4,
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Rental agreements",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p4-lede",
+      "page": 4,
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**NO PAPER? STILL A LEASE — TECHNICALLY.** A spoken agreement creates a real month-to-month tenancy (§521-22), but spoken terms are hard to prove. Put everything in writing — and remember that any new or changed term needs both parties' written agreement.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p4-mtm",
+      "page": 4,
+      "x": 0.7,
+      "y": 3.1,
+      "w": 3.45,
+      "z": 2,
+      "md": "**MONTH-TO-MONTH · §521-22**\n\n- The default when no fixed term is set\n- Either side may end it with proper written notice — 45 days from your landlord\n- No changes to rent or rules without legally required written notice",
+      "h": 1.85,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p4-fixed",
+      "page": 4,
+      "x": 4.35,
+      "y": 3.1,
+      "w": 3.45,
+      "z": 2,
+      "md": "**FIXED-TERM LEASE · §521-71**\n\n- Ends on its end date — no extra notice needed\n- Stay past it (or the landlord accepts rent)? You're month-to-month now\n- Oral agreements can't run longer than one year",
+      "h": 1.85,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p4-void",
+      "page": 4,
+      "x": 0.7,
+      "y": 5.25,
+      "w": 7.1,
+      "z": 2,
+      "md": "**VOID — EVEN IF YOU SIGNED IT (§521-31 to 35).** A lease can't take away rights the law gives you. Clauses waiving your right to a livable home, to sue, or to proper notice — or excusing the landlord's own negligence — are unenforceable. Full stop.",
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p4-movein-h",
+      "page": 4,
+      "x": 0.7,
+      "y": 6.55,
+      "w": 7.1,
+      "z": 2,
+      "md": "Move-in math §521-44(b)",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p4-ok",
+      "page": 4,
+      "x": 0.7,
+      "y": 7,
+      "w": 3.45,
+      "z": 2,
+      "md": "**ALL A LANDLORD MAY COLLECT:**\n\n✓ First month's rent\n\n✓ Security deposit\n\nThat's the whole list.",
+      "h": 1.6,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p4-not",
+      "page": 4,
+      "x": 4.35,
+      "y": 7,
+      "w": 3.45,
+      "z": 2,
+      "md": "**NOT ALLOWED UP FRONT:**\n\n✗ Last month's rent\n\n✗ \"Admin\" or \"processing\" fees\n\n✗ Anything else — you can recover unlawful charges in court.",
+      "h": 1.6,
+      "fill": "#F9EDE4",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p4-screen",
+      "page": 4,
+      "x": 0.7,
+      "y": 8.9,
+      "w": 7.1,
+      "z": 2,
+      "md": "**SCREENING FEES (§521-46)** may only cover the actual cost of checking your application. Anything beyond that must be returned within 30 days — and you can ask for an itemized receipt.",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-4",
+      "page": 4,
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "4 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b5-n",
+      "page": "b5",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "2",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 24,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b5",
+      "page": "b5",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b5",
+      "page": "b5",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Security deposits",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p5-big",
+      "page": "b5",
+      "x": 0.7,
+      "y": 1.9,
+      "w": 2,
+      "z": 2,
+      "md": "14",
+      "style": {
+        "font": "Barlow",
+        "weight": 900,
+        "size": 110,
+        "color": "#4E9685",
+        "leading": 1
+      }
+    },
+    {
+      "id": "p5-biglab",
+      "page": "b5",
+      "x": 0.7,
+      "y": 3.5,
+      "w": 2,
+      "z": 2,
+      "md": "**DAYS** to return your deposit after you move out and hand back the keys — no exceptions, no extensions. §521-44(c)",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#464646",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p5-right",
+      "page": "b5",
+      "x": 3,
+      "y": 1.95,
+      "w": 4.8,
+      "z": 2,
+      "md": "**THE CAP:** one month's rent, plus up to one more as a pet deposit. Service and assistance animals are not pets (§515-3) — no pet deposit allowed for them.\n\n**THE PAPER TRAIL:** any money kept must come with a written itemized list plus receipts or invoices. A vague \"damages\" line is not legally sufficient, and a lump-sum deduction is invalid.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p5-fair",
+      "page": "b5",
+      "x": 0.7,
+      "y": 4.75,
+      "w": 3.45,
+      "z": 2,
+      "md": "**FAIR GAME TO DEDUCT · §521-44(a)**\n\n✓ Unpaid rent\n\n✓ Cleaning, if you left it dirtier than you got it\n\n✓ Damage beyond normal wear\n\n✓ Unreturned keys or fobs",
+      "h": 1.85,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p5-off",
+      "page": "b5",
+      "x": 4.35,
+      "y": 4.75,
+      "w": 3.45,
+      "z": 2,
+      "md": "**OFF-LIMITS**\n\n✗ Faded paint\n\n✗ Worn carpet\n\n✗ Minor scuffs\n\nNormal wear and tear is the landlord's cost of doing business.",
+      "h": 1.85,
+      "fill": "#F9EDE4",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p5-3x",
+      "page": "b5",
+      "x": 0.7,
+      "y": 6.9,
+      "w": 7.1,
+      "z": 2,
+      "md": "**MISS THE DEADLINE, LOSE IT ALL.** A landlord who blows the 14-day deadline forfeits the right to keep any of it. Withheld deliberately, with no valid claim? Courts can award you up to **3× the amount**, plus court costs.",
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p5-sold",
+      "page": "b5",
+      "x": 0.7,
+      "y": 8.25,
+      "w": 7.1,
+      "z": 2,
+      "md": "**BUILDING SOLD? (§521-44(f))** Your lease and your deposit ride along: the new owner is bound by both. They owe you written notice of your deposit amount within 20 days — or the law assumes it equals one month's rent at your original rate.",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-5",
+      "page": "b5",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "5 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b6-n",
+      "page": "b6",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "3",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 24,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b6",
+      "page": "b6",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b6",
+      "page": "b6",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Rent & fees",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p6-lede",
+      "page": "b6",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**RENT IS DUE** at the start of each rental period — usually the 1st — unless your lease says otherwise (§521-21(b)). It can't be demanded early, and it's pro-rated by the day if your tenancy starts mid-period.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p6-raise-h",
+      "page": "b6",
+      "x": 0.7,
+      "y": 3,
+      "w": 7.1,
+      "z": 2,
+      "md": "Raising the rent: the notice clock §521-21(d)(e)",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p6-r1lab",
+      "page": "b6",
+      "x": 0.7,
+      "y": 3.55,
+      "w": 1.9,
+      "z": 2,
+      "md": "Month-to-month",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-r1n",
+      "page": "b6",
+      "x": 5.6,
+      "y": 3.53,
+      "w": 1.9,
+      "z": 2,
+      "md": "**45 days' notice**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#4E9685",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-r2lab",
+      "page": "b6",
+      "x": 0.7,
+      "y": 4.1,
+      "w": 1.9,
+      "z": 2,
+      "md": "Week-to-week",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-r2n",
+      "page": "b6",
+      "x": 3.75,
+      "y": 4.08,
+      "w": 1.9,
+      "z": 2,
+      "md": "**15 days' notice**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#4E9685",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-flag",
+      "page": "b6",
+      "x": 0.7,
+      "y": 4.85,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THE 60-DAY RED FLAG (§521-74).** A rent hike within 60 days of your complaint or repair request is presumed retaliatory — in court, the burden is on the landlord to prove it wasn't. Even a threatened raise in response to a maintenance request can violate the law.",
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-late",
+      "page": "b6",
+      "x": 0.7,
+      "y": 6.3,
+      "w": 3.45,
+      "z": 2,
+      "md": "**LATE FEES · §521-21**\n\n- Only enforceable if the lease explicitly allows them\n- Must be reasonable\n- Lease silent? Then generally no late fee at all\n- There's no statewide grace period — know your due date",
+      "h": 1.95,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p6-post",
+      "page": "b6",
+      "x": 4.35,
+      "y": 6.3,
+      "w": 3.45,
+      "z": 2,
+      "md": "**POSTDATED CHECKS · §521-44(e)**\n\nA landlord cannot require postdated checks or other pre-signed payments for future rent. If they do, you have grounds for a legal remedy.",
+      "h": 1.95,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-6",
+      "page": "b6",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "6 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b7-n",
+      "page": "b7",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "4·5",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 17,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b7",
+      "page": "b7",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b7",
+      "page": "b7",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Who owes what",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p7-landlord",
+      "page": "b7",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 3.45,
+      "z": 2,
+      "md": "**YOUR LANDLORD MUST · §521-42, 43, 57**\n\n- Keep the place livable: weatherproofed, working plumbing, hot and cold water, safe electrical, smoke detectors, no pests\n- Act within a reasonable time once you report a problem in writing — and never bill you for repairs that are their duty\n- Disclose in writing who owns the building and who takes notices — skipping it gives you a $100 claim\n- Keep water, power, and gas on — always",
+      "h": 3.7,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p7-tenant",
+      "page": "b7",
+      "x": 4.35,
+      "y": 1.95,
+      "w": 3.45,
+      "z": 2,
+      "md": "**YOU MUST · §521-51, 52**\n\n- Pay rent when due — after a written pay-or-quit notice, nonpayment can end in eviction\n- Keep the unit reasonably clean and dispose of trash properly\n- Not damage the place beyond normal wear and tear\n- Follow the lease on subletting (§521-31): if consent is required it can't be unreasonably refused; if subletting is banned outright, that ban sticks",
+      "h": 3.7,
+      "fill": "#232322",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p7-shutoff",
+      "page": "b7",
+      "x": 0.7,
+      "y": 6,
+      "w": 7.1,
+      "z": 2,
+      "md": "**UTILITY SHUTOFF = ILLEGAL EVICTION (§521-57).** Cutting water, power, or gas to squeeze a tenant out is unlawful even if rent is owed. Penalty: **3× monthly rent or $1,000, whichever is greater**, plus other damages. Only a court order can remove a tenant.",
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p7-report",
+      "page": "b7",
+      "x": 0.7,
+      "y": 7.5,
+      "w": 7.1,
+      "z": 2,
+      "md": "**LANDLORD WON'T FIX IT? Put it in writing, in this order:**\n\n1. The landlord — a written report starts their legal duty to act\n2. Still nothing? Escalate: Department of Health (health & sanitation), your county planning or housing department (building code), or the Office of Consumer Protection (general complaints)",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p7-norent",
+      "page": "b7",
+      "x": 0.7,
+      "y": 9.15,
+      "w": 7.1,
+      "z": 2,
+      "md": "One more: a landlord can't charge rent for any period the unit was uninhabitable because they failed to maintain it (§521-51).",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#464646",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "foot-7",
+      "page": "b7",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "7 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b8-n",
+      "page": "b8",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "6·7",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 17,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b8",
+      "page": "b8",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b8",
+      "page": "b8",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Privacy & moving on",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p8-2days",
+      "page": "b8",
+      "x": 1.35,
+      "y": 2,
+      "w": 2.2,
+      "z": 2,
+      "md": "2 DAYS",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 34,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p8-entry",
+      "page": "b8",
+      "x": 0.7,
+      "y": 2.62,
+      "w": 7.1,
+      "z": 2,
+      "md": "That's the written notice your landlord owes you before entering — for inspections, repairs, or showings — and only at reasonable hours, roughly 8am–8pm (§521-53). No notice? You may refuse entry, except in a genuine emergency. You can waive the notice in writing for a single visit, and entry rights may never be used to harass you.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p8-notice-h",
+      "page": "b8",
+      "x": 0.7,
+      "y": 3.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Ending a tenancy: who gives how much notice",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p8-l1-lab",
+      "page": "b8",
+      "x": 0.7,
+      "y": 4.22,
+      "w": 2.55,
+      "z": 2,
+      "md": "YOU end month-to-month · §521-71",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-l1-n",
+      "page": "b8",
+      "x": 4.234,
+      "y": 4.21,
+      "w": 1.4,
+      "z": 2,
+      "md": "**28 days**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#4E9685",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-l2-lab",
+      "page": "b8",
+      "x": 0.7,
+      "y": 4.84,
+      "w": 2.55,
+      "z": 2,
+      "md": "LANDLORD ends month-to-month · §521-71",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-l2-n",
+      "page": "b8",
+      "x": 4.71,
+      "y": 4.83,
+      "w": 1.4,
+      "z": 2,
+      "md": "**45 days**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#4E9685",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-l3-lab",
+      "page": "b8",
+      "x": 0.7,
+      "y": 5.46,
+      "w": 2.55,
+      "z": 2,
+      "md": "Condo conversion · §521-38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-l3-n",
+      "page": "b8",
+      "x": 6.8100000000000005,
+      "y": 5.45,
+      "w": 1.4,
+      "z": 2,
+      "md": "**120 days**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#4E9685",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-court",
+      "page": "b8",
+      "x": 0.7,
+      "y": 6.15,
+      "w": 7.1,
+      "z": 2,
+      "md": "Even after a notice period runs out, **only a court order removes a tenant.** And if the unit becomes uninhabitable, you may end the tenancy early (§521-61) — with no penalty for doing so.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p8-abandon",
+      "page": "b8",
+      "x": 0.7,
+      "y": 7.15,
+      "w": 3.45,
+      "z": 2,
+      "md": "**\"ABANDONED\" HAS A DEFINITION · §521-70**\n\nGone 20+ consecutive days **and** no rent paid **and** words or actions saying you're not coming back. A paid-up tenant on a long trip has abandoned nothing — but check your lease: it may require notice of long absences.",
+      "h": 2.15,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p8-holdover",
+      "page": "b8",
+      "x": 4.35,
+      "y": 7.15,
+      "w": 3.45,
+      "z": 2,
+      "md": "**LEASE RAN OUT, STILL THERE?**\n\nA fixed-term lease just ends on its date (§521-71). Stay on without a new agreement — or have rent accepted — and you've got a month-to-month tenancy under the same rules as before.",
+      "h": 2.15,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-8",
+      "page": "b8",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "8 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b9-n",
+      "page": "b9",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "8",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 24,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b9",
+      "page": "b9",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b9",
+      "page": "b9",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Eviction: the only legal path",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 34,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p9-lede",
+      "page": "b9",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**NO JUDGE, NO EVICTION (§521-68 to 74).** Every lawful eviction in Hawaiʻi runs through this pipeline. A landlord who skips ahead is breaking the law — no matter what the notice on your door says.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p9-f1",
+      "page": "b9",
+      "x": 0.7,
+      "y": 3.05,
+      "w": 4.3,
+      "z": 2,
+      "md": "**1 · WRITTEN NOTICE**\nThe clock starts: pay, fix, or move by the deadline.",
+      "h": 0.62,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-f2",
+      "page": "b9",
+      "x": 0.7,
+      "y": 4.01,
+      "w": 4.3,
+      "z": 2,
+      "md": "**2 · MEDIATION WINDOW (nonpayment cases · §521-68)**\nA copy of the notice goes to Mediation Centers of Hawaiʻi automatically. You have 10 days to opt in — it's free, and if you do, the landlord must participate.",
+      "h": 1.08,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-f3",
+      "page": "b9",
+      "x": 0.7,
+      "y": 5.43,
+      "w": 4.3,
+      "z": 2,
+      "md": "**3 · LANDLORD FILES IN COURT**\nNot before the notice period runs out.",
+      "h": 0.62,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-f4",
+      "page": "b9",
+      "x": 0.7,
+      "y": 6.39,
+      "w": 4.3,
+      "z": 2,
+      "md": "**4 · HEARING**\nA judge hears both sides and decides.",
+      "h": 0.62,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-f5",
+      "page": "b9",
+      "x": 0.7,
+      "y": 7.35,
+      "w": 4.3,
+      "z": 2,
+      "md": "**5 · SHERIFF ENFORCES THE ORDER**\nOnly a sheriff with a court order can remove you.",
+      "h": 0.62,
+      "fill": "#4E9685",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-never",
+      "page": "b9",
+      "x": 5.25,
+      "y": 3.6,
+      "w": 2.55,
+      "z": 2,
+      "md": "**NEVER LEGAL — EVICTION OR NOT:**\n\n✗ Changing your locks\n\n✗ Removing doors or windows\n\n✗ Shutting off utilities\n\n✗ Taking your appliances\n\n✗ Threats & intimidation\n\nThese are illegal \"self-help evictions,\" and they expose a landlord to significant damages.",
+      "h": 3.1,
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-pilot",
+      "page": "b9",
+      "x": 5.25,
+      "y": 7,
+      "w": 2.55,
+      "z": 2,
+      "md": "**NEW & TEMPORARY:** the mediation step is a pilot program (Act 278 of 2025), running through Feb 4, 2028.\n\nmediationcentersofhawaii.org",
+      "h": 1.7,
+      "fill": "#FDCF21",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p9-note",
+      "page": "b9",
+      "x": 0.7,
+      "y": 9.35,
+      "w": 7.1,
+      "z": 2,
+      "md": "If you request mediation and reach a deal, it goes in writing, signed by both sides. Request it and skip the session, though, and the landlord can seek their attorney's fees.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#464646",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "foot-9",
+      "page": "b9",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "9 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "badge-b10-n",
+      "page": "b10",
+      "x": 0.7,
+      "y": 0.86,
+      "w": 0.56,
+      "z": 3,
+      "md": "8",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 24,
+        "color": "#232322",
+        "align": "center"
+      }
+    },
+    {
+      "id": "kick-b10",
+      "page": "b10",
+      "x": 1.45,
+      "y": 0.62,
+      "w": 6.35,
+      "z": 2,
+      "md": "PART I · THE GUIDE — REMEDIES",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "h-b10",
+      "page": "b10",
+      "x": 1.45,
+      "y": 0.88,
+      "w": 6.35,
+      "z": 2,
+      "md": "Fight back, by the book",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 36,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p10-lede",
+      "page": "b10",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THE CODE GIVES YOU TOOLS — EACH WITH ITS OWN RULEBOOK.** Used right, they're powerful. Used loosely, they can backfire into an eviction case. Here's how to use each one safely.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p10-rd-h",
+      "page": "b10",
+      "x": 0.7,
+      "y": 3,
+      "w": 7.1,
+      "z": 2,
+      "md": "Repair & deduct §521-64, 65",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#4E9685"
+      }
+    },
+    {
+      "id": "p10-rd1",
+      "page": "b10",
+      "x": 0.7,
+      "y": 3.5,
+      "w": 3.35,
+      "z": 2,
+      "md": "**STEP 1**\nWritten notice of the problem to your landlord.",
+      "h": 0.95,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p10-rd2",
+      "page": "b10",
+      "x": 4.45,
+      "y": 3.5,
+      "w": 3.35,
+      "z": 2,
+      "md": "**STEP 2**\nA government agency cites the health or safety violation.",
+      "h": 0.95,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p10-rd3",
+      "page": "b10",
+      "x": 0.7,
+      "y": 4.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THEN:** if the landlord still does nothing for 1 week, you may hire the repair and deduct the cost from rent — up to one month's rent per repair, receipts required. **Skip either step first and the remedy collapses** — you could face eviction instead.",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p10-withhold",
+      "page": "b10",
+      "x": 0.7,
+      "y": 6.1,
+      "w": 3.45,
+      "z": 2,
+      "md": "**RENT WITHHOLDING · §521-78**\n\nIf the unit is legally uninhabitable through the landlord's failure, you may withhold rent or terminate after proper written notice. Talk to the Landlord-Tenant Information Center or an attorney first — a misstep here can mean eviction.",
+      "h": 2.5,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p10-claims",
+      "page": "b10",
+      "x": 4.35,
+      "y": 6.1,
+      "w": 3.45,
+      "z": 2,
+      "md": "**SMALL CLAIMS COURT · HRS 633**\n\nDisputes up to $10,000 — or **any amount** for security deposits. In deposit-only cases neither side may bring an attorney, which levels the field. Landlords and tenants both use it: unpaid rent, damages, wrongly kept deposits.",
+      "h": 2.5,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p10-retal",
+      "page": "b10",
+      "x": 0.7,
+      "y": 8.9,
+      "w": 7.1,
+      "z": 2,
+      "md": "**AND REMEMBER RETALIATION (§521-74):** eviction or a rent hike for reporting violations, joining a tenants' union, or requesting required repairs is illegal — and presumed retaliatory within 60 days of any of those.",
+      "fill": "#303030",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-10",
+      "page": "b10",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "10 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "p11-kick",
+      "page": "b11",
+      "x": 0.7,
+      "y": 0.62,
+      "w": 7.1,
+      "z": 2,
+      "md": "PART II",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 12,
+        "color": "#FDCF21",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "p11-h",
+      "page": "b11",
+      "x": 0.7,
+      "y": 0.88,
+      "w": 7.1,
+      "z": 2,
+      "md": "Where the code falls short",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#FFFFFF",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p11-lede",
+      "page": "b11",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**THE CODE ASSUMES YOU'LL ENFORCE IT YOURSELF.** Chapter 521 is a real framework — but it's a self-help law. Nobody polices it. If your rights are violated, it falls to you, on your own, to:",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 15,
+        "color": "#FFFFFF",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p11-c0",
+      "page": "b11",
+      "x": 0.7,
+      "y": 2.95,
+      "w": 1.7,
+      "z": 2,
+      "md": "**1 ·** Know the rights the code gives you",
+      "h": 0.85,
+      "fill": "#3A3A38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#A5CCB4",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-c1",
+      "page": "b11",
+      "x": 2.54,
+      "y": 2.95,
+      "w": 1.7,
+      "z": 2,
+      "md": "**2 ·** Assert them to the other party",
+      "h": 0.85,
+      "fill": "#3A3A38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#A5CCB4",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-c2",
+      "page": "b11",
+      "x": 4.38,
+      "y": 2.95,
+      "w": 1.7,
+      "z": 2,
+      "md": "**3 ·** Find the right agency to complain to",
+      "h": 0.85,
+      "fill": "#3A3A38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#A5CCB4",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-c3",
+      "page": "b11",
+      "x": 6.220000000000001,
+      "y": 2.95,
+      "w": 1.7,
+      "z": 2,
+      "md": "**4 ·** File in court — and prove your case",
+      "h": 0.85,
+      "fill": "#3A3A38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#A5CCB4",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-law-h",
+      "page": "b11",
+      "x": 0.7,
+      "y": 4.45,
+      "w": 7.1,
+      "z": 2,
+      "md": "Who has a lawyer in eviction court?",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#FDCF21"
+      }
+    },
+    {
+      "id": "p11-t-lab",
+      "page": "b11",
+      "x": 0.7,
+      "y": 4.98,
+      "w": 1.7,
+      "z": 2,
+      "md": "TENANTS",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-t-n",
+      "page": "b11",
+      "x": 2.95,
+      "y": 4.97,
+      "w": 2.2,
+      "z": 2,
+      "md": "**fewer than 5%**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#FDCF21",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-ll-lab",
+      "page": "b11",
+      "x": 0.7,
+      "y": 5.5,
+      "w": 1.7,
+      "z": 2,
+      "md": "LANDLORDS",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-ll-n",
+      "page": "b11",
+      "x": 5.35,
+      "y": 5.49,
+      "w": 2,
+      "z": 2,
+      "md": "**more than 80%**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-law-cap",
+      "page": "b11",
+      "x": 0.7,
+      "y": 6.05,
+      "w": 7.1,
+      "z": 2,
+      "md": "Eviction cases are complex and intimidating, and unrepresented tenants start at a deep disadvantage. Many lose their homes not because they lack a defense — but because they lack the resources to use it.[^rtc] Outcomes track representation, not the merits.[^desmond]",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#D8DDD6",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p11-loop-h",
+      "page": "b11",
+      "x": 0.7,
+      "y": 7.05,
+      "w": 7.1,
+      "z": 2,
+      "md": "The no-cause loophole",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 20,
+        "color": "#FDCF21"
+      }
+    },
+    {
+      "id": "p11-loop",
+      "page": "b11",
+      "x": 0.7,
+      "y": 7.55,
+      "w": 7.1,
+      "z": 2,
+      "md": "Retaliatory eviction is illegal (§521-74) — but a landlord can end any month-to-month tenancy with a 45-day **no-cause notice**: no reason given, none required. A landlord who never has to state a reason never has to state *that* reason — which makes the anti-retaliation shield nearly unenforceable in practice.",
+      "fill": "#3A3A38",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#FFFFFF",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p11-stakes",
+      "page": "b11",
+      "x": 0.7,
+      "y": 9,
+      "w": 7.1,
+      "z": 2,
+      "md": "**AND THE STAKES ARE HIGH:** eviction is linked to drug-use initiation, elevated blood pressure, weight gain, heart disease, and increased risk of domestic abuse.[^hoke-boen] Meanwhile only about 4% of Hawaiʻi rentals sit vacant and available, and well over half of renters are cost-burdened[^uhero] — a tenant protected on paper, with nowhere else to go, still has no real choice.",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13.5,
+        "color": "#D8DDD6",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "foot-11",
+      "page": "b11",
+      "x": 0.55,
+      "y": 10.55,
+      "w": 3.4,
+      "z": 2,
+      "md": "11 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#FFFFFF",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "p12-kick",
+      "page": "b12",
+      "x": 0.7,
+      "y": 0.62,
+      "w": 7.1,
+      "z": 2,
+      "md": "PART III",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 11,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "p12-h",
+      "page": "b12",
+      "x": 0.7,
+      "y": 0.88,
+      "w": 7.1,
+      "z": 2,
+      "md": "What reform looks like",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p12-lede",
+      "page": "b12",
+      "x": 0.7,
+      "y": 1.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "**JUST CAUSE EVICTION (JCE)** doesn't replace Chapter 521 — it plugs the holes. Before ending a tenancy, a landlord would need a legally recognized reason: **at-fault** (nonpayment, lease violations, property damage) or **no-fault** (owner move-in, major renovation — with evidence and 90 days' notice).[^furman]",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 14,
+        "color": "#1F1F1F",
+        "leading": 1.5
+      }
+    },
+    {
+      "id": "p12-gap0",
+      "page": "b12",
+      "x": 0.7,
+      "y": 3.15,
+      "w": 3.3,
+      "z": 2,
+      "md": "End a tenancy for any reason — or none — on 45 days' notice",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix0",
+      "page": "b12",
+      "x": 4.5,
+      "y": 3.15,
+      "w": 3.3,
+      "z": 2,
+      "md": "Every termination needs a stated, legally recognized cause",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gap1",
+      "page": "b12",
+      "x": 0.7,
+      "y": 4.13,
+      "w": 3.3,
+      "z": 2,
+      "md": "Anti-retaliation rules dodged with no-cause notices",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix1",
+      "page": "b12",
+      "x": 4.5,
+      "y": 4.13,
+      "w": 3.3,
+      "z": 2,
+      "md": "Notices must cite the cause; pretextual or discriminatory evictions banned",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gap2",
+      "page": "b12",
+      "x": 0.7,
+      "y": 5.109999999999999,
+      "w": 3.3,
+      "z": 2,
+      "md": "No guaranteed chance to fix a violation",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix2",
+      "page": "b12",
+      "x": 4.5,
+      "y": 5.109999999999999,
+      "w": 3.3,
+      "z": 2,
+      "md": "Cure periods: 14 days for nonpayment, 14–30 days for lease breaches",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gap3",
+      "page": "b12",
+      "x": 0.7,
+      "y": 6.09,
+      "w": 3.3,
+      "z": 2,
+      "md": "\"I'm selling\" — with no proof required",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix3",
+      "page": "b12",
+      "x": 4.5,
+      "y": 6.09,
+      "w": 3.3,
+      "z": 2,
+      "md": "Must list the unit within 60 days, or owe a month's rent plus the tenant's new security deposit",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gap4",
+      "page": "b12",
+      "x": 0.7,
+      "y": 7.07,
+      "w": 3.3,
+      "z": 2,
+      "md": "Same rules for a spare-room landlord and a portfolio operator",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix4",
+      "page": "b12",
+      "x": 4.5,
+      "y": 7.07,
+      "w": 3.3,
+      "z": 2,
+      "md": "Exempt: owner-occupied properties under 4 units; new construction for 10 years",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gap5",
+      "page": "b12",
+      "x": 0.7,
+      "y": 8.05,
+      "w": 3.3,
+      "z": 2,
+      "md": "Tenants face eviction court alone",
+      "h": 0.78,
+      "fill": "#EFEFEC",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#232322",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-fix5",
+      "page": "b12",
+      "x": 4.5,
+      "y": 8.05,
+      "w": 3.3,
+      "z": 2,
+      "md": "Right to counsel in eviction cases, plus expanded eviction-defense legal aid",
+      "h": 0.78,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p12-gaplab",
+      "page": "b12",
+      "x": 0.7,
+      "y": 2.88,
+      "w": 3.3,
+      "z": 2,
+      "md": "TODAY'S GAP",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 10.5,
+        "color": "#464646",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "p12-fixlab",
+      "page": "b12",
+      "x": 4.5,
+      "y": 2.88,
+      "w": 3.3,
+      "z": 2,
+      "md": "THE JCE FIX",
+      "style": {
+        "font": "Source Sans 3",
+        "weight": 700,
+        "size": 10.5,
+        "color": "#4E9685",
+        "tracking": 1.8,
+        "case": "upper"
+      }
+    },
+    {
+      "id": "p12-caveat",
+      "page": "b12",
+      "x": 0.7,
+      "y": 9.15,
+      "w": 7.1,
+      "z": 2,
+      "md": "**REFORM, WITH EYES OPEN.** Design matters — sloppy just-cause rules can chill construction and push costs onto tenants, which is exactly why the exemptions above exist.[^furman] And just cause fixes the *terms* of displacement, not the shortage that makes it devastating: real tenant power arrives when landlords must compete for tenants.[^coulson] Protections set the floor. Supply shifts the balance.",
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 12.5,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "foot-12",
+      "page": "b12",
+      "x": 4.9,
+      "y": 10.55,
+      "w": 2.9,
+      "z": 2,
+      "md": "12 · LANDLORD-TENANT CODE",
+      "style": {
+        "font": "Barlow",
+        "weight": 700,
+        "size": 12,
+        "color": "#464646",
+        "align": "right",
+        "tracking": 0.8
+      }
+    },
+    {
+      "id": "p13-h",
+      "page": "b13",
+      "x": 0.7,
+      "y": 0.7,
+      "w": 7.1,
+      "z": 2,
+      "md": "Keep this page handy",
+      "style": {
+        "font": "Barlow",
+        "weight": 800,
+        "size": 40,
+        "color": "#232322",
+        "case": "upper",
+        "leading": 1.05
+      }
+    },
+    {
+      "id": "p13-r1",
+      "page": "b13",
+      "x": 0.7,
+      "y": 1.85,
+      "w": 3.45,
+      "z": 2,
+      "md": "**LANDLORD-TENANT INFORMATION CENTER**\n\n**(808) 586-2634**\n\nState-run hotline for questions about the code.",
+      "h": 1.3,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p13-r2",
+      "page": "b13",
+      "x": 4.35,
+      "y": 1.85,
+      "w": 3.45,
+      "z": 2,
+      "md": "**HAWAIʻI STATE BAR LAWYER REFERRAL**\n\n**(808) 537-9140**\n\nHelp finding an attorney.",
+      "h": 1.3,
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p13-r3",
+      "page": "b13",
+      "x": 0.7,
+      "y": 3.35,
+      "w": 3.45,
+      "z": 2,
+      "md": "**MEDIATION CENTERS OF HAWAIʻI**\n\n**mediationcentersofhawaii.org**\n\nFree mediation — including the nonpayment-of-rent pilot program.",
+      "h": 1.3,
+      "fill": "#EAF3EE",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p13-r4",
+      "page": "b13",
+      "x": 4.35,
+      "y": 3.35,
+      "w": 3.45,
+      "z": 2,
+      "md": "**READ THE LAW YOURSELF**\n\n**capitol.hawaii.gov**\n\nHRS Chapter 521, the full Landlord-Tenant Code.",
+      "h": 1.3,
+      "fill": "#F4F1E7",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 13,
+        "color": "#1F1F1F",
+        "leading": 1.45
+      }
+    },
+    {
+      "id": "p13-disc",
+      "page": "b13",
+      "x": 0.7,
+      "y": 4.95,
+      "w": 7.1,
+      "z": 2,
+      "md": "*This guide is a plain-language summary of HRS Chapter 521 for informational purposes only and does not constitute legal advice. Statutes change — verify current law at capitol.hawaii.gov.*",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 10.5,
+        "color": "#464646",
+        "leading": 1.4
+      }
+    },
+    {
+      "id": "p13-endnotes",
+      "page": "b13",
+      "x": 0.7,
+      "y": 5.75,
+      "w": 7.1,
+      "z": 2,
+      "md": "**ENDNOTES**",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 10.5,
+        "color": "#464646",
+        "leading": 1.45
+      },
+      "act": "endnotes"
+    },
+    {
+      "id": "p13-logo",
+      "page": "b13",
+      "x": 0.7,
+      "y": 9.9,
+      "w": 1.9,
+      "z": 2,
+      "md": "![Hawaiʻi Appleseed](assets/appleseed-logo.svg)"
+    },
+    {
+      "id": "p13-url",
+      "page": "b13",
+      "x": 5.4,
+      "y": 10.15,
+      "w": 2.4,
+      "z": 2,
+      "md": "hiappleseed.org",
+      "style": {
+        "font": "Source Sans 3",
+        "size": 11,
+        "color": "#464646",
+        "align": "right"
+      }
+    }
+  ],
+  "tables": [],
+  "groups": [
+    [
+      "cover-badge",
+      "text.cover-badge-t"
+    ],
+    [
+      "p3-sbar0",
+      "text.p3-snum0",
+      "text.p3-sunit0",
+      "text.p3-slab0"
+    ],
+    [
+      "p3-sbar1",
+      "text.p3-snum1",
+      "text.p3-sunit1",
+      "text.p3-slab1"
+    ],
+    [
+      "p3-sbar2",
+      "text.p3-snum2",
+      "text.p3-sunit2",
+      "text.p3-slab2"
+    ],
+    [
+      "p3-sbar3",
+      "text.p3-snum3",
+      "text.p3-sunit3",
+      "text.p3-slab3"
+    ],
+    [
+      "p3-sbar4",
+      "text.p3-snum4",
+      "text.p3-sunit4",
+      "text.p3-slab4"
+    ],
+    [
+      "badge-4",
+      "text.badge-4-n"
+    ],
+    [
+      "badge-b5",
+      "text.badge-b5-n"
+    ],
+    [
+      "badge-b6",
+      "text.badge-b6-n"
+    ],
+    [
+      "p6-r1bar",
+      "text.p6-r1lab",
+      "text.p6-r1n"
+    ],
+    [
+      "p6-r2bar",
+      "text.p6-r2lab",
+      "text.p6-r2n"
+    ],
+    [
+      "badge-b7",
+      "text.badge-b7-n"
+    ],
+    [
+      "badge-b8",
+      "text.badge-b8-n"
+    ],
+    [
+      "p8-ic-clock",
+      "text.p8-2days"
+    ],
+    [
+      "p8-l1-bar",
+      "text.p8-l1-lab",
+      "text.p8-l1-n"
+    ],
+    [
+      "p8-l2-bar",
+      "text.p8-l2-lab",
+      "text.p8-l2-n"
+    ],
+    [
+      "p8-l3-bar",
+      "text.p8-l3-lab",
+      "text.p8-l3-n"
+    ],
+    [
+      "badge-b9",
+      "text.badge-b9-n"
+    ],
+    [
+      "badge-b10",
+      "text.badge-b10-n"
+    ],
+    [
+      "p11-t-bar",
+      "text.p11-t-lab",
+      "text.p11-t-n"
+    ],
+    [
+      "p11-ll-bar",
+      "text.p11-ll-lab",
+      "text.p11-ll-n"
+    ],
+    [
+      "text.p12-gap0",
+      "p12-arr0",
+      "text.p12-fix0"
+    ],
+    [
+      "text.p12-gap1",
+      "p12-arr1",
+      "text.p12-fix1"
+    ],
+    [
+      "text.p12-gap2",
+      "p12-arr2",
+      "text.p12-fix2"
+    ],
+    [
+      "text.p12-gap3",
+      "p12-arr3",
+      "text.p12-fix3"
+    ],
+    [
+      "text.p12-gap4",
+      "p12-arr4",
+      "text.p12-fix4"
+    ],
+    [
+      "text.p12-gap5",
+      "p12-arr5",
+      "text.p12-fix5"
+    ]
+  ],
+  "pages": {
+    "blanks": [
+      {
+        "id": "b5"
+      },
+      {
+        "id": "b6"
+      },
+      {
+        "id": "b7"
+      },
+      {
+        "id": "b8"
+      },
+      {
+        "id": "b9"
+      },
+      {
+        "id": "b10"
+      },
+      {
+        "id": "b11"
+      },
+      {
+        "id": "b12"
+      },
+      {
+        "id": "b13"
+      }
+    ],
+    "order": [
+      1,
+      2,
+      3,
+      4,
+      "b5",
+      "b6",
+      "b7",
+      "b8",
+      "b9",
+      "b10",
+      "b11",
+      "b12",
+      "b13"
+    ]
+  },
+  "sections": {}
+}
