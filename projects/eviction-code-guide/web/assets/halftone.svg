@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 1100">
+  <!-- Riso-style dot screen. A <pattern> rather than 6,000 circles, so the
+       file stays small and headless Chrome prints it without complaint. -->
+  <defs>
+    <pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse">
+      <circle cx="2.2" cy="2.2" r="1.35" fill="#ffffff"/>
+    </pattern>
+  </defs>
+  <rect width="850" height="1100" fill="url(#dots)"/>
+</svg>

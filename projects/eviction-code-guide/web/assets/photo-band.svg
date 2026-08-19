@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 300" preserveAspectRatio="xMidYMid slice">
+  <!-- A photo slot, standing in until a real image is dropped on top.
+       Translucent layers only, so the page's own colour field tints it and
+       it reads as a duotone rather than as a grey box. -->
+  <rect width="850" height="300" fill="#000" opacity=".14"/>
+  <circle cx="672" cy="96" r="104" fill="#fff" opacity=".10"/>
+  <circle cx="150" cy="238" r="132" fill="#fff" opacity=".07"/>
+  <path d="M0 196 C118 156 232 186 338 152 C452 116 566 178 676 146 C744 126 806 140 850 122 L850 300 0 300 Z" fill="#fff" opacity=".08"/>
+  <path d="M0 244 C104 210 224 232 332 190 C462 140 598 206 716 172 C768 158 818 168 850 156 L850 300 0 300 Z" fill="#000" opacity=".10"/>
+</svg>
