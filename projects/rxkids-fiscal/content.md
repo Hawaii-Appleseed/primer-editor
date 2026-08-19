@@ -40,10 +40,10 @@ $87.9M
 full program, paying through 12 months
 
 [[stat.d.n]]
-23%
+40%
 
 [[stat.d.l]]
-the most federal TANF could cover — at best
+of the core program TANF could cover, at best
 
 [[timeline.title]]
 Federal money runs out after the fourth payment
@@ -52,7 +52,7 @@ Federal money runs out after the fourth payment
 What TANF covers, and what Hawaiʻi has to raise
 
 [[funding.note]]
-**Choosing the screen is worth ~$8.6M a year** — and takes a state plan amendment, not a federal waiver.[^son]
+**Choosing the screen is worth ~$19.2M a year** — and Michigan's own approach happens to be the generous one. Adopting it takes a state plan amendment, not a federal waiver.[^son]
 
 [[medicaid.title]]
 Six in ten births are already on Medicaid — four in ten are not
@@ -69,8 +69,8 @@ The federal exposure is real, and untested
 Where the non-federal share could come from
 
 [[ask.points]]
-- **Hawaiʻi holds an idle TANF reserve near $459M** — about 4.6 years of its whole annual block grant.[^reserve] The $11.8M slice is 2.6% of it, making the federal portion the *easy* part to finance.
-- That leaves **$40.3M a year** to raise for the core program — state funds, counties and philanthropy — or **$76.1M** through twelve months.
+- **Hawaiʻi holds an idle TANF reserve near $459M** — about 4.7 years of its whole annual block grant.[^reserve] The $20.7M slice (Medicaid screen) is 4.5% of it, making the federal portion the *easy* part to finance.
+- That leaves **$31.5M a year** to raise for the core program — state funds, counties and philanthropy — or **$67.2M** through twelve months.
 - Phasing months 7–12 as contingent lets the ask grow with the fundraising rather than gate the launch.
 
 [[footer.note]]
@@ -79,7 +79,7 @@ Census PUMS microdata (ACS 2018–2022) aged to 2028; births anchored to CDC vit
 [[sources]]
 [model]: Rx Kids Hawaiʻi cost model, TY2028 universal scenario — https://github.com/dtomkatsu/Census-Forecaster/blob/main/forecast_rxkids_2028.py
 [births]: Methodology — births anchored to CDC NVSR and Hawaiʻi DOH, Kalman-projected to 2028 — https://github.com/dtomkatsu/Census-Forecaster/blob/main/RXKIDS_METHODOLOGY.md
-[nrst]: Federal definition of "assistance," 45 CFR 260.31, and ACF guidance TANF-ACF-PI-2008-05 on non-recurrent short-term benefits — https://www.ecfr.gov/current/title-45/subtitle-B/chapter-II/part-260/subpart-A/section-260.31
-[rxkids]: Rx Kids, Michigan — TANF appropriation via Public Act 119 of 2023 and the program's Medicaid-based needy-family screen — https://rxkids.org
-[son]: Hawaiʻi TANF standard of need and income tests, Department of Human Services — https://humanservices.hawaii.gov/bessd/
-[reserve]: Hawaiʻi DHS report to the Legislature on unexpended TANF funds, March 2025 — https://humanservices.hawaii.gov/reports/
+[nrst]: 45 CFR 260.31 (definition of "assistance") and ACF Program Instruction TANF-ACF-PI-2008-05, "Diversion Programs" — https://acf.gov/ofa/policy-guidance/tanf-acf-pi-2008-05-diversion-programs-amended
+[rxkids]: Michigan PA 119 of 2023 (HB 4437), Sec. 2006 — the "prenatal and infant allowance pilot program" line item ($16.5M TANF), and Rx Kids' own "Playbook for Replicating Rx Kids: Utilizing TANF and Protecting Public Benefits" (Hanna & Shaefer, MSU/Poverty Solutions, July 2024), written with MDHHS's TANF Policy Director — https://rxkids.org/wp-content/uploads/2024/08/Rx_Kids_TANF_Playbook.pdf
+[son]: Hawaiʻi Administrative Rules §17-678-4 (standard of need) and §17-676-54.1 (income tests) — https://humanservices.hawaii.gov/wp-content/uploads/2025/02/17-678_Financial-Assistance-Standards-Adopted-01-26-25.pdf
+[reserve]: Hawaiʻi DHS, "Report to the Thirty-Third Hawaiʻi State Legislature 2025" (HRS §346-51.5), filed March 20, 2025 — https://humanservices.hawaii.gov/wp-content/uploads/2024/11/RYamane_2025-HRS-Sect-346-51.5-TANF-Legislative-Report-DHS-BESSD-signed.pdf

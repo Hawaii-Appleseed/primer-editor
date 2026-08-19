@@ -84,24 +84,47 @@ BIRTHS_NONMEDICAID = 5259     # 39.8%
 #     clock — fatal to a no-work-requirement design. Michigan's Rx Kids
 #     instead classifies its TANF slice as a non-recurrent short-term
 #     benefit (NRST), which is exempt but must not exceed 4 payments. So at
-#     most $1,500 + 3 x $500 = $3,000 per birth is TANF-fundable, whatever
-#     the program's full benefit is.
+#     MOST $1,500 + 3 x $500 = $3,000/birth is TANF-fundable, REGARDLESS of
+#     how long the full program runs. Verified 2026-08-18 directly against
+#     Rx Kids' own "Playbook for Replicating Rx Kids: Utilizing TANF and
+#     Protecting Public Benefits" (Hanna & Shaefer, MSU/Poverty Solutions,
+#     July 2024 -- written with MDHHS's TANF Policy Director), quoting
+#     Michigan's TANF state plan: "no state funding will be used to support
+#     families after these four payments."
 #  2. INCOME. TANF dollars reach only families meeting a state "needy
-#     family" test. Michigan used Medicaid enrollment as that screen.
+#     family" test. Michigan's VERIFIED mechanism is general Medicaid
+#     enrollment (not a pregnancy-specific pathway): "Families not covered
+#     by Medicaid at the time of birth receive benefits through
+#     philanthropic sources" (same playbook, quoting Michigan's state plan).
 #
-# Both rows below are the SAME 4-payment envelope, priced at two candidate
-# Hawaii screens.
-TANF_ENVELOPE_UNIVERSAL = 34_287_339   # the 4-payment envelope, all births
+# Both screens price the SAME $3,000/birth cap -- only which births it
+# reaches differs -- so TANF $ is IDENTICAL between the core (6mo) and full
+# (12mo) program for a given screen; only the non-federal residual grows.
+# Computed in rxkids_tanf_split.py. An EARLIER version of that script (and
+# of this constant) re-ran RxKids' own eligibility test per FPL threshold,
+# which is wrong: eligibility is (medicaid_receives OR income<=cap), and
+# medicaid_receives is independent of income_fpl_cap, so it dominated every
+# threshold up to 313% FPL and returned identical results throughout (that
+# bug inflated "Med-QUEST pregnancy screen" TANF-fundable $ from a real
+# $12.1M to a wrongly-uncapped ~$31-53M). Fixed by gating a raw FPL ratio
+# directly instead of re-running RxKids' eligibility clauses.
+TANF_ENVELOPE_UNIVERSAL = 34_287_339   # the $3,000 cap x every birth, for scale
 
-# (label, FPL cap, TANF-fundable $, births reached)
+# (label, TANF-fundable $ [same for core+full], births reached)
 TANF_SCREENS = [
-    ("Med-QUEST pregnancy screen", 1.91, 11_799_800, 4552),
-    ("Hawaiʻi's current TANF income test", 1.12, 3_245_553, 1252),
+    ("Medicaid enrollment — Michigan's actual approach",
+     20_655_771, 7969),
+    ("Hawaiʻi's current TANF test (net income, ~30% FPL)",
+     1_433_999, 553),
 ]
 
-# Hawaii TANF context (federal award + the idle reserve).
-TANF_BLOCK_GRANT = 98_904_788          # annual State Family Assistance Grant
-TANF_RESERVE = 459_180_000             # HI DHS legislative report, Feb 2025
+# Hawaii TANF context (federal award + the idle reserve). Both verified
+# 2026-08-18 against primary documents: ACF's official FY2024 TANF Financial
+# Data Table (SFAG, sheet E.2) and Hawaii DHS's "Report to the Thirty-Third
+# Hawaii State Legislature 2025" (HRS 346-51.5), filed 2025-03-20 by
+# Director Ryan I. Yamane, Attachment 1 "TANF Financial Plan."
+TANF_BLOCK_GRANT = 98_578_402          # annual State Family Assistance Grant
+TANF_RESERVE = 459_178_667             # reserve balance as of February 2025
 
 
 def money_m(v: float, dp: int = 1) -> str:
@@ -214,8 +237,8 @@ def funding_split() -> str:
     scale = BARMAX / COST_FULL
 
     rows = []
-    for label, cap, tanf, _births in TANF_SCREENS:
-        rows.append(("hdr", f"{label} (≤{int(cap*100)}% FPL)", 0, 0))
+    for label, tanf, _births in TANF_SCREENS:
+        rows.append(("hdr", label, 0, 0))
         rows.append(("bar", "Core · through 6 mo", tanf, COST_CORE))
         rows.append(("bar", "Full · through 12 mo", tanf, COST_FULL))
 
