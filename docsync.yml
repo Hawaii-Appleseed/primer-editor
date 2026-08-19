@@ -171,6 +171,34 @@ bindings:
       # sit where the text no longer does.
       margins: [0.5, 0.55]
 
+  # Rx Kids Hawaiʻi fiscal one-pager — cost of the proposed program and the
+  # federal/non-federal funding split. Hand-built (not scaffolded), so it is
+  # STAGE TWO from the start: all prose is a [[slot]] and all three charts go
+  # through docsync.blocks.graphic(). Figures are DATA constants at the top of
+  # render_report.py, reproduced from ~/Census-Forecaster.
+  - id: rxkids-fiscal
+    content: projects/rxkids-fiscal/content.md
+    # The stage half is required: without it the watcher rebuilds the published
+    # page but leaves the staged docs/rxkids-fiscal/engine/ copy the in-browser
+    # editor actually reads from stale.
+    build: python3 projects/rxkids-fiscal/render_report.py && python3 -m docsync.stage --id rxkids-fiscal
+    outputs:
+      - projects/rxkids-fiscal/index.html
+    editor:
+      dir: docs/rxkids-fiscal
+      render: projects/rxkids-fiscal/render_report.py
+      out: projects/rxkids-fiscal/index.html
+      layout: projects/rxkids-fiscal/layout.json
+      # Appleseed brand (ash/teal/slate/charcoal) plus the three validated
+      # chart slots (federal / non-federal / Medicaid), so recolouring in the
+      # editor stays on-palette.
+      palette: ["#FFFFFF", "#2F3E46", "#354F52", "#52796F", "#84A98C", "#CAD2C5",
+                "#00907A", "#C4602F", "#3D5A98"]
+      page: [8.5, 11]
+      # Must match the .page padding in render_report.py, or the editor's guides
+      # sit where the text no longer does.
+      margins: [0.5, 0.4]
+
   # Tax Fairness Coalition — 2027 Priorities: What the Poll Said — scaffolded by docsync.scaffold as STAGE ONE: openable in the
   # draft editor, not yet editable. STAGE TWO (wiring slots/graphics) is a
   # per-page job — see the report-editor skill. page height is a generous
