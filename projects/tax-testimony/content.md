@@ -424,5 +424,8 @@ Every organisation that filed on these seven bills, ranked by how many submissio
 [[p10.foot]]
 Organisation records only · individuals excluded · github.com/dtomkatsu/hawaii-tax-testimony
 
+[[endnotes.h2]]
+Sources
+
 [[sources]]
 [themes]: Cross-campaign analysis, Hawaiʻi tax testimony 2026 — https://github.com/dtomkatsu/hawaii-tax-testimony/blob/main/analysis/themes.md

@@ -24,6 +24,7 @@ restriction):
 """
 from pathlib import Path
 import os
+import re
 import sys
 
 HERE = Path(__file__).resolve().parent           # projects/rxkids-fiscal
@@ -141,10 +142,10 @@ def payment_timeline() -> str:
     funder and a band beneath restates the same split — identity never rests
     on colour alone.
     """
-    W, H = 720, 170
-    BASE = 106                      # bar baseline
-    X0, SLOT, BW = 34, 51, 38
-    UNIT = 68 / 1500.0              # px per dollar
+    W, H = 820, 140
+    BASE = 88                       # bar baseline
+    X0, SLOT, BW = 34, 59, 44
+    UNIT = 58 / 1500.0              # px per dollar
 
     def x(i):
         return X0 + i * SLOT
@@ -167,9 +168,9 @@ def payment_timeline() -> str:
              f'…contingent on available funds</text>')
 
     # value labels
-    p.append(f'<text x="{x(0) + BW/2}" y="28" font-size="12.5" font-weight="700" '
+    p.append(f'<text x="{x(0) + BW/2}" y="24" font-size="12.5" font-weight="700" '
              f'fill="{INK}" text-anchor="middle">$1,500</text>')
-    p.append(f'<text x="{x(6) + BW/2}" y="70" font-size="12.5" font-weight="700" '
+    p.append(f'<text x="{x(6) + BW/2}" y="58" font-size="12.5" font-weight="700" '
              f'fill="{INK}" text-anchor="middle">$500 per month</text>')
 
     bars = [(0, 1500, FED, 1.0)]
@@ -190,14 +191,14 @@ def payment_timeline() -> str:
                  f'H {x(i) + BW - 4} a4 4 0 0 1 4 4 V {BASE} Z" '
                  f'fill="{fill}" opacity="{op}"/>')
         lab = "Pregnancy" if i == 0 else str(i)
-        p.append(f'<text x="{x(i) + BW/2}" y="{BASE + 15}" font-size="11.5" '
+        p.append(f'<text x="{x(i) + BW/2}" y="{BASE + 14}" font-size="11.5" '
                  f'fill="{MUTE}" text-anchor="middle">{lab}</text>')
 
     p.append(f'<line x1="{X0}" y1="{BASE}" x2="{x(12) + BW}" y2="{BASE}" '
              f'stroke="{ASH}" stroke-width="1"/>')
 
     # the funding band — a 2px surface gap between the two fills
-    by, bh = 134, 22
+    by, bh = 107, 20
     split = x(3) + BW + 6
     p.append(f'<rect x="{X0}" y="{by}" width="{split - X0 - 2}" height="{bh}" '
              f'rx="5" fill="{FED}"/>')
@@ -210,9 +211,10 @@ def payment_timeline() -> str:
              f'font-weight="700" fill="#fff" text-anchor="middle">'
              f'every remaining payment</text>')
 
-    p.append(f'<text x="{X0}" y="{by + 35}" font-size="11.5" fill="{MUTE}">'
-             f'Numbered bars are months after birth. The federal ceiling is the '
-             f'non-recurrent short-term benefit rule — not a budget choice.</text>')
+    # The "by rule, not by budget" half of this caption now lives in the
+    # section heading, where it reads as the finding rather than a footnote.
+    p.append(f'<text x="{X0}" y="{by + 32}" font-size="11.5" fill="{MUTE}">'
+             f'Numbered bars are months after birth.</text>')
     p.append("</svg>")
     return "".join(p)
 
@@ -225,8 +227,8 @@ def funding_split() -> str:
     One shared scale across all four bars so they are directly comparable, and
     every segment is directly labelled.
     """
-    W = 720
-    ROW, GAP, GRPGAP = 22, 4, 8
+    W = 820
+    ROW, GAP, GRPGAP = 18, 3, 6
     # The TANF segment is only ~21px wide in the tightest row ($3.2M against a
     # $87.9M scale) — far too narrow to hold its own label inside. So the
     # federal value lives in the gutter for EVERY row (right-aligned, in the
@@ -242,7 +244,7 @@ def funding_split() -> str:
         rows.append(("bar", "Core · through 6 mo", tanf, COST_CORE))
         rows.append(("bar", "Full · through 12 mo", tanf, COST_FULL))
 
-    H = 20 + sum(ROW + GAP if k == "bar" else 17 for k, *_ in rows) + GRPGAP + 2
+    H = 20 + sum(ROW + GAP if k == "bar" else 16 for k, *_ in rows) + GRPGAP + 2
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="Annual cost split between federal TANF and '
@@ -263,10 +265,10 @@ def funding_split() -> str:
                 y += GRPGAP
             p.append(f'<text x="0" y="{y + 10}" font-size="12.5" font-weight="700" '
                      f'fill="{INK}">{label}</text>')
-            y += 17
+            y += 16
             continue
 
-        p.append(f'<text x="0" y="{y + 16}" font-size="12.5" '
+        p.append(f'<text x="0" y="{y + 14}" font-size="12.5" '
                  f'fill="{SLATE}">{label}</text>')
 
         tw = tanf * scale
@@ -280,13 +282,13 @@ def funding_split() -> str:
                  f'H {X0 + tw + 2} Z" fill="{NONFED}"/>')
 
         # federal value in the gutter, in the federal colour
-        p.append(f'<text x="{X0 - 10}" y="{y + 16}" font-size="12.5" '
+        p.append(f'<text x="{X0 - 10}" y="{y + 14}" font-size="12.5" '
                  f'font-weight="700" fill="{FED}" text-anchor="end">'
                  f'{money_m(tanf)}</text>')
         # Kept short deliberately: the narrowest non-federal segment is ~230px,
         # and the long form ("needed from non-federal sources") overflows it.
         # The legend and the section heading carry the rest of the sentence.
-        p.append(f'<text x="{X0 + tw + 12}" y="{y + 16}" font-size="12.5" '
+        p.append(f'<text x="{X0 + tw + 12}" y="{y + 14}" font-size="12.5" '
                  f'font-weight="700" fill="#fff">{money_m(rest)} to raise</text>')
         y += ROW + GAP
 
@@ -302,15 +304,15 @@ def medicaid_split() -> str:
     A single split, so a bar beats a pie — and both segments are directly
     labelled with count and share.
     """
-    W, H = 720, 64
-    X0, BW, BH, Y = 0, 720, 30, 18
+    W, H = 820, 58
+    X0, BW, BH, Y = 0, 820, 26, 14
     total = BIRTHS_MEDICAID + BIRTHS_NONMEDICAID
     mw = BW * BIRTHS_MEDICAID / total
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="Births served, split by Medicaid '
          f'eligibility">']
-    p.append(f'<text x="0" y="12" font-size="12.5" fill="{MUTE}">'
+    p.append(f'<text x="0" y="10" font-size="12.5" fill="{MUTE}">'
              f'{total:,} births served each year</text>')
 
     p.append(f'<rect x="{X0}" y="{Y}" width="{mw - 2}" height="{BH}" rx="5" '
@@ -318,27 +320,62 @@ def medicaid_split() -> str:
     p.append(f'<rect x="{X0 + mw}" y="{Y}" width="{BW - mw}" height="{BH}" '
              f'rx="5" fill="{NONFED}" opacity="0.75"/>')
 
-    p.append(f'<text x="10" y="{Y + 22}" font-size="13" font-weight="700" '
+    p.append(f'<text x="10" y="{Y + 19}" font-size="13" font-weight="700" '
              f'fill="#fff">{BIRTHS_MEDICAID:,} on Medicaid  ·  60%</text>')
-    p.append(f'<text x="{X0 + mw + 10}" y="{Y + 22}" font-size="13" '
+    p.append(f'<text x="{X0 + mw + 10}" y="{Y + 19}" font-size="13" '
              f'font-weight="700" fill="#fff">{BIRTHS_NONMEDICAID:,}  ·  40%</text>')
 
-    p.append(f'<text x="0" y="{Y + BH + 16}" font-size="11.5" fill="{MUTE}">'
-             f'Medicaid-eligible families (left) are the pool federal dollars '
-             f'can reach; the other 40% are reachable only with '
-             f'non-federal money.</text>')
+    p.append(f'<text x="0" y="{Y + BH + 14}" font-size="11.5" fill="{MUTE}">'
+             f'Only the left-hand pool is reachable with federal dollars.</text>')
     p.append("</svg>")
     return "".join(p)
 
 
-def stat(key: str) -> str:
-    return (f'<div class="stat"{L.attr(f"stat.{key}")}>'
+# Card "d" is the thesis (what share TANF can cover), not a peer of the three
+# descriptive facts beside it — and it is a statement about FEDERAL money, so it
+# takes the federal green the charts already use for that. The other three keep
+# the neutral brand teal.
+def stat(key: str, cls: str = "") -> str:
+    return (f'<div class="stat{cls}"{L.attr(f"stat.{key}")}>'
             f'<div class="stat-n">{C.t(f"stat.{key}.n")}</div>'
             f'<div class="stat-l">{C.t(f"stat.{key}.l")}</div></div>')
 
 
 def bullets(key: str) -> str:
     return "".join(f"<li>{b}</li>" for b in C.list(key))
+
+
+# Filled after C.fn.resolve() has walked the body and assigned every number.
+ENDNOTES_SLOT = "<!--ds-endnotes-->"
+
+
+def endnote_link(n: int, sid: str, txt: str, url: str) -> str:
+    # Keyed by source id, not by n: the number is whatever the current order
+    # says, but the identity the editor routes an edit back through has to stay
+    # put. data-el also makes the entry draggable to reorder.
+    # The citation TEXT is the link, not a spelled-out URL beside it. Six
+    # printed URLs cost two vertical inches on a page that has none to spare,
+    # and every route this page reaches a reader by — PDF, screen — carries
+    # the href.
+    sep = "" if n == 1 else '<span class="ensep"> · </span>'
+    return (f'{sep}<span id="en{n}" class="en"{L.attr(f"endnote.{sid}")}>'
+            f'<span class="enn">{n}</span> <a href="{url}">{txt}</a></span>')
+
+
+def linkify_footnotes(markup: str, count: int) -> str:
+    """Turn every <sup>N</sup> marker into a link to its endnote.
+
+    Without this the markers render as bare numerals — visible, meaningless,
+    and pointing at nothing.
+    """
+    def repl(m):
+        nums = re.findall(r"\d+", m.group(1))
+        if not nums:
+            return m.group(0)
+        out = [f'<a class="fn" href="#en{n}">{n}</a>' if 1 <= int(n) <= count
+               else n for n in nums]
+        return "<sup>" + "&thinsp;".join(out) + "</sup>"
+    return re.sub(r"<sup>(.*?)</sup>", repl, markup, flags=re.S)
 
 
 page = f"""
@@ -348,18 +385,18 @@ page = f"""
   {C.html("hero.standfirst", "standfirst")}
 
   <div class="stats"{L.attr("stats.strip")}>
-    {stat("a")}{stat("b")}{stat("c")}{stat("d")}
+    {stat("a")}{stat("b")}{stat("c")}{stat("d", " stat-fed")}
   </div>
 
   <h2{L.attr("timeline.title")}>{C.t("timeline.title")}</h2>
-  {graphic(L, "chart.timeline", payment_timeline(), w=6.6)}
+  {graphic(L, "chart.timeline", payment_timeline(), w=7.5)}
 
   <h2{L.attr("funding.title")}>{C.t("funding.title")}</h2>
-  {graphic(L, "chart.funding", funding_split(), w=6.6)}
+  {graphic(L, "chart.funding", funding_split(), w=7.5)}
   {C.html("funding.note", "note")}
 
   <h2{L.attr("medicaid.title")}>{C.t("medicaid.title")}</h2>
-  {graphic(L, "chart.medicaid", medicaid_split(), w=6.6)}
+  {graphic(L, "chart.medicaid", medicaid_split(), w=7.5)}
 
   <div class="cols">
     <div class="col">
@@ -372,16 +409,20 @@ page = f"""
     </div>
   </div>
 
-  <div class="foot"{L.attr("footer.note")}>{C.t("footer.note")}</div>
+  {C.html("footer.note", "foot")}
+
+  <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
 {C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
 </section>
 """
 
 body = C.fn.resolve(page)
-notes = C.fn.endnotes()
-endnotes = "".join(
-    f'<li id="en{i + 1}">{txt} <a href="{url}">{url}</a></li>'
-    for i, (txt, url) in enumerate(notes))
+en = "".join(endnote_link(i + 1, sid, txt, url)
+             for i, (sid, txt, url) in enumerate(C.fn.endnotes_with_ids(), 0))
+# `en` carries no <sup> markers of its own, so linkifying before the fill is
+# safe and keeps the substitution out of the regex's way.
+body = linkify_footnotes(body, len(C.fn.endnotes()))
+body = body.replace(ENDNOTES_SLOT, en)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -410,33 +451,57 @@ html = f"""<!DOCTYPE html>
                  color:{SLATE}; max-width:7.4in; }}
   .standfirst strong {{ color:{INK}; }}
 
-  .stats {{ display:flex; gap:7px; margin:0 0 5px; }}
+  .stats {{ display:flex; gap:7px; margin:0 0 5px; align-items:stretch; }}
   .stat {{ flex:1; background:{CREAM}; border-left:3px solid {TEAL};
-           padding:5px 8px; border-radius:0 7px 7px 0; }}
+           padding:7px 9px; border-radius:0 7px 7px 0; }}
+  /* The federal-ceiling card is the page's thesis, and it is a claim about
+     federal money — so it carries the same green the charts use for TANF. */
+  .stat-fed {{ border-left-color:{FED}; }}
+  .stat-fed .stat-n {{ color:{FED}; }}
   .stat-n {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-             font-size:1.14rem; font-weight:700; line-height:1.1; color:{DEEP}; }}
-  .stat-l {{ font-size:0.8rem; color:{SLATE}; line-height:1.24; margin-top:1px; }}
+             font-size:1.2rem; font-weight:700; line-height:1.1; color:{DEEP}; }}
+  .stat-l {{ font-size:0.82rem; color:{SLATE}; line-height:1.26; margin-top:1px; }}
 
+  /* Section rhythm. Every h2 opens a section, so each gets a rule above and
+     noticeably more air before it than after — otherwise a heading sits as
+     close to the chart it follows as to the one it introduces, and the page
+     reads as one undifferentiated column. */
   h2 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-        font-size:1.0rem; margin:4px 0 2px; color:{INK}; }}
-  .note {{ font-size:0.85rem; color:{SLATE}; margin:2px 0 4px; }}
+        font-size:1.1rem; margin:12px 0 4px; padding-top:8px; color:{INK};
+        border-top:1px solid {ASH}; letter-spacing:-.005em; }}
+  .note {{ font-size:0.86rem; color:{SLATE}; margin:3px 0 0; }}
   .note strong {{ color:{INK}; }}
 
-  .cols {{ display:flex; gap:18px; margin:4px 0 0; }}
-  .col {{ flex:1; }}
+  .cols {{ display:flex; gap:14px; margin:12px 0 0; align-items:stretch; }}
+  /* Framed rather than bare: two colour-coded headings over loose bullets was
+     the page's weakest region, with nothing holding either column together. */
+  .col {{ flex:1; background:{CREAM}; border-radius:8px; padding:11px 13px 10px; }}
   h3 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-        font-size:0.93rem; margin:0 0 3px; }}
+        font-size:0.95rem; margin:0 0 4px; }}
   .h-warn {{ color:{NONFED}; }}
   .h-fed {{ color:{FED}; }}
   .col ul {{ margin:0; padding-left:1.05em; }}
-  .col li {{ font-size:0.8rem; line-height:1.24; margin-bottom:2px;
+  .col li {{ font-size:0.845rem; line-height:1.3; margin-bottom:4px;
              color:{SLATE}; }}
+  .col li:last-child {{ margin-bottom:0; }}
   .col li strong {{ color:{INK}; }}
 
-  .foot {{ margin-top:4px; padding-top:4px; border-top:1px solid {ASH};
-           font-size:0.73rem; color:{MUTE}; line-height:1.3; }}
-  .endnotes {{ font-size:12px; }}
-  sup a {{ color:{DEEP}; text-decoration:none; }}
+  .foot {{ margin:11px 0 0; padding-top:7px; border-top:1px solid {ASH};
+           font-size:0.775rem; color:{MUTE}; line-height:1.32; }}
+  .foot strong {{ color:{SLATE}; }}
+
+  /* Sources: two columns of small type, so six citations cost a few lines
+     rather than an inch. */
+  .srch {{ font-size:0.66rem; font-weight:700; letter-spacing:.07em;
+           text-transform:uppercase; color:{SLATE}; margin-right:5px; }}
+  .endnotes {{ margin:5px 0 0; font-size:0.685rem; line-height:1.3;
+               color:{MUTE}; }}
+  .en {{ white-space:normal; }}
+  .enn {{ font-weight:700; color:{DEEP}; }}
+  .ensep {{ color:{ASH}; }}
+  .endnotes a {{ color:{MUTE}; text-decoration:none; }}
+  .endnotes a:hover {{ text-decoration:underline; }}
+  sup a.fn {{ color:{DEEP}; text-decoration:none; font-weight:700; }}
   a {{ color:{DEEP}; }}
 </style>
 </head>

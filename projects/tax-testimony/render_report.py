@@ -349,6 +349,43 @@ def stat(key: str) -> str:
             f'{C.text(f"stats.{key}.lab")}</div></div>')
 
 
+# The sources list is a product of resolving the very body it sits in — the
+# numbering only exists once C.fn.resolve() has walked the page — so the page
+# is assembled holding a placeholder and the list is filled in afterwards.
+ENDNOTES_SLOT = "<!--ds-endnotes-->"
+
+
+def endnote_link(n: int, sid: str, txt: str, url: str) -> str:
+    """One entry in the sources run.
+
+    Keyed by source id rather than by n: the number is whatever the current
+    order says, but the identity the draft editor routes an edit back through
+    has to stay put. data-el also makes the entry draggable to reorder.
+
+    The citation TEXT is the link, not a spelled-out URL beside it — this is a
+    printed page, and every route it reaches a reader by carries the href.
+    """
+    sep = "" if n == 1 else '<span class="ensep"> · </span>'
+    return (f'{sep}<span id="en{n}" class="en"{L.attr(f"endnote.{sid}")}>'
+            f'<span class="enn">{n}</span> <a href="{url}">{txt}</a></span>')
+
+
+def linkify_footnotes(markup: str, count: int) -> str:
+    """Turn every <sup>N</sup> marker into a link to its endnote.
+
+    Without this the markers render as bare numerals — visible, meaningless,
+    and pointing at nothing.
+    """
+    def repl(m):
+        nums = re.findall(r"\d+", m.group(1))
+        if not nums:
+            return m.group(0)
+        out = [f'<a class="fn" href="#en{n}">{n}</a>' if 1 <= int(n) <= count
+               else n for n in nums]
+        return "<sup>" + "&thinsp;".join(out) + "</sup>"
+    return re.sub(r"<sup>(.*?)</sup>", repl, markup, flags=re.S)
+
+
 page = f"""
 <section class="page">
   <div class="eyebrow"{L.attr("hero.eyebrow")}>{C.t("hero.eyebrow")}</div>
@@ -378,6 +415,7 @@ page = f"""
   {C.html("find.body", "find")}
 
   <div class="foot"{L.attr("footer.note")}>{C.t("footer.note")}</div>
+  <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
 {C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
 </section>
 
@@ -397,10 +435,12 @@ page = f"""
 </section>"""
 
 body = C.fn.resolve(page)
-notes = C.fn.endnotes()
-endnotes = "".join(
-    f'<li id="en{i + 1}">{txt} <a href="{url}">{url}</a></li>'
-    for i, (txt, url) in enumerate(notes))
+en = "".join(endnote_link(i + 1, sid, txt, url)
+             for i, (sid, txt, url) in enumerate(C.fn.endnotes_with_ids()))
+# `en` carries no <sup> markers of its own, so linkifying first keeps the
+# substitution out of the regex's way.
+body = linkify_footnotes(body, len(C.fn.endnotes()))
+body = body.replace(ENDNOTES_SLOT, en)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -510,8 +550,18 @@ html = f"""<!DOCTYPE html>
            font-size:0.84rem; color:#7C8A80; }}
   .arg a, .arg-f a, .arg-m a {{ color:{DEEP}; text-decoration:none;
                                 border-bottom:1px solid {ASH}; }}
-  .endnotes {{ font-size:12px; }}
+  /* Sources: one dense numbered run. An <ol> of spelled-out URLs would cost
+     several times the height for the same information on a printed page. */
+  .srch {{ font-size:0.62rem; font-weight:700; letter-spacing:.07em;
+           text-transform:uppercase; color:{SLATE}; margin-right:5px; }}
+  .endnotes {{ margin:5px 0 0; font-size:0.645rem; line-height:1.3;
+               color:#7C8A80; }}
+  .enn {{ font-weight:700; color:{DEEP}; }}
+  .ensep {{ color:{ASH}; }}
+  .endnotes a {{ color:#7C8A80; text-decoration:none; }}
+  .endnotes a:hover {{ text-decoration:underline; }}
   sup a {{ color:{DEEP}; text-decoration:none; }}
+  sup a.fn {{ font-weight:700; }}
 </style>
 </head>
 <body>
