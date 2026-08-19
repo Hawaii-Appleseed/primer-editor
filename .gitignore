@@ -46,3 +46,7 @@ docs/*/assets/
 # Written by tools/selfupdate.py before it moves the checkout: the way back
 # from a bad update. Per-machine state, never committed.
 .primer-previous-version
+
+# The agent-change journal (who edited a report and what was rewound).
+# Local state, like a draft — never part of a report.
+.docsync-agent-log.json
