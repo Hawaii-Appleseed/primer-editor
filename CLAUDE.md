@@ -112,9 +112,14 @@ Rules that bite:
 - **Tests:** `npx playwright test` (editor behaviour; ~425 specs),
   `python3 docsync/test_docsync.py` (engine round-trip),
   `python3 report2027/tools/test_render.py` (render tolerances + edit.html
-  syntax guard). `make -C report2027 validate` chains them but its
-  build_data step needs fixture data files this repo doesn't carry — run the
-  three directly. If you inherit a full-suite failure, attribute it by
+  syntax guard), `python3 -m docsync.check` (every report's rendered OUTPUT:
+  citation integrity, unrendered markdown, chart content outside its viewBox).
+  Run the last one after touching any renderer — it walks docsync.yml, so a
+  new report is covered the day it is bound, and it caught two shipped pages
+  whose sources were built and never placed. Errors fail; warnings don't.
+  `make -C report2027 validate` chains the older three but its build_data step
+  needs fixture data files this repo doesn't carry — run them directly.
+  If you inherit a full-suite failure, attribute it by
   running the suspect spec IN ISOLATION with and without your change —
   never from one full-suite run. Two known intermittents remain under
   parallel load (content-update's documented boot hang on a freshly adopted
