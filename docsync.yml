@@ -199,6 +199,36 @@ bindings:
       # sit where the text no longer does.
       margins: [0.5, 0.4]
 
+  # DOTAX vs ITEP on Act 46 / Act 24 — a one-page methods note reconciling the
+  # two published estimates of Hawaiʻi's income tax cut. Hand-built (not
+  # scaffolded), so STAGE TWO from the start: all prose is a [[slot]] and both
+  # charts go through docsync.blocks.graphic() + chart_scroll(). Every
+  # figure is arithmetic on two published tables — `render_report.py --verify`
+  # asserts all of it against what the sources printed.
+  - id: dotax-itep
+    content: projects/dotax-itep/content.md
+    # The stage half is required: without it the watcher rebuilds the published
+    # page but leaves the staged docs/dotax-itep/engine/ copy the in-browser
+    # editor actually reads from stale.
+    build: python3 projects/dotax-itep/render_report.py && python3 -m docsync.stage --id dotax-itep
+    outputs:
+      - projects/dotax-itep/index.html
+    editor:
+      dir: docs/dotax-itep
+      render: projects/dotax-itep/render_report.py
+      out: projects/dotax-itep/index.html
+      layout: projects/dotax-itep/layout.json
+      # Appleseed brand (ash/teal/slate/charcoal) plus the validated two-series
+      # pair — DOTAX blue #3D5A98, ITEP orange #C4602F, and the within-series
+      # pale blue — so recolouring in the editor stays on-palette and keeps the
+      # CVD separation the charts were validated for.
+      palette: ["#FFFFFF", "#2F3E46", "#354F52", "#52796F", "#CAD2C5", "#F4F7F4",
+                "#3D5A98", "#8AA2CC", "#C4602F"]
+      page: [8.5, 11]
+      # Must match the .page padding in render_report.py, or the editor's guides
+      # sit where the text no longer does.
+      margins: [0.5, 0.4]
+
   # Tax Fairness Coalition — 2027 Priorities: What the Poll Said — scaffolded by docsync.scaffold as STAGE ONE: openable in the
   # draft editor, not yet editable. STAGE TWO (wiring slots/graphics) is a
   # per-page job — see the report-editor skill. page height is a generous
