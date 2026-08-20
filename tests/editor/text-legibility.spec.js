@@ -41,9 +41,26 @@ const CONTEXTS = [
 // each is actually read in — collapsing them into one number is how "0.07"
 // came to look like a reasonable setting for five-point type.
 const FLOOR = {
-  screen: 10,      // CSS px — nothing on any screen below this
+  screen: 10.5,    // CSS px — MIN_TEXT_PX exactly; nothing on any screen below
   print: 7.8,      // pt on paper — MIN_TEXT_PT, with a hair for float noise
 };
+
+// The floor protects READING, and an icon is not reading.
+//
+// screen was 10 until 2026-08-20, half a pixel under the engine's own
+// MIN_TEXT_PX. That gap had already let one real defect through: chart labels
+// rendering at 10.1px cleared 10 and only tripped the PRINT floor, so the same
+// bug was caught on paper and missed on every screen. Tightening it to 10.5
+// broke exactly one thing across all ten bound reports — a decorative ▼
+// disclosure triangle on rxkids, sized `0.8em` in the verbatim-ingested
+// Squarespace markup, which multiplies down to 10.0px.
+//
+// Failing a page over a chevron while a 9px brand LABEL sails past is
+// backwards, so runs carrying no letter and no digit are exempt: a triangle, a
+// chevron, a bullet, a multiplication sign. Prose always has a letter or a
+// digit in it, so this cannot hide a sub-floor sentence — our-mission's 9px
+// .px-brand-tag stays caught, its 9px .px-chevron no longer does.
+const isIconGlyph = (text) => !/[\p{L}\p{N}]/u.test(text);
 
 
 /** Every text run inside a sheet, with the size the browser actually computed.
@@ -118,35 +135,113 @@ const report = (bad, unit) => {
     + ` ${JSON.stringify(r.text)}${r.n > 1 ? `  (x${r.n})` : ''}`).join('\n');
 };
 
-for (const ctx of CONTEXTS) {
-  test.describe(`the published report at ${ctx.name}`, () => {
-    test.beforeEach(async ({ page }) => {
-      await page.setViewportSize({ width: ctx.width, height: ctx.height });
-      if (ctx.print) await page.emulateMedia({ media: 'print' });
-      await page.goto('/primer/');
-      await page.locator('.page').first().waitFor();
-      // Charts and any late layout settle before anything is measured — a
-      // size read mid-render is a size nobody ever sees.
-      await page.waitForTimeout(400);
-    });
+// EVERY bound report, not just the primer.
+//
+// This file measured `/primer/` alone until 2026-08-20, and two shipped pages
+// were carrying the exact defect it exists to catch: rxkids-fiscal drew chart
+// labels at 11.5 user units on an 820-unit viewBox rendered at 7.5in — 10.1px
+// on screen, 7.6pt on paper — and its footnote markers inherited the UA
+// sheet's `font-size: smaller` down to 10.3px. docsync.check passed both:
+// it reads AUTHORED sizes out of the markup and cannot know either the
+// viewBox conversion or the cascade. Only a computed measurement sees them,
+// so the measurement has to cover every report, not one.
+//
+// Reports are discovered from docsync.yml, so a new one is covered the day it
+// is bound rather than whenever someone remembers this file. docsync.yml is
+// read with a small regex rather than a YAML parser: this repo has no yaml
+// dependency, and adding one for two fields is not worth it.
+const fs = require('fs');
+const path = require('path');
+const REPO = path.resolve(__dirname, '../..');
 
-    test('no text falls below the legibility floor', async ({ page }) => {
-      const all = await runs(page);
-      // A page with no measurable text means the harness broke, not that the
-      // report passed — an empty result must never read as green.
-      expect(all.length, 'text runs found on the page').toBeGreaterThan(50);
-
-      // On paper a CSS px is 0.75pt: the sheet is drawn at 96px to the inch
-      // and the zoom rule is out of play in print.
-      const unit = ctx.print ? 'pt' : 'px';
-      const floor = ctx.print ? FLOOR.print : FLOOR.screen;
-      const bad = all
-        .map((r) => ({ ...r, size: ctx.print ? r.px * 0.75 : r.px }))
-        .filter((r) => r.size < floor - 0.05);
-
-      expect(bad.length === 0 ||
-        `text below the ${floor}${unit} floor at ${ctx.name} `
-        + `(${ctx.width}px viewport):\n${report(bad, unit)}`).toBe(true);
-    });
+const discoverReports = () => {
+  const yml = fs.readFileSync(path.join(REPO, 'docsync.yml'), 'utf8');
+  const out = [];
+  const ids = [...yml.matchAll(/^ {2}- id: (\S+)$/gm)];
+  ids.forEach((m, i) => {
+    const block = yml.slice(m.index, i + 1 < ids.length ? ids[i + 1].index : undefined);
+    const built = block.match(/^ {6}out: (\S+)$/m);
+    if (!built) return;
+    const file = path.join(REPO, built[1]);
+    // A bound report that has never been built is not a legibility failure —
+    // it is nothing to measure. Skipped loudly via the count assertion below.
+    if (fs.existsSync(file)) out.push({ id: m[1], file });
   });
+  return out;
+};
+
+const REPORTS = discoverReports();
+
+// The primer is reached over the dev server, the way a reader reaches it —
+// docs/primer/index.html is what `make pub` publishes, and it is the one
+// report serve.py hosts. Every other binding builds to projects/<id>/, which
+// serve.py does not host at all, so those are opened as files. They are
+// self-contained pages; nothing about a font SIZE depends on the origin.
+const targetFor = (r) => (r.id === 'budget-primer' ? '/primer/' : `file://${r.file}`);
+
+// Pages carrying sub-floor text when this spec was widened to cover them.
+// Each entry is a REAL defect in that page, not a false positive — a reader
+// gets type below the floor there today. They are marked expected-to-fail so
+// the widening does not turn the suite red for work nobody has scheduled,
+// and `test.fail()` (not skip) is deliberate: if someone fixes the page, the
+// test "unexpectedly passes" and Playwright says so, which is the prompt to
+// delete the line. Fix the page and remove its entry. NEVER add an entry to
+// silence a new failure — that is the whole defect this file exists to stop.
+const KNOWN_SUB_FLOOR = new Map([
+  ['our-mission:desktop', '9.0px div.px-brand-tag'],
+  ['our-mission:print', '6.8pt div.px-brand-tag'],
+  ['tax-testimony:phone', '9.9px span.srch'],
+  ['tax-testimony:tablet', '9.9px span.srch'],
+  ['tax-testimony:desktop', '9.9px span.srch'],
+  ['tax-testimony:print', '7.4pt span.srch; 7.7pt span.enn, a'],
+]);
+
+test('every bound report was discovered and built', () => {
+  // An empty or truncated list must never read as green: that would be this
+  // spec silently measuring nothing, which is how the gap opened last time.
+  expect(REPORTS.length, `reports discovered in docsync.yml: `
+    + REPORTS.map((r) => r.id).join(', ')).toBeGreaterThan(5);
+});
+
+for (const ctx of CONTEXTS) {
+  for (const rep of REPORTS) {
+    test.describe(`${rep.id} at ${ctx.name}`, () => {
+      test.beforeEach(async ({ page }) => {
+        await page.setViewportSize({ width: ctx.width, height: ctx.height });
+        if (ctx.print) await page.emulateMedia({ media: 'print' });
+        await page.goto(targetFor(rep));
+        await page.locator('.page').first().waitFor();
+        // Charts and any late layout settle before anything is measured — a
+        // size read mid-render is a size nobody ever sees.
+        await page.waitForTimeout(400);
+      });
+
+      test('no text falls below the legibility floor', async ({ page }) => {
+        const known = KNOWN_SUB_FLOOR.get(`${rep.id}:${ctx.name}`);
+        if (known) test.fail(true, `known sub-floor text, not yet fixed: ${known}`);
+
+        const all = await runs(page);
+        // A page with no measurable text means the harness broke, not that the
+        // report passed — an empty result must never read as green. The bar is
+        // low on purpose: it is set by the SMALLEST bound report (a freshly
+        // scaffolded template renders about ten runs), not by the primer's
+        // several hundred. Its job is to catch "measured nothing", and a
+        // threshold tuned to the biggest report just fails the small ones.
+        expect(all.length, 'text runs found on the page').toBeGreaterThan(5);
+
+        // On paper a CSS px is 0.75pt: the sheet is drawn at 96px to the inch
+        // and the zoom rule is out of play in print.
+        const unit = ctx.print ? 'pt' : 'px';
+        const floor = ctx.print ? FLOOR.print : FLOOR.screen;
+        const bad = all
+          .map((r) => ({ ...r, size: ctx.print ? r.px * 0.75 : r.px }))
+          .filter((r) => r.size < floor - 0.05)
+          .filter((r) => !isIconGlyph(r.text));
+
+        expect(bad.length === 0 ||
+          `text below the ${floor}${unit} floor in ${rep.id} at ${ctx.name} `
+          + `(${ctx.width}px viewport):\n${report(bad, unit)}`).toBe(true);
+      });
+    });
+  }
 }
