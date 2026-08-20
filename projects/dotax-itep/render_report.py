@@ -219,14 +219,15 @@ DOTAX_ACT24_CREDITS = DOTAX_ACT24_ALL - DOTAX_ACT24       # +188.1, credit sunse
 #   (title, total, comparable slice, its label, the rest's label,
 #    ITEP's own figure, ITEP bar label, why the rest is missing)
 SCOPE_ROWS = [
-    (f"Act 46 &#8212; DOTAX: gives up ${abs(DOTAX_ACT46_FY[_TY2031_FY]):,.1f}M a year",
+    (f"Act 46 &#8212; DOTAX: ${abs(DOTAX_ACT46_FY[_TY2026_FY]):,.1f}M a year in 2026, "
+     f"rising to ${abs(DOTAX_ACT46_FY[_TY2031_FY]):,.1f}M by 2031",
      abs(DOTAX_ACT46_FY[_TY2031_FY]), abs(DOTAX_ACT46_REMAINING),
-     "still to come after 2026", "already law by 2026",
+     "the rise", "the 2026 cost",
      abs(ITEP_ACT46_VS_2026),
-     f"ITEP: &#8722;${abs(ITEP_ACT46_VS_2026):,.0f}M &#8212; the still-to-come slice only",
-     f"The other ${abs(DOTAX_ACT46_FY[_TY2026_FY]):,.1f}M was already law when ITEP "
-     "started counting &#8212; inside its baseline, not its answer."),
-    (f"Act 24 &#8212; DOTAX: takes back ${DOTAX_ACT24_ALL:,.1f}M a year",
+     f"ITEP: &#8722;${abs(ITEP_ACT46_VS_2026):,.0f}M &#8212; it measures the rise",
+     "ITEP&#8217;s baseline is 2026 policy, so its figure is that rise &#8212; "
+     "not the $740.1M Act 46 was already costing."),
+    (f"Act 24 &#8212; DOTAX: +${DOTAX_ACT24_ALL:,.1f}M a year by 2031",
      DOTAX_ACT24_ALL, DOTAX_ACT24,
      "rate &amp; bracket changes", "tax-credit sunsets",
      ITEP_SB3125_VS_ACT46,
@@ -331,7 +332,7 @@ def scope_chart() -> str:
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="DOTAX and ITEP headlines drawn to one scale: '
-         f'ITEP\'s $705M covers only the still-to-come slice of Act 46\'s '
+         f'ITEP\'s $705M covers only the 2026-to-2031 rise in Act 46\'s '
          f'$1,453.2M a year, and its $83M covers only the rate slice of Act '
          f'24\'s $297.3M a year — ITEP has no estimate for the credit '
          f'sunsets">']
@@ -391,8 +392,13 @@ def scope_chart() -> str:
         # should match — the whole chart exists for where this bar ENDS.
         p.append(f'<rect x="0" y="{y}" width="{iw}" height="{IBH}" rx="{r}" '
                  f'fill="{ITEP}"/>')
-        p.append(f'<text x="{iw + 10}" y="{y + 11}" font-size="12.5" '
-                 f'font-weight="700" fill="{ITEP}">{itep_lab}</text>')
+        # Clear the boundary guide as well as the bar end: ITEP's bar stops
+        # just short of the dashed line in both rows, so a label placed only
+        # relative to the bar landed ON the guide and read as a stray colon
+        # before the word "ITEP".
+        p.append(f'<text x="{max(iw + 10, sw + 12)}" y="{y + 11}" '
+                 f'font-size="12.5" font-weight="700" fill="{ITEP}">'
+                 f'{itep_lab}</text>')
 
         # Dashed guide through the slice boundary, spanning both bars.
         p.append(f'<line x1="{sw}" y1="{y - BH - BGAP - 2}" x2="{sw}" '
@@ -428,7 +434,7 @@ def comparison_table() -> str:
     page is about.
     """
     rows = [
-        ("Act 46 still to come, by 2031",
+        ("Act 46&#8217;s rise, 2026 to 2031",
          DOTAX_ACT46_REMAINING, ITEP_ACT46_VS_2026, False),
         ("Act 24&#8217;s rate and bracket changes",
          DOTAX_ACT24, ITEP_SB3125_VS_ACT46, True),

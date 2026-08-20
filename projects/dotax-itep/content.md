@@ -31,7 +31,7 @@ Two estimates of the same tax cut
 $1,453M
 
 [[stat.a.l]]
-DOTAX on Act 46 — half was already law by 2026
+DOTAX on Act 46 — half already being lost in 2026
 
 [[stat.b.n]]
 $705M
