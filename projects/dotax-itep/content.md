@@ -52,10 +52,7 @@ of Act 24 is rate cuts, not credit sunsets
 apart on the one line they genuinely dispute
 
 [[frame.title]]
-Neither headline is what the other source measured
-
-[[frame.note]]
-Act 46's pale half is **inside ITEP's baseline** — modelled, but not part of its answer.[^itep] Act 24's is missing outright: **$188.1M of that bill is credit sunsets**, and ITEP models only the personal income tax.[^dotax]
+Why the headlines don't match — and shouldn't
 
 [[whole.title]]
 Line the comparable slices up and they agree
