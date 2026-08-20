@@ -1,7 +1,18 @@
-// The two pieces of chrome that used to hold window height open now float over
-// the canvas: the contextual card (#context, an overlay inside #work) and the
-// FOLDED page strip (#rail.folded, which leaves the flex column). Expanded, the
-// strip goes back in the column and the canvas stops above it. Local mode.
+// The chrome that used to hold window height open floats over the canvas: the
+// contextual card (#context, an overlay inside #work) and the page strip
+// (#rail), in BOTH its states.
+//
+// The strip used to go back into the flex column when expanded, and this file
+// pinned that. It was the right call while the only two options were an opaque
+// 106px band or nothing: an opaque bar floating over the document would read
+// as covering it. Translucency is the third option, and with it the band was
+// the largest piece of standing chrome in the app — 12% of window height, the
+// highest-contrast object on screen, holding room for something you look at
+// between tasks rather than during one. So expanded now floats too, and what
+// this file pins is the consequence: the canvas runs to the bottom of the
+// window in both states, and applyZoom leaves room BELOW the iframe so the
+// last page can still be scrolled clear of a strip that takes clicks. Local
+// mode.
 const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 
 const geo = (page) => page.evaluate(() => {
@@ -47,13 +58,38 @@ test.describe('floating chrome', () => {
       await expect(page.locator('#rail')).not.toHaveClass(/folded/);
     });
 
-  test('expanded, the strip is back in the column and the canvas stops above it',
+  test('expanded, the strip floats too — translucent, over a full-height canvas',
     async ({ page }) => {
       await fold(page, false);
       const g = await geo(page);
-      expect(g.railPos).toBe('static');
-      expect(g.work.bottom).toBeCloseTo(g.rail.y, 0);
+      expect(g.railPos).toBe('absolute');
+      // The canvas no longer stops above the strip: it runs under it.
+      expect(g.work.bottom).toBeCloseTo(g.winH, 0);
+      expect(g.rail.bottom).toBeCloseTo(g.winH, 0);
+      // Translucent, not opaque — an alpha strictly between the two. A solid
+      // fill here is the exact regression this test exists to catch, and so
+      // is a fill so faint the chips lose their ground.
+      const alpha = Number((g.railBg.match(/[\d.]+\)$/) || ['1)'])[0].slice(0, -1));
+      expect(alpha).toBeGreaterThan(0.35);
+      expect(alpha).toBeLessThan(1);
+      // And the document can still be scrolled clear of it: applyZoom puts
+      // the strip's own height below the iframe.
+      const clear = await page.locator('#out').evaluate(el =>
+        parseFloat(getComputedStyle(el).marginBottom) || 0);
+      expect(clear).toBeGreaterThanOrEqual(g.rail.h - 1);
     });
+
+  test('idle, the strip is dimmed; pointing at it brings it back', async ({ page }) => {
+    await fold(page, false);
+    const idle = await page.locator('#rail').evaluate(el =>
+      parseFloat(getComputedStyle(el).opacity));
+    expect(idle).toBeLessThan(0.8);
+    await page.hover('#rail');
+    await page.waitForTimeout(300);
+    const live = await page.locator('#rail').evaluate(el =>
+      parseFloat(getComputedStyle(el).opacity));
+    expect(live).toBeCloseTo(1, 1);
+  });
 
   test('the contextual card overlays the canvas, just under the top bar',
     async ({ page }) => {

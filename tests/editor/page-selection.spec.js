@@ -22,7 +22,15 @@ async function bareSpot(page) {
           if (hitPlaced(d, pg, { clientX: x, clientY: y })) continue;
           const el = d.elementFromPoint(x, y);
           if (!el || el.closest('a, button, input, .ds-menu')) continue;
-          return { x: r.left + x * sc, y: r.top + y * sc };
+          const top = { x: r.left + x * sc, y: r.top + y * sc };
+          // ...and the click has to actually REACH the canvas. The page strip
+          // floats over the bottom of it now, so a spot that is bare on the
+          // page can still sit under a page chip — which is not a bare spot
+          // for a person either, and a helper that returned one would be
+          // reporting a UI regression as a page-selection bug.
+          const over = document.elementFromPoint(top.x, top.y);
+          if (over !== out) continue;
+          return top;
         }
       }
     }

@@ -100,7 +100,11 @@ test.describe('page strip: renderer declares its pages', () => {
     await expect.poll(() => previewCount(page)).toBe(n);
 
     // Declared pages carry their names, which is what the fallback cannot know.
-    await expect(chips.first().locator('.chip-lab')).toHaveText('Cover');
+    // The name is the chip's tooltip and accessible name now, not a caption
+    // under the thumbnail — twelve ellipsised captions ("Budget B…", "How
+    // Mon…") identified nothing the preview and the number did not already.
+    await expect(chips.first()).toHaveAttribute('data-tip', 'Cover');
+    await expect(chips.first()).toHaveAttribute('aria-label', 'Cover');
 
     // Everything the undeclared case withholds is present here. Hiding is not
     // on that list — it is gone for every report (see pages.spec.js).
