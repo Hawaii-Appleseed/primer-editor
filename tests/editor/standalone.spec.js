@@ -71,7 +71,13 @@ test.describe('installable shell', () => {
     const cards = page.locator('#grid .card');
     await expect(cards).toHaveCount(ids.length);
     for (const id of ids) {
-      const card = page.locator(`#grid .card[href*="project=${id}"]`);
+      // Anchored at the END of the href, and built the way renderGrid() builds
+      // it. A substring match reads "project=rxkids" inside the card for
+      // rxkids-fiscal too, so this counted two cards for one id and failed on
+      // a registry that had done nothing wrong — any id that is a prefix of
+      // another id would do it again.
+      const card = page.locator(
+        `#grid .card[href$="project=${encodeURIComponent(id)}"]`);
       await expect(card).toHaveCount(1);
       await expect(card.locator('.name')).toHaveText(registry[id].name || id);
     }
