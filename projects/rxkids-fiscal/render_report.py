@@ -35,6 +35,7 @@ if str(REPO) not in sys.path:
 from docsync.content import Content              # noqa: E402
 from docsync.layout import Layout                # noqa: E402
 from docsync.blocks import graphic, pdf_button   # noqa: E402
+from docsync.blocks import chart_scroll, chart_scroll_css  # noqa: E402
 from docsync.okina import OKINA_FACES            # noqa: E402
 
 _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
@@ -132,6 +133,48 @@ def money_m(v: float, dp: int = 1) -> str:
     return f"${v / 1e6:.{dp}f}M"
 
 
+# --- Chart geometry: read this before changing a viewBox or a font-size ------
+# THE THREE-UNITS TRAP. A chart label's size on screen is NOT the number in the
+# SVG. Each chart below is drawn in its own user units and rendered at
+# CHART_W_IN inches, so:
+#
+#     px on screen = user units x (CHART_W_IN x 96) / VB_W
+#
+# At 7.5in over an 820-unit viewBox that is 0.878 px per unit, so labels
+# authored at 11.5 units rendered at 10.1px — under the 10.5px floor in
+# docsync/layout.py, and 7.6pt on paper against a 7.875pt floor. docsync.check
+# never saw it: it reads AUTHORED sizes out of the markup and cannot know the
+# conversion. tests/editor/text-legibility.spec.js measures the computed size,
+# which is the only place this is visible.
+#
+# LABEL_U is therefore the smallest size anything here may use. Do not author a
+# raw font-size below it, and if you change CHART_W_IN or VB_W, re-run the
+# arithmetic — MIN_SAFE_U below is what the floor demands at the current
+# geometry, and _assert_label_floor() fails the build if LABEL_U drops under it.
+CHART_W_IN = 7.5
+VB_W = 820
+CHART_FLOOR_PX = 10.5                      # docsync.blocks.CHART_MIN_LABEL_PX
+_PX_PER_UNIT = CHART_W_IN * 96 / VB_W      # 0.878
+MIN_SAFE_U = CHART_FLOOR_PX / _PX_PER_UNIT  # 11.96
+
+# 12.5 units -> 10.98px, a real margin over the floor. 12 units clears it by
+# 0.04px, which is not a margin — it is the same bug waiting for someone to
+# nudge CHART_W_IN. Both of the old sizes (11.5 and 12) are raised to this.
+LABEL_U = 12.5
+EMPH_U = 13                                # the two directly-labelled shares
+
+
+def _assert_label_floor() -> None:
+    if LABEL_U < MIN_SAFE_U:
+        raise SystemExit(
+            f"chart labels below the legibility floor: LABEL_U={LABEL_U} renders "
+            f"at {LABEL_U * _PX_PER_UNIT:.2f}px at {CHART_W_IN}in over a {VB_W}-unit "
+            f"viewBox; the floor is {CHART_FLOOR_PX}px (>= {MIN_SAFE_U:.2f} units)")
+
+
+_assert_label_floor()
+
+
 # --- Graphic 1: the payment schedule and the TANF ceiling --------------------
 
 def payment_timeline() -> str:
@@ -142,7 +185,7 @@ def payment_timeline() -> str:
     funder and a band beneath restates the same split — identity never rests
     on colour alone.
     """
-    W, H = 820, 140
+    W, H = VB_W, 140
     BASE = 88                       # bar baseline
     X0, SLOT, BW = 34, 59, 44
     UNIT = 58 / 1500.0              # px per dollar
@@ -157,20 +200,20 @@ def payment_timeline() -> str:
 
     # legend — always present for >= 2 series
     p.append(f'<rect x="0" y="0" width="11" height="11" rx="2.5" fill="{FED}"/>')
-    p.append(f'<text x="17" y="9.5" font-size="12.5" fill="{SLATE}">'
+    p.append(f'<text x="17" y="9.5" font-size="{LABEL_U}" fill="{SLATE}">'
              f'Federal TANF can cover</text>')
     p.append(f'<rect x="168" y="0" width="11" height="11" rx="2.5" fill="{NONFED}"/>')
-    p.append(f'<text x="185" y="9.5" font-size="12.5" fill="{SLATE}">'
+    p.append(f'<text x="185" y="9.5" font-size="{LABEL_U}" fill="{SLATE}">'
              f'State / county / philanthropy</text>')
     p.append(f'<rect x="392" y="0" width="11" height="11" rx="2.5" fill="{NONFED}" '
              f'opacity="0.45"/>')
-    p.append(f'<text x="409" y="9.5" font-size="12.5" fill="{SLATE}">'
+    p.append(f'<text x="409" y="9.5" font-size="{LABEL_U}" fill="{SLATE}">'
              f'…contingent on available funds</text>')
 
     # value labels
-    p.append(f'<text x="{x(0) + BW/2}" y="24" font-size="12.5" font-weight="700" '
+    p.append(f'<text x="{x(0) + BW/2}" y="24" font-size="{LABEL_U}" font-weight="700" '
              f'fill="{INK}" text-anchor="middle">$1,500</text>')
-    p.append(f'<text x="{x(6) + BW/2}" y="58" font-size="12.5" font-weight="700" '
+    p.append(f'<text x="{x(6) + BW/2}" y="58" font-size="{LABEL_U}" font-weight="700" '
              f'fill="{INK}" text-anchor="middle">$500 per month</text>')
 
     bars = [(0, 1500, FED, 1.0)]
@@ -191,7 +234,7 @@ def payment_timeline() -> str:
                  f'H {x(i) + BW - 4} a4 4 0 0 1 4 4 V {BASE} Z" '
                  f'fill="{fill}" opacity="{op}"/>')
         lab = "Pregnancy" if i == 0 else str(i)
-        p.append(f'<text x="{x(i) + BW/2}" y="{BASE + 14}" font-size="11.5" '
+        p.append(f'<text x="{x(i) + BW/2}" y="{BASE + 14}" font-size="{LABEL_U}" '
                  f'fill="{MUTE}" text-anchor="middle">{lab}</text>')
 
     p.append(f'<line x1="{X0}" y1="{BASE}" x2="{x(12) + BW}" y2="{BASE}" '
@@ -202,18 +245,18 @@ def payment_timeline() -> str:
     split = x(3) + BW + 6
     p.append(f'<rect x="{X0}" y="{by}" width="{split - X0 - 2}" height="{bh}" '
              f'rx="5" fill="{FED}"/>')
-    p.append(f'<text x="{(X0 + split) / 2}" y="{by + 16}" font-size="12" '
+    p.append(f'<text x="{(X0 + split) / 2}" y="{by + 16}" font-size="{LABEL_U}" '
              f'font-weight="700" fill="#fff" text-anchor="middle">'
              f'4 payments · $3,000 max</text>')
     p.append(f'<rect x="{split}" y="{by}" width="{x(12) + BW - split}" '
              f'height="{bh}" rx="5" fill="{NONFED}"/>')
-    p.append(f'<text x="{(split + x(12) + BW) / 2}" y="{by + 16}" font-size="12" '
+    p.append(f'<text x="{(split + x(12) + BW) / 2}" y="{by + 16}" font-size="{LABEL_U}" '
              f'font-weight="700" fill="#fff" text-anchor="middle">'
              f'every remaining payment</text>')
 
     # The "by rule, not by budget" half of this caption now lives in the
     # section heading, where it reads as the finding rather than a footnote.
-    p.append(f'<text x="{X0}" y="{by + 32}" font-size="11.5" fill="{MUTE}">'
+    p.append(f'<text x="{X0}" y="{by + 32}" font-size="{LABEL_U}" fill="{MUTE}">'
              f'Numbered bars are months after birth.</text>')
     p.append("</svg>")
     return "".join(p)
@@ -227,7 +270,7 @@ def funding_split() -> str:
     One shared scale across all four bars so they are directly comparable, and
     every segment is directly labelled.
     """
-    W = 820
+    W = VB_W
     ROW, GAP, GRPGAP = 18, 3, 6
     # The TANF segment is only ~21px wide in the tightest row ($3.2M against a
     # $87.9M scale) — far too narrow to hold its own label inside. So the
@@ -251,11 +294,11 @@ def funding_split() -> str:
          f'non-federal dollars, by program length and needy-family screen">']
 
     p.append(f'<rect x="0" y="0" width="11" height="11" rx="2.5" fill="{FED}"/>')
-    p.append(f'<text x="17" y="9.5" font-size="12.5" fill="{SLATE}">Federal TANF</text>')
+    p.append(f'<text x="17" y="9.5" font-size="{LABEL_U}" fill="{SLATE}">Federal TANF</text>')
     p.append(f'<rect x="112" y="0" width="11" height="11" rx="2.5" fill="{NONFED}"/>')
-    p.append(f'<text x="129" y="9.5" font-size="12.5" fill="{SLATE}">'
+    p.append(f'<text x="129" y="9.5" font-size="{LABEL_U}" fill="{SLATE}">'
              f'State / county / philanthropy</text>')
-    p.append(f'<text x="{W}" y="9.5" font-size="12" fill="{MUTE}" '
+    p.append(f'<text x="{W}" y="9.5" font-size="{LABEL_U}" fill="{MUTE}" '
              f'text-anchor="end">all bars share one scale</text>')
 
     y = 20
@@ -263,12 +306,12 @@ def funding_split() -> str:
         if kind == "hdr":
             if y > 24:            # extra air before a 2nd group
                 y += GRPGAP
-            p.append(f'<text x="0" y="{y + 10}" font-size="12.5" font-weight="700" '
+            p.append(f'<text x="0" y="{y + 10}" font-size="{LABEL_U}" font-weight="700" '
                      f'fill="{INK}">{label}</text>')
             y += 16
             continue
 
-        p.append(f'<text x="0" y="{y + 14}" font-size="12.5" '
+        p.append(f'<text x="0" y="{y + 14}" font-size="{LABEL_U}" '
                  f'fill="{SLATE}">{label}</text>')
 
         tw = tanf * scale
@@ -282,13 +325,13 @@ def funding_split() -> str:
                  f'H {X0 + tw + 2} Z" fill="{NONFED}"/>')
 
         # federal value in the gutter, in the federal colour
-        p.append(f'<text x="{X0 - 10}" y="{y + 14}" font-size="12.5" '
+        p.append(f'<text x="{X0 - 10}" y="{y + 14}" font-size="{LABEL_U}" '
                  f'font-weight="700" fill="{FED}" text-anchor="end">'
                  f'{money_m(tanf)}</text>')
         # Kept short deliberately: the narrowest non-federal segment is ~230px,
         # and the long form ("needed from non-federal sources") overflows it.
         # The legend and the section heading carry the rest of the sentence.
-        p.append(f'<text x="{X0 + tw + 12}" y="{y + 14}" font-size="12.5" '
+        p.append(f'<text x="{X0 + tw + 12}" y="{y + 14}" font-size="{LABEL_U}" '
                  f'font-weight="700" fill="#fff">{money_m(rest)} to raise</text>')
         y += ROW + GAP
 
@@ -304,7 +347,7 @@ def medicaid_split() -> str:
     A single split, so a bar beats a pie — and both segments are directly
     labelled with count and share.
     """
-    W, H = 820, 58
+    W, H = VB_W, 58
     X0, BW, BH, Y = 0, 820, 26, 14
     total = BIRTHS_MEDICAID + BIRTHS_NONMEDICAID
     mw = BW * BIRTHS_MEDICAID / total
@@ -312,7 +355,7 @@ def medicaid_split() -> str:
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="Births served, split by Medicaid '
          f'eligibility">']
-    p.append(f'<text x="0" y="10" font-size="12.5" fill="{MUTE}">'
+    p.append(f'<text x="0" y="10" font-size="{LABEL_U}" fill="{MUTE}">'
              f'{total:,} births served each year</text>')
 
     p.append(f'<rect x="{X0}" y="{Y}" width="{mw - 2}" height="{BH}" rx="5" '
@@ -320,12 +363,12 @@ def medicaid_split() -> str:
     p.append(f'<rect x="{X0 + mw}" y="{Y}" width="{BW - mw}" height="{BH}" '
              f'rx="5" fill="{NONFED}" opacity="0.75"/>')
 
-    p.append(f'<text x="10" y="{Y + 19}" font-size="13" font-weight="700" '
+    p.append(f'<text x="10" y="{Y + 19}" font-size="{EMPH_U}" font-weight="700" '
              f'fill="#fff">{BIRTHS_MEDICAID:,} on Medicaid  ·  60%</text>')
-    p.append(f'<text x="{X0 + mw + 10}" y="{Y + 19}" font-size="13" '
+    p.append(f'<text x="{X0 + mw + 10}" y="{Y + 19}" font-size="{EMPH_U}" '
              f'font-weight="700" fill="#fff">{BIRTHS_NONMEDICAID:,}  ·  40%</text>')
 
-    p.append(f'<text x="0" y="{Y + BH + 14}" font-size="11.5" fill="{MUTE}">'
+    p.append(f'<text x="0" y="{Y + BH + 14}" font-size="{LABEL_U}" fill="{MUTE}">'
              f'Only the left-hand pool is reachable with federal dollars.</text>')
     p.append("</svg>")
     return "".join(p)
@@ -389,14 +432,14 @@ page = f"""
   </div>
 
   <h2{L.attr("timeline.title")}>{C.t("timeline.title")}</h2>
-  {graphic(L, "chart.timeline", payment_timeline(), w=7.5)}
+  {graphic(L, "chart.timeline", chart_scroll(payment_timeline(), smallest_label=LABEL_U), w=CHART_W_IN)}
 
   <h2{L.attr("funding.title")}>{C.t("funding.title")}</h2>
-  {graphic(L, "chart.funding", funding_split(), w=7.5)}
+  {graphic(L, "chart.funding", chart_scroll(funding_split(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("funding.note", "note")}
 
   <h2{L.attr("medicaid.title")}>{C.t("medicaid.title")}</h2>
-  {graphic(L, "chart.medicaid", medicaid_split(), w=7.5)}
+  {graphic(L, "chart.medicaid", chart_scroll(medicaid_split(), smallest_label=LABEL_U), w=CHART_W_IN)}
 
   <div class="cols">
     <div class="col">
@@ -449,7 +492,7 @@ html = f"""<!DOCTYPE html>
         letter-spacing:-.015em; }}
   .standfirst {{ font-size:0.93rem; line-height:1.36; margin:0 0 5px;
                  color:{SLATE}; max-width:7.4in; }}
-  .standfirst strong {{ color:{INK}; }}
+  .standfirst b {{ color:{INK}; }}
 
   .stats {{ display:flex; gap:7px; margin:0 0 5px; align-items:stretch; }}
   .stat {{ flex:1; background:{CREAM}; border-left:3px solid {TEAL};
@@ -470,7 +513,7 @@ html = f"""<!DOCTYPE html>
         font-size:1.1rem; margin:12px 0 4px; padding-top:8px; color:{INK};
         border-top:1px solid {ASH}; letter-spacing:-.005em; }}
   .note {{ font-size:0.86rem; color:{SLATE}; margin:3px 0 0; }}
-  .note strong {{ color:{INK}; }}
+  .note b {{ color:{INK}; }}
 
   .cols {{ display:flex; gap:14px; margin:12px 0 0; align-items:stretch; }}
   /* Framed rather than bare: two colour-coded headings over loose bullets was
@@ -484,11 +527,11 @@ html = f"""<!DOCTYPE html>
   .col li {{ font-size:0.845rem; line-height:1.3; margin-bottom:4px;
              color:{SLATE}; }}
   .col li:last-child {{ margin-bottom:0; }}
-  .col li strong {{ color:{INK}; }}
+  .col li b {{ color:{INK}; }}
 
   .foot {{ margin:11px 0 0; padding-top:7px; border-top:1px solid {ASH};
            font-size:0.775rem; color:{MUTE}; line-height:1.32; }}
-  .foot strong {{ color:{SLATE}; }}
+  .foot b {{ color:{SLATE}; }}
 
   /* Sources: two columns of small type, so six citations cost a few lines
      rather than an inch. */
@@ -501,12 +544,20 @@ html = f"""<!DOCTYPE html>
   .ensep {{ color:{ASH}; }}
   .endnotes a {{ color:{MUTE}; text-decoration:none; }}
   .endnotes a:hover {{ text-decoration:underline; }}
+  /* Superscript markers inherit the UA sheet's `font-size: smaller` (~0.83x),
+     so the ones inside the 0.775rem footer computed to 10.3px — under the
+     10.5px floor, and invisible to docsync.check, which cannot resolve a class
+     to a size. Pin it instead of letting the cascade shrink it. Do not name the
+     element in this comment: check.py scans the OUTPUT for it and a tag name in
+     a CSS comment swallows the first real marker after it. */
+  sup {{ font-size:10.6px; line-height:0; }}
   sup a.fn {{ color:{DEEP}; text-decoration:none; font-weight:700; }}
   a {{ color:{DEEP}; }}
 </style>
 </head>
 <body>
 {pdf_button(L, bg=DEEP)}
+{chart_scroll_css()}
 {body}
 </body>
 </html>
