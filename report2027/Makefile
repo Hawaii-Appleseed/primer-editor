@@ -55,6 +55,20 @@ pdf: html
 	  "file://$(CURDIR)/web/index.html"
 	rm -rf $(PROFILE)
 
+# The report as plain text, for everyone downstream of the finished page: a
+# colleague cutting social copy, a reviewer checking a figure, anyone pasting a
+# passage into an email. Copying out of the PDF is not the same thing — chart
+# values live in SVG geometry, so they come out of a text layer as a scattered
+# pile of numbers with no labels attached. docsync.text walks the DOM instead
+# and writes them as label/value pairs.
+#
+# Nothing here is primer-specific: the module keys off document structure and
+# walks docsync.yml, so `python3 -m docsync.text` with no arguments writes a
+# text version of EVERY project in the registry, and --id does one. This target
+# is just the convenient spelling for the report that has a Makefile.
+text: render
+	cd .. && python3 -m docsync.text --id budget-primer
+
 embed: html
 	python3 tools/bundle_embed.py $(ASSET_BASE)
 
@@ -74,4 +88,4 @@ live: setup
 setup:
 	@cd .. && python3 tools/preflight.py
 
-.PHONY: render editor pub live setup all validate data html pdf embed preview
+.PHONY: render editor pub live setup all validate data html pdf text embed preview

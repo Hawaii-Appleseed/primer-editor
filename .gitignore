@@ -50,3 +50,9 @@ docs/*/assets/
 # The agent-change journal (who edited a report and what was rewound).
 # Local state, like a draft — never part of a report.
 .docsync-agent-log.json
+
+# Plain-text versions of the rendered reports (`python3 -m docsync.text`).
+# Regenerated from committed HTML in one command, and the projects here are
+# fixtures — a consumer repo that wants its text version tracked commits it
+# there instead.
+*-text.md
