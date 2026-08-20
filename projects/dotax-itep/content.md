@@ -58,7 +58,7 @@ Why the headlines don't match — and shouldn't
 Line the comparable slices up and they agree
 
 [[parts.title]]
-The one disagreement, and the fingerprint it leaves
+The one disagreement
 
 [[finding.h]]
 Where they agree, and where they don't
