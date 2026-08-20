@@ -113,7 +113,8 @@ Rules that bite:
   `python3 docsync/test_docsync.py` (engine round-trip),
   `python3 report2027/tools/test_render.py` (render tolerances + edit.html
   syntax guard), `python3 -m docsync.check` (every report's rendered OUTPUT:
-  citation integrity, unrendered markdown, chart content outside its viewBox).
+  citation integrity, unrendered markdown, chart content outside its viewBox,
+  text below the legibility floor).
   Run the last one after touching any renderer — it walks docsync.yml, so a
   new report is covered the day it is bound, and it caught two shipped pages
   whose sources were built and never placed. Errors fail; warnings don't.
@@ -128,6 +129,29 @@ Rules that bite:
   residue, stomped registries) is FIXED: server writes hold a cross-process
   lock and specs clean up surgically — see tests/editor/fixtures/
   host-state.js before writing any spec that scaffolds or adopts.
+- **Text size has a floor, and it is stated in POINTS.** `docsync/layout.py`
+  holds `MIN_TEXT_PT` / `MIN_LABEL_PT` / `MIN_SUBLABEL_PT`; everything else
+  converts off them. This exists because one page carries three units and
+  only one is what the reader sees: CSS px (x0.75 = pt on paper), SVG user
+  units in the page's INCH system (x72 = pt — a chart label written as `0.07`
+  was five-point type), and `.page{zoom:1.25}` above 1120px, which flatters
+  every desktop review and applies to neither the PDF nor a phone.
+  `_check_text()` REFUSES an authored size under the floor rather than
+  clamping it; `_lfs()` floors every chart label, so shrinking a chart box no
+  longer shrinks its type into nothing; the editor's stepper stops at 10.5px.
+  Two gates, both already in CI: `docsync.check`'s `check_text_size` reads
+  sizes out of the markup, and `tests/editor/text-legibility.spec.js`
+  measures COMPUTED sizes at phone/tablet/desktop/print — the only place the
+  sheet's mobile scale-down and the CSS cascade are visible at all. **If you
+  add a size anywhere, work it out in points first.** The phone case is held
+  up by `blocks.py`'s `chart_scroll()` / `chart_scroll_css()`: an SVG with a
+  viewBox shrinks with the sheet and its text goes with it, so below the
+  sheet's own width a chart stops shrinking at the point its smallest label
+  reaches the floor and its wrapper scrolls instead (the shape `mobile_css()`
+  already uses for a too-wide table), with CSS-only scroll shadows so a
+  clipped figure reads as scrollable rather than broken. **A chart added
+  without that wrapper fails text-legibility.spec.js at 375px** — wrap it,
+  passing the smallest font-size it uses in its own user units.
 - **Never launch or kill a dev server the user owns**; Playwright starts its
   own throwaway servers and that's fine.
 - A report is bound in **`docsync.yml`** (id, content, build command, editor

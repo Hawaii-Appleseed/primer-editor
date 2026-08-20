@@ -187,6 +187,8 @@ a { color: var(--dark); }
 
 /* charts */
 .chart { width: 100%; height: auto; display: block; margin: 4px 0; }
+.ds-chart-scroll { margin: 4px 0; }
+.ds-chart-scroll > .chart { margin: 0; }
 /* Pie figures bleed slightly past the text column, as they do in the original,
    so the discs can reach their reference diameters (Fig 3 4.06in, Fig 4 4.39in,
    Fig 5 3.82in) with the legend still beside them. Widths are disc/0.79, the
@@ -216,11 +218,18 @@ svg .ph { font-size: 12px; font-family: var(--body); }
 .iv:hover { opacity: .82; }
 
 /* Figure 2's legend sits directly under its chart and runs horizontally.
-   Scoped to direct children of .page so it never captures .pie-row legends. */
-.page > .chart + .legend { flex-direction: row; flex-wrap: wrap;
+   Scoped to direct children of .page so it never captures .pie-row legends.
+   .ds-chart-scroll is matched alongside .chart because blocks.py's
+   chart_scroll() wraps the chart in one — an adjacent-sibling selector reads
+   the WRAPPER as the legend's previous sibling once it does, and this rule
+   silently stopped applying when it didn't know that. */
+.page > .chart + .legend,
+.page > .ds-chart-scroll + .legend { flex-direction: row; flex-wrap: wrap;
                            justify-content: center; margin: 8px 0 14px; }
-.page > .chart + .legend .lg { font-size: 15px; }
-.page > .chart + .legend .sw { width: 22px; height: 22px; }
+.page > .chart + .legend .lg,
+.page > .ds-chart-scroll + .legend .lg { font-size: 15px; }
+.page > .chart + .legend .sw,
+.page > .ds-chart-scroll + .legend .sw { width: 22px; height: 22px; }
 
 /* Lifecycle callouts. Positions are computed in render_report.py from each
    bracket's stub endpoint and emitted as inline left/top; these classes only

@@ -14,6 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from docsync.content import Content, ContentError  # noqa: E402
+from docsync.blocks import chart_scroll, chart_scroll_css  # noqa: E402
 from docsync.layout import (Layout, LayoutError, check_icon_svg,  # noqa: E402
                             fill_css, fill_repr, icon_color)
 
@@ -328,7 +329,10 @@ def fig_obligated():
         out.append(f'<rect x="{X(i)-14:.1f}" y="{TM}" width="28" height="{ph}" fill="transparent" '
                    f'pointer-events="all" class="iv" data-tip="{esc(tip)}"/>')
     out.append("</svg>")
-    return "".join(out)
+    # Scrolls rather than shrinks on a phone; 11.5px is this chart's
+    # smallest label (.vlab), which is what sets how far it may scale
+    # down before the wrapper takes over.
+    return chart_scroll("".join(out), smallest_label=11.5)
 
 def fig2_rows_for(year):
     """Branch + department rows for Figure 2. FY2027 carries per-department
@@ -394,7 +398,10 @@ def fig2_svg(rows, attrs=""):
             out.append(f'<text x="{x+5:.0f}" y="{y+RH-4}" class="vlab">{short(total)}</text>')
         y += RH + GAP
     out.append("</svg>")
-    return "".join(out)
+    # Scrolls rather than shrinks on a phone; 11.5px is this chart's
+    # smallest label (.vlab), which is what sets how far it may scale
+    # down before the wrapper takes over.
+    return chart_scroll("".join(out), smallest_label=11.5)
 
 # Each lifecycle callout owns a contiguous run of months; brackets outside the
 # month ring make that span explicit rather than leaving it to proximity.
@@ -520,7 +527,16 @@ def fig1_lifecycle(size=560):
                    f'<textPath href="#ph{i}" startOffset="50%" '
                    f'text-anchor="middle">{name}</textPath></text>')
     out.append("</svg>")
-    return "".join(out)
+    # Scrolls rather than shrinks on a phone; 12px is this chart's smallest
+    # label — .ph, the phase names set along a textPath — which is what sets
+    # how far it may scale down before the wrapper takes over.
+    #
+    # This is the one figure where that trade-off is visible: the wheel is
+    # symmetric, so on a 375px screen it is now legible-but-clipped (with
+    # chart_scroll_css()'s edge shadows saying so) rather than whole at 7.2px.
+    # Asked directly, that is the call — legibility over the at-a-glance
+    # whole. Don't quietly unwrap it to make the figure fit again.
+    return chart_scroll("".join(out), smallest_label=12)
 
 def fig6_chart():
     data = [("Lowest 20%", "Less than $21,900", 14.1), ("Second 20%", "$21,900–$44,200", 13.7),
@@ -547,7 +563,10 @@ def fig6_chart():
         if "–" in rng:
             out.append(f'<text x="{x+BW/2:.0f}" y="{BASE+60:.0f}" text-anchor="middle" class="rlab">–{rng.split("–")[1]}</text>')
     out.append(f'<line x1="16" y1="{BASE}" x2="{W-16}" y2="{BASE}" stroke="{INK}" stroke-width="1"/></svg>')
-    return "".join(out)
+    # Scrolls rather than shrinks on a phone; 14.6px is this chart's
+    # smallest label (.rlab), which is what sets how far it may scale
+    # down before the wrapper takes over.
+    return chart_scroll("".join(out), smallest_label=14.6)
 
 # ---------- figure data (year-parameterized for the FY26/FY27 picker) ----------
 FIG3_ORDER = ["Transportation", "Formal Education", "All Others", "Economic Development", "Health"]
@@ -1164,6 +1183,7 @@ html = f"""<!DOCTYPE html>
 <link rel="stylesheet" href="primer.css">
 </head>
 <body{' class="ds-bleed"' if os.environ.get("DOCSYNC_MARKS") else ''}>
+{chart_scroll_css()}
 <div class="toolbar noprint">
  <span>Hawaiʻi Budget Primer FY2026–27</span>
  <span class="tb-actions">

@@ -22,10 +22,23 @@ const PHONE = { width: 375, height: 812 };
  *  only elements carrying text or artwork count. And descendants of a scroller
  *  are exempt: a wide table is SUPPOSED to have content wider than its box,
  *  that being the fix rather than the bug, and its rows legitimately measure
- *  past the edge while the table itself does not. */
+ *  past the edge while the table itself does not.
+ *
+ *  That second exemption asks the COMPUTED overflow, not `[style*="overflow"]`.
+ *  Matching an inline-style substring only ever recognised a scroller whose
+ *  rule the engine had written onto the element itself, so blocks.py's
+ *  chart_scroll() — which scrolls a chart from a stylesheet rule instead —
+ *  read as a chart running off the page. The scroll container is the thing
+ *  that matters here, not which file said so. */
 const overflowing = (page) => page.evaluate(() => {
-  const scrolled = (el) => el.closest('table') ||
-    el.parentElement?.closest('[style*="overflow"]');
+  const scrolled = (el) => {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const ox = getComputedStyle(p).overflowX;
+      if (ox === 'auto' || ox === 'scroll') return true;
+      if (p.classList.contains('page')) break;   // the sheet is not a scroller
+    }
+    return !!el.closest('table');
+  };
   const readable = (el) => el.textContent.trim()
     || ['IMG', 'TABLE', 'SVG'].includes(el.tagName.toUpperCase());
   const bad = [...document.querySelectorAll('.page *')].filter((el) => {
