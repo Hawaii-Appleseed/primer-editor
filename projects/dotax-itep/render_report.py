@@ -215,13 +215,13 @@ DOTAX_ACT24_CREDITS = DOTAX_ACT24_ALL - DOTAX_ACT24       # +188.1, credit sunse
 # reasons, which is why each row carries its own.
 #   (title, total, slice both measure, label for that slice, label for the rest)
 SCOPE_ROWS = [
-    ("Act 46, fully phased in", abs(DOTAX_ACT46_FY[_TY2031_FY]),
-     abs(DOTAX_ACT46_REMAINING), "still to come after 2026",
+    ("Act 46 gives up $1,453.2M a year", abs(DOTAX_ACT46_FY[_TY2031_FY]),
+     abs(DOTAX_ACT46_REMAINING), "still to come \u2014 what ITEP measures",
      "already in force by 2026",
      "ITEP measures 2031 law against 2026 policy, so the left half is inside "
      "its baseline, not its answer."),
-    ("Act 24, fully phased in", DOTAX_ACT24_ALL,
-     DOTAX_ACT24, "rate and bracket changes",
+    ("Act 24 takes back $297.3M a year", DOTAX_ACT24_ALL,
+     DOTAX_ACT24, "rate and bracket changes \u2014 what ITEP models",
      "tax-credit sunsets",
      "ITEP models the personal income tax. The credit sunsets — renewable "
      "energy, capital goods, high tech — are simply not in its model."),
@@ -232,7 +232,7 @@ SCOPE_ROWS = [
 # scale even though one is dollars and the other is filers. That is the whole
 # argument: the two shortfalls are the same size.
 RATIO_ROWS = [
-    ("What the bracket 2 &amp; 3 cut costs",
+    ("What the bracket 2 &amp; 3 cut costs a year",
      abs(DOTAX_B23_FY[_TY2031_FY]), abs(ITEP_B23), "$", "M"),
     ("Filers who benefit from it",
      float(DOTAX_RETURNS_B2 + DOTAX_RETURNS_B3), ITEP_UNITS * 0.511, "", ""),
@@ -290,76 +290,86 @@ def _label_px(units: float) -> float:
 # =============================================================================
 
 def scope_chart() -> str:
-    """Both headlines, split into the part ITEP can see and the part it can't.
+    """Both headlines on ONE scale, each split at what ITEP's number covers.
 
-    This replaces a pair of grouped bar charts that put DOTAX and ITEP side by
-    side on one signed axis. Those were wrong in a way worth recording: the
-    frames ran -713, +109, -604, so a shared scale rendered the middle pair as
-    two stubs while the outer pairs dominated, and the reader's eye was drawn
-    to whichever comparison happened to be biggest rather than to the finding.
-    Worse, the chart whose heading was "the disagreement is confined to a
-    single line" gave its longest bars to the line where the two AGREE.
+    The version this replaces normalised each bar to its own total, and that
+    was the wrong call three ways over. Equal-length bars stood for $1,453M and
+    $297M, which is the exact reading a bar chart invites and the exact reading
+    that was false. The two rows also run in opposite directions — Act 46 is
+    revenue the state gives up, Act 24 is revenue it takes back — and drawing
+    them identically buried the sign. And the legend said the pale part was
+    what "only DOTAX" measures, which is untrue of Act 46: ITEP does model that
+    policy, it is simply inside its baseline rather than inside its answer.
 
-    Two 100% stacked bars instead, because the question here is not "how many
-    dollars" but "what fraction of this headline is even comparable" — and a
-    proportion is what a 100% bar is for. Each row is normalised to its own
-    total, which is legitimate precisely because the comparison being invited
-    is between the two SHARES, not between the two bills' sizes; the absolute
-    total sits at the right of each row so the magnitudes are not lost.
+    So: one shared scale, which costs nothing and adds something real — Act 24
+    is a fifth the size of Act 46, and a reader should see that. Direction goes
+    in the row titles as plain verbs. Act 24's bar is short, so its segments are
+    labelled to the right of it with swatches rather than crammed inside; that
+    is the one place this chart labels outside, and it is because a 56-unit
+    segment cannot hold a label, not because the rows differ in kind.
     """
     W = VB_W
-    TOP, HDR, BH, GAP = 12, 16, 32, 8
-    LEG = 13
-    H = TOP + len(SCOPE_ROWS) * (HDR + BH + GAP) + 22
+    TOP, HDR, BH, GAP, LEG = 12, 17, 32, 7, 14
+    H = TOP + LEG + len(SCOPE_ROWS) * (HDR + BH + GAP) + 13
+    scale = W / max(t for _, t, _, _, _, _ in SCOPE_ROWS)
+    r = 5
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
-         f'role="img" aria-label="Each bill\'s full 2031 revenue effect split '
-         f'into the share ITEP\'s analysis covers and the share it does not">']
+         f'role="img" aria-label="Act 46 gives up $1,453.2M a year and Act 24 '
+         f'takes back $297.3M a year, each split into the part ITEP\'s number '
+         f'covers and the part it does not, on one shared scale">']
 
-    # Legend: the fill IS the argument here, so it is named before anything else.
     p.append(f'<rect x="0" y="2" width="11" height="11" rx="2.5" fill="{DOTAX}"/>')
     p.append(f'<text x="17" y="11.5" font-size="12.5" fill="{SLATE}">'
-             f'both sources measure this</text>')
-    p.append(f'<rect x="196" y="2" width="11" height="11" rx="2.5" fill="{DOTAX_PALE}"/>')
-    p.append(f'<text x="213" y="11.5" font-size="12.5" fill="{SLATE}">'
-             f'only DOTAX does</text>')
+             f'covered by ITEP&#8217;s number</text>')
+    p.append(f'<rect x="216" y="2" width="11" height="11" rx="2.5" fill="{DOTAX_PALE}"/>')
+    p.append(f'<text x="233" y="11.5" font-size="12.5" fill="{SLATE}">'
+             f'outside it</text>')
     p.append(f'<text x="{W}" y="11.5" font-size="11.5" fill="{MUTE}" '
-             f'text-anchor="end">DOTAX, $M a year at 2031</text>')
+             f'text-anchor="end">DOTAX, at full phase-in in 2031 &#183; '
+             f'both bars to one scale</text>')
 
     y = TOP + LEG
     for title, total, seen, seen_lab, rest_lab, _why in SCOPE_ROWS:
         rest = total - seen
         p.append(f'<text x="0" y="{y + 12}" font-size="12.5" font-weight="700" '
                  f'fill="{INK}">{title}</text>')
-        p.append(f'<text x="{W}" y="{y + 12}" font-size="12.5" font-weight="700" '
-                 f'fill="{MUTE}" text-anchor="end">${total:,.1f}M total</text>')
         y += HDR
 
-        rw = W * rest / total
-        r = 5
-        # Not-comparable on the left in the pale step, comparable on the right in
-        # full colour, the same way round in both rows — the reader should be
-        # able to compare the two solid segments by eye without re-reading a key.
+        bw = total * scale
+        rw = rest * scale
         p.append(f'<path d="M {r} {y} H {rw - 2} V {y + BH} H {r} '
                  f'a{r} {r} 0 0 1 -{r} -{r} V {y + r} a{r} {r} 0 0 1 {r} -{r} Z" '
                  f'fill="{DOTAX_PALE}"/>')
-        p.append(f'<path d="M {rw} {y} H {W - r} a{r} {r} 0 0 1 {r} {r} '
+        p.append(f'<path d="M {rw} {y} H {bw - r} a{r} {r} 0 0 1 {r} {r} '
                  f'V {y + BH - r} a{r} {r} 0 0 1 -{r} {r} H {rw} Z" '
                  f'fill="{DOTAX}"/>')
 
-        p.append(f'<text x="12" y="{y + 15}" font-size="12.5" font-weight="700" '
-                 f'fill="{INK}">${rest:,.1f}M</text>')
-        p.append(f'<text x="12" y="{y + 29}" font-size="12" fill="{SLATE}">'
-                 f'{rest_lab}</text>')
-        p.append(f'<text x="{rw + 12}" y="{y + 15}" font-size="12.5" '
-                 f'font-weight="700" fill="#fff">${seen:,.1f}M</text>')
-        p.append(f'<text x="{rw + 12}" y="{y + 29}" font-size="12" fill="#fff" '
-                 f'opacity="0.92">{seen_lab}</text>')
+        # A segment narrower than about 150 units cannot hold "$188.1M" plus a
+        # description, so that row's labels sit beside the bar with swatches.
+        if rw > 150:
+            p.append(f'<text x="12" y="{y + 13}" font-size="12.5" '
+                     f'font-weight="700" fill="{INK}">${rest:,.1f}M</text>')
+            p.append(f'<text x="12" y="{y + 27}" font-size="12" fill="{SLATE}">'
+                     f'{rest_lab}</text>')
+            p.append(f'<text x="{rw + 12}" y="{y + 13}" font-size="12.5" '
+                     f'font-weight="700" fill="#fff">${seen:,.1f}M</text>')
+            p.append(f'<text x="{rw + 12}" y="{y + 27}" font-size="12" '
+                     f'fill="#fff" opacity="0.92">{seen_lab}</text>')
+        else:
+            lx = bw + 14
+            p.append(f'<rect x="{lx}" y="{y + 3}" width="10" height="10" rx="2.5" '
+                     f'fill="{DOTAX_PALE}"/>')
+            p.append(f'<text x="{lx + 16}" y="{y + 12}" font-size="12.5" '
+                     f'fill="{SLATE}"><tspan font-weight="700" fill="{INK}">'
+                     f'${rest:,.1f}M</tspan> {rest_lab}</text>')
+            p.append(f'<rect x="{lx}" y="{y + 19}" width="10" height="10" rx="2.5" '
+                     f'fill="{DOTAX}"/>')
+            p.append(f'<text x="{lx + 16}" y="{y + 28}" font-size="12.5" '
+                     f'fill="{SLATE}"><tspan font-weight="700" fill="{INK}">'
+                     f'${seen:,.1f}M</tspan> {seen_lab}</text>')
         y += BH + GAP
 
-    p.append(f'<text x="0" y="{H - 6}" font-size="11.5" fill="{MUTE}">'
-             f'Each bar is one bill\'s full effect, scaled to its own total.'
-             f'</text>')
     p.append("</svg>")
     return "".join(p)
 
@@ -392,7 +402,7 @@ def comparison_table() -> str:
          DOTAX_CLAWBACK, ITEP_CLAWBACK, False),
     ]
     out = [f'<table class="cmp"{L.attr("table.frames")}>',
-           '<thead><tr><th>Measured the same way, at 2031</th>'
+           '<thead><tr><th>Measured the same way &#183; $ a year, at 2031</th>'
            '<th class="n">DOTAX</th><th class="n">ITEP</th>'
            '<th class="n">Gap</th></tr></thead><tbody>']
     for label, d, i, flag in rows:
