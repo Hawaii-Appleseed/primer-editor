@@ -236,15 +236,27 @@ SCOPE_ROWS = [
      "the personal income tax, not business tax credits."),
 ]
 
-# The one place the two models genuinely disagree, and the mechanism behind it.
-# Both rows are DOTAX expressed as a share of ITEP, so they share a 0–100%
-# scale even though one is dollars and the other is filers. That is the whole
-# argument: the two shortfalls are the same size.
-RATIO_ROWS = [
-    ("What the bracket 2 &amp; 3 cut costs a year",
-     abs(DOTAX_B23_FY[_TY2031_FY]), abs(ITEP_B23), "$", "M"),
-    ("Filers who benefit from it",
-     float(DOTAX_RETURNS_B2 + DOTAX_RETURNS_B3), ITEP_UNITS * 0.511, "", ""),
+# Act 24's 2029-and-after schedule, brackets 2 and 3 (TRC slide 13). These are
+# the bands whose RATE the cut lowers, and quoting them is what makes the whole
+# disagreement legible: a filer earning more than $36,000 single still earns
+# THROUGH $19,200-$36,000, so the cut reaches them too. That is the entire
+# reason the two filer counts differ by 3x.
+B23_BAND_SINGLE = (19_200, 36_000)
+B23_BAND_JOINT = (38_400, 72_000)
+
+# The one place the two models genuinely disagree, stated as two direct
+# comparisons rather than as "DOTAX as a share of ITEP" — a quantity nobody
+# reasons in, and which silently made ITEP the reference without saying why.
+# Filers come FIRST because the filer disagreement is what CAUSES the cost
+# disagreement; reading them in that order is the argument.
+#   (row title, DOTAX value, ITEP value, formatter, comparative noun)
+DISAGREE_ROWS = [
+    ("Filers the cut reaches",
+     float(DOTAX_RETURNS_B2 + DOTAX_RETURNS_B3), ITEP_UNITS * 0.511,
+     lambda v: f"{v:,.0f}", "as many"),
+    ("What it costs, a year",
+     abs(DOTAX_B23_FY[_TY2031_FY]), abs(ITEP_B23),
+     lambda v: f"${v:,.1f}M", "as much"),
 ]
 
 
@@ -460,52 +472,60 @@ def comparison_table() -> str:
 # =============================================================================
 
 def ratio_chart() -> str:
-    """DOTAX as a share of ITEP, on two measures that should not match — and do.
+    """The two estimates side by side, twice: filers first, then dollars.
 
-    The strongest evidence on this page, and the old charts buried it. Dollars
-    and filer counts cannot share an axis, but the RATIO of each to ITEP can,
-    and the ratios are the finding: DOTAX prices the cut at 28% of ITEP's
-    figure and reaches 32% as many filers. One number explains the other, which
-    is what a marginal-bracket-only count would produce and what a
-    pass-through count would not.
+    What this replaces plotted "DOTAX as a share of ITEP" — 28% and 32% against
+    a 100% track. That asked the reader to reason in a ratio nobody thinks in,
+    made ITEP the denominator without saying why, and left the actual mechanism
+    (WHO gets the cut) entirely to prose. Two similar-length bars also did
+    nothing to dramatise the one thing that matters, which is that the two
+    shortfalls match.
+
+    Now each row is a plain DOTAX-vs-ITEP pair, labelled with real quantities
+    in their own units. Filers come first because the filer disagreement CAUSES
+    the cost disagreement, so reading top to bottom is the argument: DOTAX
+    reaches a third as many people, and prices the cut at a third as much.
+
+    Each row is scaled to its own ITEP bar — unavoidable, since one row is
+    people and the other is dollars — which is stated on the chart. That
+    normalisation is what puts the two DOTAX bars at visibly the same fraction,
+    and that parallel is the finding.
     """
     W = VB_W
-    TOP, HDR, BH, SUB, GAP = 20, 15, 14, 14, 9
-    TRACK = 560                       # 100% mark; the rest holds the ITEP label
-    H = TOP + len(RATIO_ROWS) * (HDR + BH + SUB + GAP) + 12
+    TOP, HDR, BH, BGAP, GRP = 17, 15, 13, 3, 12
+    TRACK = 430                        # ITEP bar length; the rest holds labels
+    H = TOP + len(DISAGREE_ROWS) * (HDR + BH + BGAP + BH + GRP) + 4
+    r = 4
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
-         f'role="img" aria-label="DOTAX as a share of ITEP on two measures: '
-         f'28 percent of the cost and 32 percent of the filers">']
+         f'role="img" aria-label="On the bracket 2 and 3 cut, DOTAX reaches '
+         f'124,329 filers against ITEP\'s 391,937, and prices it at $13.1M '
+         f'against ITEP\'s $46.2M — about a third on both measures">']
 
-    p.append(f'<text x="0" y="12.5" font-size="12.5" font-weight="700" '
-             f'fill="{INK}">DOTAX as a share of ITEP</text>')
-    p.append(f'<text x="{W}" y="12.5" font-size="11.5" fill="{MUTE}" '
-             f'text-anchor="end">the two shortfalls are the same size</text>')
+    p.append(f'<text x="{W}" y="12" font-size="11.5" fill="{MUTE}" '
+             f'text-anchor="end">each row scaled to its own ITEP bar</text>')
 
     y = TOP
-    for title, dv, iv, pre, suf in RATIO_ROWS:
+    for title, dv, iv, fmt, comp in DISAGREE_ROWS:
         share = dv / iv
         p.append(f'<text x="0" y="{y + 11}" font-size="12.5" font-weight="700" '
                  f'fill="{INK}">{title}</text>')
+        p.append(f'<text x="{W}" y="{y + 11}" font-size="12.5" '
+                 f'font-weight="700" fill="{DOTAX}" text-anchor="end">'
+                 f'DOTAX: {share * 100:.0f}% {comp}</text>')
         y += HDR
 
-        # The 100% track is ITEP's figure — drawn first, so the bar sits in it.
-        p.append(f'<rect x="0" y="{y}" width="{TRACK}" height="{BH}" rx="4" '
-                 f'fill="{ITEP}" opacity="0.16"/>')
-        bw = TRACK * share
-        p.append(f'<rect x="0" y="{y}" width="{bw}" height="{BH}" rx="4" '
-                 f'fill="{DOTAX}"/>')
-        p.append(f'<text x="{TRACK + 10}" y="{y + 12}" font-size="12.5" '
-                 f'font-weight="700" fill="{ITEP}">= ITEP</text>')
-        p.append(f'<text x="{bw + 10}" y="{y + 12}" font-size="12.5" '
-                 f'font-weight="700" fill="{DOTAX}">{share * 100:.0f}%</text>')
-        y += BH
-
-        fmt = (lambda v: f"{pre}{v:,.1f}{suf}") if suf else (lambda v: f"{v:,.0f}")
-        p.append(f'<text x="0" y="{y + 13}" font-size="12" fill="{SLATE}">'
-                 f'DOTAX {fmt(dv)} against ITEP {fmt(iv)}</text>')
-        y += SUB + GAP
+        for val, col, name in ((dv, DOTAX, "DOTAX"), (iv, ITEP, "ITEP")):
+            bw = TRACK * val / iv
+            p.append(f'<rect x="0" y="{y}" width="{bw}" height="{BH}" rx="{r}" '
+                     f'fill="{col}"/>')
+            # Series name rides with the value, so identity never needs a
+            # legend lookup and the row reads as a sentence.
+            p.append(f'<text x="{bw + 10}" y="{y + 11}" font-size="12.5" '
+                     f'fill="{SLATE}">{name} <tspan font-weight="700" '
+                     f'fill="{INK}">{fmt(val)}</tspan></text>')
+            y += BH + BGAP
+        y += GRP - BGAP
 
     p.append("</svg>")
     return "".join(p)

@@ -61,10 +61,10 @@ Line the comparable slices up and they agree
 The one disagreement
 
 [[finding.h]]
-Where they agree, and where they don't
+Why the two counts differ
 
 [[finding.p]]
-**Both price the top-end changes alike** — $122M a year (DOTAX) against $130M (ITEP). **The middle-bracket cut is the entire disagreement:** DOTAX's −$13.1M is what you get if only filers whose *top* bracket is 2 or 3 benefit, and it counts **124,329** such returns.[^dotax] That is the fingerprint — 28% of the cost because 32% of the filers. Everyone above them earns through those bands too, which is what ITEP's **392,000** reflects.
+The cut lowers the rate on income between **$19,200 and $36,000** (single; $38,400–$72,000 joint). Anyone earning *more* still earns *through* that band, so the cut reaches them too. DOTAX's **124,329** is almost exactly the returns whose **top** bracket is 2 or 3; ITEP's **392,000** is everyone passing through it.[^dotax] **Elsewhere they agree** — the top-end changes are $122M a year against $130M.
 
 [[footer.note]]
 **Aligning them.** DOTAX reports fiscal years and includes nonresidents; ITEP reports TY2031 at 2026 incomes, residents only.[^itep][^iteptrc] Matching them means differencing two DOTAX lines and mapping FY to TY — here FY = TY+1 (the alternative gives −$751M, +$104M, −$647M). **Caution:** nonresidents and growth both push DOTAX up, so like-for-like would put ITEP 25–30% above it.
