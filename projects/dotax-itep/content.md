@@ -52,7 +52,7 @@ of Act 24 is rate cuts, not credit sunsets
 apart on the one line they genuinely dispute
 
 [[frame.title]]
-Why the headlines don't match — and shouldn't
+Differences
 
 [[whole.title]]
 Line the comparable slices up and they agree
