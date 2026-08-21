@@ -65,13 +65,10 @@ INSIDE THIS REPORT
 What Act 24 does to a $100M tax break
 
 [[cover.contents.03]]
-The governor's one-year reprieve
-
-[[cover.contents.04]]
 Who claims it, and who pays for the cap
 
-[[cover.contents.05]]
-What capping the credit saves
+[[cover.contents.04]]
+Impact of capping the credit
 
 [[cover.source]]
 Source: Hawaiʻi Department of Taxation — Tax Credits Claimed by Hawaiʻi Taxpayers (December 2025).
@@ -89,10 +86,10 @@ What Act 24 does to the RETITC
 §235-12.5 · Hawaiʻi Revised Statutes
 
 [[about.works.p1]]
-If you install of renewable energy equipment in Hawaiʻi — usually rooftop solar — the RETITC reduces your state income tax. It is the State's biggest tax break for renewable energy, and one of the driving forces behind the state's target of reaching 100 percent renewable electricity by 2045[^dotax]
+If you install renewable energy equipment in Hawaiʻi — usually rooftop solar — the RETITC reduces your state income tax. It is the State's biggest tax break for renewable energy, and one of the driving forces behind the state's target of reaching 100 percent renewable electricity by 2045.[^dotax]
 
 [[hist.note]]
-Claims average **$86.1M** over six years, but no single year tells you much. Tax Year 2020 is the outlier: trusts, estates and financial corporations jumped from $2.7M to $50.9M, then dropped back to $2.0M. Household claims are steadier and have risen every year — in nominal dollars, before inflation or filer counts.
+Claims average **$86.1M** over six years, and no single year tells you much: Tax Year 2020's spike was trusts, estates and financial corporations, jumping from $2.7M to $50.9M and back. Household claims are steadier, rising every year in nominal dollars.
 
 [[about.change.h]]
 What changes under Act 24
@@ -130,28 +127,11 @@ No new credits after Tax Year 2029. Credits already earned can still be claimed.
 [[about.foot]]
 Source: DOTAX, Tax Credits Claimed by Hawaiʻi Taxpayers — 2018–2022 actuals, Tax Year 2023 published December 2025.[^dotax] "Other" is total minus individual and corporate, picking up figures the Department withholds for privacy. Approvals run through the Hawaiʻi State Energy Office.
 
-[[eo.eyebrow]]
-The one-year reprieve
+[[eo.h]]
+The governor's one-year reprieve
 
-[[eo.h1]]
-The governor exempted a year of solar from the cap
-
-[[eo.sub]]
-Executive Order 26-02  ·  signed June 8, 2026  ·  cutoff date May 21, 2026
-
-[[eo.standfirst]]
-Act 24's $40M cap reaches back to Tax Year 2026, over systems already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects from it. His stated reason: **"the retroactivity of the RETITC annual cap presents a risk of litigation."**[^eo]
-
-[[eo.what.points]]
-- **Only the cap is lifted.** A system finished in 2026 does not count against the $40M limit. Everything else stands: the 35 percent rate, the per-system limits ($5,000 a home array, $350 per apartment unit, $500,000 commercial), the approval process, the 2030 wind-down.[^eo]
-- **The cutoff is May 21, 2026** — the day Act 24 was signed, not June 8, when the order was. A system qualifies if it was finished by then, or if its owner had already spent money on it; a payment made or bill incurred before the cutoff counts. Approvals are due May 31, 2027.[^tir]
-- **Caveat.** The cap was added late in the session with no cost estimate, and the State has published no figure for what the exemption is worth.
-
-[[eo.size.note]]
-**How we got to $85M.** The credit usually costs $86M to $100M a year. Most 2026 projects will likely qualify, since installs take months and the cutoff falls mid-year. That points to about **$85M** protected from the cap — more than double the $40M it would otherwise have allowed. A one-time gap, in 2027 and 2028, with a plausible range of $65M to $100M.[^cb]
-
-[[eo.foot]]
-The $85M is this analysis's own; the State has published none. Two loose ends: the Council on Revenues had not accounted for Act 24 or the order in its last forecast;[^cor] and the law names two end dates — 2029 in one subsection, 2031 in another — which the Tax Department settled at 2030 by announcement, not amendment.[^ann]
+[[eo.p]]
+The cap reaches back to Tax Year 2026, over systems already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects from it, citing **"a risk of litigation."**[^eo] It lifts the cap and nothing else, and covers systems finished — or already paid for — before **May 21, 2026**, the day Act 24 was signed.[^tir] Nobody has priced it. The State has published no figure; our own estimate puts about **$85M** beyond the cap's reach, once, in 2027 and 2028.[^cb]
 
 [[pays.eyebrow]]
 Who pays
@@ -181,7 +161,7 @@ Impact of capping the credit
 Projected against a no-bill baseline  ·  Tax Year 2027–2031
 
 [[saves.chart.note]]
-Act 24 may reduce the credit by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely.
+Act 24 may reduce the credit by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. Those two years are the largest not because the cap bites harder, but because by then there is almost nothing left to cap: in 2031 the credit costs the State about **$2M**, against $107M had the law not passed.
 
 [[pays.burden.h]]
 Who pays more in Tax Year 2027
@@ -208,7 +188,7 @@ $103M
 what the credit still costs in 2027, with a $40M cap
 
 [[saves.foot]]
-**Why $103M and not $40M:** the cap limits only new credits; unused credits from earlier years keep being claimed on top.[^model] How fast that older pile drains is the model's shakiest input — it assumes 65 percent a year, a rate the State does not publish and nobody has measured here. The totals above barely move if it is wrong, but the pile itself swings threefold, which is why no figure for it appears. Also: the projections assume the cap hits Tax Year 2026 systems, which the order mostly prevents, so savings are **somewhat overstated**; household figures round to the nearest $10; no behavioral change is modeled.[^method]
+**Why $103M and not $40M:** the cap limits only new credits; unused credits from earlier years keep being claimed on top.[^model] How fast that older pile drains is the model's shakiest input — it assumes 65 percent a year, a rate the State does not publish and nobody has measured here. The totals above barely move if it is wrong, but the pile itself swings threefold, which is why no figure for it appears. Also: the projections assume the cap hits Tax Year 2026 systems, which the order mostly prevents, so savings are **somewhat overstated**; household figures round to the nearest $10; no behavioral change is modeled.[^method] Two loose ends outside the model: the Council on Revenues had not accounted for Act 24 or the executive order in its last forecast,[^cor] and the law names two end dates — 2029 in one subsection, 2031 in another — which the Tax Department settled at 2030 by announcement.[^ann]
 
 [[foot.running]]
 RETITC · §235-12.5

@@ -160,7 +160,7 @@ EO_POOL_HI = 100.0
 # Page number -> content.md slot with that row's title, so the contents page
 # is editable like everything else (they were literals here; the check called
 # it the C() trap — movable container, frozen words).
-CONTENTS = [(n, f"cover.contents.{n}") for n in ("02", "03", "04", "05")]
+CONTENTS = [(n, f"cover.contents.{n}") for n in ("02", "03", "04")]
 
 
 
@@ -221,8 +221,8 @@ def historical_chart() -> str:
     The six-year mean is drawn as a reference line because the year-to-year
     swing is the finding: no single year reads as the program's normal size.
     """
-    W, H = VB_W, 276
-    BASE, TOP = 234, 40
+    W, H = VB_W, 128
+    BASE, TOP = 104, 24
     X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -282,8 +282,8 @@ def savings_chart() -> str:
     tile and in the footer, and this chart's job is the SHAPE, which is that
     the last two years are the big ones and the cap has nothing to do with it.
     """
-    W, H = VB_W, 440
-    BASE, TOP = 384, 52
+    W, H = VB_W, 424
+    BASE, TOP = 370, 48
     X0, SLOT, BW = 46, (VB_W - 52) / 5, 86
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -546,21 +546,14 @@ page = f"""
   <div class="ccards"{L.attr("about.cards")}>
     {change_card("a", WARM)}{change_card("b", PRIMARY)}{change_card("c", GREEN)}
   </div>
+  <div class="slabel" style="color:{PRIMARY_DARK}"{L.attr("eo.h")}>{C.t("eo.h")}</div>
+  {C.html("eo.p", "body")}
   {foot("about.foot", 2)}
 {C.extras("page2")} {L.layer(2)}{L.text_boxes(2)}{L.tables_html(2)}
 </section>
 
 <section class="page">
-  {head("eo", 3)}
-  {C.html("eo.standfirst", "standfirst")}
-  <ul class="pts"{C.ul_attr("eo.what.points")}>{bullets("eo.what.points")}</ul>
-  {C.html("eo.size.note", "note-b")}
-  {foot("eo.foot", 3)}
-{C.extras("page3")} {L.layer(3)}{L.text_boxes(3)}{L.tables_html(3)}
-</section>
-
-<section class="page">
-  {head("pays", 4)}
+  {head("pays", 3)}
   <h2{L.attr("pays.agi.h")}>{C.t("pays.agi.h")}</h2>
   {graphic(L, "chart.agi", chart_scroll(agi_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("pays.agi.note", "note-b")}
@@ -568,18 +561,18 @@ page = f"""
   <h2{L.attr("pays.burden.h")}>{C.t("pays.burden.h")}</h2>
   {graphic(L, "chart.burden", chart_scroll(burden_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("pays.burden.note", "note-b")}
-  {foot("pays.foot", 4)}
-{C.extras("page4")} {L.layer(4)}{L.text_boxes(4)}{L.tables_html(4)}
+  {foot("pays.foot", 3)}
+{C.extras("page3")} {L.layer(3)}{L.text_boxes(3)}{L.tables_html(3)}
 </section>
 
 <section class="page">
-  {head("saves", 5)}
+  {head("saves", 4)}
   {graphic(L, "chart.savings", chart_scroll(savings_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("saves.chart.note", "note-b")}
   <div class="stats"{L.attr("saves.stats")}>{stat("a")}{stat("b")}{stat("c")}</div>
   <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
-  {foot("saves.foot", 5)}
-{C.extras("page5")} {L.layer(5)}{L.text_boxes(5)}{L.tables_html(5)}
+  {foot("saves.foot", 4)}
+{C.extras("page4")} {L.layer(4)}{L.text_boxes(4)}{L.tables_html(4)}
 </section>
 """
 
