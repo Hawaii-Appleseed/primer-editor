@@ -156,8 +156,6 @@ EO_CAP = 40.0                    # what a strict cap would have allowed
 EO_POOL_MID = 85.0               # central estimate of the grandfathered pool
 EO_POOL_LO = 65.0
 EO_POOL_HI = 100.0
-EO_EXTRA_LO = 45.0               # incremental cost of the EO vs a strict cap
-EO_EXTRA_HI = 60.0
 
 # Page number -> content.md slot with that row's title, so the contents page
 # is editable like everything else (they were literals here; the check called
@@ -216,68 +214,47 @@ def _legend(items, y=9.5, x0=0):
 
 
 def reprieve_chart() -> str:
-    """What the calendar-2026 cohort costs with the executive order, and what a
-    strict cap would have allowed.
+    """Two bars: what the cap alone would have allowed, and what the order
+    protects instead.
 
-    The uncertainty is the point — the pool is a derived estimate with no
-    official counterpart — so the range is drawn as a band the central bar
-    sits inside, not as a whisker hung off a number that looks settled.
+    It used to carry four things at once — a legend, both bars, a pale range
+    band drawn BEHIND the second bar, and a bracket measuring the gap. The
+    band was the problem: it ran $65M-$100M while the solid bar ended at $85M
+    inside it, so it read as a lighter continuation of the bar (a $100M total)
+    rather than as a range around $85M. The range is stated in words directly
+    under the row label and again in the note below the chart, so the drawing
+    does not need to carry it too.
     """
     W, H = VB_W, 176
-    X0 = 176                       # left gutter for the row labels
+    X0 = 210                       # left gutter for the row labels
     BARMAX = W - X0 - 96
     scale = BARMAX / EO_POOL_HI
-    ROW_Y = [34, 92]
-    BH = 38
+    BH = 64
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
-         f'role="img" aria-label="The calendar 2026 cohort: about '
-         f'{EO_POOL_MID:.0f} million dollars of credits are exempt from the cap '
-         f'under Executive Order 26-02, against {EO_CAP:.0f} million a strict '
-         f'cap would have allowed">']
-    p.append(_legend([("Certified credit dollars", PRIMARY, 1.0),
-                      ("Plausible range (derived, not official)",
-                       PRIMARY_PALE, 1.0)]))
+         f'role="img" aria-label="A strict cap would have allowed '
+         f'{EO_CAP:.0f} million dollars of credits on 2026 systems. The '
+         f'executive order instead protects about {EO_POOL_MID:.0f} million, '
+         f'more than double.">']
 
-    # Row 1 — a strict cap
-    y = ROW_Y[0]
-    p.append(f'<text x="0" y="{y + 14}" font-size="{LABEL_U}" fill="{INK}" '
-             f'font-weight="700">Act 24 cap, applied strictly</text>')
-    p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{MUTED}">'
-             f'calendar-2026 systems</text>')
-    p.append(f'<rect x="{X0}" y="{y}" width="{EO_CAP * scale:.1f}" height="{BH}" '
-             f'rx="3" fill="{MUTED}"/>')
-    p.append(f'<text x="{X0 + EO_CAP * scale + 10:.1f}" y="{y + 22}" '
-             f'font-size="{EMPH_U}" font-weight="700" fill="{INK}">'
-             f'${EO_CAP:.0f}M</text>')
-
-    # Row 2 — with the EO, central estimate inside its range band
-    y = ROW_Y[1]
-    p.append(f'<text x="0" y="{y + 14}" font-size="{LABEL_U}" fill="{INK}" '
-             f'font-weight="700">Exempted by EO 26-02</text>')
-    p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{MUTED}">'
-             f'estimated, ${EO_POOL_LO:.0f}M–${EO_POOL_HI:.0f}M</text>')
-    p.append(f'<rect x="{X0 + EO_POOL_LO * scale:.1f}" y="{y - 5}" '
-             f'width="{(EO_POOL_HI - EO_POOL_LO) * scale:.1f}" height="{BH + 10}" '
-             f'rx="4" fill="{PRIMARY_PALE}"/>')
-    p.append(f'<rect x="{X0}" y="{y}" width="{EO_POOL_MID * scale:.1f}" '
-             f'height="{BH}" rx="3" fill="{PRIMARY}"/>')
-    p.append(f'<text x="{X0 + EO_POOL_MID * scale + 9:.1f}" y="{y + 20}" '
-             f'font-size="{EMPH_U}" font-weight="700" fill="{PRIMARY_DARK}">'
-             f'≈${EO_POOL_MID:.0f}M</text>')
-
-    # The difference, called out beneath both rows
-    gy = 156
-    x_a = X0 + EO_CAP * scale
-    x_b = X0 + EO_POOL_MID * scale
-    p.append(f'<line x1="{x_a:.1f}" y1="{gy - 12}" x2="{x_b:.1f}" y2="{gy - 12}" '
-             f'stroke="{WARM}" stroke-width="2"/>')
-    for x in (x_a, x_b):
-        p.append(f'<line x1="{x:.1f}" y1="{gy - 18}" x2="{x:.1f}" y2="{gy - 6}" '
-                 f'stroke="{WARM}" stroke-width="2"/>')
-    p.append(f'<text x="{(x_a + x_b) / 2:.1f}" y="{gy + 10}" font-size="{LABEL_U}" '
-             f'font-weight="700" fill="{WARM}" text-anchor="middle">'
-             f'≈${EO_EXTRA_LO:.0f}M–${EO_EXTRA_HI:.0f}M more than a strict cap</text>')
+    rows = [
+        (18, "If the cap applied", "to 2026 systems",
+         EO_CAP, MUTED, INK, f"${EO_CAP:.0f}M"),
+        (108, "Protected by the order",
+         f"estimate, ${EO_POOL_LO:.0f}M–${EO_POOL_HI:.0f}M",
+         EO_POOL_MID, PRIMARY, PRIMARY_DARK, f"≈${EO_POOL_MID:.0f}M"),
+    ]
+    for y, label, sub, value, fill, ink, tag in rows:
+        p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{INK}" '
+                 f'font-weight="700">{label}</text>')
+        p.append(f'<text x="0" y="{y + 45}" font-size="{LABEL_U}" '
+                 f'fill="{MUTED}">{sub}</text>')
+        w = value * scale
+        p.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="{BH}" '
+                 f'rx="3" fill="{fill}"/>')
+        p.append(f'<text x="{X0 + w + 12:.1f}" y="{y + BH / 2 + 5:.1f}" '
+                 f'font-size="{EMPH_U}" font-weight="700" fill="{ink}">'
+                 f'{tag}</text>')
     p.append("</svg>")
     return "".join(p)
 
