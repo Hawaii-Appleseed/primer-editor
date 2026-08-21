@@ -1,0 +1,819 @@
+#!/usr/bin/env python3
+"""RETITC — §235-12.5 Renewable Energy Technologies Income Tax Credit.
+
+A 5-page brief, pared down from the standalone RETITC analysis PDF generated
+by ~/Census-Forecaster/generate_reec_report.py. It keeps the four charts that
+carry a finding, drops the glossary and both data tables, folds Executive Order
+26-02 — the governor's one-year exemption from Act 24's $40M cap, which
+post-dates the PDF — onto one page, and ends on recommendations.
+
+The recommendations are derived from this analysis and are NOT Hawaiʻi
+Appleseed positions: positions.md carries no RETITC position at all, and the
+house position on SB 3125 covers the Act 46 bracket freeze only.
+
+Every visual goes through the engine's hooks so the user can move, resize and
+edit it: prose through C.t/C.html (never bare C(), which emits no data-slot),
+each chart through graphic() (a bare <svg> is frozen and invisible to the
+editor).
+
+The figures are baked in as DATA below rather than read from a file: a data
+file the renderer opens would have to be declared under `editor.engine` in
+docsync.yml or the draft silently fails to build in Pyodide. Every number is
+reproducible from ~/Census-Forecaster:
+
+    .venv/bin/python generate_reec_report.py --cd 1
+
+which runs tax_modeler.scenarios.sb3125_cd1_credits.compute_credit_overlay
+over TY2027-2031 with the vintage-pool carryforward simulation on. The EO
+26-02 figures on page 3 are the top-down estimate written up in that repo's
+SB3125_CD1_FORECAST.md ("Executive Order 26-02 — REEC transition relief").
+"""
+from pathlib import Path
+import os
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent           # projects/retitc
+REPO = HERE.parent.parent                        # repo root, where docsync/ lives
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from docsync.content import Content              # noqa: E402
+from docsync.layout import Layout                # noqa: E402
+from docsync.blocks import graphic, pdf_button   # noqa: E402
+from docsync.blocks import chart_scroll, chart_scroll_css  # noqa: E402
+from docsync.okina import OKINA_FACES            # noqa: E402
+
+_LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
+_CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
+_OUT = Path(os.environ.get("DOCSYNC_OUT") or (HERE / "index.html"))
+EDIT = bool(os.environ.get("DOCSYNC_EDIT"))
+
+L = Layout(_LAYOUT, page=(8.5, 11))
+C = Content(_CONTENT, styles=L)
+
+# --- Palette -----------------------------------------------------------------
+# The PDF's own light theme, anchored on #3478bd. Kept rather than swapped for
+# the Appleseed website greens: this is a conversion of an existing designed
+# report, and the palette rides docsync.yml so the editor's colour menu offers
+# exactly these swatches for a recolour.
+PRIMARY = "#3478bd"        # anchor blue
+PRIMARY_DARK = "#1e5a99"   # emphasis / heading
+PRIMARY_LIGHT = "#7eaad7"  # mid-tone fills
+PRIMARY_PALE = "#b9d2ea"   # soft fill
+
+INK = "#1e3a5f"            # deep blue-slate for body headings
+BODY = "#475569"           # slate-600
+MUTED = "#8496ab"          # slate-400, darkened to clear 3:1 on white
+LINE = "#dbe5f0"           # light blue rule
+BG_SOFT = "#f4f8fc"        # very light blue wash
+PILL = "#eaf1f8"           # light blue table cell
+
+WARM = "#c2662f"           # warm orange, darkened from the PDF's #d4794d so
+                           # small type and thin marks clear 3:1 on white
+GREEN = "#4f8a62"          # sage green, same adjustment
+ROSE = "#c25450"           # muted red
+
+GREEN_TINT = "#eaf5ee"
+WARM_TINT = "#fbf0e9"
+
+
+# --- DATA — every number the page draws -------------------------------------
+# 1. DOTAX actuals. Tax Credits Claimed by Hawaiʻi Taxpayers; TY2018-2022
+#    actuals, TY2023 from the December 2025 publication. "Other" is derived as
+#    total - individual - corporate so disclosure-suppressed cells stay in the
+#    stack (which is why TY2020 is mostly "other").
+HISTORICAL = [
+    # (tax year, individual $M, corporate $M, other $M, total $M)
+    (2018, 34.210, 23.969, 12.318, 70.497),
+    (2019, 44.025, 13.584, 2.704, 60.313),
+    (2020, 46.586, 15.110, 50.915, 112.611),
+    (2021, 51.454, 13.909, 1.954, 67.317),
+    (2022, 55.023, 48.837, 1.904, 105.764),
+    (2023, 58.293, 38.565, 3.217, 100.075),
+]
+TY23_TOTAL = 100.075
+TY23_IND = 58.293
+TY23_CORP = 38.565
+TY23_OTHER = 3.217
+SIX_YEAR_MEAN = 86.096
+
+# 2. Individual TY2023 claims by DOTAX AGI bin, with each bin's share still
+#    eligible once Act 24's $175K/$350K AGI test applies (from PUMS).
+AGI_BINS = [
+    # (label, TY2023 claims $M, eligible share after the AGI limit)
+    ("Under $10K", 4.731, 1.000),
+    ("$10K – $30K", 2.522, 1.000),
+    ("$30K – $60K", 3.121, 1.000),
+    ("$60K – $100K", 5.752, 1.000),
+    ("$100K – $200K", 16.150, 0.972),
+    ("$200K and up", 26.018, 0.561),
+]
+AGI_ELIGIBLE_SHARE = 0.7963      # weighted, all individual claims
+
+# 3. TY2027 burden by household income quintile (OBBBA Mid). Individual RETITC
+#    loss crosswalked from the AGI bins onto TY2027-anchored quintile breaks.
+QUINTILES = [
+    # (income range, lost to the income limit $M, lost to the $40M cap $M,
+    #  average tax increase per household $/yr)
+    ("Under $29K", 0.00, 3.48, 37),
+    ("$29K – $63K", 0.00, 1.77, 19),
+    ("$63K – $104K", 0.02, 2.89, 31),
+    ("$104K – $175K", 0.27, 5.38, 60),
+    ("$175K and up", 9.93, 8.99, 201),
+]
+PRO_RATA_2027 = 0.4367           # each certified credit pays ~44c on the dollar
+CORP_OTHER_2027 = 45.26          # corporate + trust/estate RETITC, TY2027 $M
+
+# 4. Act 24 fiscal path, OBBBA Mid, vintage-pool carryforward on.
+FISCAL = [
+    # (tax year, RETITC cost without the act, cost under the act, savings,
+    #  end-of-year carryforward stock, sensitivity lo, sensitivity hi)
+    (2027, 103.30, 44.98, 58.31, 11.94, 55.76, 68.51),
+    (2028, 100.52, 41.27, 59.25, 10.67, 56.00, 69.59),
+    (2029, 103.09, 40.21, 62.88, 10.46, 61.03, 72.64),
+    (2030, 106.69, 6.80, 99.89, 3.66, 96.83, 107.90),
+    (2031, 106.93, 2.38, 104.55, 1.28, 102.37, 115.66),
+]
+RETITC_CUM_SAVINGS = 384.9       # sum of the savings column
+ALL_CREDIT_CUM_SAVINGS = 493.1   # RETITC + CGEC + TCRA, same window
+
+# 5. Executive Order 26-02 — the grandfathered pool. DERIVED, NOT SOURCED: no
+#    official or third-party estimate of the credit-DOLLAR value exists (the
+#    cap was added in conference with no fiscal note). Anchored top-down on
+#    program scale, not converted from the $436M project-cost figure — see the
+#    warning on page 3 and SB3125_CD1_FORECAST.md.
+EO_CAP = 40.0                    # what a strict cap would have allowed
+EO_POOL_MID = 85.0               # central estimate of the grandfathered pool
+EO_POOL_LO = 65.0
+EO_POOL_HI = 100.0
+EO_EXTRA_LO = 45.0               # incremental cost of the EO vs a strict cap
+EO_EXTRA_HI = 60.0
+
+CONTENTS = [
+    ("02", "The credit, and what Act 24 changes"),
+    ("03", "The governor's one-year reprieve — Executive Order 26-02"),
+    ("04", "Who claims it, who pays, and what the State keeps"),
+    ("05", "Five things worth fixing"),
+]
+
+
+
+# --- Chart geometry: read this before changing a viewBox or a font-size ------
+# THE THREE-UNITS TRAP. A chart label's size on screen is NOT the number in the
+# SVG. Each chart below is drawn in its own user units and rendered at
+# CHART_W_IN inches, so:
+#
+#     px on screen = user units x (CHART_W_IN x 96) / VB_W
+#
+# LABEL_U is the smallest size anything here may use. Do not author a raw
+# font-size below it, and if you change CHART_W_IN or VB_W, re-run the
+# arithmetic — MIN_SAFE_U is what docsync/layout.py's floor demands at the
+# current geometry, and _assert_label_floor() fails the build if LABEL_U drops
+# under it. docsync.check reads AUTHORED sizes and cannot see the conversion;
+# tests/editor/text-legibility.spec.js measures the computed size.
+CHART_W_IN = 7.4
+VB_W = 820
+CHART_FLOOR_PX = 10.5                      # docsync.blocks.CHART_MIN_LABEL_PX
+_PX_PER_UNIT = CHART_W_IN * 96 / VB_W      # 0.866
+MIN_SAFE_U = CHART_FLOOR_PX / _PX_PER_UNIT  # 12.12
+
+LABEL_U = 12.5                             # 10.83px — a real margin over 10.5
+EMPH_U = 13.5                              # directly-labelled values
+
+
+def _assert_label_floor() -> None:
+    if LABEL_U < MIN_SAFE_U:
+        raise SystemExit(
+            f"chart labels below the legibility floor: LABEL_U={LABEL_U} renders "
+            f"at {LABEL_U * _PX_PER_UNIT:.2f}px at {CHART_W_IN}in over a {VB_W}-unit "
+            f"viewBox; the floor is {CHART_FLOOR_PX}px (>= {MIN_SAFE_U:.2f} units)")
+
+
+_assert_label_floor()
+
+
+def _legend(items, y=9.5, x0=0):
+    """A swatch-and-label row. Every chart with two or more series carries one —
+    identity never rests on colour alone anywhere else on the page either, but
+    a stacked bar has nowhere else to put the key."""
+    out, x = [], x0
+    for label, fill, op in items:
+        out.append(f'<rect x="{x:.0f}" y="{y - 9.5:.0f}" width="11" height="11" '
+                   f'rx="2.5" fill="{fill}" opacity="{op}"/>')
+        out.append(f'<text x="{x + 17:.0f}" y="{y:.1f}" font-size="{LABEL_U}" '
+                   f'fill="{BODY}">{label}</text>')
+        x += 17 + len(label) * 6.4 + 26
+    return "".join(out)
+
+
+
+def reprieve_chart() -> str:
+    """What the calendar-2026 cohort costs with the executive order, and what a
+    strict cap would have allowed.
+
+    The uncertainty is the point — the pool is a derived estimate with no
+    official counterpart — so the range is drawn as a band the central bar
+    sits inside, not as a whisker hung off a number that looks settled.
+    """
+    W, H = VB_W, 150
+    X0 = 176                       # left gutter for the row labels
+    BARMAX = W - X0 - 96
+    scale = BARMAX / EO_POOL_HI
+    ROW_Y = [34, 80]
+    BH = 30
+
+    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+         f'role="img" aria-label="The calendar 2026 cohort: about '
+         f'{EO_POOL_MID:.0f} million dollars of credits are exempt from the cap '
+         f'under Executive Order 26-02, against {EO_CAP:.0f} million a strict '
+         f'cap would have allowed">']
+    p.append(_legend([("Certified credit dollars", PRIMARY, 1.0),
+                      ("Plausible range (derived, not official)",
+                       PRIMARY_PALE, 1.0)]))
+
+    # Row 1 — a strict cap
+    y = ROW_Y[0]
+    p.append(f'<text x="0" y="{y + 14}" font-size="{LABEL_U}" fill="{INK}" '
+             f'font-weight="700">Act 24 cap, applied strictly</text>')
+    p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{MUTED}">'
+             f'calendar-2026 systems</text>')
+    p.append(f'<rect x="{X0}" y="{y}" width="{EO_CAP * scale:.1f}" height="{BH}" '
+             f'rx="3" fill="{MUTED}"/>')
+    p.append(f'<text x="{X0 + EO_CAP * scale + 10:.1f}" y="{y + 22}" '
+             f'font-size="{EMPH_U}" font-weight="700" fill="{INK}">'
+             f'${EO_CAP:.0f}M</text>')
+
+    # Row 2 — with the EO, central estimate inside its range band
+    y = ROW_Y[1]
+    p.append(f'<text x="0" y="{y + 14}" font-size="{LABEL_U}" fill="{INK}" '
+             f'font-weight="700">Exempted by EO 26-02</text>')
+    p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{MUTED}">'
+             f'estimated, ${EO_POOL_LO:.0f}M–${EO_POOL_HI:.0f}M</text>')
+    p.append(f'<rect x="{X0 + EO_POOL_LO * scale:.1f}" y="{y - 5}" '
+             f'width="{(EO_POOL_HI - EO_POOL_LO) * scale:.1f}" height="{BH + 10}" '
+             f'rx="4" fill="{PRIMARY_PALE}"/>')
+    p.append(f'<rect x="{X0}" y="{y}" width="{EO_POOL_MID * scale:.1f}" '
+             f'height="{BH}" rx="3" fill="{PRIMARY}"/>')
+    p.append(f'<text x="{X0 + EO_POOL_MID * scale + 9:.1f}" y="{y + 20}" '
+             f'font-size="{EMPH_U}" font-weight="700" fill="{PRIMARY_DARK}">'
+             f'≈${EO_POOL_MID:.0f}M</text>')
+
+    # The difference, called out beneath both rows
+    gy = 130
+    x_a = X0 + EO_CAP * scale
+    x_b = X0 + EO_POOL_MID * scale
+    p.append(f'<line x1="{x_a:.1f}" y1="{gy - 12}" x2="{x_b:.1f}" y2="{gy - 12}" '
+             f'stroke="{WARM}" stroke-width="2"/>')
+    for x in (x_a, x_b):
+        p.append(f'<line x1="{x:.1f}" y1="{gy - 18}" x2="{x:.1f}" y2="{gy - 6}" '
+                 f'stroke="{WARM}" stroke-width="2"/>')
+    p.append(f'<text x="{(x_a + x_b) / 2:.1f}" y="{gy + 10}" font-size="{LABEL_U}" '
+             f'font-weight="700" fill="{WARM}" text-anchor="middle">'
+             f'≈${EO_EXTRA_LO:.0f}M–${EO_EXTRA_HI:.0f}M more than a strict cap</text>')
+    p.append("</svg>")
+    return "".join(p)
+
+
+# --- Graphic 2: six years of claims (page 2) ---------------------------------
+
+def historical_chart() -> str:
+    """Claims by taxpayer type, TY2018-2023, stacked.
+
+    The six-year mean is drawn as a reference line because the year-to-year
+    swing is the finding: no single year reads as the program's normal size.
+    """
+    W, H = VB_W, 330
+    BASE, TOP = 286, 46
+    X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
+    y_max = 118.0
+    unit = (BASE - TOP) / y_max
+
+    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+         f'role="img" aria-label="RETITC claims by taxpayer type, tax years 2018 '
+         f'through 2023, stacked; totals range from 60 to 113 million dollars">']
+    p.append(_legend([("Individual", PRIMARY, 1.0),
+                      ("Corporate", PRIMARY_DARK, 1.0),
+                      ("Other / financial corp.", WARM, 1.0)]))
+
+    # Gridlines + axis, drawn first so the bars sit over them
+    for v in (25, 50, 75, 100):
+        gy = BASE - v * unit
+        p.append(f'<line x1="{X0}" y1="{gy:.1f}" x2="{W}" y2="{gy:.1f}" '
+                 f'stroke="{LINE}" stroke-width="1"/>')
+        p.append(f'<text x="{X0 - 8}" y="{gy + 4:.1f}" font-size="{LABEL_U}" '
+                 f'fill="{MUTED}" text-anchor="end">${v}M</text>')
+
+    for i, (yr, ind, corp, oth, tot) in enumerate(HISTORICAL):
+        cx = X0 + 6 + i * SLOT + (SLOT - BW) / 2
+        y = BASE
+        for amt, fill in ((ind, PRIMARY), (corp, PRIMARY_DARK), (oth, WARM)):
+            h = amt * unit
+            p.append(f'<rect x="{cx:.1f}" y="{y - h:.1f}" width="{BW}" '
+                     f'height="{max(h, 0.5):.1f}" fill="{fill}"/>')
+            y -= h
+        p.append(f'<text x="{cx + BW / 2:.1f}" y="{y - 8:.1f}" '
+                 f'font-size="{EMPH_U}" font-weight="700" fill="{INK}" '
+                 f'text-anchor="middle">${tot:.0f}M</text>')
+        p.append(f'<text x="{cx + BW / 2:.1f}" y="{BASE + 20}" '
+                 f'font-size="{LABEL_U}" fill="{BODY}" text-anchor="middle">'
+                 f'TY{yr}</text>')
+
+    p.append(f'<line x1="{X0}" y1="{BASE}" x2="{W}" y2="{BASE}" '
+             f'stroke="{BODY}" stroke-width="1"/>')
+
+    # Six-year mean
+    my = BASE - SIX_YEAR_MEAN * unit
+    p.append(f'<line x1="{X0}" y1="{my:.1f}" x2="{W}" y2="{my:.1f}" '
+             f'stroke="{ROSE}" stroke-width="1.6" stroke-dasharray="7 4"/>')
+    p.append(f'<text x="{X0 + 8}" y="{my - 7:.1f}" font-size="{LABEL_U}" '
+             f'font-weight="700" fill="{ROSE}">Six-year mean '
+             f'${SIX_YEAR_MEAN:.1f}M</text>')
+
+    p.append("</svg>")
+    return "".join(p)
+
+
+# --- Graphic 3: who claims it (page 4) ---------------------------------------
+
+def agi_chart() -> str:
+    """Individual TY2023 claims by AGI bracket, with the AGI-limit cut-off
+    marked on the two brackets it actually reaches."""
+    W = VB_W
+    X0, ROW, GAP = 158, 26, 8
+    BARMAX = W - X0 - 152
+    x_max = max(c for _, c, _ in AGI_BINS)
+    scale = BARMAX / x_max
+    H = 22 + len(AGI_BINS) * (ROW + GAP) + 30
+
+    shades = [PRIMARY_PALE, PRIMARY_LIGHT, PRIMARY_LIGHT,
+              PRIMARY, PRIMARY, PRIMARY_DARK]
+
+    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+         f'role="img" aria-label="Individual RETITC claims by adjusted gross '
+         f'income bracket, tax year 2023; the top bracket holds 45 percent of '
+         f'all individual claims">']
+    p.append(f'<text x="0" y="9.5" font-size="{LABEL_U}" fill="{MUTED}">'
+             f'Individual RETITC claims, Tax Year 2023 · ${TY23_IND:.1f}M '
+             f'total</text>')
+
+    y = 22
+    for i, (label, claim, elig) in enumerate(AGI_BINS):
+        w = claim * scale
+        p.append(f'<text x="{X0 - 10}" y="{y + ROW / 2 + 4.5:.1f}" '
+                 f'font-size="{LABEL_U}" font-weight="700" fill="{INK}" '
+                 f'text-anchor="end">{label}</text>')
+        p.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="{ROW}" '
+                 f'rx="3" fill="{shades[i]}"/>')
+        # Where the AGI limit bites, the ineligible remainder is hatched off
+        # the data end rather than the bar simply being shorter — the bracket
+        # still claims that money today.
+        if elig < 0.999:
+            cut = w * elig
+            p.append(f'<line x1="{X0 + cut:.1f}" y1="{y - 3}" '
+                     f'x2="{X0 + cut:.1f}" y2="{y + ROW + 3}" stroke="{WARM}" '
+                     f'stroke-width="2.2"/>')
+            p.append(f'<text x="{X0 + cut + 6:.1f}" y="{y + ROW + 17}" '
+                     f'font-size="{LABEL_U}" fill="{WARM}" font-weight="700">'
+                     f'{(1 - elig) * 100:.0f}% cut by the AGI limit</text>')
+        p.append(f'<text x="{X0 + w + 10:.1f}" y="{y + ROW / 2 + 4.5:.1f}" '
+                 f'font-size="{EMPH_U}" font-weight="700" fill="{INK}">'
+                 f'${claim:.1f}M</text>')
+        p.append(f'<text x="{X0 + w + 74:.1f}" y="{y + ROW / 2 + 4.5:.1f}" '
+                 f'font-size="{LABEL_U}" fill="{MUTED}">'
+                 f'{claim / TY23_IND * 100:.0f}%</text>')
+        y += ROW + GAP + (16 if elig < 0.999 else 0)
+
+    p.append("</svg>")
+    return "".join(p)
+
+
+# --- Graphic 4: who pays (page 4) --------------------------------------------
+
+def burden_chart() -> str:
+    """Average tax increase per household in TY2027, by income quintile, split
+    by which of Act 24's two screens takes the money."""
+    W = VB_W
+    X0, ROW, GAP = 150, 24, 9
+    BARMAX = W - X0 - 96
+    x_max = max(q[3] for q in QUINTILES)
+    scale = BARMAX / x_max
+    H = 22 + len(QUINTILES) * (ROW + GAP) + 8
+
+    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+         f'role="img" aria-label="Average RETITC tax increase per household in '
+         f'tax year 2027 by income quintile, from 19 dollars in the second '
+         f'quintile to 201 dollars in the top">']
+    p.append(_legend([("Lost to the income limit", PRIMARY_DARK, 1.0),
+                      ("Lost to the $40M cap", PRIMARY_LIGHT, 1.0)]))
+
+    y = 22
+    for label, il_m, cl_m, per_hh in QUINTILES:
+        tot_m = il_m + cl_m
+        p.append(f'<text x="{X0 - 10}" y="{y + ROW / 2 + 4.5:.1f}" '
+                 f'font-size="{LABEL_U}" font-weight="700" fill="{INK}" '
+                 f'text-anchor="end">{label}</text>')
+        il_w = (il_m / tot_m) * per_hh * scale if tot_m else 0
+        cl_w = (cl_m / tot_m) * per_hh * scale if tot_m else 0
+        if il_w > 0.5:
+            p.append(f'<rect x="{X0}" y="{y}" width="{il_w:.1f}" height="{ROW}" '
+                     f'fill="{PRIMARY_DARK}"/>')
+        p.append(f'<rect x="{X0 + il_w:.1f}" y="{y}" width="{cl_w:.1f}" '
+                 f'height="{ROW}" fill="{PRIMARY_LIGHT}"/>')
+        p.append(f'<text x="{X0 + il_w + cl_w + 10:.1f}" '
+                 f'y="{y + ROW / 2 + 4.5:.1f}" font-size="{EMPH_U}" '
+                 f'font-weight="700" fill="{INK}">+${per_hh:,.0f}</text>')
+        y += ROW + GAP
+
+    p.append("</svg>")
+    return "".join(p)
+
+
+
+def fig(key: str, cls: str = "") -> str:
+    """A cover key-figure card."""
+    return (f'<div class="fig{cls}"{L.attr(f"cover.fig.{key}")}>'
+            f'<div class="fig-n">{C.t(f"cover.fig.{key}.n")}</div>'
+            f'<div class="fig-l">{C.t(f"cover.fig.{key}.l")}</div></div>')
+
+
+def change_card(key: str, accent: str) -> str:
+    return (f'<div class="ccard" style="border-top-color:{accent}"'
+            f'{L.attr(f"about.card.{key}")}>'
+            f'<div class="ccard-n" style="color:{accent}">'
+            f'{C.t(f"about.card.{key}.n")}</div>'
+            f'<div class="ccard-l">{C.t(f"about.card.{key}.l")}</div>'
+            f'<div class="ccard-d">{C.t(f"about.card.{key}.d")}</div></div>')
+
+
+def stat(key: str) -> str:
+    """One of page 4's three fiscal tiles — what the savings chart and the
+    fiscal table used to say between them."""
+    return (f'<div class="stat"{L.attr(f"pays.stat.{key}")}>'
+            f'<div class="stat-n">{C.t(f"pays.stat.{key}.n")}</div>'
+            f'<div class="stat-l">{C.t(f"pays.stat.{key}.l")}</div></div>')
+
+
+def rec(n: int) -> str:
+    """One recommendation: a numbered ask and the finding it follows from.
+    Both halves are their own slot, so either can be reworded in the editor
+    without touching the other."""
+    return (f'<li class="rec"{L.attr(f"rec.r{n}")}>'
+            f'<span class="rec-n">{n}</span>'
+            f'<div class="rec-h"{L.attr(f"recs.r{n}.h")}>{C.t(f"recs.r{n}.h")}</div>'
+            f'{C.html(f"recs.r{n}.b", "rec-b")}</li>')
+
+
+def bullets(key: str) -> str:
+    return "".join(f"<li>{b}</li>" for b in C.list(key))
+
+
+def contents_rows() -> str:
+    return "".join(
+        f'<div class="crow"><span class="cnum">{n}</span>'
+        f'<span class="ctxt">{t}</span></div>' for n, t in CONTENTS)
+
+
+
+# Filled after C.fn.resolve() has walked the body and assigned every number.
+ENDNOTES_SLOT = "<!--ds-endnotes-->"
+
+
+def endnote_link(n: int, sid: str, txt: str, url: str) -> str:
+    # Keyed by source id, not by n: the number is whatever the current order
+    # says, but the identity the editor routes an edit back through has to stay
+    # put. data-el also makes the entry draggable to reorder.
+    sep = "" if n == 1 else '<span class="ensep"> · </span>'
+    return (f'{sep}<span id="en{n}" class="en"{L.attr(f"endnote.{sid}")}>'
+            f'<span class="enn">{n}</span> <a href="{url}">{txt}</a></span>')
+
+
+def linkify_footnotes(markup: str, count: int) -> str:
+    """Turn every <sup>N</sup> marker into a link to its endnote. Without this
+    the markers render as bare numerals pointing at nothing."""
+    def repl(m):
+        nums = re.findall(r"\d+", m.group(1))
+        if not nums:
+            return m.group(0)
+        out = [f'<a class="fn" href="#en{n}">{n}</a>' if 1 <= int(n) <= count
+               else n for n in nums]
+        return "<sup>" + "&thinsp;".join(out) + "</sup>"
+    return re.sub(r"<sup>(.*?)</sup>", repl, markup, flags=re.S)
+
+
+def head(pre: str, page_no: int) -> str:
+    """The running header every interior page carries."""
+    return (f'<div class="phead">'
+            f'<div class="eyebrow"{L.attr(f"{pre}.eyebrow")}>'
+            f'{C.t(f"{pre}.eyebrow")}</div>'
+            f'{L.spacer(f"{pre}.h1")}<h1{L.attr(f"{pre}.h1")}>'
+            f'{C.t(f"{pre}.h1")}</h1>'
+            f'<div class="psub"{L.attr(f"{pre}.sub")}>{C.t(f"{pre}.sub")}</div>'
+            f'</div>')
+
+
+def foot(key: str, page_no: int) -> str:
+    # C.html, not C.t: these footers carry emphasis, and a bare C.t would ship
+    # the asterisks (docsync.check fails the build on it).
+    #
+    # The running folio is wired rather than hard-coded: L.attr on the span
+    # covers the generated numeral (which nobody should retype), and the label
+    # beside it is one slot shared by all five pages, so retitling the report
+    # moves every folio at once. Left bare, docsync.check's editability pass
+    # reports all five as dead text — correctly: the report's own name was
+    # sitting on the sheet with no way to change it.
+    return (f'<div class="pfoot">{C.html(key, "pfoot-t")}'
+            f'<span class="pnum"{L.attr(f"foot.pnum.{page_no}")}>'
+            f'{page_no:02d} · {C.t("foot.running")}</span></div>')
+
+
+
+page = f"""
+<section class="page cover">
+  <div class="pill"{L.attr("cover.pill")}>{C.t("cover.pill")}</div>
+  {L.spacer("cover.h1")}<h1 class="cover-h1"{L.attr("cover.h1")}>{C.t("cover.h1")}</h1>
+  <div class="rule"></div>
+  {C.html("cover.deck", "deck")}
+
+  <div class="klabel"{L.attr("cover.figures.h")}>{C.t("cover.figures.h")}</div>
+  <div class="figs"{L.attr("cover.figs")}>
+    {fig("a")}{fig("b")}{fig("c", " fig-eo")}
+  </div>
+
+  <div class="klabel"{L.attr("cover.contents.h")}>{C.t("cover.contents.h")}</div>
+  <div class="contents"{L.attr("cover.contents")}>{contents_rows()}</div>
+
+  <div class="cover-foot">
+    <div class="cfoot-l"{L.attr("cover.source")}>{C.t("cover.source")}</div>
+    <div class="cfoot-l"{L.attr("cover.stamp")}>{C.t("cover.stamp")}</div>
+  </div>
+{C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
+</section>
+
+<section class="page">
+  {head("about", 2)}
+  {C.html("about.works.p1", "lead")}
+  {graphic(L, "chart.historical", chart_scroll(historical_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("hist.note", "note")}
+
+  <div class="slabel" style="color:{WARM}"{L.attr("about.change.h")}>{C.t("about.change.h")}</div>
+  {C.html("about.change.p", "body")}
+  <div class="ccards"{L.attr("about.cards")}>
+    {change_card("a", WARM)}{change_card("b", PRIMARY)}{change_card("c", GREEN)}
+  </div>
+  {foot("about.foot", 2)}
+{C.extras("page2")} {L.layer(2)}{L.text_boxes(2)}{L.tables_html(2)}
+</section>
+
+<section class="page">
+  {head("eo", 3)}
+  {C.html("eo.standfirst", "standfirst")}
+  <ul class="pts"{C.ul_attr("eo.what.points")}>{bullets("eo.what.points")}</ul>
+  {graphic(L, "chart.reprieve", chart_scroll(reprieve_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("eo.size.note", "note-b")}
+  <div class="box box-warn"{L.attr("eo.warn")}>
+    <div class="box-h"{L.attr("eo.warn.h")}>{C.t("eo.warn.h")}</div>
+    {C.html("eo.warn.p", "box-p")}
+  </div>
+  {foot("eo.foot", 3)}
+{C.extras("page3")} {L.layer(3)}{L.text_boxes(3)}{L.tables_html(3)}
+</section>
+
+<section class="page">
+  {head("pays", 4)}
+  <h2{L.attr("pays.agi.h")}>{C.t("pays.agi.h")}</h2>
+  {graphic(L, "chart.agi", chart_scroll(agi_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("pays.agi.note", "note-b")}
+
+  <h2{L.attr("pays.burden.h")}>{C.t("pays.burden.h")}</h2>
+  {graphic(L, "chart.burden", chart_scroll(burden_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("pays.burden.note", "note-b")}
+
+  <div class="stats"{L.attr("pays.stats")}>{stat("a")}{stat("b")}{stat("c")}</div>
+  {foot("pays.foot", 4)}
+{C.extras("page4")} {L.layer(4)}{L.text_boxes(4)}{L.tables_html(4)}
+</section>
+
+<section class="page">
+  {head("recs", 5)}
+  {C.html("recs.standfirst", "standfirst")}
+  <ol class="recs"{L.attr("recs.list")}>
+    {rec(1)}{rec(2)}{rec(3)}{rec(4)}{rec(5)}
+  </ol>
+  <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
+  {foot("recs.foot", 5)}
+{C.extras("page5")} {L.layer(5)}{L.text_boxes(5)}{L.tables_html(5)}
+</section>
+"""
+
+body = C.fn.resolve(page)
+en = "".join(endnote_link(i + 1, sid, txt, url)
+             for i, (sid, txt, url) in enumerate(C.fn.endnotes_with_ids()))
+# `en` carries no <sup> markers of its own, so linkifying before the fill is
+# safe and keeps the substitution out of the regex's way.
+body = linkify_footnotes(body, len(C.fn.endnotes()))
+body = body.replace(ENDNOTES_SLOT, en)
+
+html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{C.text("title")}</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Neither Manrope nor Poppins encodes U+02BB, so every ʻokina would fall
+     back to the OS UI font. These one-glyph faces re-encode each family's own
+     U+2018 outline at U+02BB; they must come FIRST in a stack. */
+{OKINA_FACES}
+  body {{ margin:0; background:{BG_SOFT};
+         font:14.5px/1.5 OkinaManrope, Manrope, system-ui, sans-serif; color:{INK};
+         /* Manrope ligates "(c)" into a copyright sign. This report cites
+            HRS §235-12.5(c)(5), (j) and (p) throughout, so the default would
+            silently rewrite a statute citation on the page. */
+         font-variant-ligatures:none; }}
+  .page {{ width:8.5in; min-height:11in; margin:24px auto; background:#fff;
+           box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.5in 0.55in 0.42in;
+           box-sizing:border-box; position:relative; overflow:hidden; }}
+
+  /* --- Cover --------------------------------------------------------- */
+  /* The left accent stripe is the cover's one piece of full-bleed chrome, so
+     it is a pseudo-element on the sheet rather than an element the editor can
+     drag off the edge. */
+  .cover {{ padding-left:0.78in; }}
+  .cover::before {{ content:""; position:absolute; left:0; top:0; bottom:0;
+                     width:0.19in; background:{PRIMARY}; z-index:2; }}
+  /* The hero wash stops after the deck and before KEY FIGURES — measured, not
+     guessed: a band that ends mid-card cuts the figures in half. If the deck
+     grows past 3.0in, move this with it. */
+  .cover::after {{ content:""; position:absolute; left:0; right:0; top:0;
+                   height:3.16in; background:{BG_SOFT}; border-bottom:1px solid {LINE};
+                   z-index:0; }}
+  .cover > * {{ position:relative; z-index:1; }}
+  .pill {{ display:inline-block; background:{PRIMARY}; color:#fff;
+           font-family:OkinaPoppins, Poppins, sans-serif; font-weight:700;
+           font-size:0.86rem; letter-spacing:.02em; padding:5px 15px;
+           border-radius:13px; }}
+  .cover-h1 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+               font-size:2.65rem; line-height:1.08; margin:20px 0 0;
+               letter-spacing:-.022em; color:{INK}; max-width:6.1in; }}
+  .rule {{ width:1.35in; height:5px; background:{PRIMARY}; margin:20px 0 16px; }}
+  .deck {{ font-size:1.02rem; line-height:1.5; color:{BODY}; margin:0 0 40px;
+           max-width:5.9in; }}
+
+  .klabel {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+             font-weight:700; letter-spacing:.1em; color:{PRIMARY};
+             margin:0 0 10px; }}
+  .klabel-t {{ margin-top:16px; }}
+
+  .figs {{ display:flex; gap:12px; margin:0 0 30px; }}
+  .fig {{ flex:1; background:#fff; border:1px solid {LINE};
+          border-left:5px solid {PRIMARY}; padding:13px 15px 12px; }}
+  .fig-eo {{ border-left-color:{WARM}; }}
+  .fig-eo .fig-n {{ color:{WARM}; }}
+  .fig-n {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:1.72rem;
+            font-weight:700; line-height:1; color:{INK}; }}
+  .fig-l {{ font-size:0.72rem; font-weight:700; letter-spacing:.045em;
+            color:{MUTED}; margin-top:8px; line-height:1.35; }}
+
+  /* Four contents rows, not the nine this cover was first laid out for — so
+     the rows are taller, rather than leaving two idle inches under a short
+     block. Re-tighten this if the contents list ever grows again. */
+  .contents {{ margin:0; }}
+  .crow {{ display:flex; gap:16px; padding:20px 4px; border-top:1px solid {LINE};
+           font-size:0.92rem; }}
+  .crow:last-child {{ border-bottom:1px solid {LINE}; }}
+  .cnum {{ font-weight:700; color:{PRIMARY}; min-width:1.6em; }}
+  .ctxt {{ color:{BODY}; }}
+  .cover-foot {{ position:absolute; left:0.78in; right:0.55in; bottom:0.5in;
+                 border-top:1px solid {LINE}; padding-top:11px; }}
+  .cfoot-l {{ font-size:0.76rem; color:{MUTED}; line-height:1.5; }}
+
+  /* --- Interior pages ------------------------------------------------- */
+  .phead {{ border-bottom:2px solid {PRIMARY}; padding-bottom:10px;
+            margin-bottom:18px; }}
+  .eyebrow {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+              font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+              color:{PRIMARY}; margin-bottom:5px; }}
+  h1 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+        font-size:1.62rem; line-height:1.16; margin:0; color:{INK};
+        letter-spacing:-.015em; }}
+  .psub {{ font-size:0.86rem; color:{MUTED}; margin-top:6px; }}
+
+  /* A section kicker with its own short accent rule — the PDF's device for
+     opening a section without spending a full heading on it. */
+  .slabel {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+             font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+             margin:20px 0 0; padding-bottom:7px; position:relative; }}
+  .slabel::after {{ content:""; position:absolute; left:0; bottom:0;
+                    width:0.55in; height:3px; background:currentColor; }}
+  h2 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+        font-size:1.02rem; margin:17px 0 0; padding-top:9px; color:{INK};
+        border-top:1px solid {LINE}; letter-spacing:-.005em; }}
+  .lead {{ font-size:0.95rem; line-height:1.55; color:{INK}; margin:13px 0 0; }}
+  .body {{ font-size:0.92rem; line-height:1.55; color:{BODY}; margin:9px 0 0; }}
+  .body b, .lead b, .standfirst b {{ color:{INK}; }}
+  .standfirst {{ font-size:0.98rem; line-height:1.52; color:{BODY};
+                 margin:0 0 4px; }}
+  .note {{ font-size:0.82rem; line-height:1.45; color:{MUTED}; margin:7px 0 0;
+           font-style:italic; }}
+  .note b {{ color:{BODY}; font-style:normal; }}
+  .note-b {{ font-size:0.865rem; line-height:1.48; color:{BODY}; margin:8px 0 0; }}
+  .note-b b {{ color:{INK}; }}
+
+  .pts {{ margin:11px 0 0; padding-left:1.1em; }}
+  .pts li {{ font-size:0.9rem; line-height:1.5; color:{BODY};
+             margin-bottom:7px; }}
+  .pts li:last-child {{ margin-bottom:0; }}
+  .pts li b {{ color:{INK}; }}
+
+  /* --- Cards, boxes --------------------------------------------------- */
+  .ccards {{ display:flex; gap:11px; margin:14px 0 0; align-items:stretch; }}
+  .ccard {{ flex:1; border:1px solid {LINE}; border-top:5px solid {PRIMARY};
+            padding:13px 14px 12px; }}
+  .ccard-n {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:1.5rem;
+              font-weight:700; line-height:1; }}
+  .ccard-l {{ font-size:0.71rem; font-weight:700; letter-spacing:.05em;
+              color:{MUTED}; margin:7px 0 9px; padding-bottom:9px;
+              border-bottom:1px solid {LINE}; }}
+  .ccard-d {{ font-size:0.83rem; line-height:1.47; color:{BODY}; }}
+
+  .boxes {{ display:flex; gap:12px; margin:14px 0 0; align-items:stretch; }}
+  .boxes .box {{ flex:1; margin:0; }}
+  .box {{ background:{BG_SOFT}; border:1px solid {LINE}; border-left:4px solid {PRIMARY};
+          padding:12px 15px 13px; margin:14px 0 0; }}
+  .box-warn {{ background:{WARM_TINT}; border-left-color:{WARM}; }}
+  .box-warn .box-h {{ color:{WARM}; }}
+  .box-green {{ background:{GREEN_TINT}; border-left-color:{GREEN}; }}
+  .box-green .box-h {{ color:{GREEN}; }}
+  .box-h {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.76rem;
+            font-weight:700; letter-spacing:.075em; text-transform:uppercase;
+            color:{PRIMARY_DARK}; margin-bottom:7px; }}
+  .box-p {{ font-size:0.865rem; line-height:1.5; color:{BODY}; margin:0; }}
+  .box-p b {{ color:{INK}; }}
+  /* Air above every chart. Ignored once the user drags one — a placed graphic
+     is absolutely positioned — which is the behaviour we want. */
+  .ds-graphic {{ margin-top:14px; }}
+
+  /* --- Stat tiles: the fiscal result, compressed ---------------------- */
+  .stats {{ display:flex; gap:11px; margin:16px 0 0; align-items:stretch; }}
+  .stat {{ flex:1; background:{BG_SOFT}; border-left:4px solid {PRIMARY};
+           padding:11px 13px 10px; }}
+  .stat-n {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+             font-size:1.42rem; font-weight:700; line-height:1;
+             color:{PRIMARY_DARK}; }}
+  .stat-l {{ font-size:0.79rem; line-height:1.32; color:{BODY}; margin-top:7px; }}
+
+  /* --- Recommendations ------------------------------------------------ */
+  /* The numeral is a counter-free span rather than the list marker: an <ol>
+     marker cannot be coloured or sized independently of its item, and this
+     one is a design element. */
+  .recs {{ list-style:none; margin:14px 0 0; padding:0; }}
+  .rec {{ position:relative; padding:0 0 0 2.05em; margin-bottom:9px; }}
+  .rec:last-child {{ margin-bottom:0; }}
+  .rec-n {{ position:absolute; left:0; top:0.02em; width:1.5em; height:1.5em;
+            border-radius:50%; background:{PRIMARY}; color:#fff;
+            font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.82rem;
+            font-weight:700; line-height:1.5em; text-align:center; }}
+  .rec-h {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+            font-size:0.97rem; font-weight:700; line-height:1.28; color:{INK};
+            margin-bottom:4px; }}
+  .rec-b {{ font-size:0.855rem; line-height:1.46; color:{BODY}; margin:0; }}
+  .rec-b b {{ color:{INK}; }}
+
+  /* --- Footers, endnotes ---------------------------------------------- */
+  .pfoot {{ position:absolute; left:0.55in; right:0.55in; bottom:0.42in;
+            border-top:1px solid {LINE}; padding-top:8px; }}
+  .pfoot-t {{ font-size:0.735rem; line-height:1.45; color:{MUTED}; margin:0; }}
+  .pfoot-t b {{ color:{BODY}; }}
+  .pnum {{ display:block; margin-top:5px; font-weight:700; letter-spacing:.06em;
+           text-transform:uppercase; font-size:0.7rem; color:{PRIMARY}; }}
+
+  .srch {{ font-size:0.7rem; font-weight:700; letter-spacing:.07em;
+           text-transform:uppercase; color:{BODY}; margin-right:5px; }}
+  .endnotes {{ margin:18px 0 0; padding-top:11px; border-top:1px solid {LINE};
+               font-size:0.715rem; line-height:1.4; color:{MUTED}; }}
+  .en {{ white-space:normal; }}
+  .enn {{ font-weight:700; color:{PRIMARY_DARK}; }}
+  .ensep {{ color:{MUTED}; }}   /* {LINE} on white is invisible at this size */
+  .endnotes a {{ color:{MUTED}; text-decoration:none; }}
+  .endnotes a:hover {{ text-decoration:underline; }}
+  /* Superscript markers inherit the UA sheet's `font-size: smaller` (~0.83x),
+     which drops a marker inside the small footer type under the 10.5px floor.
+     Pin it instead of letting the cascade shrink it. Do not name the element
+     in this comment: check.py scans the OUTPUT for it and a tag name in a CSS
+     comment swallows the first real marker after it. */
+  sup {{ font-size:10.6px; line-height:0; }}
+  sup a.fn {{ color:{PRIMARY_DARK}; text-decoration:none; font-weight:700; }}
+  a {{ color:{PRIMARY_DARK}; }}
+</style>
+</head>
+<body>
+{pdf_button(L, bg=PRIMARY_DARK)}
+{chart_scroll_css()}
+{body}
+</body>
+</html>
+"""
+
+_OUT.write_text(html)

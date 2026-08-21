@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renewable Energy Technologies Tax Credit — Act 24, the one-year reprieve, and what to do next</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Neither Manrope nor Poppins encodes U+02BB, so every ʻokina would fall
+     back to the OS UI font. These one-glyph faces re-encode each family's own
+     U+2018 outline at U+02BB; they must come FIRST in a stack. */
+
+  @font-face { font-family:'OkinaManrope'; font-weight:200 800;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAMAABIAAAAAByQAAAKdAASBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMD9IVkFSNgZgP1NUQVSBAgA0L2oRCAowSTBSATYCJAMICwYABCAFhSwHIAwHG/0FSL4EcIe14O6gCINqRdPe1Ahlo7zcU87Os/rOGdhEBPkXX/W8WfCDPig6x2BOM6LjDS8Eo4uJNWzO+7JjXeEqPDjiAbKe9c1knaweAd46m2CK0kQhGZuAqn1I4TsALXB3AwyA9m8AkyBY+c9ZWELWWQBoWnioPs/NOOL6Vlukl1gvgqX54jlsTI8kD/iELvEbxAeGp5tD5fHgg4jIgmFY/lRB31LL5eBD/RyCClOAoG+r7Rrke9rxn+se+hmT+xE6/j0ImEt991AwX4T9mVBEwN9iPV2tRWtufR0PxfPysd3KLVzhGq0jb+DgV35S3aP+i/By5QOBuk/rGaxURXQFc3WwVLn45PWdwNhi6+3lQKEuAokJAinZigYlTe6hfIxAan7NaJXjYN/G7uw0K0FBg7kawVzVSlRVKB9NqeQbgWCmIuRWn/ofR40JzUqIBBPSTSFbSS8NuYf0U8mvZJAW5TjIMG3Kx2SUDs1KMhaZUkABFcEQMwEVkOHlb2egf82zr+xd6n7/nLkav5X5glVAELBYAYvB0muCvm3X2B/2VzUnrK+Gyqe54EwbXy97+5r9/a9teg33fT8vvPDATTfcdL2gXtu+YJ9njcT+W6rzGXz17jfAD/f0hEti82NraCsgfIffmrjkqRsBs7TkJHmTxVAOwh/Nz1gjtScWklGMLdw33b4K2rZbv58p1CxzHUULQ6fIExR9F6AxthDV0FVomek2tHU9ho7ZnkPXduvRs9bb6NvocwysDwxtznqMrM5hP+TY1pwnsrNxNBGYOLo6OVtILaw87E2AQsMh3u6u130bK2v32mlZWP8SQXdu4+EgE+LQtJ3szaM+qJczifTxmdg66/p8M0GdfJkuhKbW2jTXms5u8u9n2vVOAAAA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:300;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGMAAwAAAAAAygAAAFAAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBLgcgG2sCIC4KY2PZeImq+GNqZRfO1Mslqwjq78W9e5dSK6UDl4qhSt8oFOBMxMIBD1BEPwgw5nYRKUGsPptqS08v1aA0Ot45ERoAo/Zf7mJpFGCqLU8zefEIu8swSjDQALTAAm02mw48ZEGQbILtxajAqHWb4jIYzyNX0A8gMOrIiYZEczc4+tgMdTK8B9XiAgcD5EcOHvI+3vFFCCi66u4pmOI5per/TFcr4Q4E5K7wim2FRMO8JjCvbKOUIH/6dfFfEAGABIVAYQhQgKiasqQav2aKL35AoEKa/jHd0gV+5SLRN/D3/QL+P51YjjfOQhiSIDhxZDzQni8CAJDxAL/sAqkECGnTIDoAhjwTiVIQlplIk5bRLMMLg/YdYtoy1Rmj7qXMTCx1pK2srf3bTtbAyMFcxxZ0p8chR8b2JlKtjwsA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:400;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAF0AAwAAAAAAwgAAAEmAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBEAcgG00CYJ4JdqyWadFs4NF4+G/s230zs6KGWVaTRiikDYVGKWKl4A0/fYnLL8DUREAUrdr/D27FmdLlUpVY6Zc4sZyzwEMWBMkm2V6UCtQbNCw2bt55UK0ClYBAvUWWyIDuvHjp8QrDgXMWnIOSD8S0KtLTdBQ7ch+nrYitUEVbbTu4eY/36VV6Vfr/72K5kx4gIE2mlxhVkJDRKQt0KkZRFEF6VanFs5sFgAQKAgU1gAKIcqL+SMOTD5fPfF8HBEpUL1gw25mWlf/k/Bc+P/8Wfk97pjc+epFeoEYCwYWRMaPXuBcCAJBiBt/0CiRFgJAMq8ZFAFXWy6LUCb0MSpr1UtYLFmHV5pljjxuuue2cve64666/PbDfJVc8ctM59zFvsSUrV2EFAAAA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:500;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGQAAwAAAAAAywAAAFCAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBMgcgG28CYC4KYyJzHusKrkX24mq+ZaKI9tdFUOz327t3iEkSLUm8kUxaIjaGUKCSCIkhW4Tv85zrb20VAs3jUV5zN51AahTBvTM/W2tg3e4qwNSq/bflaSYvHnmGEQUagBZYnIVJNx3oxuAG02FJWLFUoNusebG9G1fBK2gFBLpt2NIIVn3o7gLzpaYn56Ca8ygw5GMKjvo+rgRxCLTDqIPTKMOXPC/+Xzo1zzUIyOV8AosKiQajGoFRZRGlBPncOov/IgSABIVAoQNQgKjz7kbP5WU/+OcABCra/3afZ6+F8Jenmk94//wBHwdXWPHqjQx0SBC8cI6CZdEbAjozfsAXSyCVACHNa8cDADqcoUR1CZMcSP0m0ZiEF9otWcKgSaJDeh3LjA3NNOXmFhb721pZV9/WRNNKu9tOdHUMbU2jFKQWAQAAAA==) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:600;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGUAAwAAAAAAzQAAAFGAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBOgcgG3cCYJ4FjnPiVHH1ItFWkQdH+OvH8//ct9/ndpuxlscJD5PGUUahthIPKLCPvwcP/Lh8HwchQVNeYpJQMisU0qIU8kJlvN4DTN1Xtf+2PE0g0BePPMOIAs0tDjDQstlsN3COBYNpYDqsvFVgIS5J7A6tvZhpMAQEFkqqKMH7H3P7dZLQVCRn0KPpGmRAPWFc7+euLq1gio0631o6eJH3dd/R35XZ3qgdCKhtPcKGhoIRrCkC1rQ0NE2gXsMc/N9CAFBAQ6BhCtAA6ZHFwPL2fbLyFCDQMX79uE+46v/MSn3D56ZP+B54SipP/uUdTEkgeGFlKlKy/gkAQKWCrKQIKJoAQkoywgOAqWGKaAtCGAckpzCUMKSGUUEGbmFUPdw6dVixZN2UThs2bfa3Hd3mLNizasq29r6sx5w1SxpsWDWLKdMG6gAAAAA=) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:700;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAF0AAwAAAAAAvwAAAEpAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBBAcgG0ECQC8KbFukNzTis868eNV4qB/739m993n8LkmQyJBcmpiVQOgeGlS8MV1DYpj+ifA6QQNrV/7XPiRg6mtBkj49DawlEFMGQUSBJpxagQVadrvH2DAsZTsMowJdk6bFjl0HTmir0AcIdK1YUxo/eOnyk82mBeejVQ9quZ7vNcinGfbrf5yxOQ5BG6/ae2LXYS/zvPr/tUv1bj5EQK7lF8yqSBQMKgKDqllUVZDv+vDwv10CQIKKQEULUAFRT3ZP9r69+W7vIRCo0Rx4tP/z2bb+bZfyB37tK/zmmeV4G+RHoSVB8P1krFu2KToCAJCxTmyxLJCqACFNa+ISgIZtiqgdYZTk1DbKxShYlTXNm3XYTdfdcd4Rd91zj/TQttwtlxpdpRWW+tsM) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaOpenSans'; font-weight:300 800;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,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) format('woff2');
+    unicode-range:U+02BB; }
+
+  body { margin:0; background:#f4f8fc;
+         font:14.5px/1.5 OkinaManrope, Manrope, system-ui, sans-serif; color:#1e3a5f;
+         /* Manrope ligates "(c)" into a copyright sign. This report cites
+            HRS §235-12.5(c)(5), (j) and (p) throughout, so the default would
+            silently rewrite a statute citation on the page. */
+         font-variant-ligatures:none; }
+  .page { width:8.5in; min-height:11in; margin:24px auto; background:#fff;
+           box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.5in 0.55in 0.42in;
+           box-sizing:border-box; position:relative; overflow:hidden; }
+
+  /* --- Cover --------------------------------------------------------- */
+  /* The left accent stripe is the cover's one piece of full-bleed chrome, so
+     it is a pseudo-element on the sheet rather than an element the editor can
+     drag off the edge. */
+  .cover { padding-left:0.78in; }
+  .cover::before { content:""; position:absolute; left:0; top:0; bottom:0;
+                     width:0.19in; background:#3478bd; z-index:2; }
+  /* The hero wash stops after the deck and before KEY FIGURES — measured, not
+     guessed: a band that ends mid-card cuts the figures in half. If the deck
+     grows past 3.0in, move this with it. */
+  .cover::after { content:""; position:absolute; left:0; right:0; top:0;
+                   height:3.16in; background:#f4f8fc; border-bottom:1px solid #dbe5f0;
+                   z-index:0; }
+  .cover > * { position:relative; z-index:1; }
+  .pill { display:inline-block; background:#3478bd; color:#fff;
+           font-family:OkinaPoppins, Poppins, sans-serif; font-weight:700;
+           font-size:0.86rem; letter-spacing:.02em; padding:5px 15px;
+           border-radius:13px; }
+  .cover-h1 { font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+               font-size:2.65rem; line-height:1.08; margin:20px 0 0;
+               letter-spacing:-.022em; color:#1e3a5f; max-width:6.1in; }
+  .rule { width:1.35in; height:5px; background:#3478bd; margin:20px 0 16px; }
+  .deck { font-size:1.02rem; line-height:1.5; color:#475569; margin:0 0 40px;
+           max-width:5.9in; }
+
+  .klabel { font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+             font-weight:700; letter-spacing:.1em; color:#3478bd;
+             margin:0 0 10px; }
+  .klabel-t { margin-top:16px; }
+
+  .figs { display:flex; gap:12px; margin:0 0 30px; }
+  .fig { flex:1; background:#fff; border:1px solid #dbe5f0;
+          border-left:5px solid #3478bd; padding:13px 15px 12px; }
+  .fig-eo { border-left-color:#c2662f; }
+  .fig-eo .fig-n { color:#c2662f; }
+  .fig-n { font-family:OkinaPoppins, Poppins, sans-serif; font-size:1.72rem;
+            font-weight:700; line-height:1; color:#1e3a5f; }
+  .fig-l { font-size:0.72rem; font-weight:700; letter-spacing:.045em;
+            color:#8496ab; margin-top:8px; line-height:1.35; }
+
+  /* Four contents rows, not the nine this cover was first laid out for — so
+     the rows are taller, rather than leaving two idle inches under a short
+     block. Re-tighten this if the contents list ever grows again. */
+  .contents { margin:0; }
+  .crow { display:flex; gap:16px; padding:20px 4px; border-top:1px solid #dbe5f0;
+           font-size:0.92rem; }
+  .crow:last-child { border-bottom:1px solid #dbe5f0; }
+  .cnum { font-weight:700; color:#3478bd; min-width:1.6em; }
+  .ctxt { color:#475569; }
+  .cover-foot { position:absolute; left:0.78in; right:0.55in; bottom:0.5in;
+                 border-top:1px solid #dbe5f0; padding-top:11px; }
+  .cfoot-l { font-size:0.76rem; color:#8496ab; line-height:1.5; }
+
+  /* --- Interior pages ------------------------------------------------- */
+  .phead { border-bottom:2px solid #3478bd; padding-bottom:10px;
+            margin-bottom:18px; }
+  .eyebrow { font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+              font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+              color:#3478bd; margin-bottom:5px; }
+  h1 { font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+        font-size:1.62rem; line-height:1.16; margin:0; color:#1e3a5f;
+        letter-spacing:-.015em; }
+  .psub { font-size:0.86rem; color:#8496ab; margin-top:6px; }
+
+  /* A section kicker with its own short accent rule — the PDF's device for
+     opening a section without spending a full heading on it. */
+  .slabel { font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.78rem;
+             font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+             margin:20px 0 0; padding-bottom:7px; position:relative; }
+  .slabel::after { content:""; position:absolute; left:0; bottom:0;
+                    width:0.55in; height:3px; background:currentColor; }
+  h2 { font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+        font-size:1.02rem; margin:17px 0 0; padding-top:9px; color:#1e3a5f;
+        border-top:1px solid #dbe5f0; letter-spacing:-.005em; }
+  .lead { font-size:0.95rem; line-height:1.55; color:#1e3a5f; margin:13px 0 0; }
+  .body { font-size:0.92rem; line-height:1.55; color:#475569; margin:9px 0 0; }
+  .body b, .lead b, .standfirst b { color:#1e3a5f; }
+  .standfirst { font-size:0.98rem; line-height:1.52; color:#475569;
+                 margin:0 0 4px; }
+  .note { font-size:0.82rem; line-height:1.45; color:#8496ab; margin:7px 0 0;
+           font-style:italic; }
+  .note b { color:#475569; font-style:normal; }
+  .note-b { font-size:0.865rem; line-height:1.48; color:#475569; margin:8px 0 0; }
+  .note-b b { color:#1e3a5f; }
+
+  .pts { margin:11px 0 0; padding-left:1.1em; }
+  .pts li { font-size:0.9rem; line-height:1.5; color:#475569;
+             margin-bottom:7px; }
+  .pts li:last-child { margin-bottom:0; }
+  .pts li b { color:#1e3a5f; }
+
+  /* --- Cards, boxes --------------------------------------------------- */
+  .ccards { display:flex; gap:11px; margin:14px 0 0; align-items:stretch; }
+  .ccard { flex:1; border:1px solid #dbe5f0; border-top:5px solid #3478bd;
+            padding:13px 14px 12px; }
+  .ccard-n { font-family:OkinaPoppins, Poppins, sans-serif; font-size:1.5rem;
+              font-weight:700; line-height:1; }
+  .ccard-l { font-size:0.71rem; font-weight:700; letter-spacing:.05em;
+              color:#8496ab; margin:7px 0 9px; padding-bottom:9px;
+              border-bottom:1px solid #dbe5f0; }
+  .ccard-d { font-size:0.83rem; line-height:1.47; color:#475569; }
+
+  .boxes { display:flex; gap:12px; margin:14px 0 0; align-items:stretch; }
+  .boxes .box { flex:1; margin:0; }
+  .box { background:#f4f8fc; border:1px solid #dbe5f0; border-left:4px solid #3478bd;
+          padding:12px 15px 13px; margin:14px 0 0; }
+  .box-warn { background:#fbf0e9; border-left-color:#c2662f; }
+  .box-warn .box-h { color:#c2662f; }
+  .box-green { background:#eaf5ee; border-left-color:#4f8a62; }
+  .box-green .box-h { color:#4f8a62; }
+  .box-h { font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.76rem;
+            font-weight:700; letter-spacing:.075em; text-transform:uppercase;
+            color:#1e5a99; margin-bottom:7px; }
+  .box-p { font-size:0.865rem; line-height:1.5; color:#475569; margin:0; }
+  .box-p b { color:#1e3a5f; }
+  /* Air above every chart. Ignored once the user drags one — a placed graphic
+     is absolutely positioned — which is the behaviour we want. */
+  .ds-graphic { margin-top:14px; }
+
+  /* --- Stat tiles: the fiscal result, compressed ---------------------- */
+  .stats { display:flex; gap:11px; margin:16px 0 0; align-items:stretch; }
+  .stat { flex:1; background:#f4f8fc; border-left:4px solid #3478bd;
+           padding:11px 13px 10px; }
+  .stat-n { font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+             font-size:1.42rem; font-weight:700; line-height:1;
+             color:#1e5a99; }
+  .stat-l { font-size:0.79rem; line-height:1.32; color:#475569; margin-top:7px; }
+
+  /* --- Recommendations ------------------------------------------------ */
+  /* The numeral is a counter-free span rather than the list marker: an <ol>
+     marker cannot be coloured or sized independently of its item, and this
+     one is a design element. */
+  .recs { list-style:none; margin:14px 0 0; padding:0; }
+  .rec { position:relative; padding:0 0 0 2.05em; margin-bottom:9px; }
+  .rec:last-child { margin-bottom:0; }
+  .rec-n { position:absolute; left:0; top:0.02em; width:1.5em; height:1.5em;
+            border-radius:50%; background:#3478bd; color:#fff;
+            font-family:OkinaPoppins, Poppins, sans-serif; font-size:0.82rem;
+            font-weight:700; line-height:1.5em; text-align:center; }
+  .rec-h { font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
+            font-size:0.97rem; font-weight:700; line-height:1.28; color:#1e3a5f;
+            margin-bottom:4px; }
+  .rec-b { font-size:0.855rem; line-height:1.46; color:#475569; margin:0; }
+  .rec-b b { color:#1e3a5f; }
+
+  /* --- Footers, endnotes ---------------------------------------------- */
+  .pfoot { position:absolute; left:0.55in; right:0.55in; bottom:0.42in;
+            border-top:1px solid #dbe5f0; padding-top:8px; }
+  .pfoot-t { font-size:0.735rem; line-height:1.45; color:#8496ab; margin:0; }
+  .pfoot-t b { color:#475569; }
+  .pnum { display:block; margin-top:5px; font-weight:700; letter-spacing:.06em;
+           text-transform:uppercase; font-size:0.7rem; color:#3478bd; }
+
+  .srch { font-size:0.7rem; font-weight:700; letter-spacing:.07em;
+           text-transform:uppercase; color:#475569; margin-right:5px; }
+  .endnotes { margin:18px 0 0; padding-top:11px; border-top:1px solid #dbe5f0;
+               font-size:0.715rem; line-height:1.4; color:#8496ab; }
+  .en { white-space:normal; }
+  .enn { font-weight:700; color:#1e5a99; }
+  .ensep { color:#8496ab; }   /* #dbe5f0 on white is invisible at this size */
+  .endnotes a { color:#8496ab; text-decoration:none; }
+  .endnotes a:hover { text-decoration:underline; }
+  /* Superscript markers inherit the UA sheet's `font-size: smaller` (~0.83x),
+     which drops a marker inside the small footer type under the 10.5px floor.
+     Pin it instead of letting the cascade shrink it. Do not name the element
+     in this comment: check.py scans the OUTPUT for it and a tag name in a CSS
+     comment swallows the first real marker after it. */
+  sup { font-size:10.6px; line-height:0; }
+  sup a.fn { color:#1e5a99; text-decoration:none; font-weight:700; }
+  a { color:#1e5a99; }
+</style>
+</head>
+<body>
+<style>@page{size:8.5in 11in;margin:0}@media print{*,*::before,*::after{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}body{background:#fff}.noprint{display:none !important}.page{margin:0;box-shadow:none;max-width:none;height:11in;page-break-after:always}.page:last-child{page-break-after:auto}}</style><button type="button" class="noprint" onclick="window.print()" title="Opens your browser's print dialog — choose Save as PDF" style="position:fixed;top:18px;right:18px;z-index:60;background:#1e5a99;color:#FFFFFF;border:0;border-radius:8px;padding:9px 15px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)">↓&nbsp;Download PDF</button>
+<style>@media screen and (max-width:8.5in){.ds-chart-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;background:linear-gradient(to right,var(--ds-chart-bg,#fff) 30%,rgba(255,255,255,0)) left/22px 100% no-repeat local,linear-gradient(to left,var(--ds-chart-bg,#fff) 30%,rgba(255,255,255,0)) right/22px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(47,62,70,.17),rgba(47,62,70,0)) left/11px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(47,62,70,.17),rgba(47,62,70,0)) right/11px 100% no-repeat scroll}.ds-chart-scroll>svg{min-width:var(--ds-chart-min);margin:0}}</style>
+
+<section class="page cover">
+  <div class="pill">§235-12.5</div>
+  <h1 class="cover-h1">Renewable Energy Technologies Tax Credit</h1>
+  <div class="rule"></div>
+  <p class="deck">What Act 24 does to Hawaiʻi's solar tax credit, what the governor's executive order gives back for a year, and five things worth fixing.</p>
+
+  <div class="klabel">KEY FIGURES</div>
+  <div class="figs">
+    <div class="fig"><div class="fig-n">$100M</div><div class="fig-l">TOTAL RETITC CLAIMS · TAX YEAR 2023</div></div><div class="fig"><div class="fig-n">$40M</div><div class="fig-l">ANNUAL CAP · TAX YEAR 2027–2030</div></div><div class="fig fig-eo"><div class="fig-n">≈$85M</div><div class="fig-l">GRANDFATHERED BY EXECUTIVE ORDER 26-02</div></div>
+  </div>
+
+  <div class="klabel">INSIDE THIS REPORT</div>
+  <div class="contents"><div class="crow"><span class="cnum">02</span><span class="ctxt">The credit, and what Act 24 changes</span></div><div class="crow"><span class="cnum">03</span><span class="ctxt">The governor's one-year reprieve — Executive Order 26-02</span></div><div class="crow"><span class="cnum">04</span><span class="ctxt">Who claims it, who pays, and what the State keeps</span></div><div class="crow"><span class="cnum">05</span><span class="ctxt">Five things worth fixing</span></div></div>
+
+  <div class="cover-foot">
+    <div class="cfoot-l">Source: Hawaiʻi Department of Taxation — Tax Credits Claimed by Hawaiʻi Taxpayers (December 2025).</div>
+    <div class="cfoot-l">Hawaiʻi Appleseed Center for Law & Economic Justice  ·  Act 24, SLH 2026 (SB 3125 CD1 formula)  ·  Post-OBBBA federal §25D termination scenarios.</div>
+  </div>
+ 
+</section>
+
+<section class="page">
+  <div class="phead"><div class="eyebrow">The credit</div><h1>What Act 24 changes, and what it costs</h1><div class="psub">§235-12.5 · Hawaiʻi Revised Statutes</div></div>
+  <p class="lead">Hawaiʻi's Renewable Energy Technologies Tax Credit lets homeowners and businesses cut their state income tax when they install renewable energy equipment — most commonly rooftop solar. The State does not pay for installations; it forgoes the revenue instead, and its income-tax receipts fall by the same amount. <b>In Tax Year 2023 that came to $100.1M.</b><sup><a class="fn" href="#en1">1</a></sup></p>
+  <span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.4in"><div class="ds-chart-scroll" style="--ds-chart-min:689px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 820 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RETITC claims by taxpayer type, tax years 2018 through 2023, stacked; totals range from 60 to 113 million dollars"><rect x="0" y="0" width="11" height="11" rx="2.5" fill="#3478bd" opacity="1.0"/><text x="17" y="9.5" font-size="12.5" fill="#475569">Individual</text><rect x="107" y="0" width="11" height="11" rx="2.5" fill="#1e5a99" opacity="1.0"/><text x="124" y="9.5" font-size="12.5" fill="#475569">Corporate</text><rect x="208" y="0" width="11" height="11" rx="2.5" fill="#c2662f" opacity="1.0"/><text x="225" y="9.5" font-size="12.5" fill="#475569">Other / financial corp.</text><line x1="46" y1="235.2" x2="820" y2="235.2" stroke="#dbe5f0" stroke-width="1"/><text x="38" y="239.2" font-size="12.5" fill="#8496ab" text-anchor="end">$25M</text><line x1="46" y1="184.3" x2="820" y2="184.3" stroke="#dbe5f0" stroke-width="1"/><text x="38" y="188.3" font-size="12.5" fill="#8496ab" text-anchor="end">$50M</text><line x1="46" y1="133.5" x2="820" y2="133.5" stroke="#dbe5f0" stroke-width="1"/><text x="38" y="137.5" font-size="12.5" fill="#8496ab" text-anchor="end">$75M</text><line x1="46" y1="82.6" x2="820" y2="82.6" stroke="#dbe5f0" stroke-width="1"/><text x="38" y="86.6" font-size="12.5" fill="#8496ab" text-anchor="end">$100M</text><rect x="79.0" y="216.4" width="74" height="69.6" fill="#3478bd"/><rect x="79.0" y="167.7" width="74" height="48.8" fill="#1e5a99"/><rect x="79.0" y="142.6" width="74" height="25.1" fill="#c2662f"/><text x="116.0" y="134.6" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$70M</text><text x="116.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2018</text><rect x="207.0" y="196.5" width="74" height="89.5" fill="#3478bd"/><rect x="207.0" y="168.8" width="74" height="27.6" fill="#1e5a99"/><rect x="207.0" y="163.3" width="74" height="5.5" fill="#c2662f"/><text x="244.0" y="155.3" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$60M</text><text x="244.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2019</text><rect x="335.0" y="191.2" width="74" height="94.8" fill="#3478bd"/><rect x="335.0" y="160.5" width="74" height="30.7" fill="#1e5a99"/><rect x="335.0" y="57.0" width="74" height="103.6" fill="#c2662f"/><text x="372.0" y="49.0" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$113M</text><text x="372.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2020</text><rect x="463.0" y="181.3" width="74" height="104.7" fill="#3478bd"/><rect x="463.0" y="153.1" width="74" height="28.3" fill="#1e5a99"/><rect x="463.0" y="149.1" width="74" height="4.0" fill="#c2662f"/><text x="500.0" y="141.1" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$67M</text><text x="500.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2021</text><rect x="591.0" y="174.1" width="74" height="111.9" fill="#3478bd"/><rect x="591.0" y="74.8" width="74" height="99.3" fill="#1e5a99"/><rect x="591.0" y="70.9" width="74" height="3.9" fill="#c2662f"/><text x="628.0" y="62.9" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$106M</text><text x="628.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2022</text><rect x="719.0" y="167.4" width="74" height="118.6" fill="#3478bd"/><rect x="719.0" y="89.0" width="74" height="78.4" fill="#1e5a99"/><rect x="719.0" y="82.5" width="74" height="6.5" fill="#c2662f"/><text x="756.0" y="74.5" font-size="13.5" font-weight="700" fill="#1e3a5f" text-anchor="middle">$100M</text><text x="756.0" y="306" font-size="12.5" fill="#475569" text-anchor="middle">TY2023</text><line x1="46" y1="286" x2="820" y2="286" stroke="#475569" stroke-width="1"/><line x1="46" y1="110.9" x2="820" y2="110.9" stroke="#c25450" stroke-width="1.6" stroke-dasharray="7 4"/><text x="54" y="103.9" font-size="12.5" font-weight="700" fill="#c25450">Six-year mean $86.1M</text></svg></div></span>
+  <p class="note">Six years of claims average <b>$86.1M</b>, with a spread wide enough that no single year is a reliable read on the program. Tax Year 2020's $113M came almost entirely from trusts, estates and financial corporations, during a stretch of large COVID-era commercial deals.</p>
+
+  <div class="slabel" style="color:#c2662f">What changes under Act 24</div>
+  <p class="body">SB 3125 was signed <b>May 21, 2026</b> and is now <b>Act 24, SLH 2026</b>.<sup><a class="fn" href="#en2">2</a></sup> Three provisions reshape the credit — and one of them has already been suspended for a year by executive order.</p>
+  <div class="ccards">
+    <div class="ccard" style="border-top-color:#c2662f"><div class="ccard-n" style="color:#c2662f">$40M</div><div class="ccard-l">ANNUAL CAP</div><div class="ccard-d">Applies Tax Year 2027–2030. If certifications exceed $40M, every credit is scaled down by the same percentage.</div></div><div class="ccard" style="border-top-color:#3478bd"><div class="ccard-n" style="color:#3478bd">$175K</div><div class="ccard-l">INCOME LIMIT</div><div class="ccard-d">Filers above $175K AGI (single) or $350K (married filing jointly) no longer qualify. Starts Tax Year 2027, not 2026.</div></div><div class="ccard" style="border-top-color:#4f8a62"><div class="ccard-n" style="color:#4f8a62">2029</div><div class="ccard-l">FINAL YEAR</div><div class="ccard-d">After Tax Year 2029, no new credits are issued. Carryforward balances from earlier years still draw down.</div></div>
+  </div>
+  <div class="pfoot"><p class="pfoot-t">Source: DOTAX — Tax Credits Claimed by Hawaiʻi Taxpayers (Tax Year 2018–2022 actuals; Tax Year 2023 December 2025 publication).<sup><a class="fn" href="#en1">1</a></sup> "Other" = Total − Individual − Corporate, so disclosure-suppressed cells appear in the stack. Certification runs through the Hawaiʻi State Energy Office, not DBEDT.</p><span class="pnum">02 · RETITC · §235-12.5</span></div>
+ 
+</section>
+
+<section class="page">
+  <div class="phead"><div class="eyebrow">The one-year reprieve</div><h1>The governor exempted a year's worth of solar from the cap</h1><div class="psub">Executive Order 26-02  ·  signed June 8, 2026  ·  eligibility cutoff May 21, 2026</div></div>
+  <p class="standfirst">Act 24's $40M cap reaches back to Tax Year 2026. Three weeks after signing the bill, Gov. Josh Green signed an executive order taking most of that year back out — the stated reason being that <b>"the retroactivity of the RETITC annual cap presents a risk of litigation."</b><sup><a class="fn" href="#en3">3</a></sup></p>
+  <ul class="pts"><li><b>The cap only.</b> A calendar-2026 system "shall not be subject to the annual $40,000,000 aggregate cap" — and nothing else changes. The 35 percent rate, every per-system cap ($5,000 single-family PV, $350 per unit multi-family, $500,000 commercial), certification and the 2030 phase-out all still apply.<sup><a class="fn" href="#en3">3</a></sup></li><li><b>Two ways to qualify</b>, against a <b>May 21, 2026</b> cutoff — not the June 8 signing date. The system was finished before that day, or its owner shows the State it had already "reasonably relied" on the credit. DOTAX reads reliance as a payment made or cost incurred before the cutoff, and then presumes it; certification lands by May 31, 2027.<sup><a class="fn" href="#en4">4</a></sup></li><li><b>Nobody has priced it.</b> The cap was added in conference committee with no fiscal note, and no official estimate of the exempted credit dollars exists. The figure below is ours, derived top-down from program scale.</li></ul>
+  <span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.4in"><div class="ds-chart-scroll" style="--ds-chart-min:689px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 820 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The calendar 2026 cohort: about 85 million dollars of credits are exempt from the cap under Executive Order 26-02, against 40 million a strict cap would have allowed"><rect x="0" y="0" width="11" height="11" rx="2.5" fill="#3478bd" opacity="1.0"/><text x="17" y="9.5" font-size="12.5" fill="#475569">Certified credit dollars</text><rect x="197" y="0" width="11" height="11" rx="2.5" fill="#b9d2ea" opacity="1.0"/><text x="214" y="9.5" font-size="12.5" fill="#475569">Plausible range (derived, not official)</text><text x="0" y="48" font-size="12.5" fill="#1e3a5f" font-weight="700">Act 24 cap, applied strictly</text><text x="0" y="63" font-size="12.5" fill="#8496ab">calendar-2026 systems</text><rect x="176" y="34" width="219.2" height="30" rx="3" fill="#8496ab"/><text x="405.2" y="56" font-size="13.5" font-weight="700" fill="#1e3a5f">$40M</text><text x="0" y="94" font-size="12.5" fill="#1e3a5f" font-weight="700">Exempted by EO 26-02</text><text x="0" y="109" font-size="12.5" fill="#8496ab">estimated, $65M–$100M</text><rect x="532.2" y="75" width="191.8" height="40" rx="4" fill="#b9d2ea"/><rect x="176" y="80" width="465.8" height="30" rx="3" fill="#3478bd"/><text x="650.8" y="100" font-size="13.5" font-weight="700" fill="#1e5a99">≈$85M</text><line x1="395.2" y1="118" x2="641.8" y2="118" stroke="#c2662f" stroke-width="2"/><line x1="395.2" y1="112" x2="395.2" y2="124" stroke="#c2662f" stroke-width="2"/><line x1="641.8" y1="112" x2="641.8" y2="124" stroke="#c2662f" stroke-width="2"/><text x="518.5" y="140" font-size="12.5" font-weight="700" fill="#c2662f" text-anchor="middle">≈$45M–$60M more than a strict cap</text></svg></div></span>
+  <p class="note-b"><b>How the estimate is built.</b> Anchor on what the credit normally costs — $100.1M in Tax Year 2023, a six-year mean of $86.1M — and on a grandfathered share of 75 to 95 percent, which a May 21 cutoff implies against multi-month lead times. That puts the pool near <b>$85M</b> against the $40M a strict cap allowed — a one-time gap in FY2027–28, not a recurring one.</p>
+  <div class="box box-warn">
+    <div class="box-h">Do not convert the $436M figure at 35 percent</div>
+    <p class="box-p">The only quantified public numbers are <b>project cost, not credit value</b>: the Hawaiʻi Solar Energy Association reported that the eight largest solar firms had 265 commercial projects with $436M of committed private capital for 2026 — explicitly a sample, and excluding residential.<sup><a class="fn" href="#en5">5</a></sup> The per-system caps put the blended effective rate nearer <b>17 to 25 percent</b>, not 35: a $30,000 residential system yields $5,000, and a 114-unit multi-family complex yields $39,900 at $350 per unit, not $500,000. Converted at 35 percent, that sample alone would exceed the largest annual total the program has ever paid.</p>
+  </div>
+  <div class="pfoot"><p class="pfoot-t">The exempted-pool estimate is this analysis's own. It is <b>not</b> a DOTAX, HSEO or Council on Revenues figure, and no such figure has been published. The savings on the next page do not move with the order — they score Act 24 against a no-bill baseline, and both paths already treat Tax Year 2026 as uncapped. What moves is the State's cash position in FY2027–28.</p><span class="pnum">03 · RETITC · §235-12.5</span></div>
+ 
+</section>
+
+<section class="page">
+  <div class="phead"><div class="eyebrow">Who pays</div><h1>Claims cluster at the top — the cap does not</h1><div class="psub">Tax Year 2023 claims  ·  Tax Year 2027 burden  ·  OBBBA Mid</div></div>
+  <h2>Who claims the credit today</h2>
+  <span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.4in"><div class="ds-chart-scroll" style="--ds-chart-min:689px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 820 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Individual RETITC claims by adjusted gross income bracket, tax year 2023; the top bracket holds 45 percent of all individual claims"><text x="0" y="9.5" font-size="12.5" fill="#8496ab">Individual RETITC claims, Tax Year 2023 · $58.3M total</text><text x="148" y="39.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">Under $10K</text><rect x="158" y="22" width="92.7" height="26" rx="3" fill="#b9d2ea"/><text x="260.7" y="39.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$4.7M</text><text x="324.7" y="39.5" font-size="12.5" fill="#8496ab">8%</text><text x="148" y="73.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$10K – $30K</text><rect x="158" y="56" width="49.4" height="26" rx="3" fill="#7eaad7"/><text x="217.4" y="73.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$2.5M</text><text x="281.4" y="73.5" font-size="12.5" fill="#8496ab">4%</text><text x="148" y="107.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$30K – $60K</text><rect x="158" y="90" width="61.2" height="26" rx="3" fill="#7eaad7"/><text x="229.2" y="107.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$3.1M</text><text x="293.2" y="107.5" font-size="12.5" fill="#8496ab">5%</text><text x="148" y="141.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$60K – $100K</text><rect x="158" y="124" width="112.7" height="26" rx="3" fill="#3478bd"/><text x="280.7" y="141.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$5.8M</text><text x="344.7" y="141.5" font-size="12.5" fill="#8496ab">10%</text><text x="148" y="175.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$100K – $200K</text><rect x="158" y="158" width="316.6" height="26" rx="3" fill="#3478bd"/><line x1="465.7" y1="155" x2="465.7" y2="187" stroke="#c2662f" stroke-width="2.2"/><text x="471.7" y="201" font-size="12.5" fill="#c2662f" font-weight="700">3% cut by the AGI limit</text><text x="484.6" y="175.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$16.1M</text><text x="548.6" y="175.5" font-size="12.5" fill="#8496ab">28%</text><text x="148" y="225.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$200K and up</text><rect x="158" y="208" width="510.0" height="26" rx="3" fill="#1e5a99"/><line x1="444.1" y1="205" x2="444.1" y2="237" stroke="#c2662f" stroke-width="2.2"/><text x="450.1" y="251" font-size="12.5" fill="#c2662f" font-weight="700">44% cut by the AGI limit</text><text x="678.0" y="225.5" font-size="13.5" font-weight="700" fill="#1e3a5f">$26.0M</text><text x="742.0" y="225.5" font-size="12.5" fill="#8496ab">45%</text></svg></div></span>
+  <p class="note-b">The top bracket alone — $200K and up — takes <b>45 percent</b> of all individual claims; everyone under $60K combined takes less than a fifth. That is who can afford solar, and who has the tax liability to use a credit that is not refundable. The orange rules mark where Act 24's income limit bites — the top two brackets, and nothing below them.</p>
+
+  <h2>Who bears the increase in Tax Year 2027</h2>
+  <span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.4in"><div class="ds-chart-scroll" style="--ds-chart-min:689px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 820 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Average RETITC tax increase per household in tax year 2027 by income quintile, from 19 dollars in the second quintile to 201 dollars in the top"><rect x="0" y="0" width="11" height="11" rx="2.5" fill="#1e5a99" opacity="1.0"/><text x="17" y="9.5" font-size="12.5" fill="#475569">Lost to the income limit</text><rect x="197" y="0" width="11" height="11" rx="2.5" fill="#7eaad7" opacity="1.0"/><text x="214" y="9.5" font-size="12.5" fill="#475569">Lost to the $40M cap</text><text x="140" y="38.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">Under $29K</text><rect x="150.0" y="22" width="105.7" height="24" fill="#7eaad7"/><text x="265.7" y="38.5" font-size="13.5" font-weight="700" fill="#1e3a5f">+$37</text><text x="140" y="71.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$29K – $63K</text><rect x="150.0" y="55" width="54.3" height="24" fill="#7eaad7"/><text x="214.3" y="71.5" font-size="13.5" font-weight="700" fill="#1e3a5f">+$19</text><text x="140" y="104.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$63K – $104K</text><rect x="150" y="88" width="0.6" height="24" fill="#1e5a99"/><rect x="150.6" y="88" width="87.9" height="24" fill="#7eaad7"/><text x="248.5" y="104.5" font-size="13.5" font-weight="700" fill="#1e3a5f">+$31</text><text x="140" y="137.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$104K – $175K</text><rect x="150" y="121" width="8.2" height="24" fill="#1e5a99"/><rect x="158.2" y="121" width="163.2" height="24" fill="#7eaad7"/><text x="331.3" y="137.5" font-size="13.5" font-weight="700" fill="#1e3a5f">+$60</text><text x="140" y="170.5" font-size="12.5" font-weight="700" fill="#1e3a5f" text-anchor="end">$175K and up</text><rect x="150" y="154" width="301.3" height="24" fill="#1e5a99"/><rect x="451.3" y="154" width="272.7" height="24" fill="#7eaad7"/><text x="734.0" y="170.5" font-size="13.5" font-weight="700" fill="#1e3a5f">+$201</text></svg></div></span>
+  <p class="note-b">The income limit is targeted; <b>the cap is not.</b> Once certifications exceed $40M every surviving credit is trimmed by the same percentage, so the bottom quintile loses about $37 a household to a cap it had no part in triggering. Corporate and trust filers hold roughly 42 percent of the credit and sit outside the income limit entirely.</p>
+
+  <div class="stats"><div class="stat"><div class="stat-n">$385M</div><div class="stat-l">revenue the State keeps, Tax Year 2027–2031</div></div><div class="stat"><div class="stat-n">$103M</div><div class="stat-l">what the RETITC still costs in 2027, against a $40M cap</div></div><div class="stat"><div class="stat-n">44¢</div><div class="stat-l">what each certified credit pays on the dollar in 2027</div></div></div>
+  <div class="pfoot"><p class="pfoot-t">Annual savings run $58M–$63M through 2029, then rise to $100M–$105M as the sunset bites rather than the cap.<sup><a class="fn" href="#en6">6</a></sup> Individual loss is crosswalked from DOTAX Tax Year 2023 AGI bins onto Tax Year 2027-anchored household quintiles; static incidence, no behavioral response modeled.<sup><a class="fn" href="#en7">7</a></sup></p><span class="pnum">04 · RETITC · §235-12.5</span></div>
+ 
+</section>
+
+<section class="page">
+  <div class="phead"><div class="eyebrow">What to do next</div><h1>Five things worth fixing</h1><div class="psub">Drawn from the figures in this report  ·  not adopted positions</div></div>
+  <p class="standfirst">Each of these follows from a number in this report. <b>None of them is yet a Hawaiʻi Appleseed position</b> — the organization has taken no position on the RETITC, and its support for SB 3125 covers the Act 46 bracket freeze, not the credit. They are put here for the policy team to weigh.</p>
+  <ol class="recs">
+    <li class="rec"><span class="rec-n">1</span><div class="rec-h">Stop the cap from falling on the households the income limit was written to spare</div><p class="rec-b">Act 24 does two things at once, and only one of them is targeted. The AGI limit removes high earners; the cap then trims <b>every surviving claim by the same 56 percent</b>, including claims from households the limit deliberately left in. Reserve a share of the $40M for single-family systems below a stated income, or exempt them from pro-rata, so the cap's cost falls where the income limit was already pointing.</p></li><li class="rec"><span class="rec-n">2</span><div class="rec-h">Make the credit refundable below an income threshold</div><p class="rec-b">The RETITC is nonrefundable, so its value depends on having tax liability to offset — which is a large part of why claims cluster in the top bracket, and why an unexpiring carryforward pool exists at all. Refundability below a stated income would deliver the credit to households that cannot use it today. <b>This is a design proposal, not a scored one</b>: no run in this analysis prices it.</p></li><li class="rec"><span class="rec-n">3</span><div class="rec-h">Report new certifications and carryforward drawdown as separate lines</div><p class="rec-b">"A $40M cap" is not what the State spends. In Tax Year 2027 the RETITC still costs <b>$103M</b>, because credits earned earlier but never claimed draw down on top of newly certified ones. Splitting the two lines in DOTAX reporting would make the cap's real fiscal effect legible — as would publishing <b>effective</b> rates by system class, which the per-system caps put at 17 to 25 percent, not the headline 35.</p></li><li class="rec"><span class="rec-n">4</span><div class="rec-h">Publish the certified grandfathered total once the 2027 round closes</div><p class="rec-b">The executive order's cost is unknown to everyone, including the State. HSEO certifies by <b>May 31, 2027</b>; publishing the certified total and the count of exempted systems would replace every derived estimate, including ours, with a fact. The Council on Revenues should also take up Act 24 and the order — its last General Fund forecast predates both and incorporates neither.<sup><a class="fn" href="#en8">8</a></sup></p></li><li class="rec"><span class="rec-n">5</span><div class="rec-h">Fix the sunset conflict in statute, not by announcement</div><p class="rec-b">§235-12.5(c)(5) says allowable credits are $0 beginning January 1, 2031; §235-12.5(p) sunsets the section after Tax Year 2029. DOTAX has resolved the conflict as $0 from January 1, 2030 — which settles it administratively but not formally.<sup><a class="fn" href="#en9">9</a></sup> A one-line technical amendment in the 2027 session would close it.</p></li>
+  </ol>
+  <div class="endnotes"><span class="srch">Sources</span><span id="en1" class="en"><span class="enn">1</span> <a href="https://tax.hawaii.gov/stats/a5_3txcr/">Hawaiʻi Department of Taxation, "Tax Credits Claimed by Hawaiʻi Taxpayers," Tax Year 2023 (published December 2025).</a></span><span class="ensep"> · </span><span id="en2" class="en"><span class="enn">2</span> <a href="https://www.capitol.hawaii.gov/session/measure_indiv.aspx?billtype=SB&billnumber=3125&year=2026">Act 24, Session Laws of Hawaiʻi 2026 (SB 3125 CD2), signed May 21, 2026.</a></span><span class="ensep"> · </span><span id="en3" class="en"><span class="enn">3</span> <a href="https://governor.hawaii.gov/executive-orders/">Executive Order No. 26-02, Office of the Governor, signed June 8, 2026 (announced June 12; approved as to form by Attorney General Anne Lopez).</a></span><span class="ensep"> · </span><span id="en4" class="en"><span class="enn">4</span> <a href="https://tax.hawaii.gov/legal/tir/">Hawaiʻi Department of Taxation, Tax Information Release No. 2026-02, July 31, 2026.</a></span><span class="ensep"> · </span><span id="en5" class="en"><span class="enn">5</span> <a href="https://www.civilbeat.org/">Hawaiʻi Solar Energy Association figures reported by Honolulu Civil Beat, May 29 and June 12, 2026 — 265 commercial projects, $436M of committed private capital across the eight largest firms.</a></span><span class="ensep"> · </span><span id="en6" class="en"><span class="enn">6</span> <a href="https://github.com/Hawaii-Appleseed/Census-Forecaster/blob/main/generate_reec_report.py">Census-Forecaster credit-overlay model, vintage-pool carryforward simulation (CD1 formula, OBBBA Mid).</a></span><span class="ensep"> · </span><span id="en7" class="en"><span class="enn">7</span> <a href="https://github.com/Hawaii-Appleseed/Census-Forecaster/blob/main/RETITC_REPORT_METHODOLOGY.md">"RETITC Report — How the Pipeline Works," Census-Forecaster methodology.</a></span><span class="ensep"> · </span><span id="en8" class="en"><span class="enn">8</span> <a href="https://tax.hawaii.gov/useful/a2_b2_5cor/">Hawaiʻi Council on Revenues, General Fund forecast of May 21, 2026; next meeting September 3, 2026.</a></span><span class="ensep"> · </span><span id="en9" class="en"><span class="enn">9</span> <a href="https://tax.hawaii.gov/legal/announce/">Hawaiʻi Department of Taxation, Announcement No. 2026-06.</a></span></div>
+  <div class="pfoot"><p class="pfoot-t">Act 24, SLH 2026  ·  §235-12.5 Renewable Energy Technologies Income Tax Credit  ·  Recommendations derived from this analysis; not adopted positions.</p><span class="pnum">05 · RETITC · §235-12.5</span></div>
+ 
+</section>
+
+</body>
+</html>
