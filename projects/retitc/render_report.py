@@ -272,13 +272,67 @@ def historical_chart() -> str:
     return "".join(p)
 
 
-# --- Graphic 2: who claims it (page 4) ---------------------------------------
+# --- Graphic 2: what the State keeps (page 5) --------------------------------
+
+def savings_chart() -> str:
+    """Revenue the State keeps each year, against a no-bill baseline.
+
+    Deliberately plain: bars, gridlines, value labels, and a wash over the two
+    years after new credits stop. No whiskers — the range lives on the stat
+    tile and in the footer, and this chart's job is the SHAPE, which is that
+    the last two years are the big ones and the cap has nothing to do with it.
+    """
+    W, H = VB_W, 440
+    BASE, TOP = 384, 52
+    X0, SLOT, BW = 46, (VB_W - 52) / 5, 86
+    y_max = 118.0
+    unit = (BASE - TOP) / y_max
+
+    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+         f'role="img" aria-label="Revenue the State keeps each year: 58, 59 '
+         f'and 63 million dollars through 2029, then 100 and 105 million in '
+         f'2030 and 2031 once new credits stop.">']
+
+    # The sunset wash goes down first, so the bars and rules sit over it.
+    sx = X0 + 6 + 3 * SLOT
+    p.append(f'<rect x="{sx:.1f}" y="{TOP - 24}" width="{W - sx:.1f}" '
+             f'height="{BASE - TOP + 24:.1f}" fill="{INK}" opacity="0.045"/>')
+    p.append(f'<text x="{(sx + W) / 2:.1f}" y="{TOP - 10}" font-size="{LABEL_U}" '
+             f'font-weight="700" fill="{BODY}" text-anchor="middle">'
+             f'no new credits after 2029</text>')
+
+    for v in (25, 50, 75, 100):
+        gy = BASE - v * unit
+        p.append(f'<line x1="{X0}" y1="{gy:.1f}" x2="{W}" y2="{gy:.1f}" '
+                 f'stroke="{LINE}" stroke-width="1"/>')
+        p.append(f'<text x="{X0 - 8}" y="{gy + 4:.1f}" font-size="{LABEL_U}" '
+                 f'fill="{MUTED}" text-anchor="end">${v}M</text>')
+
+    for i, (yr, _base, _after, sav, _stock, _lo, _hi) in enumerate(FISCAL):
+        cx = X0 + 6 + i * SLOT + (SLOT - BW) / 2
+        h = sav * unit
+        p.append(f'<rect x="{cx:.1f}" y="{BASE - h:.1f}" width="{BW}" '
+                 f'height="{h:.1f}" rx="3" fill="{PRIMARY}"/>')
+        p.append(f'<text x="{cx + BW / 2:.1f}" y="{BASE - h - 9:.1f}" '
+                 f'font-size="{EMPH_U}" font-weight="700" fill="{PRIMARY_DARK}" '
+                 f'text-anchor="middle">${sav:.0f}M</text>')
+        p.append(f'<text x="{cx + BW / 2:.1f}" y="{BASE + 21}" '
+                 f'font-size="{LABEL_U}" fill="{BODY}" text-anchor="middle">'
+                 f'TY{yr}</text>')
+
+    p.append(f'<line x1="{X0}" y1="{BASE}" x2="{W}" y2="{BASE}" '
+             f'stroke="{BODY}" stroke-width="1"/>')
+    p.append("</svg>")
+    return "".join(p)
+
+
+# --- Graphic 3: who claims it (page 4) ---------------------------------------
 
 def agi_chart() -> str:
     """Individual TY2023 claims by AGI bracket, with the AGI-limit cut-off
     marked on the two brackets it actually reaches."""
     W = VB_W
-    X0, ROW, GAP = 158, 90, 24
+    X0, ROW, GAP = 158, 34, 10
     BARMAX = W - X0 - 152
     x_max = max(c for _, c, _ in AGI_BINS)
     scale = BARMAX / x_max
@@ -326,13 +380,13 @@ def agi_chart() -> str:
     return "".join(p)
 
 
-# --- Graphic 3: who pays (page 5) --------------------------------------------
+# --- Graphic 4: who pays (page 4) --------------------------------------------
 
 def burden_chart() -> str:
     """Average tax increase per household in TY2027, by income quintile, split
     by which of Act 24's two screens takes the money."""
     W = VB_W
-    X0, ROW, GAP = 150, 56, 17
+    X0, ROW, GAP = 150, 26, 9
     BARMAX = W - X0 - 96
     x_max = max(q[3] for q in QUINTILES)
     scale = BARMAX / x_max
@@ -507,18 +561,21 @@ page = f"""
 
 <section class="page">
   {head("pays", 4)}
+  <h2{L.attr("pays.agi.h")}>{C.t("pays.agi.h")}</h2>
   {graphic(L, "chart.agi", chart_scroll(agi_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("pays.agi.note", "note-b")}
+
+  <h2{L.attr("pays.burden.h")}>{C.t("pays.burden.h")}</h2>
+  {graphic(L, "chart.burden", chart_scroll(burden_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("pays.burden.note", "note-b")}
   {foot("pays.foot", 4)}
 {C.extras("page4")} {L.layer(4)}{L.text_boxes(4)}{L.tables_html(4)}
 </section>
 
 <section class="page">
   {head("saves", 5)}
-  <h2{L.attr("saves.burden.h")}>{C.t("saves.burden.h")}</h2>
-  {graphic(L, "chart.burden", chart_scroll(burden_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
-  {C.html("saves.burden.note", "note-b")}
-
+  {graphic(L, "chart.savings", chart_scroll(savings_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("saves.chart.note", "note-b")}
   <div class="stats"{L.attr("saves.stats")}>{stat("a")}{stat("b")}{stat("c")}</div>
   <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
   {foot("saves.foot", 5)}

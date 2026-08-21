@@ -68,10 +68,10 @@ What Act 24 does to a $100M tax break
 The governor's one-year reprieve
 
 [[cover.contents.04]]
-Who claims the credit today
+Who claims it, and who pays for the cap
 
 [[cover.contents.05]]
-What the cap saves, and who pays for it
+What capping the credit saves
 
 [[cover.source]]
 Source: Hawaiʻi Department of Taxation — Tax Credits Claimed by Hawaiʻi Taxpayers (December 2025).
@@ -157,10 +157,13 @@ The $85M is this analysis's own; the State has published none. Two loose ends: t
 Who pays
 
 [[pays.h1]]
-Who claims the credit today
+Who claims the credit, and who pays for the cap
 
 [[pays.sub]]
-Tax Year 2023 · individual filers
+Tax Year 2023 claims · Tax Year 2027 burden
+
+[[pays.agi.h]]
+Who claims it today
 
 [[pays.agi.note]]
 Households above $200K take **45 percent** of individual claims; everyone under $60K takes less than a fifth. Solar costs about $30,000 up front, and the credit is **nonrefundable** — it only cancels tax you already owe, so a filer whose bill is smaller than the credit never sees the difference. Act 24's income limit goes at the top: the orange marks show where it bites, the top two brackets only.
@@ -175,12 +178,15 @@ What it saves
 What capping the credit saves
 
 [[saves.sub]]
-Tax Year 2027 burden  ·  savings through 2031
+Projected against a no-bill baseline  ·  Tax Year 2027–2031
 
-[[saves.burden.h]]
+[[saves.chart.note]]
+Act 24 keeps **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. That is the phase-out doing the work, not the $40M cap: through 2029, while the cap is the only thing binding, the annual figure runs $58M to $63M.
+
+[[pays.burden.h]]
 Who pays more in Tax Year 2027
 
-[[saves.burden.note]]
+[[pays.burden.note]]
 **The cap makes no distinction.** Once a year's claims pass $40M, every remaining credit is cut by the same share — roughly 56 percent at 2027 demand — so a household in the bottom fifth pays about $40 more for a ceiling it did nothing to reach. The income limit only touches the top. Businesses and trusts hold about 42 percent of the credit and fall outside it entirely: a commercial system has no personal income to test.
 
 [[saves.stat.a.n]]
