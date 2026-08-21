@@ -161,7 +161,7 @@ Impact of capping the credit
 Projected against a no-bill baseline  ·  Tax Year 2027–2031
 
 [[saves.chart.note]]
-Act 24 may reduce the credit by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. Those two years are the largest not because the cap bites harder, but because by then there is almost nothing left to cap: in 2031 the credit costs the State about **$2M**, against $107M had the law not passed.
+Act 24 may reduce credit claims by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. Those two years show the largest savings  because the cap will be nearly phased out at that point. In 2031 the credit may cost the State about **$2M**, against $107M had the law not passed.
 
 [[pays.burden.h]]
 Who pays more in Tax Year 2027
