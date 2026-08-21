@@ -148,13 +148,13 @@ Act 24's $40M cap reaches back to Tax Year 2026 — over systems that were alrea
 - **Caveat. **The cap was added late in the session with no cost estimate attached, and the State has not published a figure for what the exemption is worth.
 
 [[eo.size.note]]
-**The arithmetic.** Start from what the credit normally costs: $100.1M in Tax Year 2023, $86.1M averaged over six years. Then assume 75 to 95 percent of 2026 systems qualify, since solar takes months to install and the cutoff falls in May. That puts the exempted amount near **$85M**, against the $40M a strict cap would have allowed — a one-time gap in 2027 and 2028, not a recurring one.
+**How we got to $85M.** The credit usually costs Hawaiʻi $86M to $100M a year. Most solar projects finished in 2026 will likely qualify for the exemption, since installations take months and the cutoff falls in the middle of the year. That points to about **$85M** in credits protected from the cap — more than double the $40M the cap alone would have allowed. It only happens once, in 2027 and 2028, not every year.
 
 [[eo.warn.h]]
-Don't take 35 percent of $436M
+Don't multiply $436M by 35 percent
 
 [[eo.warn.p]]
-The only public figures describe **what the projects cost, not what the credits are worth**. The Hawaiʻi Solar Energy Association reported that the eight largest solar firms had 265 commercial projects with $436M committed for 2026 — a sample, and no residential systems at all.[^cb] Because each system carries its own dollar limit, the credit is worth far less than 35 percent of what a project costs. A typical home system, around $30,000, earns $5,000 — about 17 percent of the price. A 114-unit apartment building earns $39,900, not $500,000. Taking 35 percent of $436M would make that one sample larger than the biggest year the program has ever paid out.
+The only public number here is **what these solar projects cost to build — not what the tax credits are worth**. The Hawaiʻi Solar Energy Association says the state's eight largest solar companies have $436M in commercial projects planned for 2026. That is a sample of big companies, and it leaves out homes entirely.[^cb] The credit is worth far less than 35 percent of a project's cost, because every system has its own dollar limit. A typical $30,000 home system earns back $5,000 — about 17 percent. A 114-unit apartment building earns $39,900, not $500,000. Multiplying $436M by 35 percent would produce more money than the credit has ever cost the state in a single year — a sign the math doesn't work that way.
 
 [[eo.foot]]
 The $85M figure is this analysis's own; the State has published none. Two things are still unsettled. The Council on Revenues, which sets the State's official revenue forecast, had not accounted for Act 24 or the executive order as of its last one.[^cor] And the law gives two different end dates for the credit — 2029 in one subsection, 2031 in another — which the Tax Department has settled at 2030 by announcement rather than by amendment.[^ann]
@@ -178,7 +178,7 @@ Source: DOTAX Table A-5, Tax Year 2023 individual claims by income bracket.[^dot
 What it saves
 
 [[saves.h1]]
-What the cap saves, and who pays for it
+What capping the credit saves
 
 [[saves.sub]]
 Tax Year 2027 burden  ·  savings through 2031
