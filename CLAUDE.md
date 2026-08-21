@@ -125,8 +125,10 @@ Rules that bite:
   text below the legibility floor — plus an `edit-mode draft` pass per binding
   that builds with DOCSYNC_EDIT=1 and warns on DEAD TEXT (visible strings with
   no data-slot/data-el hook) and FROZEN PROSE (sentences drawn inside an SVG).
-  A conversion/ingestion is not done until that line is clean or its warnings
-  are named to the user as deliberate — see the report-editor skill's
+  A conversion/ingestion is not done until that line is clean AND its binding
+  says `editability: strict` (findings become ERRORS, so CI fails a push that
+  regresses; deliberate exceptions go in `editability_ok`, one exact string
+  per line; scaffolds start as `wip`) — see the report-editor skill's
   "editability contract" section).
   Run the last one after touching any renderer — it walks docsync.yml, so a
   new report is covered the day it is bound, and it caught two shipped pages

@@ -293,8 +293,15 @@ matters for editing that content.
 A converted document (a PDF rebuilt as a renderer, a scaffolded page after
 `propose`, any "make this editable" request) is **not done when it renders —
 it is done when `python3 -m docsync.check --id <slug>` shows a clean
-`edit-mode draft` line**, or when every remaining `[editability]` warning has
-been named to the user as a deliberate choice. The check builds the edit-mode
+`edit-mode draft` line AND the binding says `editability: strict`** in
+docsync.yml. Strict makes any future finding a build ERROR — CI
+(report-checks.yml) fails the push — so the page cannot quietly regress.
+Deliberate exceptions (page-number chrome, a data-frozen label) are listed
+per exact string under `editability_ok:`, one reviewable decision per line;
+never downgrade a binding to `warn` to get past a finding. `docsync.new` and
+`docsync.ingest` write `strict` into every project they create;
+`docsync.scaffold` writes `wip` (STAGE ONE is expected to be unwired) — the
+STAGE TWO pass ends by flipping it to `strict`. The check builds the edit-mode
 draft and finds the two shapes of silent uneditability that every earlier net
 missed (the audit and the amber notice count wiring that EXISTS, never text
 left with none):

@@ -178,6 +178,9 @@ bindings:
   # render_report.py, reproduced from ~/Census-Forecaster.
   - id: rxkids-fiscal
     content: projects/rxkids-fiscal/content.md
+    # Fully wired 2026-08-20 (captions moved out of the SVGs into slots);
+    # editability findings are errors from here on.
+    editability: strict
     # The stage half is required: without it the watcher rebuilds the published
     # page but leaves the staged docs/rxkids-fiscal/engine/ copy the in-browser
     # editor actually reads from stale.
@@ -207,6 +210,9 @@ bindings:
   # asserts all of it against what the sources printed.
   - id: dotax-itep
     content: projects/dotax-itep/content.md
+    # Fully wired 2026-08-20 (scope-chart explanations became in-place SVG
+    # slots); editability findings are errors from here on.
+    editability: strict
     # The stage half is required: without it the watcher rebuilds the published
     # page but leaves the staged docs/dotax-itep/engine/ copy the in-browser
     # editor actually reads from stale.
@@ -255,6 +261,7 @@ bindings:
   # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed policy brief" template.
   - id: my-report
     content: projects/my-report/content.md
+    editability: strict
     build: python3 projects/my-report/render_report.py && python3 -m docsync.stage --id my-report
     outputs:
       - projects/my-report/web/index.html
@@ -269,6 +276,7 @@ bindings:
   # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed report" template.
   - id: eviction-code-guide
     content: projects/eviction-code-guide/content.md
+    editability: strict
     build: python3 projects/eviction-code-guide/render_report.py && python3 -m docsync.stage --id eviction-code-guide
     outputs:
       - projects/eviction-code-guide/web/index.html
@@ -290,6 +298,7 @@ bindings:
   # render_report.py, reproduced from ~/Census-Forecaster.
   - id: retitc
     content: projects/retitc/content.md
+    editability: strict
     # The stage half is required: without it the watcher rebuilds the published
     # page but leaves the staged docs/retitc/engine/ copy the in-browser editor
     # actually reads from stale.
