@@ -83,13 +83,13 @@ Hawaiʻi Appleseed Center for Law & Economic Justice  ·  Act 24, SLH 2026  ·  
 The credit
 
 [[about.h1]]
-What Act 24 does to a $100M tax break
+What Act 24 does to the RETITC
 
 [[about.sub]]
 §235-12.5 · Hawaiʻi Revised Statutes
 
 [[about.works.p1]]
-Install renewable energy equipment in Hawaiʻi — usually rooftop solar — and this credit cuts your state income tax. It is the State's biggest tax break for renewable energy, and one lever behind a legal target: 100 percent renewable electricity by 2045. No money changes hands; the State just collects less. **In Tax Year 2023, $100.1M less.**[^dotax]
+If you install of renewable energy equipment in Hawaiʻi — usually rooftop solar — the RETITC reduces your state income tax. It is the State's biggest tax break for renewable energy, and one of the driving forces behind the state's target of reaching 100 percent renewable electricity by 2045[^dotax]
 
 [[hist.note]]
 Claims average **$86.1M** over six years, but no single year tells you much. Tax Year 2020 is the outlier: trusts, estates and financial corporations jumped from $2.7M to $50.9M, then dropped back to $2.0M. Household claims are steadier and have risen every year — in nominal dollars, before inflation or filer counts.
@@ -175,13 +175,13 @@ Source: DOTAX Table A-5, Tax Year 2023 individual claims by bracket.[^dotax] Adj
 What it saves
 
 [[saves.h1]]
-What capping the credit saves
+Impact of capping the credit
 
 [[saves.sub]]
 Projected against a no-bill baseline  ·  Tax Year 2027–2031
 
 [[saves.chart.note]]
-Act 24 keeps **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. That is the phase-out doing the work, not the $40M cap: through 2029, while the cap is the only thing binding, the annual figure runs $58M to $63M.
+Act 24 may reduce the credit by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely.
 
 [[pays.burden.h]]
 Who pays more in Tax Year 2027
