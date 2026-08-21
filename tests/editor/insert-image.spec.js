@@ -25,15 +25,26 @@ test.describe('insert image', () => {
   test('uploads and places a movable image box', async ({ page }) => {
     await gotoEditor(page);
     const uploaded = page.waitForRequest('**/__upload');
-    const chooser = page.waitForEvent('filechooser');
-    await page.click('#ar-img');
     // Insert Image goes straight to the file dialog only for a project with
     // NOTHING bundled. This fixture's project carries images (the template
     // logos in its assets), so the button opens the picker first and "Upload
-    // from computer…" is what reaches the dialog — without this the chooser
-    // simply never fired and the spec timed out at 90s.
-    if (await page.locator('#imgpop').isVisible()) await page.click('#img-upload');
-    await (await chooser).setFiles(PIXEL);
+    // from computer…" is what reaches the dialog. The old shape — a single
+    // unwaited isVisible() probe right after the click — lost two races on
+    // slow machines (CI): the popover rendering late (probe false, chooser
+    // never fires, 90s timeout) and the popover closing under an outside
+    // click before #img-upload was hit. Retried as one unit instead: each
+    // attempt (re)opens the picker and must produce the file chooser.
+    let chooser;
+    await expect(async () => {
+      const pop = page.locator('#imgpop');
+      if (!(await pop.isVisible())) await page.click('#ar-img');
+      const c = page.waitForEvent('filechooser', { timeout: 3000 })
+        .catch(() => null);
+      await page.click('#img-upload', { timeout: 2000 });
+      chooser = await c;
+      if (!chooser) throw new Error('file chooser did not open');
+    }).toPass();
+    await chooser.setFiles(PIXEL);
     // the editor posted real image bytes with the sanitised name
     const req = JSON.parse((await uploaded).postData());
     expect(req.name).toBe('spec-pixel.png');

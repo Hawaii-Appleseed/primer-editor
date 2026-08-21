@@ -100,14 +100,25 @@ test.describe('endnotes page', () => {
     await addSourceViaUi(page, 'en-edit-a', 'Original text.', 'https://example.com/orig');
 
     const li = frame.locator('[data-el="endnote.en-edit-a"]');
-    await li.scrollIntoViewIfNeeded();
-    await li.dblclick({ force: true });
-
     const form = frame.locator('.ds-endnote-edit');
-    await form.waitFor({ state: 'visible' });
+    // Retried: on a slow machine addSourceViaUi's render can still be
+    // swapping the iframe, and a dblclick in the swap's unwired window is
+    // silently lost (seen on CI as a 90s waitFor timeout here). A second
+    // dblclick against the settled document opens the form.
+    await expect(async () => {
+      await li.scrollIntoViewIfNeeded();
+      await li.dblclick({ force: true });
+      await form.waitFor({ state: 'visible', timeout: 2000 });
+    }).toPass();
     const txt = form.locator('.ds-en-text');
     await txt.fill('Updated text.');
-    await txt.evaluate(el => el.blur());
+    // Commit with Enter, NOT locator.evaluate(el => el.blur()): the commit
+    // tears down the iframe document (finish -> render -> swap), and under a
+    // throttled CPU the swap destroys the JS execution context before the
+    // evaluate call's response gets back ("Execution context was destroyed")
+    // — reproduced locally at DS_CPU_THROTTLE=6. A key press is CDP input,
+    // not an in-context evaluation, so it cannot lose that race.
+    await txt.press('Enter');
     await page.waitForTimeout(600);
 
     // The underlying [[sources]] line reflects the edit — the single source

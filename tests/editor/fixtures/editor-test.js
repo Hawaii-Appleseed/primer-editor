@@ -76,6 +76,13 @@ async function waitForFirstRender(page) {
 }
 
 async function gotoEditor(page, query = '') {
+  // DS_CPU_THROTTLE=6 npx playwright test … — slow this page's CPU by that
+  // factor, to reproduce CI-only timing failures on a fast dev machine. The
+  // endnotes-page "execution context destroyed" race only shows above ~6x.
+  if (process.env.DS_CPU_THROTTLE) {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: Number(process.env.DS_CPU_THROTTLE) });
+  }
   await page.goto('edit.html' + query);
   await waitForFirstRender(page);
   // Local mode (serve.py answers /__ping) polls its live-reload stream and
