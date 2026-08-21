@@ -138,6 +138,13 @@ FISCAL = [
     (2031, 106.93, 2.38, 104.55, 1.28, 102.37, 115.66),
 ]
 RETITC_CUM_SAVINGS = 384.9       # sum of the savings column
+# The sensitivity band, summed the same way. The report shows the central
+# estimate as its headline, so this range has to travel with it: 16% of the
+# central estimate is not a rounding difference, and dropping the whisker
+# chart in the pare-down is what made the point estimate look like an
+# accounting figure rather than one scenario out of several.
+RETITC_CUM_SAVINGS_LO = 372.0
+RETITC_CUM_SAVINGS_HI = 434.3
 ALL_CREDIT_CUM_SAVINGS = 493.1   # RETITC + CGEC + TCRA, same window
 
 # 5. Executive Order 26-02 — the grandfathered pool. DERIVED, NOT SOURCED: no
@@ -216,12 +223,12 @@ def reprieve_chart() -> str:
     official counterpart — so the range is drawn as a band the central bar
     sits inside, not as a whisker hung off a number that looks settled.
     """
-    W, H = VB_W, 134
+    W, H = VB_W, 120
     X0 = 176                       # left gutter for the row labels
     BARMAX = W - X0 - 96
     scale = BARMAX / EO_POOL_HI
-    ROW_Y = [28, 72]
-    BH = 28
+    ROW_Y = [24, 64]
+    BH = 26
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="The calendar 2026 cohort: about '
@@ -260,7 +267,7 @@ def reprieve_chart() -> str:
              f'≈${EO_POOL_MID:.0f}M</text>')
 
     # The difference, called out beneath both rows
-    gy = 118
+    gy = 106
     x_a = X0 + EO_CAP * scale
     x_b = X0 + EO_POOL_MID * scale
     p.append(f'<line x1="{x_a:.1f}" y1="{gy - 12}" x2="{x_b:.1f}" y2="{gy - 12}" '
@@ -283,8 +290,8 @@ def historical_chart() -> str:
     The six-year mean is drawn as a reference line because the year-to-year
     swing is the finding: no single year reads as the program's normal size.
     """
-    W, H = VB_W, 236
-    BASE, TOP = 198, 38
+    W, H = VB_W, 220
+    BASE, TOP = 184, 36
     X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -422,7 +429,8 @@ def burden_chart() -> str:
                  f'height="{ROW}" fill="{PRIMARY_LIGHT}"/>')
         p.append(f'<text x="{X0 + il_w + cl_w + 10:.1f}" '
                  f'y="{y + ROW / 2 + 4.5:.1f}" font-size="{EMPH_U}" '
-                 f'font-weight="700" fill="{INK}">+${per_hh:,.0f}</text>')
+                 f'font-weight="700" fill="{INK}">'
+                 f'+${round(per_hh / 10) * 10:,.0f}</text>')
         y += ROW + GAP
 
     p.append("</svg>")
