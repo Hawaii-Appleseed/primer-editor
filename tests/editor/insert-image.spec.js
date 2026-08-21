@@ -79,4 +79,22 @@ test.describe('insert image', () => {
       (layout.boxes || []).find(b => b.id === id), box.id);
     expect(moved.x).toBeGreaterThan(box.x + 0.3);
   });
+
+  // Two bugs shared this shape, both fixed in togglePop()/#leftrail CSS and
+  // guarded here at a height where the picker MUST overlap the page strip:
+  //  - #leftrail's z-index:2 stacking context trapped the popover's
+  //    z-index:1000 under the strip (z-index:6), which intercepted the click
+  //    on "Upload from computer…" whenever the two overlapped — CI's font
+  //    metrics hit that band at the default 720px window on every run.
+  //  - with no viewport clamp a tall picker's bottom rows simply left the
+  //    screen on a short window, unreachable by scroll or anything else.
+  test('the picker stays reachable and clickable on a short window', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 520 });
+    await gotoEditor(page);
+    await page.click('#ar-img');
+    await page.locator('#imgpop').waitFor({ state: 'visible' });
+    const chooser = page.waitForEvent('filechooser', { timeout: 5000 });
+    await page.click('#img-upload', { timeout: 5000 });
+    await chooser;
+  });
 });
