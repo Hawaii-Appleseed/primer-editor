@@ -288,6 +288,41 @@ opacity:0 even after scrolling. Not a build error; a rendering interop wrinkle
 worth fixing (or stripping the reveal-gating for the editor context) if it
 matters for editing that content.
 
+## Handing over a conversion: the editability contract
+
+A converted document (a PDF rebuilt as a renderer, a scaffolded page after
+`propose`, any "make this editable" request) is **not done when it renders —
+it is done when `python3 -m docsync.check --id <slug>` shows a clean
+`edit-mode draft` line**, or when every remaining `[editability]` warning has
+been named to the user as a deliberate choice. The check builds the edit-mode
+draft and finds the two shapes of silent uneditability that every earlier net
+missed (the audit and the amber notice count wiring that EXISTS, never text
+left with none):
+
+- **dead text** — visible strings with no `data-slot`/`data-el` ancestor:
+  carried-over widget markup, stat cards, footers. Wire them or call them
+  chrome out loud.
+- **frozen prose** — sentences drawn inside an SVG. The graphic moves; the
+  sentence can only be changed by editing the renderer. Captions and notes
+  render as slots BESIDE the graphic (`C.html`), never inside it.
+
+Two conversion rules that prevent the warnings in the first place:
+
+1. **Only data-derived marks live inside a chart** (values, axis ticks,
+   legend swatched labels). Anything a person would rephrase — captions,
+   takeaway lines, method notes — is a slot outside the `<svg>`.
+2. **Match the chart to its nature.** A *presentational* chart (numbers the
+   user may legitimately retype) should be a native editor chart — a
+   layout.json shape `kind:"chart"` (bar/column/pie/donut), fully editable in
+   the Chart panel. A *model-driven* chart (numbers reproduced from a
+   pipeline, e.g. rxkids-fiscal's TANF figures) stays a `graphic()` with DATA
+   constants in the renderer — retyping "$52.1M" by hand would make the chart
+   lie — but then SAY SO at handoff: tell the user those figures change by
+   re-running the model, not by clicking.
+
+The handoff message itself must state what is editable how: double-click
+edits text, click selects/moves, which graphics are data-frozen and why.
+
 ## Where code lives
 
 The engine (`docsync/`, `edit.html`, `serve.py`, this skill) is canonical in

@@ -114,7 +114,12 @@ Rules that bite:
   `python3 report2027/tools/test_render.py` (render tolerances + edit.html
   syntax guard), `python3 -m docsync.check` (every report's rendered OUTPUT:
   citation integrity, unrendered markdown, chart content outside its viewBox,
-  text below the legibility floor).
+  text below the legibility floor — plus an `edit-mode draft` pass per binding
+  that builds with DOCSYNC_EDIT=1 and warns on DEAD TEXT (visible strings with
+  no data-slot/data-el hook) and FROZEN PROSE (sentences drawn inside an SVG).
+  A conversion/ingestion is not done until that line is clean or its warnings
+  are named to the user as deliberate — see the report-editor skill's
+  "editability contract" section).
   Run the last one after touching any renderer — it walks docsync.yml, so a
   new report is covered the day it is bound, and it caught two shipped pages
   whose sources were built and never placed. Errors fail; warnings don't.
