@@ -335,10 +335,14 @@ def scope_chart() -> str:
     drop that paragraph.
     """
     W = VB_W
-    TOP, LEG = 12, 13
-    HDR, BH, BGAP, IBH, SGAP, SUB, GAP = 15, 24, 2, 14, 4, 13, 12
+    # Roomier than it was: parking the disagreement section freed 3.5in of
+    # sheet, and this was the cramped chart. Bars nearly double in height, the
+    # ITEP bar gets real separation from the DOTAX bar above it, and every size
+    # goes up a step — 12.5 units still renders at 11.8px, clear of the floor.
+    TOP, LEG = 14, 16
+    HDR, BH, BGAP, IBH, SGAP, SUB, GAP = 20, 42, 6, 22, 8, 16, 24
     GRP = HDR + BH + BGAP + IBH + SGAP + SUB + GAP
-    H = TOP + LEG + len(SCOPE_ROWS) * GRP + 4
+    H = TOP + LEG + len(SCOPE_ROWS) * GRP + 8
     scale = W / max(t for _, t, *_ in SCOPE_ROWS)
     r = 4
 
@@ -349,18 +353,18 @@ def scope_chart() -> str:
          f'24\'s $297.3M a year — ITEP has no estimate for the credit '
          f'sunsets">']
 
-    p.append(f'<rect x="0" y="3" width="11" height="11" rx="2.5" fill="{DOTAX}"/>')
-    p.append(f'<text x="17" y="12.5" font-size="12.5" fill="{SLATE}">DOTAX</text>')
-    p.append(f'<rect x="72" y="3" width="11" height="11" rx="2.5" fill="{ITEP}"/>')
-    p.append(f'<text x="89" y="12.5" font-size="12.5" fill="{SLATE}">ITEP</text>')
-    p.append(f'<text x="{W}" y="12.5" font-size="11.5" fill="{MUTE}" '
+    p.append(f'<rect x="0" y="4" width="11" height="11" rx="2.5" fill="{DOTAX}"/>')
+    p.append(f'<text x="17" y="13.5" font-size="13" fill="{SLATE}">DOTAX</text>')
+    p.append(f'<rect x="72" y="4" width="11" height="11" rx="2.5" fill="{ITEP}"/>')
+    p.append(f'<text x="89" y="13.5" font-size="13" fill="{SLATE}">ITEP</text>')
+    p.append(f'<text x="{W}" y="13.5" font-size="11.5" fill="{MUTE}" '
              f'text-anchor="end">$M a year at full phase-in in 2031 &#183; '
              f'one scale</text>')
 
     y = TOP + LEG
     for title, total, seen, seen_lab, rest_lab, itep_v, itep_lab, why in SCOPE_ROWS:
         rest = total - seen
-        p.append(f'<text x="0" y="{y + 11}" font-size="12.5" font-weight="700" '
+        p.append(f'<text x="0" y="{y + 14}" font-size="13.5" font-weight="700" '
                  f'fill="{INK}">{title}</text>')
         y += HDR
 
@@ -375,27 +379,29 @@ def scope_chart() -> str:
                  f'fill="{DOTAX_PALE}"/>')
 
         if sw > 220:      # labels fit inside both segments
-            p.append(f'<text x="12" y="{y + 16}" font-size="12.5" '
-                     f'font-weight="700" fill="#fff">${seen:,.1f}M '
-                     f'<tspan font-weight="400" opacity="0.92">&#183; '
-                     f'{seen_lab}</tspan></text>')
-            p.append(f'<text x="{sw + 12}" y="{y + 16}" font-size="12.5" '
-                     f'font-weight="700" fill="{INK}">${rest:,.1f}M '
-                     f'<tspan font-weight="400" fill="{SLATE}">&#183; '
-                     f'{rest_lab}</tspan></text>')
+            p.append(f'<text x="14" y="{y + 19}" font-size="13.5" '
+                     f'font-weight="700" fill="#fff">${seen:,.1f}M</text>')
+            p.append(f'<text x="14" y="{y + 35}" font-size="13" fill="#fff" '
+                     f'opacity="0.92">{seen_lab}</text>')
+            p.append(f'<text x="{sw + 14}" y="{y + 19}" font-size="13.5" '
+                     f'font-weight="700" fill="{INK}">${rest:,.1f}M</text>')
+            p.append(f'<text x="{sw + 14}" y="{y + 35}" font-size="13" '
+                     f'fill="{SLATE}">{rest_lab}</text>')
         else:             # bar too short to hold labels; one line beside it,
                           # at bar centre — two stacked lines beside a 24-unit
                           # bar collided with the title above and the ITEP
                           # label below, in turn, until they shared a baseline
-            lx = bw + 14
-            p.append(f'<rect x="{lx}" y="{y + 7}" width="10" height="10" '
+            # A 42-unit bar finally has room to stack these one per line,
+            # which reads as a key rather than as a run-on.
+            lx = bw + 16
+            p.append(f'<rect x="{lx}" y="{y + 7}" width="11" height="11" '
                      f'rx="2.5" fill="{DOTAX}"/>')
-            p.append(f'<text x="{lx + 16}" y="{y + 16}" font-size="12.5" '
+            p.append(f'<text x="{lx + 17}" y="{y + 16}" font-size="13" '
                      f'fill="{SLATE}"><tspan font-weight="700" fill="{INK}">'
                      f'${seen:,.1f}M</tspan> {seen_lab}</text>')
-            p.append(f'<rect x="{lx + 250}" y="{y + 7}" width="10" height="10" '
+            p.append(f'<rect x="{lx}" y="{y + 26}" width="11" height="11" '
                      f'rx="2.5" fill="{DOTAX_PALE}"/>')
-            p.append(f'<text x="{lx + 266}" y="{y + 16}" font-size="12.5" '
+            p.append(f'<text x="{lx + 17}" y="{y + 35}" font-size="13" '
                      f'fill="{SLATE}"><tspan font-weight="700" fill="{INK}">'
                      f'${rest:,.1f}M</tspan> {rest_lab}</text>')
         y += BH + BGAP
@@ -408,17 +414,17 @@ def scope_chart() -> str:
         # just short of the dashed line in both rows, so a label placed only
         # relative to the bar landed ON the guide and read as a stray colon
         # before the word "ITEP".
-        p.append(f'<text x="{max(iw + 10, sw + 12)}" y="{y + 11}" '
-                 f'font-size="12.5" font-weight="700" fill="{ITEP}">'
+        p.append(f'<text x="{max(iw + 12, sw + 14)}" y="{y + 16}" '
+                 f'font-size="13.5" font-weight="700" fill="{ITEP}">'
                  f'{itep_lab}</text>')
 
         # Dashed guide through the slice boundary, spanning both bars.
-        p.append(f'<line x1="{sw}" y1="{y - BH - BGAP - 2}" x2="{sw}" '
-                 f'y2="{y + IBH + 2}" stroke="{MUTE}" stroke-width="1" '
-                 f'stroke-dasharray="3 3"/>')
+        p.append(f'<line x1="{sw}" y1="{y - BH - BGAP - 4}" x2="{sw}" '
+                 f'y2="{y + IBH + 4}" stroke="{MUTE}" stroke-width="1" '
+                 f'stroke-dasharray="4 3"/>')
         y += IBH + SGAP
 
-        p.append(f'<text x="0" y="{y + 10}" font-size="11.5" fill="{MUTE}">'
+        p.append(f'<text x="0" y="{y + 12}" font-size="12.5" fill="{MUTE}">'
                  f'{why}</text>')
         y += SUB + GAP
 
@@ -449,7 +455,7 @@ def comparison_table() -> str:
         ("Act 46&#8217;s rise, 2026 to 2031",
          DOTAX_ACT46_REMAINING, ITEP_ACT46_VS_2026, False),
         ("Act 24&#8217;s rate and bracket changes",
-         DOTAX_ACT24, ITEP_SB3125_VS_ACT46, True),
+         DOTAX_ACT24, ITEP_SB3125_VS_ACT46, False),
         ("Both together, against a 2026 freeze",
          DOTAX_CLAWBACK, ITEP_CLAWBACK, False),
     ]
@@ -676,7 +682,7 @@ html = f"""<!DOCTYPE html>
      more air before it than after — otherwise a heading sits as close to the
      chart it follows as to the one it introduces. */
   h2 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-        font-size:1.03rem; margin:5px 0 2px; padding-top:4px; color:{INK};
+        font-size:1.06rem; margin:13px 0 5px; padding-top:9px; color:{INK};
         border-top:1px solid {ASH}; letter-spacing:-.005em; }}
   .note {{ font-size:0.845rem; color:{SLATE}; margin:4px 0 0; max-width:7.4in;
            line-height:1.32; }}
@@ -686,12 +692,12 @@ html = f"""<!DOCTYPE html>
      message is "these agree", which is the one thing paired bars are worst at
      showing. Numbers are computed from the DATA constants, never authored, so
      a cell can never drift out of step with the charts. */
-  .cmp {{ width:100%; border-collapse:collapse; margin:5px 0 0;
-          font-size:0.845rem; }}
+  .cmp {{ width:100%; border-collapse:collapse; margin:7px 0 0;
+          font-size:0.9rem; }}
   .cmp th {{ font-size:0.7rem; font-weight:700; letter-spacing:.06em;
              text-transform:uppercase; color:{MUTE}; text-align:left;
-             padding:0 8px 3px 0; border-bottom:1px solid {ASH}; }}
-  .cmp td {{ padding:5px 8px 5px 0; color:{SLATE};
+             padding:0 8px 6px 0; border-bottom:1px solid {ASH}; }}
+  .cmp td {{ padding:9px 8px 9px 0; color:{SLATE};
              border-bottom:1px solid {CREAM}; }}
   .cmp .n {{ text-align:right; padding-right:0; white-space:nowrap; }}
   .cmp .d {{ color:{DOTAX}; font-weight:700; }}
@@ -713,7 +719,7 @@ html = f"""<!DOCTYPE html>
   .finding-p b {{ color:{INK}; }}
   .finding-p i {{ font-style:italic; color:{INK}; }}
 
-  .foot {{ margin:8px 0 0; padding-top:6px; border-top:1px solid {ASH};
+  .foot {{ margin:14px 0 0; padding-top:9px; border-top:1px solid {ASH};
            font-size:0.775rem; color:{MUTE}; line-height:1.32; }}
   .foot b {{ color:{SLATE}; }}
 

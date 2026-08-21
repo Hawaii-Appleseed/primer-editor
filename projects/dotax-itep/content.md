@@ -25,7 +25,7 @@ HAWAIʻI APPLESEED · METHODS NOTE · AUGUST 2026
 Two estimates of the same tax cut
 
 [[hero.standfirst]]
-**Every figure here is annual, at full phase-in in 2031 — not a multi-year total.** The two sets look irreconcilable; they are not. Each headline bundles something the other never measured. Aligned, they agree within a few percent — **except one line, where they differ 3.5×.**
+**Every figure here is annual, at full phase-in in 2031 — not a multi-year total.** The two sets look irreconcilable; they are not. Each headline bundles something the other source never measured — strip that out and they line up.
 
 [[stat.a.n]]
 $1,453M
@@ -46,10 +46,10 @@ ITEP on the same year — a different baseline
 of Act 24 is rate cuts, not credit sunsets
 
 [[stat.d.n]]
-3.5×
+1%
 
 [[stat.d.l]]
-apart on the one line they genuinely dispute
+apart on Act 46, once both measure the same span
 
 [[frame.title]]
 Differences
