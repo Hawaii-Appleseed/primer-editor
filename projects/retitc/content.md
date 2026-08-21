@@ -54,6 +54,18 @@ ANNUAL CAP · TAX YEAR 2027–2030
 [[cover.fig.c.l]]
 GRANDFATHERED BY EXECUTIVE ORDER 26-02
 
+[[cover.contents.02]]
+The credit, and what Act 24 changes
+
+[[cover.contents.03]]
+The governor's one-year reprieve — Executive Order 26-02
+
+[[cover.contents.04]]
+Who claims it, who pays, and what the State keeps
+
+[[cover.contents.05]]
+Five things worth fixing
+
 [[cover.contents.h]]
 INSIDE THIS REPORT
 

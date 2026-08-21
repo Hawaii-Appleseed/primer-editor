@@ -150,12 +150,10 @@ EO_POOL_HI = 100.0
 EO_EXTRA_LO = 45.0               # incremental cost of the EO vs a strict cap
 EO_EXTRA_HI = 60.0
 
-CONTENTS = [
-    ("02", "The credit, and what Act 24 changes"),
-    ("03", "The governor's one-year reprieve — Executive Order 26-02"),
-    ("04", "Who claims it, who pays, and what the State keeps"),
-    ("05", "Five things worth fixing"),
-]
+# Page number -> content.md slot with that row's title, so the contents page
+# is editable like everything else (they were literals here; the check called
+# it the C() trap — movable container, frozen words).
+CONTENTS = [(n, f"cover.contents.{n}") for n in ("02", "03", "04", "05")]
 
 
 
@@ -471,7 +469,8 @@ def bullets(key: str) -> str:
 def contents_rows() -> str:
     return "".join(
         f'<div class="crow"><span class="cnum">{n}</span>'
-        f'<span class="ctxt">{t}</span></div>' for n, t in CONTENTS)
+        f'<span class="ctxt">{C.t(key, esc=True)}</span></div>'
+        for n, key in CONTENTS)
 
 
 
