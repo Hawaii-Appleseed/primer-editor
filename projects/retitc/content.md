@@ -187,7 +187,7 @@ Act 24 may reduce the credit by **$385M** over five years. More than half of it
 Who pays more in Tax Year 2027
 
 [[pays.burden.note]]
-**The cap makes no distinction.** Once a year's claims pass $40M, every remaining credit is cut by the same share — roughly 56 percent at 2027 demand — so a household in the bottom fifth pays about $40 more for a ceiling it did nothing to reach. The income limit only touches the top. Businesses and trusts hold about 42 percent of the credit and fall outside it entirely: a commercial system has no personal income to test.
+**The cap makes no distinction.** Once a year's claims pass $40M, every remaining credit is cut by the same share — roughly 56 percent at 2027 demand — so a household in the bottom fifth would pay about $40 more. The income limit only touches the top. Businesses and trusts hold about 42 percent of the credit and fall outside it entirely: a commercial system has no personal income to test.
 
 [[saves.stat.a.n]]
 $385M
