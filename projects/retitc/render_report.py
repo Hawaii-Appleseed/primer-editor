@@ -221,8 +221,8 @@ def historical_chart() -> str:
     The six-year mean is drawn as a reference line because the year-to-year
     swing is the finding: no single year reads as the program's normal size.
     """
-    W, H = VB_W, 128
-    BASE, TOP = 104, 24
+    W, H = VB_W, 250
+    BASE, TOP = 212, 38
     X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -700,11 +700,11 @@ html = f"""<!DOCTYPE html>
   /* --- Cards, boxes --------------------------------------------------- */
   .ccards {{ display:flex; gap:11px; margin:14px 0 0; align-items:stretch; }}
   .ccard {{ flex:1; border:1px solid {LINE}; border-top:5px solid {PRIMARY};
-            padding:13px 14px 12px; }}
+            padding:10px 13px 9px; }}
   .ccard-n {{ font-family:OkinaPoppins, Poppins, sans-serif; font-size:1.5rem;
               font-weight:700; line-height:1; }}
   .ccard-l {{ font-size:0.71rem; font-weight:700; letter-spacing:.05em;
-              color:{MUTED}; margin:7px 0 9px; padding-bottom:9px;
+              color:{MUTED}; margin:5px 0 7px; padding-bottom:7px;
               border-bottom:1px solid {LINE}; }}
   .ccard-d {{ font-size:0.83rem; line-height:1.47; color:{BODY}; }}
 

@@ -86,16 +86,16 @@ What Act 24 does to the RETITC
 §235-12.5 · Hawaiʻi Revised Statutes
 
 [[about.works.p1]]
-If you install renewable energy equipment in Hawaiʻi — usually rooftop solar — the RETITC reduces your state income tax. It is the State's biggest tax break for renewable energy, and one of the driving forces behind the state's target of reaching 100 percent renewable electricity by 2045.[^dotax]
+If you install renewable energy equipment in Hawaiʻi — usually rooftop solar — the RETITC reduces your state income tax. It is the State's biggest tax break for renewable energy, and one of the forces behind its target of 100 percent renewable electricity by 2045.[^dotax]
 
 [[hist.note]]
-Claims average **$86.1M** over six years, and no single year tells you much: Tax Year 2020's spike was trusts, estates and financial corporations, jumping from $2.7M to $50.9M and back. Household claims are steadier, rising every year in nominal dollars.
+Claims average **$86.1M** over six years. Tax Year 2020's spike was trusts, estates and financial corporations — $2.7M to $50.9M and back. Household claims are steadier, rising every year in nominal dollars.
 
 [[about.change.h]]
 What changes under Act 24
 
 [[about.change.p]]
-SB 3125 was signed **May 21, 2026** and is now **Act 24**.[^act24] It adds three limits, one of which the governor has already suspended for a year. Washington ended the federal residential solar credit at the end of 2025, so the State credit is now the only one a household can claim.
+SB 3125 was signed **May 21, 2026** and is now **Act 24**.[^act24] Washington ended the federal residential solar credit at the end of 2025, so the State credit is now the only one a household can claim.
 
 [[about.card.a.n]]
 $40M
@@ -104,7 +104,7 @@ $40M
 ANNUAL CAP
 
 [[about.card.a.d]]
-Tax Year 2027 through 2030. If a year's approved credits top $40M, every credit is cut by the same percentage.
+Tax Year 2027–2030. If approved credits top $40M, every credit is cut by the same percentage.
 
 [[about.card.b.n]]
 $175K
@@ -113,7 +113,7 @@ $175K
 INCOME LIMIT
 
 [[about.card.b.d]]
-Filers above $175K, or $350K for a married couple, no longer qualify. Starts Tax Year 2027, not 2026.
+Filers above $175K, or $350K for a married couple, no longer qualify. Starts 2027, not 2026.
 
 [[about.card.c.n]]
 2029
@@ -125,13 +125,13 @@ FINAL YEAR
 No new credits after Tax Year 2029. Credits already earned can still be claimed.
 
 [[about.foot]]
-Source: DOTAX, Tax Credits Claimed by Hawaiʻi Taxpayers — 2018–2022 actuals, Tax Year 2023 published December 2025.[^dotax] "Other" is total minus individual and corporate, picking up figures the Department withholds for privacy. Approvals run through the Hawaiʻi State Energy Office.
+Source: DOTAX, Tax Credits Claimed by Hawaiʻi Taxpayers — 2018–2022 actuals, Tax Year 2023 published December 2025.[^dotax] "Other" is total minus individual and corporate, picking up figures withheld for privacy. Approvals run through the Hawaiʻi State Energy Office.
 
 [[eo.h]]
 The governor's one-year reprieve
 
 [[eo.p]]
-The cap reaches back to Tax Year 2026, over systems already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects from it, citing **"a risk of litigation."**[^eo] It lifts the cap and nothing else, and covers systems finished — or already paid for — before **May 21, 2026**, the day Act 24 was signed.[^tir] Nobody has priced it. The State has published no figure; our own estimate puts about **$85M** beyond the cap's reach, once, in 2027 and 2028.[^cb]
+The cap reaches back to Tax Year 2026, over systems already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects, citing **"a risk of litigation."**[^eo] It lifts the cap and nothing else, covering systems finished — or already paid for — before **May 21, 2026**.[^tir] Nobody has priced it: the State has published no figure, and our own estimate puts about **$85M** beyond the cap's reach, once, in 2027 and 2028.[^cb]
 
 [[pays.eyebrow]]
 Who pays
@@ -161,7 +161,7 @@ Impact of capping the credit
 Projected against a no-bill baseline  ·  Tax Year 2027–2031
 
 [[saves.chart.note]]
-Act 24 may reduce credit claims by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. Those two years show the largest savings  because the cap will be nearly phased out at that point. In 2031 the credit may cost the State about **$2M**, against $107M had the law not passed.
+Act 24 may reduce credit claims by **$385M** over five years. More than half of it — $204M — lands in 2030 and 2031, after the credit stops issuing entirely. Those two years show the largest savings because the credit itself is nearly phased out by then, not because the cap bites harder. In 2031 the credit may cost the State about **$2M**, against $107M had the law not passed.
 
 [[pays.burden.h]]
 Who pays more in Tax Year 2027
