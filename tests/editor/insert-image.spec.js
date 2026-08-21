@@ -25,22 +25,24 @@ test.describe('insert image', () => {
   test('uploads and places a movable image box', async ({ page }) => {
     await gotoEditor(page);
     const uploaded = page.waitForRequest('**/__upload');
-    // Insert Image goes straight to the file dialog only for a project with
-    // NOTHING bundled. This fixture's project carries images (the template
-    // logos in its assets), so the button opens the picker first and "Upload
-    // from computer…" is what reaches the dialog. The old shape — a single
-    // unwaited isVisible() probe right after the click — lost two races on
-    // slow machines (CI): the popover rendering late (probe false, chooser
-    // never fires, 90s timeout) and the popover closing under an outside
-    // click before #img-upload was hit. Retried as one unit instead: each
-    // attempt (re)opens the picker and must produce the file chooser.
+    // Insert Image has TWO legitimate flows (edit.html's #ar-img handler):
+    // a project whose staged manifest bundles images opens the #imgpop
+    // picker, where "Upload from computer…" reaches the file dialog; one
+    // with nothing bundled goes straight to the dialog. Which one this
+    // fixture gets has proven environment-dependent (the picker locally,
+    // the direct dialog on the CI runner), and every earlier shape of this
+    // spec hard-coded one flow and timed out 90s in the other. So: take
+    // whichever the app offers, as one retried unit that must end with the
+    // chooser in hand.
     let chooser;
     await expect(async () => {
-      const pop = page.locator('#imgpop');
-      if (!(await pop.isVisible())) await page.click('#ar-img');
       const c = page.waitForEvent('filechooser', { timeout: 3000 })
         .catch(() => null);
-      await page.click('#img-upload', { timeout: 2000 });
+      const pop = page.locator('#imgpop');
+      if (!(await pop.isVisible())) await page.click('#ar-img');
+      const picker = await pop.waitFor({ state: 'visible', timeout: 700 })
+        .then(() => true).catch(() => false);
+      if (picker) await page.click('#img-upload', { timeout: 2000 });
       chooser = await c;
       if (!chooser) throw new Error('file chooser did not open');
     }).toPass();
