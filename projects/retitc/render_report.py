@@ -223,12 +223,12 @@ def reprieve_chart() -> str:
     official counterpart — so the range is drawn as a band the central bar
     sits inside, not as a whisker hung off a number that looks settled.
     """
-    W, H = VB_W, 120
+    W, H = VB_W, 176
     X0 = 176                       # left gutter for the row labels
     BARMAX = W - X0 - 96
     scale = BARMAX / EO_POOL_HI
-    ROW_Y = [24, 64]
-    BH = 26
+    ROW_Y = [34, 92]
+    BH = 38
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="The calendar 2026 cohort: about '
@@ -267,7 +267,7 @@ def reprieve_chart() -> str:
              f'≈${EO_POOL_MID:.0f}M</text>')
 
     # The difference, called out beneath both rows
-    gy = 106
+    gy = 156
     x_a = X0 + EO_CAP * scale
     x_b = X0 + EO_POOL_MID * scale
     p.append(f'<line x1="{x_a:.1f}" y1="{gy - 12}" x2="{x_b:.1f}" y2="{gy - 12}" '
@@ -290,8 +290,8 @@ def historical_chart() -> str:
     The six-year mean is drawn as a reference line because the year-to-year
     swing is the finding: no single year reads as the program's normal size.
     """
-    W, H = VB_W, 220
-    BASE, TOP = 184, 36
+    W, H = VB_W, 276
+    BASE, TOP = 234, 40
     X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -347,7 +347,7 @@ def agi_chart() -> str:
     """Individual TY2023 claims by AGI bracket, with the AGI-limit cut-off
     marked on the two brackets it actually reaches."""
     W = VB_W
-    X0, ROW, GAP = 158, 74, 20
+    X0, ROW, GAP = 158, 90, 24
     BARMAX = W - X0 - 152
     x_max = max(c for _, c, _ in AGI_BINS)
     scale = BARMAX / x_max
@@ -401,7 +401,7 @@ def burden_chart() -> str:
     """Average tax increase per household in TY2027, by income quintile, split
     by which of Act 24's two screens takes the money."""
     W = VB_W
-    X0, ROW, GAP = 150, 50, 15
+    X0, ROW, GAP = 150, 56, 17
     BARMAX = W - X0 - 96
     x_max = max(q[3] for q in QUINTILES)
     scale = BARMAX / x_max
