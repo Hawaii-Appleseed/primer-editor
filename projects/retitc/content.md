@@ -145,7 +145,7 @@ Act 24's $40M cap reaches back to Tax Year 2026 — over systems that were alrea
 [[eo.what.points]]
 - **Only the cap is lifted.** A system finished during 2026 does not count against the $40M limit. Everything else stands: the 35 percent rate, the separate dollar limit on each system ($5,000 for a single-family solar array, $350 per unit for an apartment building, $500,000 for a commercial system), the approval process, and the 2030 wind-down.[^eo]
 - **The cutoff is May 21, 2026** — the day Act 24 was signed, not June 8, when the order was. A system qualifies if it was finished by then, or if its owner can show they had already spent money on it. The Tax Department will accept a payment made or a bill incurred before the cutoff, and approvals are due by May 31, 2027.[^tir]
-- **Nobody has priced it.** The cap was added late in the session with no cost estimate attached, and the State has never published a figure for what the exemption is worth. The one below is ours.
+- **Caveat. **The cap was added late in the session with no cost estimate attached, and the State has not published a figure for what the exemption is worth.
 
 [[eo.size.note]]
 **The arithmetic.** Start from what the credit normally costs: $100.1M in Tax Year 2023, $86.1M averaged over six years. Then assume 75 to 95 percent of 2026 systems qualify, since solar takes months to install and the cutoff falls in May. That puts the exempted amount near **$85M**, against the $40M a strict cap would have allowed — a one-time gap in 2027 and 2028, not a recurring one.
