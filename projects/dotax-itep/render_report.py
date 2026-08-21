@@ -575,6 +575,31 @@ def linkify_footnotes(markup: str, count: int) -> str:
 # font-size each SVG actually uses in ITS OWN user units — 11.5 throughout —
 # which is what sets the point below which the chart scrolls instead of
 # shrinking its type past the legibility floor.
+# --- The disagreement section is parked ---------------------------------------
+# Flip to True to bring back the heading, the DOTAX-vs-ITEP filers/cost chart
+# and the "why the two counts differ" panel. Nothing else has to change: the
+# slots stay in content.md (so the editor keeps them and no wording is lost),
+# and footer.note carries the [^dotax] citation that used to live only in
+# finding.p — without it that source is declared but uncited, which docsync
+# treats as a publish blocker.
+SHOW_DISAGREEMENT = False
+
+def disagreement_section() -> str:
+    """The parked section, or nothing. See SHOW_DISAGREEMENT above."""
+    if not SHOW_DISAGREEMENT:
+        return ""
+    return f"""
+  <h2{L.attr("parts.title")}>{C.t("parts.title")}</h2>
+  {graphic(L, "chart.ratio",
+           chart_scroll(ratio_chart(), smallest_label=SMALLEST_LABEL), w=CHART_W_IN)}
+
+  <div class="finding"{L.attr("finding.box")}>
+    <h3{L.attr("finding.h")}>{C.t("finding.h")}</h3>
+    {C.html("finding.p", "finding-p")}
+  </div>
+"""
+
+
 page = f"""
 <section class="page">
   <div class="eyebrow"{L.attr("hero.eyebrow")}>{C.t("hero.eyebrow")}</div>
@@ -592,14 +617,7 @@ page = f"""
   <h2{L.attr("whole.title")}>{C.t("whole.title")}</h2>
   {comparison_table()}
 
-  <h2{L.attr("parts.title")}>{C.t("parts.title")}</h2>
-  {graphic(L, "chart.ratio",
-           chart_scroll(ratio_chart(), smallest_label=SMALLEST_LABEL), w=CHART_W_IN)}
-
-  <div class="finding"{L.attr("finding.box")}>
-    <h3{L.attr("finding.h")}>{C.t("finding.h")}</h3>
-    {C.html("finding.p", "finding-p")}
-  </div>
+  {disagreement_section()}
 
   {C.html("footer.note", "foot")}
 
