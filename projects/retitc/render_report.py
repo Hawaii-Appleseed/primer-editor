@@ -214,12 +214,12 @@ def reprieve_chart() -> str:
     official counterpart — so the range is drawn as a band the central bar
     sits inside, not as a whisker hung off a number that looks settled.
     """
-    W, H = VB_W, 150
+    W, H = VB_W, 134
     X0 = 176                       # left gutter for the row labels
     BARMAX = W - X0 - 96
     scale = BARMAX / EO_POOL_HI
-    ROW_Y = [34, 80]
-    BH = 30
+    ROW_Y = [28, 72]
+    BH = 28
 
     p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
          f'role="img" aria-label="The calendar 2026 cohort: about '
@@ -258,7 +258,7 @@ def reprieve_chart() -> str:
              f'≈${EO_POOL_MID:.0f}M</text>')
 
     # The difference, called out beneath both rows
-    gy = 130
+    gy = 118
     x_a = X0 + EO_CAP * scale
     x_b = X0 + EO_POOL_MID * scale
     p.append(f'<line x1="{x_a:.1f}" y1="{gy - 12}" x2="{x_b:.1f}" y2="{gy - 12}" '
@@ -281,8 +281,8 @@ def historical_chart() -> str:
     The six-year mean is drawn as a reference line because the year-to-year
     swing is the finding: no single year reads as the program's normal size.
     """
-    W, H = VB_W, 330
-    BASE, TOP = 286, 46
+    W, H = VB_W, 268
+    BASE, TOP = 226, 42
     X0, SLOT, BW = 46, (VB_W - 52) / 6, 74
     y_max = 118.0
     unit = (BASE - TOP) / y_max
@@ -338,7 +338,7 @@ def agi_chart() -> str:
     """Individual TY2023 claims by AGI bracket, with the AGI-limit cut-off
     marked on the two brackets it actually reaches."""
     W = VB_W
-    X0, ROW, GAP = 158, 26, 8
+    X0, ROW, GAP = 158, 22, 7
     BARMAX = W - X0 - 152
     x_max = max(c for _, c, _ in AGI_BINS)
     scale = BARMAX / x_max
@@ -392,7 +392,7 @@ def burden_chart() -> str:
     """Average tax increase per household in TY2027, by income quintile, split
     by which of Act 24's two screens takes the money."""
     W = VB_W
-    X0, ROW, GAP = 150, 24, 9
+    X0, ROW, GAP = 150, 20, 8
     BARMAX = W - X0 - 96
     x_max = max(q[3] for q in QUINTILES)
     scale = BARMAX / x_max
@@ -553,7 +553,7 @@ page = f"""
   {head("about", 2)}
   {C.html("about.works.p1", "lead")}
   {graphic(L, "chart.historical", chart_scroll(historical_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
-  {C.html("hist.note", "note")}
+  {C.html("hist.note", "note-b")}
 
   <div class="slabel" style="color:{WARM}"{L.attr("about.change.h")}>{C.t("about.change.h")}</div>
   {C.html("about.change.p", "body")}
@@ -722,7 +722,7 @@ html = f"""<!DOCTYPE html>
 
   .pts {{ margin:11px 0 0; padding-left:1.1em; }}
   .pts li {{ font-size:0.9rem; line-height:1.5; color:{BODY};
-             margin-bottom:7px; }}
+             margin-bottom:5px; }}
   .pts li:last-child {{ margin-bottom:0; }}
   .pts li b {{ color:{INK}; }}
 
@@ -740,7 +740,7 @@ html = f"""<!DOCTYPE html>
   .boxes {{ display:flex; gap:12px; margin:14px 0 0; align-items:stretch; }}
   .boxes .box {{ flex:1; margin:0; }}
   .box {{ background:{BG_SOFT}; border:1px solid {LINE}; border-left:4px solid {PRIMARY};
-          padding:12px 15px 13px; margin:14px 0 0; }}
+          padding:10px 15px 10px; margin:14px 0 0; }}
   .box-warn {{ background:{WARM_TINT}; border-left-color:{WARM}; }}
   .box-warn .box-h {{ color:{WARM}; }}
   .box-green {{ background:{GREEN_TINT}; border-left-color:{GREEN}; }}
@@ -768,7 +768,7 @@ html = f"""<!DOCTYPE html>
      marker cannot be coloured or sized independently of its item, and this
      one is a design element. */
   .recs {{ list-style:none; margin:14px 0 0; padding:0; }}
-  .rec {{ position:relative; padding:0 0 0 2.05em; margin-bottom:9px; }}
+  .rec {{ position:relative; padding:0 0 0 2.05em; margin-bottom:6px; }}
   .rec:last-child {{ margin-bottom:0; }}
   .rec-n {{ position:absolute; left:0; top:0.02em; width:1.5em; height:1.5em;
             border-radius:50%; background:{PRIMARY}; color:#fff;
