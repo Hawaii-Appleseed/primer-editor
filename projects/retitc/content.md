@@ -148,13 +148,9 @@ Act 24's $40M cap reaches back to Tax Year 2026, over systems already paid for a
 - **Caveat.** The cap was added late in the session with no cost estimate, and the State has published no figure for what the exemption is worth.
 
 [[eo.size.note]]
-**How we got to $85M.** The credit usually costs $86M to $100M a year. Most 2026 projects will likely qualify, since installs take months and the cutoff falls mid-year. That points to about **$85M** protected from the cap — more than double the $40M it would otherwise have allowed. A one-time gap, in 2027 and 2028.
+**How we got to $85M.** The credit usually costs $86M to $100M a year. Most 2026 projects will likely qualify, since installs take months and the cutoff falls mid-year. That points to about **$85M** protected from the cap — more than double the $40M it would otherwise have allowed. A one-time gap, in 2027 and 2028, with a plausible range of $65M to $100M.
 
-[[eo.warn.h]]
-Don't multiply $436M by 35 percent
-
-[[eo.warn.p]]
-The $436M is **what these projects cost to build, not what the credits are worth**. The Hawaiʻi Solar Energy Association counts that much in 2026 commercial work at the state's eight largest solar firms — big companies only, no homes.[^cb] Per-system limits put the credit far below 35 percent: a $30,000 home system earns back $5,000, about 17 percent; a 114-unit apartment building earns $39,900, not $500,000. Multiply $436M by 35 percent and you get more than the credit has ever cost the state in a year.
+Do not reach this figure the other way. The $436M the solar industry reports for 2026 is **what the projects cost to build, not what the credits are worth**; per-system limits put the credit near 17 percent of price, not 35.[^cb]
 
 [[eo.foot]]
 The $85M is this analysis's own; the State has published none. Two loose ends: the Council on Revenues had not accounted for Act 24 or the order in its last forecast;[^cor] and the law names two end dates — 2029 in one subsection, 2031 in another — which the Tax Department settled at 2030 by announcement, not amendment.[^ann]

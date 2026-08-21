@@ -154,7 +154,7 @@ ALL_CREDIT_CUM_SAVINGS = 493.1   # RETITC + CGEC + TCRA, same window
 #    warning on page 3 and SB3125_CD1_FORECAST.md.
 EO_CAP = 40.0                    # what a strict cap would have allowed
 EO_POOL_MID = 85.0               # central estimate of the grandfathered pool
-EO_POOL_LO = 65.0
+EO_POOL_LO = 65.0                # quoted in eo.size.note, not drawn
 EO_POOL_HI = 100.0
 
 # Page number -> content.md slot with that row's title, so the contents page
@@ -213,53 +213,7 @@ def _legend(items, y=9.5, x0=0):
 
 
 
-def reprieve_chart() -> str:
-    """Two bars: what the cap alone would have allowed, and what the order
-    protects instead.
-
-    It used to carry four things at once — a legend, both bars, a pale range
-    band drawn BEHIND the second bar, and a bracket measuring the gap. The
-    band was the problem: it ran $65M-$100M while the solid bar ended at $85M
-    inside it, so it read as a lighter continuation of the bar (a $100M total)
-    rather than as a range around $85M. The range is stated in words directly
-    under the row label and again in the note below the chart, so the drawing
-    does not need to carry it too.
-    """
-    W, H = VB_W, 176
-    X0 = 210                       # left gutter for the row labels
-    BARMAX = W - X0 - 96
-    scale = BARMAX / EO_POOL_HI
-    BH = 64
-
-    p = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
-         f'role="img" aria-label="A strict cap would have allowed '
-         f'{EO_CAP:.0f} million dollars of credits on 2026 systems. The '
-         f'executive order instead protects about {EO_POOL_MID:.0f} million, '
-         f'more than double.">']
-
-    rows = [
-        (18, "If the cap applied", "to 2026 systems",
-         EO_CAP, MUTED, INK, f"${EO_CAP:.0f}M"),
-        (108, "Protected by the order",
-         f"estimate, ${EO_POOL_LO:.0f}M–${EO_POOL_HI:.0f}M",
-         EO_POOL_MID, PRIMARY, PRIMARY_DARK, f"≈${EO_POOL_MID:.0f}M"),
-    ]
-    for y, label, sub, value, fill, ink, tag in rows:
-        p.append(f'<text x="0" y="{y + 29}" font-size="{LABEL_U}" fill="{INK}" '
-                 f'font-weight="700">{label}</text>')
-        p.append(f'<text x="0" y="{y + 45}" font-size="{LABEL_U}" '
-                 f'fill="{MUTED}">{sub}</text>')
-        w = value * scale
-        p.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="{BH}" '
-                 f'rx="3" fill="{fill}"/>')
-        p.append(f'<text x="{X0 + w + 12:.1f}" y="{y + BH / 2 + 5:.1f}" '
-                 f'font-size="{EMPH_U}" font-weight="700" fill="{ink}">'
-                 f'{tag}</text>')
-    p.append("</svg>")
-    return "".join(p)
-
-
-# --- Graphic 2: six years of claims (page 2) ---------------------------------
+# --- Graphic 1: six years of claims (page 2) ---------------------------------
 
 def historical_chart() -> str:
     """Claims by taxpayer type, TY2018-2023, stacked.
@@ -318,7 +272,7 @@ def historical_chart() -> str:
     return "".join(p)
 
 
-# --- Graphic 3: who claims it (page 4) ---------------------------------------
+# --- Graphic 2: who claims it (page 4) ---------------------------------------
 
 def agi_chart() -> str:
     """Individual TY2023 claims by AGI bracket, with the AGI-limit cut-off
@@ -372,7 +326,7 @@ def agi_chart() -> str:
     return "".join(p)
 
 
-# --- Graphic 4: who pays (page 4) --------------------------------------------
+# --- Graphic 3: who pays (page 5) --------------------------------------------
 
 def burden_chart() -> str:
     """Average tax increase per household in TY2027, by income quintile, split
@@ -546,12 +500,7 @@ page = f"""
   {head("eo", 3)}
   {C.html("eo.standfirst", "standfirst")}
   <ul class="pts"{C.ul_attr("eo.what.points")}>{bullets("eo.what.points")}</ul>
-  {graphic(L, "chart.reprieve", chart_scroll(reprieve_chart(), smallest_label=LABEL_U), w=CHART_W_IN)}
   {C.html("eo.size.note", "note-b")}
-  <div class="box box-warn"{L.attr("eo.warn")}>
-    <div class="box-h"{L.attr("eo.warn.h")}>{C.t("eo.warn.h")}</div>
-    {C.html("eo.warn.p", "box-p")}
-  </div>
   {foot("eo.foot", 3)}
 {C.extras("page3")} {L.layer(3)}{L.text_boxes(3)}{L.tables_html(3)}
 </section>
