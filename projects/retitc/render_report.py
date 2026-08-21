@@ -401,7 +401,7 @@ def burden_chart() -> str:
     """Average tax increase per household in TY2027, by income quintile, split
     by which of Act 24's two screens takes the money."""
     W = VB_W
-    X0, ROW, GAP = 150, 56, 17
+    X0, ROW, GAP = 150, 50, 15
     BARMAX = W - X0 - 96
     x_max = max(q[3] for q in QUINTILES)
     scale = BARMAX / x_max

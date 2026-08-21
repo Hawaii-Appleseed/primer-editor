@@ -62,7 +62,7 @@ LAST YEAR FOR NEW CREDITS
 INSIDE THIS REPORT
 
 [[cover.contents.02]]
-What the credit is, and what Act 24 changes
+What Act 24 does to a $100M tax break
 
 [[cover.contents.03]]
 The governor's one-year reprieve
@@ -83,22 +83,22 @@ Hawaiʻi Appleseed Center for Law & Economic Justice  ·  Act 24, SLH 2026  ·  
 The credit
 
 [[about.h1]]
-What the credit is, and what Act 24 changes
+What Act 24 does to a $100M tax break
 
 [[about.sub]]
 §235-12.5 · Hawaiʻi Revised Statutes
 
 [[about.works.p1]]
-Hawaiʻi's Renewable Energy Technologies Tax Credit cuts your state income tax when you install renewable energy equipment — usually rooftop solar. It is the State's main tax incentive for rooftop solar, and part of how it pursues a goal written into law: all of Hawaiʻi's electricity from renewable sources by 2045. The State does not write anyone a check. It collects less tax instead, which costs it the same money. **In Tax Year 2023 that came to $100.1M.**[^dotax]
+Install renewable energy equipment in Hawaiʻi — usually rooftop solar — and this credit cuts your state income tax. It is the biggest tax break the State offers for putting solar on a roof, and one of the tools behind a target written into law: all of Hawaiʻi's electricity from renewable sources by 2045. No money changes hands. The State simply collects less tax, which costs it the same either way. **In Tax Year 2023 that came to $100.1M.**[^dotax]
 
 [[hist.note]]
-Claims average **$86.1M** across the six years, but no single year says much on its own. Tax Year 2020 is the odd one out: claims by trusts, estates and financial corporations jumped from $2.7M to $50.9M, then fell back to $2.0M the year after. Household claims are the steady part — they have risen every year in the series, though these are nominal dollars, not adjusted for inflation or for the number of filers.
+Claims average **$86.1M** across the six years, but no single year tells you much. Tax Year 2020 is the odd one: claims by trusts, estates and financial corporations jumped from $2.7M to $50.9M, then dropped back to $2.0M. Household claims move far less, and have gone up every year — though in nominal dollars, before inflation or any change in the number of filers.
 
 [[about.change.h]]
 What changes under Act 24
 
 [[about.change.p]]
-SB 3125 was signed on **May 21, 2026** and is now **Act 24**.[^act24] It adds three limits to the credit, and the governor has already suspended one of them for a year. The timing matters: the federal government ended its own residential solar credit at the end of 2025, so for a household the State credit is now the only one left.
+SB 3125 was signed on **May 21, 2026** and is now **Act 24**.[^act24] It adds three limits to the credit, one of which the governor has already suspended for a year. All of it lands just after Washington ended the federal residential solar credit at the end of 2025, leaving the State credit as the only one a household can still claim.
 
 [[about.card.a.n]]
 $40M
@@ -143,12 +143,12 @@ Executive Order 26-02  ·  signed June 8, 2026  ·  cutoff date May 21, 2026
 Act 24's $40M cap reaches back to Tax Year 2026 — over systems that were already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects from the cap. His stated reason: **"the retroactivity of the RETITC annual cap presents a risk of litigation."**[^eo]
 
 [[eo.what.points]]
-- **It lifts the cap, and nothing else.** A system finished during 2026 is not counted against the $40M limit. Everything else still applies: the 35 percent rate, the separate dollar limit on each system ($5,000 for a single-family solar array, $350 per unit for an apartment building, $500,000 for a commercial system), the approval process, and the 2030 wind-down.[^eo]
-- **The date that matters is May 21, 2026** — the day Act 24 was signed, not June 8, when the order was. A system qualifies if it was finished before that day, or if its owner can show they had already spent money on it. The Tax Department accepts a payment made or a bill incurred before the cutoff as proof, and approvals are due by May 31, 2027.[^tir]
-- **Nobody has priced it.** The cap was added late in the session with no cost estimate attached, and no official figure for what the exemption is worth has ever been published. The number below is ours.
+- **Only the cap is lifted.** A system finished during 2026 does not count against the $40M limit. Everything else stands: the 35 percent rate, the separate dollar limit on each system ($5,000 for a single-family solar array, $350 per unit for an apartment building, $500,000 for a commercial system), the approval process, and the 2030 wind-down.[^eo]
+- **The cutoff is May 21, 2026** — the day Act 24 was signed, not June 8, when the order was. A system qualifies if it was finished by then, or if its owner can show they had already spent money on it. The Tax Department will accept a payment made or a bill incurred before the cutoff, and approvals are due by May 31, 2027.[^tir]
+- **Nobody has priced it.** The cap was added late in the session with no cost estimate attached, and the State has never published a figure for what the exemption is worth. The one below is ours.
 
 [[eo.size.note]]
-**How we got there.** Start from what the credit normally costs: $100.1M in Tax Year 2023, and $86.1M averaged over six years. Then assume 75 to 95 percent of 2026 systems qualify, which is what a May 21 cutoff implies when solar projects take months to finish. That puts the exempted amount near **$85M**, against the $40M a strict cap would have allowed — a one-time gap in 2027 and 2028, not a recurring one.
+**The arithmetic.** Start from what the credit normally costs: $100.1M in Tax Year 2023, $86.1M averaged over six years. Then assume 75 to 95 percent of 2026 systems qualify, since solar takes months to install and the cutoff falls in May. That puts the exempted amount near **$85M**, against the $40M a strict cap would have allowed — a one-time gap in 2027 and 2028, not a recurring one.
 
 [[eo.warn.h]]
 Don't take 35 percent of $436M
@@ -169,7 +169,7 @@ Who claims the credit today
 Tax Year 2023 · individual filers
 
 [[pays.agi.note]]
-Households earning $200K and up take **45 percent** of all individual claims. Everyone under $60K combined takes less than a fifth. Two things drive that. One is who can afford the up-front cost — a home system runs around $30,000. The other is that the credit is **nonrefundable** — it can only cancel tax you already owe, so if your tax bill is smaller than the credit, you do not get the difference back. Act 24's income limit addresses the top directly: the orange marks show where it applies, in the top two brackets and nowhere below.
+Households earning $200K and up take **45 percent** of all individual claims. Everyone under $60K combined takes less than a fifth. Solar costs money up front — a home system runs around $30,000 — and the credit is **nonrefundable**, meaning it only cancels tax you already owe. A filer whose tax bill comes to less than the credit never sees the difference. Act 24's income limit goes straight at the top of that distribution: the orange marks show where it applies, in the top two brackets only.
 
 [[pays.foot]]
 Source: DOTAX Table A-5, Tax Year 2023 individual claims by income bracket.[^dotax] Adjusted gross income is roughly what you earned before deductions and exemptions. Individual filers claimed $58.3M of the program's $100.1M that year; businesses and trusts claimed the rest.
@@ -187,7 +187,7 @@ Tax Year 2027 burden  ·  savings through 2031
 Who pays more in Tax Year 2027
 
 [[saves.burden.note]]
-The income limit is aimed. **The cap is not.** Once a year's claims pass $40M, every remaining credit is cut by the same share — about 56 percent at 2027 demand — so a household in the bottom fifth pays about $40 more a year because of a ceiling it did nothing to reach. Businesses and trusts hold about 42 percent of the credit, and the income limit cannot reach those at all: a commercial or apartment system is not claimed by a person with an income.
+**The cap makes no distinction at all.** Once a year's claims pass $40M, every remaining credit is cut by the same share — roughly 56 percent at 2027 demand — so a household in the bottom fifth pays about $40 more a year because of a ceiling it did nothing to reach. The income limit only ever touches the top. Businesses and trusts hold about 42 percent of the credit and sit outside it entirely, since a commercial or apartment system is not claimed by a person with an income.
 
 [[saves.stat.a.n]]
 $385M
@@ -208,7 +208,7 @@ $103M
 what the credit still costs in 2027, despite a $40M cap
 
 [[saves.foot]]
-**Why $103M and not $40M:** the cap limits only new credits. Credits earned in earlier years but never used keep being claimed on top of them.[^model] These projections also assume the cap applies to Tax Year 2026 systems; the executive order means it mostly will not, so the savings shown here are **somewhat overstated**. The $385M is one scenario of several the model runs, which is where the range on the first figure comes from. Claims are spread across income groups using Tax Year 2023 tax data and rounded to the nearest $10; no change in taxpayer behavior is modeled.[^method]
+**Why $103M and not $40M:** the cap limits only new credits. Credits earned in earlier years and never used keep being claimed on top of them.[^model] How fast that older pile drains is the shakiest input in the model — it assumes 65 percent of it goes each year, a rate the State does not publish and nobody has measured for Hawaiʻi. The totals above barely move if that is wrong, but the size of the pile itself swings threefold, which is why no figure for it appears here. Two smaller caveats: the projections assume the cap applies to Tax Year 2026 systems, which the executive order mostly prevents, so the savings are **somewhat overstated**; and household figures are rounded to the nearest $10, with no change in taxpayer behavior modeled.[^method]
 
 [[foot.running]]
 RETITC · §235-12.5
