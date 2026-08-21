@@ -659,15 +659,15 @@ html = f"""<!DOCTYPE html>
   .eyebrow {{ font-size:0.88rem; font-weight:700; letter-spacing:.09em;
               color:{DEEP}; margin-bottom:3px; }}
   h1 {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-        font-size:1.62rem; line-height:1.06; margin:0 0 5px; color:{INK};
+        font-size:1.8rem; line-height:1.05; margin:0 0 7px; color:{INK};
         letter-spacing:-.015em; }}
-  .standfirst {{ font-size:0.93rem; line-height:1.36; margin:0 0 6px;
+  .standfirst {{ font-size:1rem; line-height:1.45; margin:0 0 10px;
                  color:{SLATE}; max-width:7.4in; }}
   .standfirst b {{ color:{INK}; }}
 
-  .stats {{ display:flex; gap:7px; margin:0 0 5px; align-items:stretch; }}
+  .stats {{ display:flex; gap:9px; margin:0 0 6px; align-items:stretch; }}
   .stat {{ flex:1; background:{CREAM}; border-left:3px solid {DEEP};
-           padding:6px 8px; border-radius:0 7px 7px 0; }}
+           padding:10px 11px; border-radius:0 8px 8px 0; }}
   /* The two source cards wear their source's colour; the two derived cards
      keep the house teal. */
   .stat-dotax {{ border-left-color:{DOTAX}; }}
@@ -675,8 +675,8 @@ html = f"""<!DOCTYPE html>
   .stat-itep {{ border-left-color:{ITEP}; }}
   .stat-itep .stat-n {{ color:{ITEP}; }}
   .stat-n {{ font-family:OkinaPoppins, Poppins, OkinaManrope, Manrope, sans-serif;
-             font-size:1.2rem; font-weight:700; line-height:1.1; color:{DEEP}; }}
-  .stat-l {{ font-size:0.82rem; color:{SLATE}; line-height:1.22; margin-top:1px; }}
+             font-size:1.38rem; font-weight:700; line-height:1.1; color:{DEEP}; }}
+  .stat-l {{ font-size:0.86rem; color:{SLATE}; line-height:1.3; margin-top:3px; }}
 
   /* Section rhythm: every h2 opens a section, so each gets a rule above and
      more air before it than after — otherwise a heading sits as close to the
@@ -697,7 +697,7 @@ html = f"""<!DOCTYPE html>
   .cmp th {{ font-size:0.7rem; font-weight:700; letter-spacing:.06em;
              text-transform:uppercase; color:{MUTE}; text-align:left;
              padding:0 8px 6px 0; border-bottom:1px solid {ASH}; }}
-  .cmp td {{ padding:9px 8px 9px 0; color:{SLATE};
+  .cmp td {{ padding:11px 8px 11px 0; color:{SLATE};
              border-bottom:1px solid {CREAM}; }}
   .cmp .n {{ text-align:right; padding-right:0; white-space:nowrap; }}
   .cmp .d {{ color:{DOTAX}; font-weight:700; }}
@@ -720,14 +720,14 @@ html = f"""<!DOCTYPE html>
   .finding-p i {{ font-style:italic; color:{INK}; }}
 
   .foot {{ margin:14px 0 0; padding-top:9px; border-top:1px solid {ASH};
-           font-size:0.775rem; color:{MUTE}; line-height:1.32; }}
+           font-size:0.82rem; color:{MUTE}; line-height:1.42; }}
   .foot b {{ color:{SLATE}; }}
 
   /* Sources: one run of small type, so three citations cost a line rather
      than an inch. */
-  .srch {{ font-size:0.66rem; font-weight:700; letter-spacing:.07em;
+  .srch {{ font-size:0.7rem; font-weight:700; letter-spacing:.07em;
            text-transform:uppercase; color:{SLATE}; margin-right:5px; }}
-  .endnotes {{ margin:5px 0 0; font-size:0.685rem; line-height:1.3;
+  .endnotes {{ margin:7px 0 0; font-size:0.72rem; line-height:1.38;
                color:{MUTE}; }}
   .en {{ white-space:normal; }}
   .enn {{ font-weight:700; color:{DEEP}; }}
