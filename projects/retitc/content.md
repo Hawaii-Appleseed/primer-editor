@@ -140,7 +140,7 @@ The governor exempted a year of solar from the cap
 Executive Order 26-02  ·  signed June 8, 2026  ·  cutoff date May 21, 2026
 
 [[eo.standfirst]]
-Act 24's $40M cap reaches back to Tax Year 2026 — over systems that were already paid for, already permitted, and in many cases already running. Three weeks after signing the bill, Gov. Josh Green signed an executive order taking most of that year back out. His stated reason: **"the retroactivity of the RETITC annual cap presents a risk of litigation."**[^eo]
+Act 24's $40M cap reaches back to Tax Year 2026 — over systems that were already paid for and permitted. Three weeks after signing the bill, Gov. Josh Green signed an executive order protecting a large portion of that year's projects from the cap. His stated reason: **"the retroactivity of the RETITC annual cap presents a risk of litigation."**[^eo]
 
 [[eo.what.points]]
 - **It lifts the cap, and nothing else.** A system finished during 2026 is not counted against the $40M limit. Everything else still applies: the 35 percent rate, the separate dollar limit on each system ($5,000 for a single-family solar array, $350 per unit for an apartment building, $500,000 for a commercial system), the approval process, and the 2030 wind-down.[^eo]
