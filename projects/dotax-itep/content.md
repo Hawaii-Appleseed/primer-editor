@@ -57,6 +57,12 @@ Differences
 [[whole.title]]
 Line the comparable slices up and they agree
 
+[[scope.why-act46]]
+ITEP’s baseline is 2026 policy, so its figure is that rise — not the $740.1M Act 46 was already costing.
+
+[[scope.why-act24]]
+ITEP has no estimate for the credit sunsets at all: its model covers the personal income tax, not business tax credits.
+
 [[parts.title]]
 The one disagreement
 

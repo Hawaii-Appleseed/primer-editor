@@ -48,6 +48,9 @@ of the core program TANF can cover, at best
 [[timeline.title]]
 Federal money runs out after the fourth payment — by rule, not by budget
 
+[[timeline.note]]
+Numbered bars are months after birth.
+
 [[funding.title]]
 What TANF covers — and what Hawaiʻi must raise
 
@@ -56,6 +59,9 @@ What TANF covers — and what Hawaiʻi must raise
 
 [[medicaid.title]]
 Six in ten births are already on Medicaid — four in ten are not
+
+[[medicaid.note]]
+Only the left-hand pool is reachable with federal dollars.
 
 [[risk.h]]
 The federal exposure is real, and untested

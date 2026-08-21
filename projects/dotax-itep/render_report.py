@@ -217,7 +217,9 @@ DOTAX_ACT24_CREDITS = DOTAX_ACT24_ALL - DOTAX_ACT24       # +188.1, credit sunse
 # slice boundary: for Act 46 they nearly touch, which IS the reconciliation;
 # for Act 24 the shortfall is the 32% gap the rest of the page is about.
 #   (title, total, comparable slice, its label, the rest's label,
-#    ITEP's own figure, ITEP bar label, why the rest is missing)
+#    ITEP's own figure, ITEP bar label, content.md slot with WHY the rest is
+#    missing — a full sentence, so it lives in a slot the editor can edit,
+#    drawn in place via C.slot_attr on the SVG <text>)
 SCOPE_ROWS = [
     (f"Act 46 &#8212; DOTAX: ${abs(DOTAX_ACT46_FY[_TY2026_FY]):,.1f}M a year in 2026, "
      f"rising to ${abs(DOTAX_ACT46_FY[_TY2031_FY]):,.1f}M by 2031",
@@ -225,15 +227,13 @@ SCOPE_ROWS = [
      "the rise", "the 2026 cost",
      abs(ITEP_ACT46_VS_2026),
      f"ITEP: &#8722;${abs(ITEP_ACT46_VS_2026):,.0f}M &#8212; it measures the rise",
-     "ITEP&#8217;s baseline is 2026 policy, so its figure is that rise &#8212; "
-     "not the $740.1M Act 46 was already costing."),
+     "scope.why-act46"),
     (f"Act 24 &#8212; DOTAX: +${DOTAX_ACT24_ALL:,.1f}M a year by 2031",
      DOTAX_ACT24_ALL, DOTAX_ACT24,
      "rate &amp; bracket changes", "tax-credit sunsets",
      ITEP_SB3125_VS_ACT46,
      f"ITEP: +${ITEP_SB3125_VS_ACT46:,.0f}M &#8212; rates only",
-     "ITEP has no estimate for the credit sunsets at all: its model covers "
-     "the personal income tax, not business tax credits."),
+     "scope.why-act24"),
 ]
 
 # Act 24's 2029-and-after schedule, brackets 2 and 3 (TRC slide 13). These are
@@ -362,7 +362,7 @@ def scope_chart() -> str:
              f'one scale</text>')
 
     y = TOP + LEG
-    for title, total, seen, seen_lab, rest_lab, itep_v, itep_lab, why in SCOPE_ROWS:
+    for title, total, seen, seen_lab, rest_lab, itep_v, itep_lab, why_key in SCOPE_ROWS:
         rest = total - seen
         p.append(f'<text x="0" y="{y + 14}" font-size="13.5" font-weight="700" '
                  f'fill="{INK}">{title}</text>')
@@ -424,8 +424,12 @@ def scope_chart() -> str:
                  f'stroke-dasharray="4 3"/>')
         y += IBH + SGAP
 
-        p.append(f'<text x="0" y="{y + 12}" font-size="12.5" fill="{MUTE}">'
-                 f'{why}</text>')
+        # The explanation is a content.md slot drawn in place: slot_attr on
+        # the <text> tag (the report2027 placeholder pattern) keeps it
+        # editable in the editor without leaving its row.
+        why = C.text(why_key).replace("&", "&amp;").replace("<", "&lt;")
+        p.append(f'<text x="0" y="{y + 12}" font-size="12.5" fill="{MUTE}"'
+                 f'{C.slot_attr(why_key)}>{why}</text>')
         y += SUB + GAP
 
     p.append("</svg>")

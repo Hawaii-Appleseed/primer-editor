@@ -58,10 +58,18 @@ slot's full markdown, every source with its citation count, the geometry of
 everything placed, and (unless `&elements=0`) every addressable element id.
 `docsync/mcp_server.py` wraps both halves as an MCP server (stdlib only:
 `claude mcp add primer -- python3 docsync/mcp_server.py`) — read tools plus
-`pilot`. Never write content.md/layout.json directly while an editor is open:
-it holds the document in memory, so the write is overwritten by its next Save
-with nothing to see and nothing to undo. Decide *what* to change with the
-reads; make the change with a verb.
+`pilot`. Don't write content.md/layout.json directly while an editor is open
+when a pilot verb can express the change — the verbs get validation, one
+render, and ⌘Z for free. For a change the pilot CANNOT express (a NEW slot
+key, or renderer + content edited together — `setSlot` refuses unknown keys),
+the sanctioned file route exists: **announce first** with
+`POST /__agent/change {"project": id, "by": "Claude", "summary": …}`, then
+edit the files. Live mode adopts external edits into open editors (that is
+what "edits here and from Claude land in the same files" means): a same-file
+conflict prompts the user to choose, and the announce records base=HEAD so
+the "Claude edited this" chip can rewind the whole change. Editing the files
+withOUT announcing still gets adopted but surfaces as an anonymous
+"edited outside the editor" chip — always announce.
 
 Full verb list and contract: `pilot-api.spec.js` is the executable spec;
 the `report-editor` skill documents it. Reserve clicking/dragging for what

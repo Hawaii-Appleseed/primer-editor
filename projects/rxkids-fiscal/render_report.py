@@ -185,7 +185,7 @@ def payment_timeline() -> str:
     funder and a band beneath restates the same split — identity never rests
     on colour alone.
     """
-    W, H = VB_W, 140
+    W, H = VB_W, 129
     BASE = 88                       # bar baseline
     X0, SLOT, BW = 34, 59, 44
     UNIT = 58 / 1500.0              # px per dollar
@@ -254,10 +254,10 @@ def payment_timeline() -> str:
              f'font-weight="700" fill="#fff" text-anchor="middle">'
              f'every remaining payment</text>')
 
-    # The "by rule, not by budget" half of this caption now lives in the
-    # section heading, where it reads as the finding rather than a footnote.
-    p.append(f'<text x="{X0}" y="{by + 32}" font-size="{LABEL_U}" fill="{MUTE}">'
-             f'Numbered bars are months after birth.</text>')
+    # The caption ("Numbered bars are months after birth.") is a slot rendered
+    # under the graphic, not drawn in here — a sentence inside an SVG is
+    # frozen to the editor (the editability contract in the report-editor
+    # skill; docsync.check warns on it).
     p.append("</svg>")
     return "".join(p)
 
@@ -347,7 +347,7 @@ def medicaid_split() -> str:
     A single split, so a bar beats a pie — and both segments are directly
     labelled with count and share.
     """
-    W, H = VB_W, 58
+    W, H = VB_W, 42
     X0, BW, BH, Y = 0, 820, 26, 14
     total = BIRTHS_MEDICAID + BIRTHS_NONMEDICAID
     mw = BW * BIRTHS_MEDICAID / total
@@ -368,8 +368,8 @@ def medicaid_split() -> str:
     p.append(f'<text x="{X0 + mw + 10}" y="{Y + 19}" font-size="{EMPH_U}" '
              f'font-weight="700" fill="#fff">{BIRTHS_NONMEDICAID:,}  ·  40%</text>')
 
-    p.append(f'<text x="0" y="{Y + BH + 14}" font-size="{LABEL_U}" fill="{MUTE}">'
-             f'Only the left-hand pool is reachable with federal dollars.</text>')
+    # The takeaway line lives in a slot under the graphic (see payment_timeline
+    # for why), so H stops at the bar plus its inside labels.
     p.append("</svg>")
     return "".join(p)
 
@@ -433,6 +433,7 @@ page = f"""
 
   <h2{L.attr("timeline.title")}>{C.t("timeline.title")}</h2>
   {graphic(L, "chart.timeline", chart_scroll(payment_timeline(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("timeline.note", "cnote")}
 
   <h2{L.attr("funding.title")}>{C.t("funding.title")}</h2>
   {graphic(L, "chart.funding", chart_scroll(funding_split(), smallest_label=LABEL_U), w=CHART_W_IN)}
@@ -440,6 +441,7 @@ page = f"""
 
   <h2{L.attr("medicaid.title")}>{C.t("medicaid.title")}</h2>
   {graphic(L, "chart.medicaid", chart_scroll(medicaid_split(), smallest_label=LABEL_U), w=CHART_W_IN)}
+  {C.html("medicaid.note", "cnote")}
 
   <div class="cols">
     <div class="col">
@@ -514,6 +516,9 @@ html = f"""<!DOCTYPE html>
         border-top:1px solid {ASH}; letter-spacing:-.005em; }}
   .note {{ font-size:0.86rem; color:{SLATE}; margin:3px 0 0; }}
   .note b {{ color:{INK}; }}
+  /* Chart caption, as a slot rather than SVG text — 0.74rem = 10.7px, just
+     over the 10.5px chart-label floor its SVG predecessor was held to. */
+  .cnote {{ font-size:0.74rem; line-height:1.25; color:{MUTE}; margin:1px 0 0; }}
 
   .cols {{ display:flex; gap:14px; margin:12px 0 0; align-items:stretch; }}
   /* Framed rather than bare: two colour-coded headings over loose bullets was
