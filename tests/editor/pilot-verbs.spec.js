@@ -211,7 +211,11 @@ test.describe('pilot verbs', () => {
       async ({ page }) => {
         const r = await api(page, 'audit()');
         expect(r.ok).toBe(true);
-        for (const k of ['off-sheet', 'overlap', 'orphaned-group-member'])
+        // covers-flow in this list is the false-positive net: the untouched
+        // fixture is a real, dense document full of DESIGNED overlap (cards,
+        // backgrounds, pinned elements over bands) and must report none.
+        for (const k of ['off-sheet', 'overlap', 'orphaned-group-member',
+                         'covers-flow'])
           expect(r.issues.filter(i => i.kind === k), k).toHaveLength(0);
         // The fixture genuinely overflows (its own real state) — audit must
         // say exactly what lastFit says, no more, no fewer.
@@ -250,6 +254,39 @@ test.describe('pilot verbs', () => {
       r = await api(page, 'audit()');
       expect(r.issues.find(i => i.kind === 'print-overflow')).toBeTruthy();
       await page.evaluate(() => { lastFit = []; });
+    });
+
+    test('a text box parked on flow prose is a covers-flow pair; undone, it is clean', async ({ page }) => {
+      // Aim at a real flow element: the first non-placed data-el with words
+      // and a measurable box, on whichever page it actually lives.
+      const tgt = await page.evaluate(() => {
+        const d = document.getElementById('out').contentDocument;
+        for (const el of d.querySelectorAll('section.page [data-el]')) {
+          const id = el.getAttribute('data-el');
+          if (/^(text|table)\./.test(id)) continue;
+          if ((layout.positions || {})[id]) continue;
+          if (!(el.textContent || '').trim()) continue;
+          const sec = el.closest('section[data-page]');
+          const mount = el.closest('section.page')?.querySelector('.ds-mount');
+          const pg = (sec && sec.dataset.page) || (mount && mount.dataset.dsMount);
+          const m = _pilotMeasure(id);
+          if (m && pg && m.w > 1 && m.h > 0.2) return { id, m, page: pg };
+        }
+        return null;
+      });
+      expect(tgt).toBeTruthy();
+      const boxId = await addBox(page, {
+        page: isNaN(+tgt.page) ? tgt.page : +tgt.page,
+        x: tgt.m.x, y: tgt.m.y, w: Math.min(2, tgt.m.w),
+      });
+      let r = await api(page, 'audit()');
+      const hit = r.issues.find(i => i.kind === 'covers-flow'
+        && i.ids.includes(boxId) && i.ids.includes(tgt.id));
+      expect(hit).toBeTruthy();
+      await api(page, 'undo()');
+      r = await api(page, 'audit()');
+      expect(r.issues.filter(i => i.kind === 'covers-flow'
+        && i.ids.includes(boxId))).toHaveLength(0);
     });
 
     test('uncited sources are reported by id', async ({ page }) => {

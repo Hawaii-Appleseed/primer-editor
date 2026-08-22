@@ -1,6 +1,6 @@
 ---
 name: report-editor
-description: How to build or change ANY report served by the docsync draft editor so its elements stay user-editable — movable/resizable SVGs and graphics, detachable cards, text, shapes, images, groups, citations. Use when adding, drawing, or restyling anything in a report bound in docsync.yml, or when the user says an element "should be movable / resizable / editable."
+description: How to build or change ANY report served by the docsync draft editor so its elements stay user-editable and never clash — movable/resizable SVGs and graphics, detachable cards, text, shapes, images, groups, citations, collision-free placement. Use when adding, drawing, placing, or restyling anything in a report bound in docsync.yml, when elements overlap or collide, or when the user says an element "should be movable / editable" or "shouldn't clash."
 ---
 
 # Building reports the draft editor can edit
@@ -11,6 +11,18 @@ The editor can move, resize, rotate, recolour, group and re-layer elements —
 but ONLY elements rendered through the right hook. Raw markup is frozen: the
 editor has no handle to select it. When you add anything, render it so the
 user can grab it.
+
+Two invariants govern everything this skill builds, and each has a mechanical
+gate — neither is satisfied by eyeballing:
+
+- **Every element is editable.** All text is a slot, every graphic goes
+  through `graphic()`, prose never bakes into an SVG. Gate:
+  `python3 -m docsync.check --id <slug>` shows a clean `edit-mode draft`
+  line and the binding says `editability: strict` (see "the editability
+  contract" below).
+- **No element clashes with another.** Flow first, measured placement,
+  grouped composition. Gate: the pilot `audit` verb comes back with zero
+  issues (see "Placement: nothing clashes" below).
 
 ## The shared building blocks: `docsync.blocks`
 
@@ -88,6 +100,38 @@ moved/resized/recoloured something (`positions`, `shapes`, `boxes`, `tables`,
 `groups`, `endnote_order`). An empty file = the pristine design. Don't
 hand-place by guessing inches — set a sensible default in the renderer and let
 the user drag.
+
+## Placement: nothing clashes
+
+Two elements fighting for the same inches is the defect a reader sees before
+any other. The discipline, in order of preference:
+
+1. **The flow cannot clash — prefer it.** Content rendered in the renderer's
+   own flow (slots, `graphic()`, `card()`, sections) lays out around itself;
+   there is nothing to collide with. Reach for `addTextBox` / `addShape` /
+   absolute placement only for genuine annotations — a callout, a stamp, a
+   label riding a chart — never as a substitute for putting content in the
+   renderer.
+2. **Measure before you place.** Never guess inches. `inventory()` returns
+   every element's bounding box in page inches; read the geometry, pick a
+   spot that is actually empty, keep ~0.15in clear of neighbours, and stay
+   inside the binding's `margins`. A default that lands "roughly there" and
+   waits for the user to fix it is a clash you shipped.
+3. **Group what belongs together.** Overlap inside a group is composition —
+   `audit` deliberately skips it; the same overlap ungrouped is a collision.
+   A lockup built from pieces (rect + text box + icon) gets a `groups` entry
+   the moment it exists, not later.
+4. **`audit` is the gate, and it must come back empty.** After any build-out
+   or placement pass, run the pilot `audit` verb and fix every issue:
+   `overlap` (two placed movables sharing >20% of the smaller), `covers-flow`
+   (a placed box/table/dragged element parked on flow prose or a flow
+   graphic), `off-sheet`, `print-overflow` (Save refuses this one outright),
+   `rule-through-glyph`, `orphaned-group-member`, `uncited-source`. "Fix"
+   means move to clear space or group with intent — never shrink text under
+   the legibility floor or hide an element to dodge a finding.
+
+A handoff with a non-empty `audit` is not done, exactly as a conversion with
+`[editability]` findings is not done.
 
 ## Moving cited text (footnotes travel with it)
 
