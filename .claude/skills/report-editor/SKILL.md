@@ -81,6 +81,20 @@ it carries `L.attr` (that only makes it *movable*, `data-el`, not *editable*).
 For any prose the user should edit, render it through `C.html(key, cls)` (a
 whole `<p>`) or wrap the inner text in `C.slot_attr`/`C.slot_span`/`C.t`. A `<p>`
 with `data-el` but no `data-slot` is the tell.
+**The third answer: `C.derived(source)`.** Some text is not the user's to
+type — a tally, a rank, a computed share, anything whose authority comes from
+the thing that produced it. Retyping it would only make the page disagree
+with its own source. Stamp those spans with
+`C.derived("python -m testimony stats")` — the argument is *how the value is
+remade*, so the answer travels with the markup. It clears the editability
+check (a declaration, not an oversight), and clicking the number in the
+editor tells the reader where it comes from instead of doing nothing.
+
+Use it for measured values only. It is not a way to quiet a finding on text
+somebody simply forgot to wire — if a person could reasonably rephrase it,
+it is prose and belongs in a slot. And it never excuses a sentence drawn
+inside an SVG: a caption is prose wherever its numbers came from.
+
 | Photo / raster image | an `<img>` with `L.attr` (see the primer's `img_el`) | move, corner resize, rotate, crop, replace |
 | Rect / ellipse / line / text box / table | user adds from the editor; stored in layout.json | move, resize, restyle |
 | Coloured background band (a full-width section) | `L.sec(el_id)` on the section tag — NOT `L.attr` (a band must never leave the flow) | bottom-edge grip: stretch taller, or drag back to natural height to reset; override lives in layout.json `sections` |
@@ -350,9 +364,12 @@ draft and finds the two shapes of silent uneditability that every earlier net
 missed (the audit and the amber notice count wiring that EXISTS, never text
 left with none):
 
-- **dead text** — visible strings with no `data-slot`/`data-el` ancestor:
-  carried-over widget markup, stat cards, footers. Wire them or call them
-  chrome out loud.
+- **dead text** — visible strings with no `data-slot`/`data-fixed`/`data-el`
+  ancestor: carried-over widget markup, stat cards, footers. Wire them,
+  declare measured values with `C.derived(…)`, or call them chrome out loud.
+  Reach for `editability_ok` last: it matches on the exact string, so a list
+  of tallies there goes stale the first time the numbers are regenerated —
+  that is what `C.derived` exists to avoid.
 - **frozen prose** — sentences drawn inside an SVG. The graphic moves; the
   sentence can only be changed by editing the renderer. Captions and notes
   render as slots BESIDE the graphic (`C.html`), never inside it.

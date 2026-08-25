@@ -152,6 +152,10 @@ bindings:
   # A real letter page, not a scrolling web page — it is meant to be handed out.
   - id: tax-testimony
     content: projects/tax-testimony/content.md
+    # STAGE TWO done 2026-08-24: section labels and organisation names are
+    # slots; every tally is declared with C.derived(TALLY), naming the
+    # command that remakes it. Findings are errors from here on.
+    editability: strict
     # The stage half is required: without it the watcher rebuilds the published
     # page but leaves the staged docs/tax-testimony/engine/ copy the in-browser
     # editor actually reads from stale.

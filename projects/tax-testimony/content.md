@@ -12,6 +12,86 @@
 [[title]]
 What the Testimony Said
 
+<!--
+  Repeated labels. Each is rendered once per argument block (twenty times
+  over), so a reword here lands everywhere at once.
+-->
+
+[[label.more]]
+More from the record
+
+[[label.figures]]
+Figures cited
+
+<!--
+  Organisation display names, keyed by the slug in render_report.py's
+  ORG_OPPOSE / ORG_SUPPORT. The counts beside them are measured and stay in
+  the renderer; the NAME lives here so a misattribution can be corrected by
+  whoever spots it — a wrong name in an organisations table is the headline,
+  not a footnote. Deleting one of these breaks the build loudly (missing
+  slot), which is the intended failure: a row must not render nameless.
+-->
+
+[[org.realtors.name]]
+Hawaiʻi Association of REALTORS
+
+[[org.grassroot.name]]
+Grassroot Institute of Hawaii
+
+[[org.naiop.name]]
+NAIOP Hawaii
+
+[[org.chamber.name]]
+Chamber of Commerce Hawaii
+
+[[org.lurf.name]]
+Land Use Research Foundation of Hawaii
+
+[[org.food-industry.name]]
+Hawaiʻi Food Industry Association
+
+[[org.tpl.name]]
+Trust for Public Land
+
+[[org.kobayashi.name]]
+Kobayashi Group
+
+[[org.bia.name]]
+Building Industry Association of Hawaii
+
+[[org.laborers.name]]
+Hawaiʻi Laborers & Employers Cooperation
+
+[[org.appleseed.name]]
+Hawaiʻi Appleseed Center for Law and Economic Justice
+
+[[org.protect-democracy.name]]
+Protect Democracy
+
+[[org.hcan.name]]
+Hawaiʻi Children's Action Network Speaks!
+
+[[org.hiphi.name]]
+Hawaiʻi Public Health Institute
+
+[[org.yimby.name]]
+Hawaiʻi YIMBY
+
+[[org.dhhl.name]]
+Department of Hawaiian Home Lands
+
+[[org.womens-caucus.name]]
+Women's Caucus
+
+[[org.cnha.name]]
+Council for Native Hawaiian Advancement
+
+[[org.governor.name]]
+Office of the Governor
+
+[[org.tnc.name]]
+The Nature Conservancy
+
 [[hero.eyebrow]]
 HAWAIʻI TAX FAIRNESS COALITION
 

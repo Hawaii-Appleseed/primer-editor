@@ -132,6 +132,12 @@ def diverging_chart() -> str:
 # for every theme and is reported alongside by the command above.
 ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 7, 5]
 
+# What every tally on this page is remade by. Passed to C.derived() at each
+# call site, so a reader who clicks a number in the editor is told how it
+# changes instead of finding it simply inert — and so docsync.check's
+# editability pass can tell a declared figure from text nobody wired.
+TALLY = "python -m testimony stats  (~/repos/hawaii-tax-testimony)"
+
 # The same measurement over the 917 SUPPORTING submissions (657 distinct).
 # Printed by the same command. Note how differently the two sides argue: the
 # opposition's top theme is a claim about consequences, the support's top three
@@ -193,9 +199,14 @@ def argument(pre: str, i: int, count: int) -> str:
     prose, so they are slots.
     """
     more = C.list(f"{pre}.{i}.more")
+    # The two section labels are ONE slot each, reused down all twenty
+    # blocks: they are the same words every time, so a reword should land
+    # everywhere at once rather than twenty times by hand. (Duplicate
+    # data-slot keys are an established pattern — see the primer's
+    # cip.body, rendered twice for its two fiscal years.)
     more_html = (
         f'<div class="arg-m">'
-        f'<span class="arg-ml">More from the record</span>'
+        f'<span class="arg-ml"{C.slot_attr("label.more")}>{C.text("label.more")}</span>'
         f'<ul{C.ul_attr(f"{pre}.{i}.more")}>'
         + "".join(f"<li>{m}</li>" for m in more) +
         f'</ul></div>') if more else ""
@@ -203,16 +214,17 @@ def argument(pre: str, i: int, count: int) -> str:
     facts = C.list(f"{pre}.{i}.f")
     facts_html = (
         f'<div class="arg-f">'
-        f'<span class="arg-fl">Figures cited</span>'
+        f'<span class="arg-fl"{C.slot_attr("label.figures")}>'
+        f'{C.text("label.figures")}</span>'
         f'<ul{C.ul_attr(f"{pre}.{i}.f")}>'
         + "".join(f"<li>{f}</li>" for f in facts) +
         f'</ul></div>') if facts else ""
     return (
         f'<li class="arg">'
-        f'<span class="arg-r">{i}</span>'
+        f'<span class="arg-r"{C.derived(TALLY)}>{i}</span>'
         f'<div class="arg-h">'
         f'<span class="arg-t"{C.slot_attr(f"{pre}.{i}.h")}>{C.text(f"{pre}.{i}.h")}</span>'
-        f'<span class="arg-n">{count}</span>'
+        f'<span class="arg-n"{C.derived(TALLY)}>{count}</span>'
         f'</div>'
         # C.html, not C.t/C.text: the quotation carries a markdown link to the
         # source PDF, and only html() runs the markdown pass. It emits its own
@@ -290,29 +302,38 @@ def _arg_pages() -> int:
 #     up as a supporter: DHHL's "strongly supports this bill" sat inside DOTAX's
 #     record.
 # Regenerate with `python -m testimony organisations`.
+#
+# Rows are (SLUG, submissions, bills). The slug is the row's identity, never
+# its display text: the NAME is a content.md slot (`org.<slug>.name`), so a
+# misattribution can be corrected in the editor by the person who spots it —
+# which an organisations table needs more than any other block on the page,
+# per the note above. Keying on the slug rather than the rank is what lets a
+# re-tally reorder these freely without silently re-pairing every name with
+# another organisation's numbers; the counts stay here because they are
+# measured, and `C.derived` says so at the call site.
 ORG_OPPOSE = [
-    ("Hawaiʻi Association of REALTORS", 11, 4),
-    ("Grassroot Institute of Hawaii", 10, 4),
-    ("NAIOP Hawaii", 10, 3),
-    ("Chamber of Commerce Hawaii", 3, 2),
-    ("Land Use Research Foundation of Hawaii", 3, 2),
-    ("Hawaiʻi Food Industry Association", 2, 2),
-    ("Trust for Public Land", 1, 1),
-    ("Kobayashi Group", 1, 1),
-    ("Building Industry Association of Hawaii", 1, 1),
-    ("Hawaiʻi Laborers & Employers Cooperation", 1, 1),
+    ("realtors", 11, 4),
+    ("grassroot", 10, 4),
+    ("naiop", 10, 3),
+    ("chamber", 3, 2),
+    ("lurf", 3, 2),
+    ("food-industry", 2, 2),
+    ("tpl", 1, 1),
+    ("kobayashi", 1, 1),
+    ("bia", 1, 1),
+    ("laborers", 1, 1),
 ]
 ORG_SUPPORT = [
-    ("Hawaiʻi Appleseed Center for Law and Economic Justice", 14, 5),
-    ("Protect Democracy", 12, 6),
-    ("Hawaiʻi Children's Action Network Speaks!", 12, 6),
-    ("Hawaiʻi Public Health Institute", 10, 7),
-    ("Hawaiʻi YIMBY", 7, 2),
-    ("Department of Hawaiian Home Lands", 6, 1),
-    ("Women's Caucus", 5, 4),
-    ("Council for Native Hawaiian Advancement", 5, 2),
-    ("Office of the Governor", 5, 2),
-    ("The Nature Conservancy", 4, 1),
+    ("appleseed", 14, 5),
+    ("protect-democracy", 12, 6),
+    ("hcan", 12, 6),
+    ("hiphi", 10, 7),
+    ("yimby", 7, 2),
+    ("dhhl", 6, 1),
+    ("womens-caucus", 5, 4),
+    ("cnha", 5, 2),
+    ("governor", 5, 2),
+    ("tnc", 4, 1),
 ]
 
 
@@ -320,12 +341,14 @@ def org_column(rows, accent: str, head_key: str) -> str:
     """One ranked column of organisations: name, submissions, bills."""
     items = "".join(
         f'<li class="org">'
-        f'<span class="org-r" style="background:{accent}">{i}</span>'
-        f'<span class="org-n">{name}</span>'
-        f'<span class="org-c" style="color:{accent}">{n}</span>'
-        f'<span class="org-b">{b} bill{"s" if b != 1 else ""}</span>'
+        f'<span class="org-r" style="background:{accent}"{C.derived(TALLY)}>{i}</span>'
+        f'<span class="org-n"{C.slot_attr(f"org.{slug}.name")}>'
+        f'{C.text(f"org.{slug}.name")}</span>'
+        f'<span class="org-c" style="color:{accent}"{C.derived(TALLY)}>{n}</span>'
+        f'<span class="org-b"{C.derived(TALLY)}>'
+        f'{b} bill{"s" if b != 1 else ""}</span>'
         f'</li>'
-        for i, (name, n, b) in enumerate(rows, 1))
+        for i, (slug, n, b) in enumerate(rows, 1))
     return (f'<div class="col">'
             f'<h3 style="color:{accent}"{L.attr(head_key)}>{C.t(head_key)}</h3>'
             f'<ol class="orgs">{items}</ol></div>')
