@@ -306,7 +306,7 @@ def flint_expandable() -> str:
         </div>""")
     return f"""<div class="tfc-expandable-section">
     <button class="tfc-expand-btn" onclick="toggleFlintSection()">
-    Example: Flint Michigan <span class="tfc-expand-icon">&#9660;</span>
+    {C.t("flint.button")} <span class="tfc-expand-icon">&#9660;</span>
 </button>
 <div id="flint-content" class="tfc-expand-content">
     <div class="tfc-expand-inner">
@@ -456,43 +456,45 @@ def step(n: int) -> str:
 # Cost estimate table (from the program's own cost slide) — hand-set here like
 # the other charts (see content.md's note). Columns 3–5 carry the same colour
 # language as the funding timeline: TANF = green, additional dollars = purple.
-COST_ROWS = [
-    ("Hawaiʻi County", "2,055", "$3,213,000", "$6,034,500", "$12,199,500"),
-    ("Honolulu County", "10,474", "$9,087,000", "$38,046,000", "$69,468,000"),
-    ("Maui County", "1,566", "$1,989,000", "$5,058,000", "$9,756,000"),
-    ("Unidentified Counties", "713", "$966,000", "$2,242,500", "$4,381,500"),
-    ("Entire State", "14,808", "$15,255,000", "$51,381,000", "$95,805,000"),
-]
+#
+# Row identity is a SLUG, not the county name: the name is a content.md slot
+# (cost.<slug>.county) like every other cell, so this list only fixes which
+# row a slot belongs to, never what it displays — the same discipline as
+# tax-testimony's org.<slug>.name.
+COST_ROWS = ["hawaii", "honolulu", "maui", "unidentified", "entire-state"]
 
 
 def cost_expandable() -> str:
     body_rows = []
-    for county, babies, tanf, six, twelve in COST_ROWS:
-        total = ' class="rxk-cost-total"' if county == "Entire State" else ""
+    for slug in COST_ROWS:
+        total = ' class="rxk-cost-total"' if slug == "entire-state" else ""
         body_rows.append(f"""<tr{total}>
-            <th scope="row">{county}</th>
-            <td>{babies}</td>
-            <td class="rxk-cost-tanf">{tanf}</td>
-            <td class="rxk-cost-add">{six}</td>
-            <td class="rxk-cost-add">{twelve}</td>
+            <th scope="row"{C.slot_attr(f"cost.{slug}.county")}>{C.text(f"cost.{slug}.county")}</th>
+            <td{C.slot_attr(f"cost.{slug}.babies")}>{C.text(f"cost.{slug}.babies")}</td>
+            <td class="rxk-cost-tanf"{C.slot_attr(f"cost.{slug}.tanf")}>{C.text(f"cost.{slug}.tanf")}</td>
+            <td class="rxk-cost-add"{C.slot_attr(f"cost.{slug}.six")}>{C.text(f"cost.{slug}.six")}</td>
+            <td class="rxk-cost-add"{C.slot_attr(f"cost.{slug}.twelve")}>{C.text(f"cost.{slug}.twelve")}</td>
         </tr>""")
+    # "Additional public and/or private dollars needed" is ONE slot rendered
+    # under both money columns — the same words each time, so a reword lands
+    # in both headers at once (the tax-testimony label pattern).
     return f"""<div class="tfc-expandable-section">
     <button class="tfc-expand-btn rxk-cost-btn" onclick="rxkToggle(this, 'cost-content')">
-    <span class="rxk-cost-btn-eyebrow">Cost to launch statewide</span>
-    <span class="rxk-cost-btn-amt">$15 million</span>
+    <span class="rxk-cost-btn-eyebrow"{C.slot_attr("cost.button.eyebrow")}>{C.text("cost.button.eyebrow")}</span>
+    <span class="rxk-cost-btn-amt"{C.slot_attr("cost.button.amt")}>{C.text("cost.button.amt")}</span>
     <span class="rxk-cost-btn-foot"><span class="tfc-expand-icon">&#9660;</span></span>
 </button>
 <div id="cost-content" class="tfc-expand-content">
     <div class="tfc-expand-inner">
         <div class="rxk-cost-wrap">
-            <div class="rxk-cost-title">Cost estimate to bring RxKids to Hawaiʻi moms and babies</div>
+            <div class="rxk-cost-title"{C.slot_attr("cost.title")}>{C.text("cost.title")}</div>
             <table class="rxk-cost">
                 <thead><tr>
                     <th></th>
-                    <th>Number of babies<span>2023 births</span></th>
-                    <th class="rxk-cost-tanf">Cash prescriptions covered by TANF<span>$3,000 for each Medicaid birth</span></th>
-                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 6-month program</span></th>
-                    <th class="rxk-cost-add">Additional public and/or private dollars needed<span>Prenatal + 12-month program</span></th>
+                    <th{C.slot_attr("cost.head.babies")}>{C.text("cost.head.babies")}<span{C.slot_attr("cost.head.babies.note")}>{C.text("cost.head.babies.note")}</span></th>
+                    <th class="rxk-cost-tanf"{C.slot_attr("cost.head.tanf")}>{C.text("cost.head.tanf")}<span{C.slot_attr("cost.head.tanf.note")}>{C.text("cost.head.tanf.note")}</span></th>
+                    <th class="rxk-cost-add"{C.slot_attr("cost.head.add")}>{C.text("cost.head.add")}<span{C.slot_attr("cost.head.six.note")}>{C.text("cost.head.six.note")}</span></th>
+                    <th class="rxk-cost-add"{C.slot_attr("cost.head.add")}>{C.text("cost.head.add")}<span{C.slot_attr("cost.head.twelve.note")}>{C.text("cost.head.twelve.note")}</span></th>
                 </tr></thead>
                 <tbody>{"".join(body_rows)}</tbody>
             </table>

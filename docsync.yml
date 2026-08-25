@@ -62,6 +62,11 @@ bindings:
   # print page — this project is a scrolling web page.
   - id: rxkids
     content: projects/rxkids/content.md
+    # STAGE TWO done 2026-08-25: the cost table (county names, births, TANF
+    # and additional-dollars columns) is fully slotted, keyed by county slug
+    # rather than rank; the two expandable-section buttons are slots too.
+    # Findings are errors from here on.
+    editability: strict
     # Also re-stages the editor, unlike budget-primer's `make ... pub` (whose
     # Makefile target already depends on `editor` -> docsync.stage) — without
     # this, the watcher rebuilds the PUBLISHED page but leaves the staged

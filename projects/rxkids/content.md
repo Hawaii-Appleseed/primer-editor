@@ -116,6 +116,9 @@ Family Bonding
 - Reduced financial stress enables greater emotional availability for children[^rxkids-maltreatment]
 - Trust in healthcare institutions rose by 10 percentage points[^rxkids-savings]
 
+[[flint.button]]
+Example: Flint Michigan
+
 [[flint.eyebrow]]
 Case Study · Flint, Michigan
 
@@ -364,6 +367,120 @@ Visit RxKids.org
 
 [[cta.link2.label]]
 About the Program
+
+<!--
+  Cost estimate table (below, through cost.entire-state.twelve): from the
+  program's own cost slide, hand-typed like the other charts (no live
+  pipeline — see the top-of-file note). Each row is keyed by a SLUG in
+  render_report.py's COST_ROWS, not by name, so correcting a county's name
+  here can never silently re-pair it with another row's numbers.
+  cost.head.add is ONE slot rendered under both money columns.
+-->
+
+[[cost.button.eyebrow]]
+Cost to launch statewide
+
+[[cost.button.amt]]
+$15 million
+
+[[cost.title]]
+Cost estimate to bring RxKids to Hawaiʻi moms and babies
+
+[[cost.head.babies]]
+Number of babies
+
+[[cost.head.babies.note]]
+2023 births
+
+[[cost.head.tanf]]
+Cash prescriptions covered by TANF
+
+[[cost.head.tanf.note]]
+$3,000 for each Medicaid birth
+
+[[cost.head.add]]
+Additional public and/or private dollars needed
+
+[[cost.head.six.note]]
+Prenatal + 6-month program
+
+[[cost.head.twelve.note]]
+Prenatal + 12-month program
+
+[[cost.hawaii.county]]
+Hawaiʻi County
+
+[[cost.hawaii.babies]]
+2,055
+
+[[cost.hawaii.tanf]]
+$3,213,000
+
+[[cost.hawaii.six]]
+$6,034,500
+
+[[cost.hawaii.twelve]]
+$12,199,500
+
+[[cost.honolulu.county]]
+Honolulu County
+
+[[cost.honolulu.babies]]
+10,474
+
+[[cost.honolulu.tanf]]
+$9,087,000
+
+[[cost.honolulu.six]]
+$38,046,000
+
+[[cost.honolulu.twelve]]
+$69,468,000
+
+[[cost.maui.county]]
+Maui County
+
+[[cost.maui.babies]]
+1,566
+
+[[cost.maui.tanf]]
+$1,989,000
+
+[[cost.maui.six]]
+$5,058,000
+
+[[cost.maui.twelve]]
+$9,756,000
+
+[[cost.unidentified.county]]
+Unidentified Counties
+
+[[cost.unidentified.babies]]
+713
+
+[[cost.unidentified.tanf]]
+$966,000
+
+[[cost.unidentified.six]]
+$2,242,500
+
+[[cost.unidentified.twelve]]
+$4,381,500
+
+[[cost.entire-state.county]]
+Entire State
+
+[[cost.entire-state.babies]]
+14,808
+
+[[cost.entire-state.tanf]]
+$15,255,000
+
+[[cost.entire-state.six]]
+$51,381,000
+
+[[cost.entire-state.twelve]]
+$95,805,000
 
 [[endnotes.h2]]
 Sources
