@@ -153,5 +153,65 @@ core
 [[ha-five-tail.span-txt-2]]
 for change
 
+<!--
+  Wired 2026-08-25 to clear docsync.check's editability pass — 17 strings
+  propose left unwired because they're not "substantial text leaves": step
+  ordinals, card titles, tab buttons, CTA buttons, two eyebrows. Site nav and
+  footer (the OTHER 23 strings the pass found) stay deliberately unwired —
+  see editability_ok in this project's docsync.yml entry; this page does not
+  own that chrome.
+-->
+
+[[ha-step.num-1]]
+01
+
+[[ha-step.num-2]]
+02
+
+[[ha-step.num-3]]
+03
+
+[[ha-step.num-4]]
+04
+
+[[ha-step.num-5]]
+05
+
+[[ha-focus.h3-1]]
+Affordable Housing
+
+[[ha-focus.h3-2]]
+Food Equity
+
+[[ha-focus.h3-3]]
+Wages & Labor
+
+[[ha-focus.h3-4]]
+Transportation Equity
+
+[[ha-focus.h3-5]]
+Taxes & Budget
+
+[[ha-five.phase-1]]
+Practices
+
+[[ha-five.phase-2]]
+Values
+
+[[ha-five.phase-3]]
+Focus Areas
+
+[[ha-cta.support]]
+Support Our Work
+
+[[ha-cta.subscribe]]
+Subscribe
+
+[[ha-hero.eyebrow]]
+Our Mission
+
+[[ha-cta.eyebrow]]
+Stand With Us
+
 [[sources]]
 [example]: Replace or delete this placeholder source — https://example.com

@@ -21,14 +21,23 @@ Coalition Priorities Survey
 [[standfirst.p-1]]
 Results of the Pol.is poll on 2027 legislative priorities: 14 ideas, voted agree / disagree / pass.
 
+[[num.span-2]]
+12
+
 [[of.span-1]]
 /28
 
 [[lbl.span-1]]
 Members voted · 43%
 
+[[num.span-3]]
+7
+
 [[lbl.span-2]]
 Put up ideas
+
+[[num.span-4]]
+14
 
 [[lbl.span-3]]
 Ideas on the table
@@ -38,6 +47,9 @@ Ideas on the table
 
 [[lbl.span-4]]
 Votes cast
+
+[[num.span-5]]
+3
 
 [[lbl.span-5]]
 Were "disagree"
@@ -179,6 +191,26 @@ Revenue raisers · 7 ideas
 
 [[famsplit.key-3]]
 GET restructuring · 2 ideas
+
+<!--
+  famsplit.n1/n2/n3: the three segment counts, 34+51+16=101 (num.span-1 /
+  "Votes cast" above). The bar widths (33.7% / 50.5% / 15.8%) and the
+  famsplit-bar's aria-label in body.slotted.html are NOT computed from
+  these — they are separately hand-maintained percentages of the same
+  total. Change a count here and update those three places too, or the
+  bar visually disagrees with its own numbers (this page already had that
+  exact bug once — the votes-cast total was wrong by one — see git history
+  around "fix 102->101 votes-cast").
+-->
+
+[[famsplit.n1]]
+34
+
+[[famsplit.n2]]
+51
+
+[[famsplit.n3]]
+16
 
 [[famsplit.cap]]
 Share of the 101 votes cast, by family. Revenue raisers took half the coalition's attention; the two GET questions took a sixth.

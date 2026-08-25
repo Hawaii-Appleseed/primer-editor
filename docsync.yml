@@ -128,12 +128,33 @@ bindings:
   #   content: snap-timeline/content.md
   #   target: snap-timeline/index.html
 
-  # Our Mission — Hawaiʻi Appleseed — scaffolded by docsync.scaffold as STAGE ONE: openable in the
-  # draft editor, not yet editable. STAGE TWO (wiring slots/graphics) is a
-  # per-page job — see the report-editor skill. page height is a generous
-  # no-clip default for a scrolling web page; trim once visible.
+  # Our Mission — Hawaiʻi Appleseed. STAGE TWO wiring done 2026-08-25: every
+  # step ordinal, focus-area card, phase tab, CTA button and eyebrow propose
+  # left unwired is now a slot. page height is a generous no-clip default for
+  # a scrolling web page; trim once visible.
   - id: our-mission
     content: projects/our-mission/content.md
+    # The remaining findings are all Squarespace SITE nav/footer, carried
+    # over verbatim by docsync.scaffold — this page does not own that chrome,
+    # and editing it here would never reach the live site. Declared, not
+    # wired: each string below is one exact occurrence in the edit-mode
+    # build (python3 -m docsync.check --id our-mission to re-derive).
+    editability: strict
+    editability_ok:
+      - "Home"
+      - "Issues"
+      - "News"
+      - "Research"
+      - "Donate"
+      - "About"
+      - "Our Mission"
+      - "Our Story"
+      - "Our Team"
+      - "Board"
+      - "Main Website"
+      - "HAWAIʻI APPLESEED"
+      - "CENTER FOR LAW & ECONOMIC JUSTICE"
+      - "Hawaiʻi Budget Bill Draft Tracker"
     build: python3 projects/our-mission/render_report.py
     outputs:
       - projects/our-mission/index.html
@@ -250,6 +271,12 @@ bindings:
   # no-clip default for a scrolling web page; trim once visible.
   - id: tfc-2027-priorities
     content: projects/tfc-2027-priorities/content.md
+    # STAGE TWO done 2026-08-25: the 5 stat numbers (2 propose left as bare
+    # literals under 2 chars, which its dead-text scanner cannot see either —
+    # a checker blind spot, not a pass) and the 3 family-split segment counts
+    # are now slots. See the comment above famsplit.n1 in content.md for the
+    # one thing NOT auto-derived from them.
+    editability: strict
     build: python3 projects/tfc-2027-priorities/render_report.py
     outputs:
       - projects/tfc-2027-priorities/index.html
