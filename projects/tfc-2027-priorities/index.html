@@ -260,6 +260,15 @@
 }
 .group .items .idea, .get-callout .items .idea{font-size:.85rem;}
 .group .items .tally, .get-callout .items .tally{font-size:.7rem;}
+/* --empty is the page's own "recessed track" colour (already used for the
+   turnout bar and every gauge's background) — reusing it here reads as "this
+   is a sub-panel of the card above it" rather than introducing a new colour
+   meaning. --panel (the card's own background) would barely show against
+   itself in light mode; --empty is visibly darker/cooler in both themes. */
+.group .items, .get-callout .items{
+  background:var(--empty); border-radius:4px; margin-top:.15rem;
+  padding:0 .65rem;
+}
 
   
 @page { size: letter; margin: 0.25in; }
