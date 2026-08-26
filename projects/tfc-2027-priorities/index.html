@@ -6,7 +6,7 @@
 <title>Tax Fairness Coalition — 2027 Priorities: What the Poll Said</title>
 <style>
   body { margin:0; background:#EDF1EE; }
-  .page { width:12.5in; min-height:27.0in; margin:0 auto;
+  .page { width:12.5in; min-height:38.5in; margin:0 auto;
            background:#fff; position:relative; overflow:hidden; }
   
   :root{
@@ -222,6 +222,46 @@
   max-width:46rem;}
 
   
+:root{
+  --bkt1:#3B6E8F; --bkt1-ink:#FFFFFF;
+  --bkt2:#A65D3D; --bkt2-ink:#FFFFFF;
+  --bkt3:#C99A3E; --bkt3-ink:#241B08;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bkt1:#7FA8C4; --bkt1-ink:#0F1E27;
+    --bkt2:#D08F6D; --bkt2-ink:#2A140A;
+    --bkt3:#E0BD73; --bkt3-ink:#241B08;
+  }
+}
+:root[data-theme="dark"]{
+  --bkt1:#7FA8C4; --bkt1-ink:#0F1E27;
+  --bkt2:#D08F6D; --bkt2-ink:#2A140A;
+  --bkt3:#E0BD73; --bkt3-ink:#241B08;
+}
+:root[data-theme="light"]{
+  --bkt1:#3B6E8F; --bkt1-ink:#FFFFFF;
+  --bkt2:#A65D3D; --bkt2-ink:#FFFFFF;
+  --bkt3:#C99A3E; --bkt3-ink:#241B08;
+}
+.famsplit-bar .b1{background:var(--bkt1); color:var(--bkt1-ink);}
+.famsplit-bar .b2{background:var(--bkt2); color:var(--bkt2-ink);}
+.famsplit-bar .b3{background:var(--bkt3); color:var(--bkt3-ink);}
+.get-callout{margin-top:1.1rem; padding:.9rem 1.1rem; border:1px dashed var(--ink-faint);
+  border-radius:6px;}
+.get-callout .who{display:block;}
+/* ol.items li's own grid-template-columns:1fr 11.5rem (original.html) assumes
+   the full-width tier list; nested inside a ~15rem .group card or the
+   .get-callout box it would push the tally column off the edge. Stack idea
+   over gauge instead, at a slightly smaller size than the top-level list so
+   a 5-item ranking still fits a card without dominating it. */
+.group .items li, .get-callout .items li{
+  grid-template-columns:1fr; gap:.2rem; padding:.5rem 0;
+}
+.group .items .idea, .get-callout .items .idea{font-size:.85rem;}
+.group .items .tally, .get-callout .items .tally{font-size:.7rem;}
+
+  
 @page { size: letter; margin: 0.25in; }
 @media print {
   body { background:#fff; }
@@ -251,7 +291,7 @@
      beside the whitespace where its row-mates should be. It is ~300pt, well
      under a sheet, so holding it together costs a page break, not a page. */
   ol.items li, .group, .groups, .tier-head, .legend, p.sub,
-  .famsplit { break-inside:avoid; }
+  .famsplit, .get-callout { break-inside:avoid; }
   /* .famsplit joins the heading-chain: the bar is the section's summary and
      the cards are its detail, so a break between them reads as two unrelated
      graphics. Chained with h2/p.sub above, the whole block moves together. */
@@ -272,23 +312,23 @@
     <p class="standfirst">Results of the Pol.is poll on 2027 legislative priorities: 14 ideas, voted agree / disagree / pass.</p>
 
     <div class="meta">
-      <div class="stat"><span class="num">12<span class="of">/28</span></span><span class="lbl">Members voted · 43%</span></div>
+      <div class="stat"><span class="num">13<span class="of">/28</span></span><span class="lbl">Members voted · 46%</span></div>
       <div class="stat"><span class="num">7</span><span class="lbl">Put up ideas</span></div>
       <div class="stat"><span class="num">14</span><span class="lbl">Ideas on the table</span></div>
-      <div class="stat"><span class="num">101</span><span class="lbl">Votes cast</span></div>
-      <div class="stat"><span class="num">3</span><span class="lbl">Were "disagree"</span></div>
+      <div class="stat"><span class="num">115</span><span class="lbl">Votes cast</span></div>
+      <div class="stat"><span class="num">4</span><span class="lbl">Were "disagree"</span></div>
     </div>
     <div class="turnout">
-      <div class="turnout-bar" role="img" aria-label="12 of 28 coalition members voted, 43 percent">
-        <i style="width:42.9%"></i>
+      <div class="turnout-bar" role="img" aria-label="13 of 28 coalition members voted, 46 percent">
+        <i style="width:46.4%"></i>
       </div>
-      <p><b>12 of 28</b> invited coalition members cast at least one vote (43% turnout).</p>
+      <p><b>13 of 28</b> invited coalition members cast at least one vote (46% turnout).</p>
     </div>
   </header>
 
   <section>
     <h2>14 ideas</h2>
-    <p class="sub">Each bar shows all 12 voters: agree / pass / disagree / no vote.</p>
+    <p class="sub">Each bar shows all 13 voters: agree / pass / disagree / no vote.</p>
 
     <div class="legend">
       <span><i class="swatch" style="background:var(--agree)"></i> <span>Agree</span></span>
@@ -306,64 +346,64 @@
         <li>
           <span class="idea"><span>Fix last session's renewable energy tax cuts</span><span class="gloss">By reducing the proposed phase-out</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="7 agree, 0 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:58.3%"></i>
+            <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:53.8%"></i><i class="p" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>7 of 7</b> votes agreed · no passes</span>
+            <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>Conveyance tax reform</span><span class="gloss"></span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="9 agree, 2 pass, 0 disagree, 1 did not vote">
-              <i class="a" style="width:75%"></i><i class="p" style="width:16.7%"></i>
+            <span class="bar" role="img" aria-label="10 agree, 2 pass, 0 disagree, 1 did not vote">
+              <i class="a" style="width:76.9%"></i><i class="p" style="width:15.4%"></i>
             </span>
-            <span class="tally"><b>9 of 11</b> votes agreed · 2 passes</span>
+            <span class="tally"><b>10 of 12</b> votes agreed · 2 passes</span>
           </span>
         </li>
         <li>
           <span class="idea">Save the working family tax credits set to expire</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:53.8%"></i><i class="p" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+            <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
           </span>
         </li>
         <li>
           <span class="idea">Tax capital gains at the same rate as ordinary income</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:53.8%"></i><i class="p" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+            <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
           </span>
         </li>
         <li>
           <span class="idea">Close the REIT tax loophole</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="6 agree, 1 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:50%"></i><i class="p" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:53.8%"></i><i class="p" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>6 of 7</b> votes agreed · 1 pass</span>
+            <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>Create a state-level Child Tax Credit</span><span class="gloss">Posted last — fewest people saw it</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="4 agree, 1 pass, 0 disagree, 7 did not vote">
-              <i class="a" style="width:33.3%"></i><i class="p" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="5 agree, 1 pass, 0 disagree, 7 did not vote">
+              <i class="a" style="width:38.5%"></i><i class="p" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>4 of 5</b> votes agreed · 1 pass</span>
+            <span class="tally"><b>5 of 6</b> votes agreed · 1 pass</span>
           </span>
         </li>
         <li>
           <span class="idea">Strengthen the caregiver tax credit for kūpuna caregivers</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="5 agree, 2 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:41.7%"></i><i class="p" style="width:16.7%"></i>
+            <span class="bar" role="img" aria-label="5 agree, 3 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:38.5%"></i><i class="p" style="width:23.1%"></i>
             </span>
-            <span class="tally"><b>5 of 7</b> votes agreed · 2 passes</span>
+            <span class="tally"><b>5 of 8</b> votes agreed · 3 passes</span>
           </span>
         </li>
       </ol>
@@ -372,43 +412,43 @@
     <div class="tier">
       <div class="tier-head">
         <h3>Agreement, with some passes</h3>
-        <span class="note">Zero opposition, 1/3–1/2 passed</span>
+        <span class="note">Little opposition, 1/3–1/2 passed</span>
       </div>
       <ol class="items">
         <li>
           <span class="idea"><span>Keiki Rx</span><span class="gloss">Funding for first-year post-partum women, partly through TANF</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="5 agree, 3 pass, 0 disagree, 4 did not vote">
-              <i class="a" style="width:41.7%"></i><i class="p" style="width:25%"></i>
+            <span class="bar" role="img" aria-label="6 agree, 3 pass, 0 disagree, 4 did not vote">
+              <i class="a" style="width:46.2%"></i><i class="p" style="width:23.1%"></i>
             </span>
-            <span class="tally"><b>5 of 8</b> votes agreed · 3 passes</span>
+            <span class="tally"><b>6 of 9</b> votes agreed · 3 passes</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>Pair a progressive revenue raiser with cutting the GET on food</span><span class="gloss">Net effect: a more progressive system overall</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="5 agree, 4 pass, 0 disagree, 3 did not vote">
-              <i class="a" style="width:41.7%"></i><i class="p" style="width:33.3%"></i>
+            <span class="bar" role="img" aria-label="5 agree, 4 pass, 1 disagree, 3 did not vote">
+              <i class="a" style="width:38.5%"></i><i class="p" style="width:30.8%"></i><i class="d" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>5 of 9</b> votes agreed · 4 passes</span>
+            <span class="tally"><b>5 of 10</b> votes agreed · 4 passes · 1 disagree</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>Institute worldwide combined reporting</span><span class="gloss">Stops multinationals shifting profit offshore</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="3 agree, 4 pass, 0 disagree, 5 did not vote">
-              <i class="a" style="width:25%"></i><i class="p" style="width:33.3%"></i>
+            <span class="bar" role="img" aria-label="4 agree, 4 pass, 0 disagree, 5 did not vote">
+              <i class="a" style="width:30.8%"></i><i class="p" style="width:30.8%"></i>
             </span>
-            <span class="tally"><b>3 of 7</b> votes agreed · 4 passes</span>
+            <span class="tally"><b>4 of 8</b> votes agreed · 4 passes</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>Reform the 2011 historic-home tax exemption</span><span class="gloss">City &amp; County of Honolulu — a county issue</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="2 agree, 2 pass, 0 disagree, 8 did not vote">
-              <i class="a" style="width:16.7%"></i><i class="p" style="width:16.7%"></i>
+            <span class="bar" role="img" aria-label="3 agree, 2 pass, 0 disagree, 8 did not vote">
+              <i class="a" style="width:23.1%"></i><i class="p" style="width:15.4%"></i>
             </span>
-            <span class="tally"><b>2 of 4</b> votes agreed · 2 passes</span>
+            <span class="tally"><b>3 of 5</b> votes agreed · 2 passes</span>
           </span>
         </li>
       </ol>
@@ -417,34 +457,34 @@
     <div class="tier">
       <div class="tier-head">
         <h3>Unresolved</h3>
-        <span class="note">Passes > agrees; all 3 disagree votes landed here</span>
+        <span class="note">Passes > agrees; 3 of the 4 disagree votes landed here</span>
       </div>
       <ol class="items">
         <li>
           <span class="idea">Fix the child and dependent care tax credit</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="2 agree, 4 pass, 1 disagree, 5 did not vote">
-              <i class="a" style="width:16.7%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="2 agree, 5 pass, 1 disagree, 5 did not vote">
+              <i class="a" style="width:15.4%"></i><i class="p" style="width:38.5%"></i><i class="d" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>2 of 7</b> votes agreed · 4 passes · 1 disagree</span>
+            <span class="tally"><b>2 of 8</b> votes agreed · 5 passes · 1 disagree</span>
           </span>
         </li>
         <li>
           <span class="idea"><span>GET reform or replacement</span><span class="gloss">Largest dissent</span></span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="2 agree, 4 pass, 1 disagree, 5 did not vote">
-              <i class="a" style="width:16.7%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="3 agree, 4 pass, 1 disagree, 5 did not vote">
+              <i class="a" style="width:23.1%"></i><i class="p" style="width:30.8%"></i><i class="d" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>2 of 7</b> votes agreed · 4 passes · 1 disagree</span>
+            <span class="tally"><b>3 of 8</b> votes agreed · 4 passes · 1 disagree</span>
           </span>
         </li>
         <li>
           <span class="idea">Constitutional amendment to let the state tax high-value investment properties</span>
           <span class="gauge">
-            <span class="bar" role="img" aria-label="1 agree, 6 pass, 1 disagree, 4 did not vote">
-              <i class="a" style="width:8.3%"></i><i class="p" style="width:50%"></i><i class="d" style="width:8.3%"></i>
+            <span class="bar" role="img" aria-label="2 agree, 6 pass, 1 disagree, 4 did not vote">
+              <i class="a" style="width:15.4%"></i><i class="p" style="width:46.2%"></i><i class="d" style="width:7.7%"></i>
             </span>
-            <span class="tally"><b>1 of 8</b> votes agreed · 6 passes · 1 disagree</span>
+            <span class="tally"><b>2 of 9</b> votes agreed · 6 passes · 1 disagree</span>
           </span>
         </li>
       </ol>
@@ -455,56 +495,253 @@
     <h2>Tax credits vs revenue raisers</h2>
     <p class="sub"></p>
     <div class="famsplit">
-      <span class="famsplit-bar" role="img" aria-label="Of 101 votes cast: 34 on tax credits and direct support, 51 on revenue raisers, 16 on GET restructuring">
-        <i class="f1" style="width:33.7%">34</i><i class="f2" style="width:50.5%">51</i><i class="f3" style="width:15.8%">16</i>
+      <span class="famsplit-bar" role="img" aria-label="Of 115 votes cast: 39 on tax credits and direct support, 58 on revenue raisers, 18 on GET restructuring">
+        <i class="f1" style="width:33.9%">39</i><i class="f2" style="width:50.4%">58</i><i class="f3" style="width:15.7%">18</i>
       </span>
       <div class="famsplit-key">
         <span><i class="swatch" style="background:var(--fam1)"></i> <span>Tax credits &amp; direct support · 5 ideas</span></span>
         <span><i class="swatch" style="background:var(--fam2)"></i> <span>Revenue raisers · 7 ideas</span></span>
         <span><i class="swatch" style="background:var(--fam3)"></i> <span>GET restructuring · 2 ideas</span></span>
       </div>
-      <p class="famsplit-cap">Share of the 101 votes cast, by family. Revenue raisers took half the coalition's attention; the two GET questions took a sixth.</p>
+      <p class="famsplit-cap">Share of the 115 votes cast, by family. Revenue raisers took half the coalition's attention; the two GET questions took a sixth.</p>
     </div>
     <div class="groups">
       <div class="group">
-        <span class="who">5 ideas · 34 votes</span>
+        <span class="who">5 ideas · 39 votes</span>
         <h3>Tax credits &amp; direct support</h3>
         <span class="gauge">
-          <span class="bar" role="img" aria-label="22 agree, 11 pass, 1 disagree across 34 votes">
-            <i class="a" style="width:64.7%"></i><i class="p" style="width:32.4%"></i><i class="d" style="width:2.9%"></i>
+          <span class="bar" role="img" aria-label="25 agree, 13 pass, 1 disagree across 39 votes">
+            <i class="a" style="width:64.1%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:2.6%"></i>
           </span>
-          <span class="tally"><b>22 of 34</b> votes agreed · 11 passes · 1 disagree</span>
+          <span class="tally"><b>25 of 39</b> votes agreed · 13 passes · 1 disagree</span>
         </span>
         <p>Saving the expiring working family credits, a state Child Tax Credit, the kūpuna caregiver credit, Keiki Rx, and the child &amp; dependent care credit. Strongest at the top (6 of 7 on the expiring credits); the child &amp; dependent care fix is the least agreed item.</p>
       </div>
       <div class="group">
-        <span class="who">7 ideas · 51 votes</span>
+        <span class="who">7 ideas · 58 votes</span>
         <h3>Revenue raisers</h3>
         <span class="gauge">
-          <span class="bar" role="img" aria-label="34 agree, 16 pass, 1 disagree across 51 votes">
-            <i class="a" style="width:66.7%"></i><i class="p" style="width:31.4%"></i><i class="d" style="width:2.0%"></i>
+          <span class="bar" role="img" aria-label="40 agree, 17 pass, 1 disagree across 58 votes">
+            <i class="a" style="width:69%"></i><i class="p" style="width:29.3%"></i><i class="d" style="width:1.7%"></i>
           </span>
-          <span class="tally"><b>34 of 51</b> votes agreed · 16 passes · 1 disagree</span>
+          <span class="tally"><b>40 of 58</b> votes agreed · 17 passes · 1 disagree</span>
         </span>
         <p>The renewable energy fix, conveyance tax, capital gains, the REIT loophole, worldwide combined reporting, the historic-home exemption, and the ConAm.</p>
       </div>
       <div class="group">
-        <span class="who">2 ideas · 16 votes</span>
+        <span class="who">2 ideas · 18 votes</span>
         <h3>GET restructuring</h3>
         <span class="gauge">
-          <span class="bar" role="img" aria-label="7 agree, 8 pass, 1 disagree across 16 votes">
-            <i class="a" style="width:43.8%"></i><i class="p" style="width:50.0%"></i><i class="d" style="width:6.3%"></i>
+          <span class="bar" role="img" aria-label="8 agree, 8 pass, 2 disagree across 18 votes">
+            <i class="a" style="width:44.4%"></i><i class="p" style="width:44.4%"></i><i class="d" style="width:11.1%"></i>
           </span>
-          <span class="tally"><b>7 of 16</b> votes agreed · 8 passes · 1 disagree</span>
+          <span class="tally"><b>8 of 18</b> votes agreed · 8 passes · 2 disagrees</span>
         </span>
         <p>Pairing a progressive raiser with a GET cut on food, and GET reform or replacement.</p>
       </div>
     </div>
-    <p class="sub"><b>Credits and raisers poll the same.</b> 65% agree on the credit side, 67% on the revenue side, one disagree vote each — no meaningful gap. However, GET restructuring polled at 44%, with more passes than agrees.</p>
+    <p class="sub"><b>Credits and raisers poll the same.</b> 64% agree on the credit side, 69% on the revenue side, one disagree vote each — no meaningful gap. However, GET restructuring polled at 44%, with more passes than agrees and now two disagree votes.</p>
+  </section>
+
+  <section>
+    <h2>Priorities by bucket</h2>
+    <p class="sub">The same 14 ideas, grouped by the Coalition's three 2027 priority buckets: tax the wealthy, tax corporations, and tax credits and assistance.</p>
+    <div class="famsplit">
+      <span class="famsplit-bar" role="img" aria-label="Of 97 votes cast on bucketed ideas: 42 on tax the wealthy, 16 on tax corporations, 39 on tax credits and assistance">
+        <i class="b1" style="width:43.3%">42</i><i class="b2" style="width:16.5%">16</i><i class="b3" style="width:40.2%">39</i>
+      </span>
+      <div class="famsplit-key">
+        <span><i class="swatch" style="background:var(--bkt1)"></i> <span>Tax the wealthy · 5 ideas</span></span>
+        <span><i class="swatch" style="background:var(--bkt2)"></i> <span>Tax corporations · 2 ideas</span></span>
+        <span><i class="swatch" style="background:var(--bkt3)"></i> <span>Tax credits and assistance · 5 ideas</span></span>
+      </div>
+      <p class="famsplit-cap">Share of the 97 votes cast on the 12 bucketed ideas. The two GET ideas (18 votes) aren't part of this split — see below.</p>
+    </div>
+    <div class="groups">
+      <div class="group">
+        <span class="who">5 ideas · 42 votes</span>
+        <h3>Tax the wealthy</h3>
+        <span class="gauge">
+          <span class="bar" role="img" aria-label="29 agree, 12 pass, 1 disagree across 42 votes">
+            <i class="a" style="width:69%"></i><i class="p" style="width:28.6%"></i><i class="d" style="width:2.4%"></i>
+          </span>
+          <span class="tally"><b>29 of 42</b> votes agreed · 12 passes · 1 disagree</span>
+        </span>
+        <p>The five ideas, ranked by votes agreed:</p>
+        <ol class="items">
+          <li>
+            <span class="idea">Conveyance tax reform</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="10 agree, 2 pass, 0 disagree across 12 votes">
+                <i class="a" style="width:83.3%"></i><i class="p" style="width:16.7%"></i>
+              </span>
+              <span class="tally"><b>10 of 12</b> votes agreed · 2 passes</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Tax capital gains at the same rate as ordinary income</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:87.5%"></i><i class="p" style="width:12.5%"></i>
+              </span>
+              <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Fix last session's renewable energy tax cuts</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:87.5%"></i><i class="p" style="width:12.5%"></i>
+              </span>
+              <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Reform the 2011 historic-home tax exemption</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="3 agree, 2 pass, 0 disagree across 5 votes">
+                <i class="a" style="width:60%"></i><i class="p" style="width:40%"></i>
+              </span>
+              <span class="tally"><b>3 of 5</b> votes agreed · 2 passes</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Constitutional amendment to tax high-value investment properties (ConAm)</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="2 agree, 6 pass, 1 disagree across 9 votes">
+                <i class="a" style="width:22.2%"></i><i class="p" style="width:66.7%"></i><i class="d" style="width:11.1%"></i>
+              </span>
+              <span class="tally"><b>2 of 9</b> votes agreed · 6 passes · 1 disagree</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+      <div class="group">
+        <span class="who">2 ideas · 16 votes</span>
+        <h3>Tax corporations</h3>
+        <span class="gauge">
+          <span class="bar" role="img" aria-label="11 agree, 5 pass, 0 disagree across 16 votes">
+            <i class="a" style="width:68.8%"></i><i class="p" style="width:31.3%"></i>
+          </span>
+          <span class="tally"><b>11 of 16</b> votes agreed · 5 passes</span>
+        </span>
+        <p>The two ideas, ranked by votes agreed:</p>
+        <ol class="items">
+          <li>
+            <span class="idea">Close the REIT tax loophole</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:87.5%"></i><i class="p" style="width:12.5%"></i>
+              </span>
+              <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Institute worldwide combined reporting</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="4 agree, 4 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:50%"></i><i class="p" style="width:50%"></i>
+              </span>
+              <span class="tally"><b>4 of 8</b> votes agreed · 4 passes</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+      <div class="group">
+        <span class="who">5 ideas · 39 votes</span>
+        <h3>Tax credits and assistance</h3>
+        <span class="gauge">
+          <span class="bar" role="img" aria-label="25 agree, 13 pass, 1 disagree across 39 votes">
+            <i class="a" style="width:64.1%"></i><i class="p" style="width:33.3%"></i><i class="d" style="width:2.6%"></i>
+          </span>
+          <span class="tally"><b>25 of 39</b> votes agreed · 13 passes · 1 disagree</span>
+        </span>
+        <p>The five ideas, ranked by votes agreed:</p>
+        <ol class="items">
+          <li>
+            <span class="idea">Save the working family tax credits set to expire</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="7 agree, 1 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:87.5%"></i><i class="p" style="width:12.5%"></i>
+              </span>
+              <span class="tally"><b>7 of 8</b> votes agreed · 1 pass</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Keiki Rx</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="6 agree, 3 pass, 0 disagree across 9 votes">
+                <i class="a" style="width:66.7%"></i><i class="p" style="width:33.3%"></i>
+              </span>
+              <span class="tally"><b>6 of 9</b> votes agreed · 3 passes</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Create a state-level Child Tax Credit</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="5 agree, 1 pass, 0 disagree across 6 votes">
+                <i class="a" style="width:83.3%"></i><i class="p" style="width:16.7%"></i>
+              </span>
+              <span class="tally"><b>5 of 6</b> votes agreed · 1 pass</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Strengthen the caregiver tax credit for kūpuna caregivers</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="5 agree, 3 pass, 0 disagree across 8 votes">
+                <i class="a" style="width:62.5%"></i><i class="p" style="width:37.5%"></i>
+              </span>
+              <span class="tally"><b>5 of 8</b> votes agreed · 3 passes</span>
+            </span>
+          </li>
+          <li>
+            <span class="idea">Fix the child and dependent care tax credit</span>
+            <span class="gauge">
+              <span class="bar" role="img" aria-label="2 agree, 5 pass, 1 disagree across 8 votes">
+                <i class="a" style="width:25%"></i><i class="p" style="width:62.5%"></i><i class="d" style="width:12.5%"></i>
+              </span>
+              <span class="tally"><b>2 of 8</b> votes agreed · 5 passes · 1 disagree</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <div class="get-callout">
+      <span class="who">2 ideas · 18 votes · not part of a bucket</span>
+      <h3>GET on food</h3>
+      <span class="gauge">
+        <span class="bar" role="img" aria-label="8 agree, 8 pass, 2 disagree across 18 votes">
+          <i class="a" style="width:44.4%"></i><i class="p" style="width:44.4%"></i><i class="d" style="width:11.1%"></i>
+        </span>
+        <span class="tally"><b>8 of 18</b> votes agreed · 8 passes · 2 disagrees</span>
+      </span>
+      <p>Not one of the Coalition's three buckets — its own track per the Charter. Ranked by votes agreed:</p>
+      <ol class="items">
+        <li>
+          <span class="idea">Pair a progressive revenue raiser with cutting the GET on food</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="5 agree, 4 pass, 1 disagree across 10 votes">
+              <i class="a" style="width:50%"></i><i class="p" style="width:40%"></i><i class="d" style="width:10%"></i>
+            </span>
+            <span class="tally"><b>5 of 10</b> votes agreed · 4 passes · 1 disagree</span>
+          </span>
+        </li>
+        <li>
+          <span class="idea">GET reform or replacement</span>
+          <span class="gauge">
+            <span class="bar" role="img" aria-label="3 agree, 4 pass, 1 disagree across 8 votes">
+              <i class="a" style="width:37.5%"></i><i class="p" style="width:50%"></i><i class="d" style="width:12.5%"></i>
+            </span>
+            <span class="tally"><b>3 of 8</b> votes agreed · 4 passes · 1 disagree</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+    <p class="sub">Buckets aren't ranked by how much they agreed — they're how the Coalition organizes its 2027 ballot. See "Tax credits vs revenue raisers" above for the poll's own weight-of-attention split.</p>
   </section>
 
   <footer>
-    <span>Source: Pol.is conversation <a href="https://pol.is/7bvwfhpf8x">7bvwfhpf8x</a> · votes collected 30 July 2026 · 28 members invited, 12 voted</span>
+    <span>Source: Pol.is conversation <a href="https://pol.is/7bvwfhpf8x">7bvwfhpf8x</a> · votes as of 25 August 2026 (opened 30 July) · 28 members invited, 13 voted</span>
     <span>Prepared for the Tax Fairness Coalition</span>
   </footer>
 

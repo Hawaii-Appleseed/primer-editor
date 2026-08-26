@@ -24,11 +24,14 @@ _LAYOUT = Path(os.environ.get("DOCSYNC_LAYOUT") or (HERE / "layout.json"))
 _CONTENT = Path(os.environ.get("DOCSYNC_CONTENT") or (HERE / "content.md"))
 _OUT = Path(os.environ.get("DOCSYNC_OUT") or (HERE / "index.html"))
 
-# Keep in step with the `page:` in docsync.yml. 27in is the content's measured
-# bottom (26.3in, the .sheet's own height) plus slack: .page is overflow:hidden,
-# so a page trimmed exactly to today's content would clip tomorrow's sentence.
+# Keep in step with the `page:` in docsync.yml. 38.5in is the content's
+# measured bottom (37.2in, the .sheet's own height, after adding the
+# "Priorities by bucket" section and its per-bucket ranked lists) plus slack:
+# the editor's cut-in-print check compares actual content height against this
+# configured height, so a value trimmed exactly to today's content would flag
+# every future sentence as clipped.
 # 160in was the scaffold's no-clip import default, ~6x the real page.
-L = Layout(_LAYOUT, page=(12.5, 27.0))
+L = Layout(_LAYOUT, page=(12.5, 38.5))
 C = Content(_CONTENT, styles=L)
 
 EDIT = bool(os.environ.get("DOCSYNC_EDIT"))
@@ -118,6 +121,55 @@ FAMILY_CSS = """
   max-width:46rem;}
 """
 
+# The Coalition's 2027 Charter groups its ballot into three priority buckets
+# (tax the wealthy / tax corporations / tax credits and assistance) — a
+# different cut of the same 14 ideas than the credits/raisers/GET split above,
+# so it gets its own colour ramp rather than reusing --fam1..3 (which would
+# visually claim the two splits are the same grouping). GET is deliberately
+# NOT one of the three bars: the Charter treats it as its own track, so it's
+# shown as a separate dashed callout below the bucket cards, not a fourth
+# segment competing for a share of the same bar.
+BUCKET_CSS = """
+:root{
+  --bkt1:#3B6E8F; --bkt1-ink:#FFFFFF;
+  --bkt2:#A65D3D; --bkt2-ink:#FFFFFF;
+  --bkt3:#C99A3E; --bkt3-ink:#241B08;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bkt1:#7FA8C4; --bkt1-ink:#0F1E27;
+    --bkt2:#D08F6D; --bkt2-ink:#2A140A;
+    --bkt3:#E0BD73; --bkt3-ink:#241B08;
+  }
+}
+:root[data-theme="dark"]{
+  --bkt1:#7FA8C4; --bkt1-ink:#0F1E27;
+  --bkt2:#D08F6D; --bkt2-ink:#2A140A;
+  --bkt3:#E0BD73; --bkt3-ink:#241B08;
+}
+:root[data-theme="light"]{
+  --bkt1:#3B6E8F; --bkt1-ink:#FFFFFF;
+  --bkt2:#A65D3D; --bkt2-ink:#FFFFFF;
+  --bkt3:#C99A3E; --bkt3-ink:#241B08;
+}
+.famsplit-bar .b1{background:var(--bkt1); color:var(--bkt1-ink);}
+.famsplit-bar .b2{background:var(--bkt2); color:var(--bkt2-ink);}
+.famsplit-bar .b3{background:var(--bkt3); color:var(--bkt3-ink);}
+.get-callout{margin-top:1.1rem; padding:.9rem 1.1rem; border:1px dashed var(--ink-faint);
+  border-radius:6px;}
+.get-callout .who{display:block;}
+/* ol.items li's own grid-template-columns:1fr 11.5rem (original.html) assumes
+   the full-width tier list; nested inside a ~15rem .group card or the
+   .get-callout box it would push the tally column off the edge. Stack idea
+   over gauge instead, at a slightly smaller size than the top-level list so
+   a 5-item ranking still fits a card without dominating it. */
+.group .items li, .get-callout .items li{
+  grid-template-columns:1fr; gap:.2rem; padding:.5rem 0;
+}
+.group .items .idea, .get-callout .items .idea{font-size:.85rem;}
+.group .items .tally, .get-callout .items .tally{font-size:.7rem;}
+"""
+
 # The wrapper's .page is a 12.5in-wide SCREEN canvas with overflow:hidden. Send
 # that to a printer and Chrome lays it on Letter: the right four inches \u2014 every
 # vote tally on every row \u2014 are clipped away, and the 27in column collapses to
@@ -157,7 +209,7 @@ PRINT_CSS = """
      beside the whitespace where its row-mates should be. It is ~300pt, well
      under a sheet, so holding it together costs a page break, not a page. */
   ol.items li, .group, .groups, .tier-head, .legend, p.sub,
-  .famsplit { break-inside:avoid; }
+  .famsplit, .get-callout { break-inside:avoid; }
   /* .famsplit joins the heading-chain: the bar is the section's summary and
      the cards are its detail, so a break between them reads as two unrelated
      graphics. Chained with h2/p.sub above, the whole block moves together. */
@@ -177,6 +229,7 @@ html = f"""<!DOCTYPE html>
            background:#fff; position:relative; overflow:hidden; }}
   {STYLE}
   {FAMILY_CSS}
+  {BUCKET_CSS}
   {PRINT_CSS}
   {EDIT_CSS}
 </style>

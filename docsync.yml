@@ -286,7 +286,7 @@ bindings:
       out: projects/tfc-2027-priorities/index.html
       layout: projects/tfc-2027-priorities/layout.json
       palette: ["#52796F", "#FFFFFF", "#FBFCFA", "#222E33", "#5A6B6C", "#8A9899", "#DCE3DC", "#C3CEC5"]
-      page: [12.5, 27]
+      page: [12.5, 38.5]
       margins: [0.3, 0.3]
       engine:
         # Files render_report.py reads MUST be listed here or the browser's
