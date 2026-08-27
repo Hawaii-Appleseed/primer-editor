@@ -261,37 +261,37 @@ Priorities by bucket
 The same 14 ideas, grouped by the Coalition's three 2027 priority buckets: tax the wealthy, tax corporations, and tax credits and assistance.
 
 [[bucket.n1]]
-42
+34
 
 [[bucket.n2]]
 16
 
 [[bucket.n3]]
-39
+47
 
 [[bucket.key-1]]
-Tax the wealthy · 5 ideas
+Tax the wealthy · 4 ideas
 
 [[bucket.key-2]]
 Tax corporations · 2 ideas
 
 [[bucket.key-3]]
-Tax credits and assistance · 5 ideas
+Tax credits and assistance · 6 ideas
 
 [[bucket.cap]]
 Share of the 97 votes cast on the 12 bucketed ideas. The two GET ideas (18 votes) aren't part of this split — see below.
 
 [[bkt.who-1]]
-5 ideas · 42 votes
+4 ideas · 34 votes
 
 [[bkt.h3-1]]
 Tax the wealthy
 
 [[bkt.tally-1]]
-**29 of 42** votes agreed · 12 passes · 1 disagree
+**22 of 34** votes agreed · 11 passes · 1 disagree
 
 [[bkt.p-1]]
-The five ideas, ranked by votes agreed:
+The four ideas, ranked by votes agreed:
 
 [[bktw.idea-1]]
 Conveyance tax reform
@@ -306,21 +306,15 @@ Tax capital gains at the same rate as ordinary income
 **7 of 8** votes agreed · 1 pass
 
 [[bktw.idea-3]]
-Fix last session's renewable energy tax cuts
-
-[[bktw.tally-3]]
-**7 of 8** votes agreed · 1 pass
-
-[[bktw.idea-4]]
 Reform the 2011 historic-home tax exemption
 
-[[bktw.tally-4]]
+[[bktw.tally-3]]
 **3 of 5** votes agreed · 2 passes
 
-[[bktw.idea-5]]
+[[bktw.idea-4]]
 Constitutional amendment to tax high-value investment properties (ConAm)
 
-[[bktw.tally-5]]
+[[bktw.tally-4]]
 **2 of 9** votes agreed · 6 passes · 1 disagree
 
 [[bkt.who-2]]
@@ -348,16 +342,16 @@ Institute worldwide combined reporting
 **4 of 8** votes agreed · 4 passes
 
 [[bkt.who-3]]
-5 ideas · 39 votes
+6 ideas · 47 votes
 
 [[bkt.h3-3]]
 Tax credits and assistance
 
 [[bkt.tally-3]]
-**25 of 39** votes agreed · 13 passes · 1 disagree
+**32 of 47** votes agreed · 14 passes · 1 disagree
 
 [[bkt.p-3]]
-The five ideas, ranked by votes agreed:
+The six ideas, ranked by votes agreed:
 
 [[bkta.idea-1]]
 Save the working family tax credits set to expire
@@ -366,27 +360,33 @@ Save the working family tax credits set to expire
 **7 of 8** votes agreed · 1 pass
 
 [[bkta.idea-2]]
-Keiki Rx
+Fix last session's renewable energy tax cuts
 
 [[bkta.tally-2]]
-**6 of 9** votes agreed · 3 passes
+**7 of 8** votes agreed · 1 pass
 
 [[bkta.idea-3]]
-Create a state-level Child Tax Credit
+Keiki Rx
 
 [[bkta.tally-3]]
-**5 of 6** votes agreed · 1 pass
+**6 of 9** votes agreed · 3 passes
 
 [[bkta.idea-4]]
-Strengthen the caregiver tax credit for kūpuna caregivers
+Create a state-level Child Tax Credit
 
 [[bkta.tally-4]]
-**5 of 8** votes agreed · 3 passes
+**5 of 6** votes agreed · 1 pass
 
 [[bkta.idea-5]]
-Fix the child and dependent care tax credit
+Strengthen the caregiver tax credit for kūpuna caregivers
 
 [[bkta.tally-5]]
+**5 of 8** votes agreed · 3 passes
+
+[[bkta.idea-6]]
+Fix the child and dependent care tax credit
+
+[[bkta.tally-6]]
 **2 of 8** votes agreed · 5 passes · 1 disagree
 
 [[get.who-1]]
