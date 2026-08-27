@@ -203,6 +203,19 @@ PRINT_CSS = """
   .sheet { padding:0.12in 0.3in; }
   section { margin-top:1.3rem; }
   footer { margin-top:1.25rem; padding-top:0.8rem; break-before:avoid; }
+  /* A three-card .groups row printed as 2 + 1. On screen the sheet is 60rem
+     and auto-fit's 15rem floor admits three columns; on Letter the sheet is
+     only ~44rem (612pt less the @page margin and .sheet padding), where
+     3x15rem + 2x1rem of gap does not fit, so the third card wrapped to a row
+     of its own with a full empty column beside it. That stranded column, not
+     the length of the text, is what pushed the closing note and source line
+     onto a sheet by themselves. A 12rem floor fits all three across
+     (3x12 + 2x1 = 38rem, comfortably inside 44rem) and stays auto-fit, so a
+     future two-card or four-card row still lays itself out. Card content is
+     ~10rem wide at that floor — the tallies and ranked lists still wrap
+     cleanly, and no type size changes. */
+  .groups { grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));
+            align-items:start; }
   /* The bigger win was pagination, not whitespace. original.html marks whole
      sections and whole tiers break-inside:avoid, and by now both are taller
      than a sheet: the Settled tier alone is ~400pt and the credits/raisers
