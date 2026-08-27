@@ -236,6 +236,15 @@ PRINT_CSS = """
      the cards are its detail, so a break between them reads as two unrelated
      graphics. Chained with h2/p.sub above, the whole block moves together. */
   h2, h3, .tier-head, p.sub, .famsplit { break-after:avoid; }
+  /* ...but p.sub plays two roles. As a lead-in it introduces the block below
+     it and the rule above is right. As the LAST child of a section it is a
+     closing note, and gluing it forward binds it to the NEXT section's
+     heading — which then drags it into that section's whole avoid-chain.
+     That is what left 5in of blank paper at the foot of the credits/raisers
+     page while its own closing note sat alone atop the next sheet, and it
+     cost the bucket section the room its three cards needed to print whole.
+     A trailing note belongs to what is above it, so say exactly that. */
+  section > p.sub:last-child { break-after:auto; break-before:avoid; }
 }
 """
 
