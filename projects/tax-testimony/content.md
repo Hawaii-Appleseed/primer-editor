@@ -358,7 +358,7 @@ Build affordable housing with the revenue
 "Our housing crisis has intensified while our infrastructure and housing needs, particularly around transit-oriented development, have grown substantially." — [Hawaiʻi Appleseed, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=14)
 
 [[sup.2.more]]
-- "This housing is essential to prevent homelessness and enable many local families to remain in Hawai`i." — [Catholic Charities Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=31)
+- "This housing is essential to prevent homelessness and enable many local families to remain in Hawaiʻi." — [Catholic Charities Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=31)
 - "It also provides greater flexibility in affordable housing options, with a reliable income stream for the Rental Housing Revolving Fund, Dwelling Unit Revolving Fund, and Hawaiian Home Lands Trust Fund." — [Catholic Charities Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=32)
 - "Revenue from HB2010 could generate tens of millions of dollars each year to support affordable housing, education, healthcare, services for kupuna, and climate resilience." — [Individual, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=52)
 
@@ -412,7 +412,7 @@ The wealthy should pay their fair share
 It pays for roads, schools and public services
 
 [[sup.6.q]]
-"That revenue would help Hawai‘i fund schools, health care, housing, and other services that directly benefit our keiki and kūpuna—all of which are under threat after federal cuts and recent state tax cuts." — [Hawaiʻi Appleseed, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=13)
+"That revenue would help Hawaiʻi fund schools, health care, housing, and other services that directly benefit our keiki and kūpuna—all of which are under threat after federal cuts and recent state tax cuts." — [Hawaiʻi Appleseed, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=13)
 
 [[sup.6.more]]
 - "...ensure that the corporations benefitting from Hawaii's economy pay their fair share for the roads, schools, and infrastructure that ... make their success possible." — [Womenʻs Caucus, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=19)

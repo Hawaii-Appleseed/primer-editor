@@ -100,7 +100,7 @@ test('an engine file added after boot arrives on the next refresh', async ({ pag
   const r = await page.evaluate(async () => {
     const rel = 'docsync/okina.py';
     const url = Object.keys(M.files).find(u => M.files[u] === rel);
-    if (!url) return { skip: 'okina not in this manifest' };
+    if (!url) return { skip: 'okina not in this manifest' };  // okina-lint:ignore -- "okina" here names docsync/okina.py, not the diacritic
     // Rewind this tab to a boot that predates the file: not in the manifest,
     // not in Pyodide's filesystem, no signature on record.
     delete M.files[url];
