@@ -66,7 +66,7 @@ Hawaiʻi Laborers & Employers Cooperation
 Hawaiʻi Appleseed Center for Law and Economic Justice
 
 [[org.protect-democracy.name]]
-Protect Democracy
+Indivisible Hawaiʻi
 
 [[org.hcan.name]]
 Hawaiʻi Children's Action Network Speaks!
@@ -372,7 +372,7 @@ Protect land, water and open space
 "The LCF supports the Legacy Land Conservation Program, which funds grants to state and county governments and non-profit land conservation organizations to acquire land and protect valuable resources for public benefit." — [The Nature Conservancy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=19)
 
 [[sup.3.more]]
-- "The additional tax revenue from tweaking the conveyance tax could also fund affordable housing, homeless programs, land conservation, and so on." — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- "The additional tax revenue from tweaking the conveyance tax could also fund affordable housing, homeless programs, land conservation, and so on." — [Indivisible Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
 - "Bolstering the Legacy Land Conservation Fund to protect ʻāina from development." — [Individual, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=55)
 
 [[sup.3.f]]
@@ -385,12 +385,12 @@ Aim it at luxury and out-of-state buyers
 "It makes sense to ask wealthy sellers to pay a more when they sell their multi-million dollar properties – especially second homes or investment properties – and use those revenues to help those who are struggling to afford housing." — [Hawaiʻi Children’s Action Network, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=18)
 
 [[sup.4.more]]
-- "Even though property values have soared, especially for luxury homes, owners of expensive properties still pay very low conveyance tax rates." — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- "Even though property values have soared, especially for luxury homes, owners of expensive properties still pay very low conveyance tax rates." — [Indivisible Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
 - "The capital gains tax loophole benefits the highest-income taxpayers, including non-residents who profit from investing in real estate in Hawaiʻi." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=46)
 - "Shifting the tax burden away from labor and toward excess wealth and speculative gains helps level the playing field and supports a healthier, regenerative local economy." — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=7)
 
 [[sup.4.f]]
-- Luxury-home sellers pay conveyance tax of only about **0.5% to 1.25%** — below Seattle and San Francisco. — [Protect Democracy, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
+- Luxury-home sellers pay conveyance tax of only about **0.5% to 1.25%** — below Seattle and San Francisco. — [Indivisible Hawaiʻi, Conveyance tax · HB2049](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2049_HD1_TESTIMONY_JHA_02-13-26_.PDF#page=12)
 - **Capital gains are concentrated at the top of the income distribution, especially for non-residents.** — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=22)
 
 [[sup.5.h]]
@@ -402,7 +402,7 @@ The wealthy should pay their fair share
 [[sup.5.more]]
 - "HB 1850 is about creating a more equitable and progressive tax system, one that ensures people are paying their fair share to support our community." — [Oʻahu Youth Action Board, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=21)
 - "HB 2010 ensures that those who have benefited the most from our economy contribute their fair share to maintain and strengthen the safety net that so many of our most vulnerable community members rely on." — [Individual, Millionaire’s tax · HB2010](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB2010_TESTIMONY_HSH_02-05-26_.PDF#page=9)
-- "Studies show that the states with the most progressive tax system are ranked significantly better places to live, work and raise a family." — [Protect Democracy, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
+- "Studies show that the states with the most progressive tax system are ranked significantly better places to live, work and raise a family." — [Indivisible Hawaiʻi, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
 
 [[sup.5.f]]
 - Roughly **70% of long-term capital gains** in Hawaiʻi flow to taxpayers earning **over $400,000**. — [Individual, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=29)
@@ -453,7 +453,7 @@ It backfills the federal cuts
 Investment income is taxed below a paycheck
 
 [[sup.9.q]]
-"Hawaiʻi is one of only nine states that allows capital gains to be taxed at a lower rate than ordinary income." — [Protect Democracy, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
+"Hawaiʻi is one of only nine states that allows capital gains to be taxed at a lower rate than ordinary income." — [Indivisible Hawaiʻi, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_HD1_TESTIMONY_FIN_03-02-26_.PDF#page=15)
 
 [[sup.9.more]]
 - "It’s simply not fair that working families in Hawaiʻi—many of whom are struggling to afford rent, food, and healthcare—pay higher tax rates on their wages than wealthy investors pay on their investment income." — [Voices of Hawaiʻi, Capital gains · HB1850](https://data.capitol.hawaii.gov/sessions/session2026/Testimony/HB1850_TESTIMONY_ECD-TOU_02-04-26_.PDF#page=6)
