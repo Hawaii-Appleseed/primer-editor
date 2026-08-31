@@ -1,0 +1,429 @@
+{
+ "schema": 1,
+ "session": 2026,
+ "generated_at": "2026-08-31T20:26:06Z",
+ "source": {
+  "repo": "Legislative-Research-Tool",
+  "rev": "f71eddf",
+  "command": "python -m testimony export  (~/repos/Legislative-Research-Tool)",
+  "records": 1285,
+  "excluded": "see exclusions.yml"
+ },
+ "bills": [
+  {
+   "bill": "HB2049",
+   "short": "Conveyance tax",
+   "outcome": "died",
+   "campaign": "conveyance-tax",
+   "support": 538,
+   "oppose": 33,
+   "comments": 16,
+   "submissions": 609,
+   "distinct": 403
+  },
+  {
+   "bill": "SB3028",
+   "short": "Conveyance tax",
+   "outcome": "died",
+   "campaign": "conveyance-tax",
+   "support": 127,
+   "oppose": 21,
+   "comments": 13,
+   "submissions": 166,
+   "distinct": 106
+  },
+  {
+   "bill": "SB2362",
+   "short": "REIT loophole",
+   "outcome": "died",
+   "campaign": "reits",
+   "support": 81,
+   "oppose": 14,
+   "comments": 17,
+   "submissions": 134,
+   "distinct": 122
+  },
+  {
+   "bill": "HB1850",
+   "short": "Capital gains",
+   "outcome": "died",
+   "campaign": "capital-gains",
+   "support": 69,
+   "oppose": 13,
+   "comments": 3,
+   "submissions": 93,
+   "distinct": 77
+  },
+  {
+   "bill": "HB2010",
+   "short": "Millionaire's tax",
+   "outcome": "died",
+   "campaign": "millionaires-tax",
+   "support": 42,
+   "oppose": 2,
+   "comments": 1,
+   "submissions": 46,
+   "distinct": 45
+  },
+  {
+   "bill": "HB2306",
+   "short": "Act 46 freeze",
+   "outcome": "died",
+   "campaign": "freezing-act-46",
+   "support": 31,
+   "oppose": 156,
+   "comments": 0,
+   "submissions": 189,
+   "distinct": 125
+  },
+  {
+   "bill": "SB3125",
+   "short": "Act 46 freeze",
+   "outcome": "PASSED",
+   "campaign": "freezing-act-46",
+   "support": 29,
+   "oppose": 11,
+   "comments": 7,
+   "submissions": 48,
+   "distinct": 45
+  }
+ ],
+ "arguments": {
+  "oppose": {
+   "submissions": 250,
+   "distinct": 172,
+   "themes": [
+    {
+     "theme": "It makes an expensive place (Hawaiʻi) harder to afford",
+     "raw": 71,
+     "distinct": 41
+    },
+    {
+     "theme": "It costs jobs and shrinks the activity being taxed",
+     "raw": 38,
+     "distinct": 27
+    },
+    {
+     "theme": "It breaks a promise already made",
+     "raw": 34,
+     "distinct": 16
+    },
+    {
+     "theme": "Business taxes reach every consumer",
+     "raw": 18,
+     "distinct": 11
+    },
+    {
+     "theme": "Small businesses absorb it worst",
+     "raw": 18,
+     "distinct": 10
+    },
+    {
+     "theme": "Pausing a scheduled cut is itself a tax increase",
+     "raw": 15,
+     "distinct": 6
+    },
+    {
+     "theme": "It will not raise the revenue predicted",
+     "raw": 12,
+     "distinct": 5
+    },
+    {
+     "theme": "Cut waste instead of raising revenue",
+     "raw": 9,
+     "distinct": 9
+    },
+    {
+     "theme": "Investors will put their capital in another state",
+     "raw": 7,
+     "distinct": 6
+    },
+    {
+     "theme": "Tax increases are never reversed",
+     "raw": 5,
+     "distinct": 3
+    }
+   ]
+  },
+  "support": {
+   "submissions": 917,
+   "distinct": 657,
+   "themes": [
+    {
+     "theme": "Give Hawaiian Home Lands a permanent funding source",
+     "raw": 451,
+     "distinct": 250
+    },
+    {
+     "theme": "Build affordable housing with the revenue",
+     "raw": 250,
+     "distinct": 171
+    },
+    {
+     "theme": "Protect land, water and open space",
+     "raw": 164,
+     "distinct": 105
+    },
+    {
+     "theme": "Aim it at luxury and out-of-state buyers",
+     "raw": 139,
+     "distinct": 81
+    },
+    {
+     "theme": "The wealthy should pay their fair share",
+     "raw": 135,
+     "distinct": 99
+    },
+    {
+     "theme": "It pays for roads, schools and public services",
+     "raw": 106,
+     "distinct": 96
+    },
+    {
+     "theme": "The cost of living is driving locals away",
+     "raw": 81,
+     "distinct": 73
+    },
+    {
+     "theme": "It backfills the federal cuts",
+     "raw": 77,
+     "distinct": 68
+    },
+    {
+     "theme": "Investment income is taxed below a paycheck",
+     "raw": 75,
+     "distinct": 66
+    },
+    {
+     "theme": "It funds transit-oriented development",
+     "raw": 72,
+     "distinct": 31
+    }
+   ]
+  }
+ },
+ "organisations": {
+  "oppose": [
+   {
+    "slug": "realtors",
+    "organization": "Hawaiʻi Association of REALTORS",
+    "submissions": 11,
+    "bills": 4,
+    "bill_ids": [
+     "HB1850",
+     "HB2049",
+     "SB2362",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "grassroot",
+    "organization": "Grassroot Institute of Hawaii",
+    "submissions": 10,
+    "bills": 4,
+    "bill_ids": [
+     "HB2010",
+     "HB2049",
+     "SB2362",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "naiop",
+    "organization": "NAIOP Hawaii",
+    "submissions": 10,
+    "bills": 3,
+    "bill_ids": [
+     "HB2049",
+     "SB2362",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "chamber",
+    "organization": "Chamber of Commerce Hawaii",
+    "submissions": 3,
+    "bills": 2,
+    "bill_ids": [
+     "HB1850",
+     "SB3125"
+    ]
+   },
+   {
+    "slug": "lurf",
+    "organization": "Land Use Research Foundation of Hawaii",
+    "submissions": 3,
+    "bills": 2,
+    "bill_ids": [
+     "HB2049",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "food-industry",
+    "organization": "Hawaiʻi Food Industry Association",
+    "submissions": 2,
+    "bills": 2,
+    "bill_ids": [
+     "HB1850",
+     "HB2306"
+    ]
+   },
+   {
+    "slug": "tpl",
+    "organization": "Trust for Public Land",
+    "submissions": 1,
+    "bills": 1,
+    "bill_ids": [
+     "HB2049"
+    ]
+   },
+   {
+    "slug": "kobayashi",
+    "organization": "Kobayashi Group",
+    "submissions": 1,
+    "bills": 1,
+    "bill_ids": [
+     "HB2049"
+    ]
+   },
+   {
+    "slug": "bia",
+    "organization": "Building Industry Association of Hawaii",
+    "submissions": 1,
+    "bills": 1,
+    "bill_ids": [
+     "SB2362"
+    ]
+   },
+   {
+    "slug": "laborers",
+    "organization": "Hawaiʻi Laborers & Employers Cooperation and Education Trust",
+    "submissions": 1,
+    "bills": 1,
+    "bill_ids": [
+     "SB2362"
+    ]
+   }
+  ],
+  "support": [
+   {
+    "slug": "appleseed",
+    "organization": "Hawaiʻi Appleseed Center for Law and Economic Justice",
+    "submissions": 14,
+    "bills": 5,
+    "bill_ids": [
+     "HB1850",
+     "HB2010",
+     "HB2049",
+     "SB2362",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "protect-democracy",
+    "organization": "Indivisible Hawaiʻi",
+    "submissions": 13,
+    "bills": 6,
+    "bill_ids": [
+     "HB1850",
+     "HB2010",
+     "HB2049",
+     "SB2362",
+     "SB3028",
+     "SB3125"
+    ]
+   },
+   {
+    "slug": "hcan",
+    "organization": "Hawaiʻi Children's Action Network Speaks!",
+    "submissions": 12,
+    "bills": 6,
+    "bill_ids": [
+     "HB2010",
+     "HB2049",
+     "HB2306",
+     "SB2362",
+     "SB3028",
+     "SB3125"
+    ]
+   },
+   {
+    "slug": "hiphi",
+    "organization": "Hawaiʻi Public Health Institute",
+    "submissions": 10,
+    "bills": 7,
+    "bill_ids": [
+     "HB1850",
+     "HB2010",
+     "HB2049",
+     "HB2306",
+     "SB2362",
+     "SB3028",
+     "SB3125"
+    ]
+   },
+   {
+    "slug": "yimby",
+    "organization": "Hawai‘i YIMBY",
+    "submissions": 7,
+    "bills": 2,
+    "bill_ids": [
+     "HB2049",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "dhhl",
+    "organization": "Department of Hawaiian Home Lands",
+    "submissions": 6,
+    "bills": 1,
+    "bill_ids": [
+     "HB2049"
+    ]
+   },
+   {
+    "slug": "womens-caucus",
+    "organization": "Women's Caucus",
+    "submissions": 5,
+    "bills": 4,
+    "bill_ids": [
+     "HB1850",
+     "HB2010",
+     "HB2049",
+     "HB2306"
+    ]
+   },
+   {
+    "slug": "cnha",
+    "organization": "Council for Native Hawaiian Advancement",
+    "submissions": 5,
+    "bills": 2,
+    "bill_ids": [
+     "HB2049",
+     "SB2362"
+    ]
+   },
+   {
+    "slug": "governor",
+    "organization": "Office of the Governor",
+    "submissions": 5,
+    "bills": 2,
+    "bill_ids": [
+     "HB2049",
+     "SB3028"
+    ]
+   },
+   {
+    "slug": "tnc",
+    "organization": "The Nature Conservancy",
+    "submissions": 4,
+    "bills": 1,
+    "bill_ids": [
+     "HB2049"
+    ]
+   }
+  ]
+ },
+ "warnings": []
+}

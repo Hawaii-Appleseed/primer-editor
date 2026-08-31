@@ -200,6 +200,13 @@ bindings:
       # Must match the .page padding in render_report.py, or the editor's guides
       # sit where the text no longer does.
       margins: [0.5, 0.55]
+      engine:
+        # Every figure the page prints, measured by
+        # `python -m testimony export --project tax-testimony` in
+        # ~/repos/Legislative-Research-Tool. render_report.py opens it, so the
+        # manifest must stage it: an undeclared data file builds on disk and
+        # then fails in Pyodide, where the editor has only the staged copies.
+        - projects/tax-testimony/report_data.json
 
   # Rx Kids Hawaiʻi fiscal one-pager — cost of the proposed program and the
   # federal/non-federal funding split. Hand-built (not scaffolded), so it is

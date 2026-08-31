@@ -6,13 +6,15 @@ resize and edit it: prose through C.html/C.t (never bare C(), which emits no
 data-slot), the chart through graphic() (a bare <svg> is frozen and invisible
 to the editor).
 
-The figures are baked in as DATA below rather than read from a file. The 2026
-session is closed, so these numbers are final, and a data file the renderer
-opens would have to be declared under `editor.engine` in docsync.yml or the
-draft silently fails to build in Pyodide. Regenerate from
-~/repos/hawaii-tax-testimony with `python -m testimony stats`.
+The figures are read from report_data.json, written by `make report` in
+~/repos/Legislative-Research-Tool. They used to be constants pasted from that
+repo's terminal output; nothing then checked that the paste still matched the
+corpus. The data file is declared under `editor.engine` in docsync.yml, which
+is what a renderer needs before it may open a file — an undeclared one builds
+on disk and then fails in Pyodide, where the editor has only staged copies.
 """
 from pathlib import Path
+import json
 import os
 import re
 import sys
@@ -50,16 +52,24 @@ CREAM = "#F4F7F4"
 SUP = "#00907A"
 OPP = "#C4602F"
 
+# --- measured figures --------------------------------------------------------
+# Every number this page prints comes from report_data.json, written by
+# `python -m testimony export --project tax-testimony` in
+# ~/repos/Legislative-Research-Tool. It used to be a set of constants pasted
+# from that repo's terminal output, which is reproducible only in the sense
+# that a person could reproduce it: nothing checked the paste still matched the
+# corpus, and a re-tally that reordered two themes would have re-paired every
+# heading with another theme's count in silence.
+#
+# The file must stay declared under `editor.engine` in docsync.yml. A renderer
+# that opens a file the manifest does not list builds here and fails in
+# Pyodide, where the draft editor has only the staged copies.
+FIGURES = json.loads((HERE / "report_data.json").read_text(encoding="utf-8"))
+TALLY = FIGURES["source"]["command"]
+
 # bill, campaign short, support, oppose, outcome
-DATA = [
-    ("HB2049", "Conveyance tax",   538, 33, "died"),
-    ("SB3028", "Conveyance tax",   127, 21, "died"),
-    ("SB2362", "REIT loophole",     81, 14, "died"),
-    ("HB1850", "Capital gains",     69, 13, "died"),
-    ("HB2010", "Millionaire's tax", 42,  2, "died"),
-    ("HB2306", "Act 46 freeze",     31, 156, "died"),
-    ("SB3125", "Act 46 freeze",     29, 11, "PASSED"),
-]
+DATA = [(b["bill"], b["short"], b["support"], b["oppose"], b["outcome"])
+        for b in FIGURES["bills"]]
 
 
 def diverging_chart() -> str:
@@ -121,28 +131,55 @@ def diverging_chart() -> str:
     return "".join(p)
 
 
-# How many of the 250 opposing submissions raise each argument, in the same
-# order the page lists them. Measured, and now RE-DERIVABLE rather than read by
-# hand: `python -m testimony arguments` in ~/repos/hawaii-tax-testimony prints
-# this list, from phrase sets committed in testimony/arguments.py.
+# How many of the opposing submissions raise each argument, in the same order
+# the page lists them, from the phrase sets committed in
+# testimony/arguments.py. _check_headings() below asserts that this order still
+# matches the headings in content.md.
 #
 # Counts overlap — one submission usually makes several of these at once — so
 # they do not sum to 250. They are RAW submission counts, which is what the
 # (xN) markers in the citations describe; the distinct (deduped) count is lower
 # for every theme and is reported alongside by the command above.
-ARG_COUNTS = [71, 38, 34, 18, 18, 15, 12, 9, 7, 5]
-
-# What every tally on this page is remade by. Passed to C.derived() at each
-# call site, so a reader who clicks a number in the editor is told how it
-# changes instead of finding it simply inert — and so docsync.check's
-# editability pass can tell a declared figure from text nobody wired.
-TALLY = "python -m testimony stats  (~/repos/hawaii-tax-testimony)"
+#
+# TALLY (above) is what every one of them is remade by. It is passed to
+# C.derived() at each call site, so a reader who clicks a number in the editor
+# is told how it changes instead of finding it simply inert — and so
+# docsync.check's editability pass can tell a declared figure from text nobody
+# wired.
+ARG_COUNTS = [t["raw"] for t in FIGURES["arguments"]["oppose"]["themes"]]
 
 # The same measurement over the 917 SUPPORTING submissions (657 distinct).
 # Printed by the same command. Note how differently the two sides argue: the
 # opposition's top theme is a claim about consequences, the support's top three
 # are all destinations for the money.
-SUPPORT_COUNTS = [451, 250, 164, 139, 135, 106, 81, 77, 75, 72]
+SUPPORT_COUNTS = [t["raw"] for t in FIGURES["arguments"]["support"]["themes"]]
+
+
+def _check_headings(pre: str, themes: list[dict]) -> None:
+    """A count and its heading must describe the same argument.
+
+    The ranked lists are ordered by frequency, so a re-tally can reorder them —
+    and the headings live in content.md, which a re-tally does not touch. Left
+    unchecked, two themes swapping places re-pairs every heading below them
+    with another argument's number, silently, and in whichever direction
+    flatters the theme that moved up. `arguments.THEMES` keys ARE these
+    headings, so the two can simply be compared.
+
+    A mismatch is fatal rather than a warning: the page's whole claim is that
+    its figures are measured, and a mispaired figure is worse than no page.
+    """
+    for i, t in enumerate(themes, 1):
+        slot = f"{pre}.{i}.h"
+        heading = " ".join(C.text(slot).split())
+        if heading and heading != t["theme"]:
+            raise SystemExit(
+                f"{slot} says {heading!r} but report_data.json ranks "
+                f"{t['theme']!r} at #{i}. The tally reordered; update the "
+                f"heading slots in content.md to match before rebuilding.")
+
+
+_check_headings("arg", FIGURES["arguments"]["oppose"]["themes"])
+_check_headings("sup", FIGURES["arguments"]["support"]["themes"])
 
 
 # Argument blocks vary from ~240px to ~410px depending on how many examples and
@@ -311,30 +348,10 @@ def _arg_pages() -> int:
 # re-tally reorder these freely without silently re-pairing every name with
 # another organisation's numbers; the counts stay here because they are
 # measured, and `C.derived` says so at the call site.
-ORG_OPPOSE = [
-    ("realtors", 11, 4),
-    ("grassroot", 10, 4),
-    ("naiop", 10, 3),
-    ("chamber", 3, 2),
-    ("lurf", 3, 2),
-    ("food-industry", 2, 2),
-    ("tpl", 1, 1),
-    ("kobayashi", 1, 1),
-    ("bia", 1, 1),
-    ("laborers", 1, 1),
-]
-ORG_SUPPORT = [
-    ("appleseed", 14, 5),
-    ("protect-democracy", 12, 6),
-    ("hcan", 12, 6),
-    ("hiphi", 10, 7),
-    ("yimby", 7, 2),
-    ("dhhl", 6, 1),
-    ("womens-caucus", 5, 4),
-    ("cnha", 5, 2),
-    ("governor", 5, 2),
-    ("tnc", 4, 1),
-]
+ORG_OPPOSE = [(o["slug"], o["submissions"], o["bills"])
+              for o in FIGURES["organisations"]["oppose"]]
+ORG_SUPPORT = [(o["slug"], o["submissions"], o["bills"])
+               for o in FIGURES["organisations"]["support"]]
 
 
 def org_column(rows, accent: str, head_key: str) -> str:
