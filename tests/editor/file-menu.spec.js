@@ -9,7 +9,7 @@
 const { test, expect, gotoEditor, openFileMenu } = require('./fixtures/editor-test');
 
 test.describe('File menu', () => {
-  test('collects Open, New window, Connect GitHub, Repo, Resize, Download, Restore and Token', async ({ page }) => {
+  test('collects Open, New window, Connect GitHub, Repo, Resize, Google Doc, Download, Restore and Token', async ({ page }) => {
     await gotoEditor(page);
     // Closed until asked for — it is a menu, not a panel.
     await expect(page.locator('#filepop')).toBeHidden();
@@ -22,8 +22,11 @@ test.describe('File menu', () => {
     // Force quit is local-only too (see quit-and-reload.spec.js) and closes the
     // list — it stops the editor for every window, so it sits apart from the
     // rows that act on the report.
+    // The two Google Doc rows are local-only as well (see google-doc.spec.js),
+    // and Import is hidden until a doc IS linked — both are always in the DOM.
     await expect(page.locator('#filepop button')).toHaveText(
-      ['Open…', 'New window', 'Connect GitHub…', /^Repo: /, 'Resize…', 'Download…',
+      ['Open…', 'New window', 'Connect GitHub…', /^Repo: /, 'Resize…',
+       /^Google Doc/, 'Import text from the Doc…', 'Download…',
        'Restore deleted…', 'Token…', 'Force quit']);
   });
 

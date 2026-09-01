@@ -1,13 +1,20 @@
 # Report bindings — the registry the draft editor and the build read.
 #
-# Each entry pairs a committed source file with the report it feeds. This used
-# to sync to a Google Doc; that is gone. Prose is now edited directly in
-# content.md — by hand or through the draft editor — and the files on disk are
-# the single source of truth. The `editor:` block below is what lets one
-# generic editor serve any report.
+# Each entry pairs a committed source file with the report it feeds. The files
+# on disk are the single source of truth: prose is edited directly in
+# content.md, by hand or through the draft editor. The `editor:` block below is
+# what lets one generic editor serve any report.
+#
+# The two-way Google Doc sync this once had is gone and is not coming back.
+# What replaced it is one-way and manual: `doc:` records the Google Doc a
+# report was DRAFTED in, and File ▸ Import text from the Doc reads it and
+# proposes where each section lands (docsync/docimport.py). The doc is never
+# written to, so there is no conflict to detect — an import you did not want
+# is one ⌘Z away. Set it from the editor rather than by hand.
 #
 #   id       kebab-case, unique
 #   content  the committed source the report reads
+#   doc      optional: the Google Doc id this report is drafted in
 #   build    the one command that rebuilds and publishes (make pub)
 #   editor   what the draft editor needs to run this report in the browser
 

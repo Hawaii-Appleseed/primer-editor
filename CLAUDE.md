@@ -172,6 +172,17 @@ Rules that bite:
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
   block); `python3 -m docsync.stage --id <id>` stages the editor + engine next
   to that report's published dir.
+- **A project can name the Google Doc it was drafted in** (`doc:` on its
+  binding; set it from File ▸ Google Doc, not by hand). File ▸ Import text
+  from the Doc reads that doc and proposes where each section lands — by its
+  `[[key]]` markers if it has them, otherwise by matching its headings to what
+  the slots currently say. One-way: the doc is never written to, so there is no
+  conflict to detect, and the approved rows apply as ONE pilot `batch` — one
+  undo step, the same validation as typing them. Matching lives in
+  `docsync/docimport.py` (pure, tested in `test_docsync.py`); the endpoints are
+  `/__doc` and `/__doc/import`, and they are local-only because
+  docs.google.com serves no CORS headers. The old two-way `docsync.sync` is
+  not what this is and is not coming back.
 - **Report templates live in `docsync/templates/`** (registry + logo assets;
   engine files, so they vendor to consumers like the rest of the package).
   "+ New report" offers them beside the blank canvas — editor File ▸ Open ▸

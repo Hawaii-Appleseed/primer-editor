@@ -187,8 +187,15 @@ for whatever is selected; a bottom strip shows every page as a thumbnail and
 can be collapsed when you don't need it (remembered per project). The
 top-left **File** menu is where report-level actions live: Open (switch
 between reports this server knows about), Resize (six standard doc sizes —
-changing one re-renders the report at it, live), Download, and the GitHub
-token. Clicking the report itself dismisses whatever menu or panel is open,
+changing one re-renders the report at it, live), Google Doc, Download, and the
+GitHub token.
+
+**Google Doc** records which doc a report was drafted in, and **Import text
+from the Doc** brings that text in: the server reads the doc and proposes where
+each section lands — by its `[[key]]` markers if it has them, otherwise by
+matching its headings to what the slots currently say — and you approve the
+list row by row before anything is written. It is one-way; the doc is never
+written to, and the whole import is a single undo. Clicking the report itself dismisses whatever menu or panel is open,
 except the ones that describe your current selection (Table/Chart/Colour),
 which stay open so you can keep working while they're up.
 
