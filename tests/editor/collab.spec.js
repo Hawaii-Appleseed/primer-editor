@@ -301,6 +301,33 @@ test('both editors type in the SAME paragraph at once, each sees the other\'s wo
   await expect.poll(() => slot(b), { timeout: 10_000 }).toBe(merged);
 });
 
+test('an automated edit in B is shown to A as Claude at work, via grace, and clears when it is done', async () => {
+  const text = 'Claude wrote this through the pilot at ' + Date.now() + '.';
+  // A pilot op is what an AI's edit looks like to an editor: the same verbs
+  // the tests call, arriving through /__pilot. Run one in B directly.
+  await b.evaluate(`runPilotOps([{ id: 'test-op', verb: 'setSlot', args: [${JSON.stringify(SLOT)}, ${JSON.stringify(text)}] }])`);
+  // B says so itself…
+  await expect(b.locator('#agentlive')).toBeVisible();
+  await expect(b.locator('#agentlive')).toHaveText(/Claude is editing/);
+  expect((await b.evaluate('docsync.api.status().agent')).target).toBe(SLOT);
+  // …and A hears it from B, with the words, the attribution and a tag on the paragraph.
+  await expect.poll(() => slot(a), { timeout: 10_000 }).toBe(text);
+  await expect(a.locator('#agentlive')).toHaveText(/Claude is editing · via grace/, { timeout: 10_000 });
+  const tag = a.frameLocator('#out').locator(`[data-slot="${SLOT}"].ds-agent`);
+  await expect(tag).toHaveCount(1, { timeout: 10_000 });
+  await expect(tag).toHaveAttribute('data-peer', /Claude · editing/);
+  const st = await status(a);
+  expect(st.peerList.find(p => p.login === 'grace').agent.target).toBe(SLOT);
+  // A few quiet seconds later it is over, everywhere.
+  await expect(b.locator('#agentlive')).toBeHidden({ timeout: 10_000 });
+  await expect(a.locator('#agentlive')).toBeHidden({ timeout: 10_000 });
+  await expect(a.frameLocator('#out').locator('.ds-agent')).toHaveCount(0, { timeout: 10_000 });
+  // A person's own edit says nothing of the kind.
+  await api(a, `setSlot(${JSON.stringify(SLOT)}, ${JSON.stringify('A person wrote this.')})`);
+  await expect.poll(() => slot(b), { timeout: 10_000 }).toBe('A person wrote this.');
+  await expect(b.locator('#agentlive')).toBeHidden();
+});
+
 test('an unshared project shows no chip and keeps the snapshot undo stack', async ({ page }) => {
   await gotoEditor(page, '?collab=0');
   const s = await status(page);

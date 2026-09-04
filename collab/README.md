@@ -392,6 +392,30 @@ goes to the shared branch and disables everyone's Save; a commit landing
 outside the session is named in a confirm, cancel leaves the branch alone,
 and *Save over it* commits on top of it.
 
+### The AI at work
+
+`#agentnote` was already the past tense — *Claude edited this*, with a
+rewind. Phase 4 adds the present tense: a purple, pulsing `#agentlive` chip,
+**✦ Claude is editing…**, while an automated editor is changing the report,
+and a *✦ Claude · editing* tag on the paragraph or element it is touching,
+drawn the way a collaborator's typing spot is. Three sources feed it
+(`agentTouch()` in the editor):
+
+- a pilot op running in this tab (`runPilotOps`), named by verb and target —
+  the ordinary shape of an AI edit through the MCP server;
+- an agent that announced itself to the local server (`POST /__agent/change`),
+  and every disk change adopted while that announcement is fresh;
+- a collaborator's editor doing either: presence carries `agent` and the room
+  paints it with **· via \<login\>**, so a change that arrives from Claude
+  through grace's tab is never mistaken for grace's own.
+
+It clears itself — a few seconds after the last pilot op, longer after an
+announced agent's last change. `docsync.api.status().agent` carries the same,
+and `collab.peerList[].agent` who is relaying one. Tested end to end in
+`collab.spec.js`: a pilot op in B shows in A as *Claude is editing · via
+grace* with the tag on the paragraph, clears when it is done, and a person's
+own edit says nothing of the kind.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the

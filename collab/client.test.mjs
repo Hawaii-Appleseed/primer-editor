@@ -462,6 +462,13 @@ describe('two editors on one room', { skip: E2E ? false : 'COLLAB_E2E=0' }, () =
     assert.equal(b.peers[0].drag, true);
     assert.equal(b.peers[0].page, null);
 
+    // An automated editor at work through A is presence too, so B can say "via ada".
+    a.setPresence({ sel: [], agent: { by: 'Claude', what: 'setSlot page1.intro', target: 'page1.intro' } });
+    await waitFor(() => b.peers[0]?.agent?.by === 'Claude', 5000, 'the agent never showed');
+    assert.equal(b.peers[0].agent.target, 'page1.intro');
+    a.setPresence({ sel: [] });
+    await waitFor(() => !b.peers[0]?.agent, 5000, 'the agent never cleared');
+
     // A polled presence function is picked up without anyone calling setPresence.
     const c = open(room, 'linus', p, { presence: () => ({ page: 'p3' }) });
     await c.ready;

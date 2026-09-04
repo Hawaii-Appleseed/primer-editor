@@ -342,6 +342,7 @@ function peerOf(clientId, st) {
     slot: st.slot ?? null,      // the slot / element id an inline editor is open on
     drag: !!st.drag,
     cursor: st.cursor ?? null,  // {slot, rel}: a caret in that slot, as a relative position
+    agent: st.agent ?? null,    // {by, what, target}: an AI is editing THROUGH this editor right now
   };
 }
 
@@ -465,7 +466,7 @@ export class CollabSession {
    *  Only sends when something changed — awareness fans out to everyone. */
   setPresence(p) {
     const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag,
-                   cursor: p.cursor ?? null };
+                   cursor: p.cursor ?? null, agent: p.agent ?? null };
     const sig = JSON.stringify(next);
     if (sig === this.#lastPresence) return false;
     this.#lastPresence = sig;
