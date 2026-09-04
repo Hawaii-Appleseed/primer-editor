@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import * as Y from 'yjs';
 import {
   CollabSession, ORIGIN, writeFiles, filesFromY, docFromY, applyText,
-  syncMap, syncArray, syncBlocks, deepEqual, toY,
+  syncMap, syncArray, syncBlocks, deepEqual, toY, colorFor,
 } from './client/session.mjs';
 import { parseContent, serializeContent } from './serialize.mjs';
 import { mintTicket, formatRoom } from './src/auth.js';
@@ -401,6 +401,42 @@ describe('two editors on one room', { skip: E2E ? false : 'COLLAB_E2E=0' }, () =
     assert.equal(a.shadow.getArray('blocks').length, b.shadow.getArray('blocks').length, 'no duplicate blocks');
     assert.equal(a.files().content, b.files().content);
     a.close(); b.close();
+  });
+
+  test('presence: selection, page, typing spot and colour reach the other side, and leave with it', async () => {
+    const room = uniqueRoom('presence');
+    const seenA = [], seenB = [];
+    const a = open(room, 'ada', p, { onPeers: ps => seenA.push(ps) });
+    await a.ready;
+    const b = open(room, 'grace', p, { onPeers: ps => seenB.push(ps) });
+    await b.ready;
+    await waitFor(() => a.peers.length === 1 && b.peers.length === 1, 5000, 'never saw each other');
+    assert.equal(a.peers[0].login, 'grace');
+    assert.equal(b.peers[0].login, 'ada');
+    assert.equal(b.peers[0].color, colorFor('ada'), 'colour hashes off the login');
+    assert.equal(a.color, colorFor('ada'));
+    assert.equal(colorFor('ada'), colorFor('ada'), 'stable across calls (and so across days)');
+    assert.match(colorFor('grace'), /^#[0-9A-F]{6}$/);
+    // Two logins CAN share a colour (eight colours, many people); stability
+    // beats uniqueness here, and the name tag disambiguates.
+    assert.deepEqual(b.peers[0].sel, []);
+
+    assert.equal(a.setPresence({ sel: ['cover.logo', 'fig.3'], slot: 'page1.intro', drag: true }), true);
+    assert.equal(a.setPresence({ sel: ['cover.logo', 'fig.3'], slot: 'page1.intro', drag: true }), false, 'unchanged: not resent');
+    await waitFor(() => b.peers[0]?.slot === 'page1.intro', 5000, 'presence never propagated');
+    assert.deepEqual(b.peers[0].sel, ['cover.logo', 'fig.3']);
+    assert.equal(b.peers[0].drag, true);
+    assert.equal(b.peers[0].page, null);
+
+    // A polled presence function is picked up without anyone calling setPresence.
+    const c = open(room, 'linus', p, { presence: () => ({ page: 'p3' }) });
+    await c.ready;
+    await waitFor(() => b.peers.some(x => x.login === 'linus' && x.page === 'p3'), 5000, 'polled presence never arrived');
+
+    a.close();
+    await waitFor(() => !b.peers.some(x => x.login === 'ada'), 5000, 'ada never left');
+    assert.ok(seenB.length >= 3, 'onPeers fired for arrival, change and departure');
+    b.close(); c.close();
   });
 
   test('baseSha rides in meta and is not an undo step', async () => {

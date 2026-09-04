@@ -5,7 +5,8 @@ Durable Object per project, holding a Yjs document that two or more browsers
 edit at once.
 
 Phase 0 (the file⇄document bridge) is in [PHASE0.md](PHASE0.md).
-Phase 1 (the Worker) and Phase 2 (the editor side) are described below.
+Phase 1 (the Worker), Phase 2 (the editor side) and Phase 3 (presence) are
+described below.
 
 ```
 collab/
@@ -257,11 +258,44 @@ consumer like the rest of the engine, and `docsync.stage` copies it beside
 `edit.html`. The Node tests import the source; the Playwright spec is what
 catches a stale bundle.
 
-## Known gaps, for Phase 3
+## Phase 3 — presence
 
-- **Presence is a count.** Awareness carries `login` and nothing else; the
-  chip shows how many are here and who on hover. Cursors, selections, "X is
-  dragging this" and colours are Phase 3 — the transport is there.
+Awareness (y-partyserver fans it out; nothing server-side changed) now
+carries what each editor is doing, and every other editor paints it:
+
+| Field | Set from | Painted as |
+|---|---|---|
+| `login`, `color` | the ticket; colour hashes off the login | a dot per person in the `#collab` chip |
+| `sel` | `selIds` | a ring in their colour on each selected element, with a name tag |
+| `page` | `selPage` (a selected page background) | a halo on that page |
+| `slot` | the inline editor open here (`data-slot` on a paragraph host, `data-el` on a text box, the table cell's id) | `name · typing` on that paragraph, and a coloured bar down its left edge |
+| `drag` | a pointer down on a selection | the tag reads `name · moving` |
+
+The editor publishes from one poll (`collabPresence()`, 4×/s, sent only when
+something changed) rather than from hooks at every selection and edit site;
+`collabPaintPeers()` is idempotent and runs after every render (from
+`wire()`) and every awareness change, so marks survive a re-render. Rings go
+on HTML elements only — an outline on an SVG child paints around the whole
+page-sized viewport (the same reason `paintSel` uses an overlay for shapes).
+
+Colours are **stable, not unique**: a person keeps theirs from one day to
+the next because it hashes off the login, and with eight colours two people
+can share one — the name tag disambiguates. Opening a paragraph a
+collaborator is already typing in is allowed (the CRDT merges both) but
+announced in the status row: *grace is also editing this paragraph — both of
+your edits will be kept*. Presence leaves with the person: closing the tab
+removes the awareness state, and the provider's disconnect path clears it
+for a dropped connection.
+
+`?collabas=<name>` names a local editor in a dev room (two tabs on one
+machine would otherwise both be `local`); local mode only, like `?collab=`.
+
+## Known gaps, for Phase 4
+
+- **No cursors inside a paragraph.** Presence says *which* paragraph someone
+  is typing in, not where. A caret position would need the inline editor's
+  DOM selection mapped to a `Y.Text` relative position, which is Yjs's
+  `RelativePosition` — straightforward once someone needs it.
 - **The busy hold is coarse.** While an inline editor is open, *every* remote
   change waits, not just changes to that slot. Correct, and the wait is
   seconds, but a per-slot hold would let the rest of the page keep moving.

@@ -302,9 +302,39 @@ export function checkY(ydoc) {
   return assertWellFormed(docFromY(ydoc));
 }
 
+/* ------------------------------------------------------------- presence */
+
+/** Eight colours that stay apart from the editor's own selection green and
+ *  from each other; a person keeps theirs across sessions because it hashes
+ *  off the login, so "the orange one is Ada" holds from one day to the next. */
+export const PEER_COLORS = [
+  '#D9622B', '#2F6DB5', '#8E44AD', '#C2185B', '#00838F', '#F9A825', '#5D4037', '#455A64',
+];
+
+export function colorFor(key) {
+  const s = String(key ?? '');
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return PEER_COLORS[h % PEER_COLORS.length];
+}
+
+/** What one collaborator is doing, as the editor wants it. */
+function peerOf(clientId, st) {
+  return {
+    id: clientId,
+    login: st.login ?? null,
+    color: st.color || colorFor(st.login ?? clientId),
+    sel: Array.isArray(st.sel) ? st.sel : [],
+    page: st.page ?? null,
+    slot: st.slot ?? null,      // the slot / element id an inline editor is open on
+    drag: !!st.drag,
+  };
+}
+
 /* ------------------------------------------------------------ the session */
 
 const STATUS_POLL_MS = 200;
+const PRESENCE_POLL_MS = 250;
 
 export class CollabSession {
   /**
@@ -329,7 +359,11 @@ export class CollabSession {
     this.onFiles = o.onFiles || (() => {});
     this.onStatus = o.onStatus || (() => {});
     this.onHistory = o.onHistory || (() => {});
+    this.onPeers = o.onPeers || (() => {});
+    this.presence = o.presence || null;     // polled: () => {sel, page, slot, drag}
     this.debug = !!o.debug;
+    this.color = o.color || colorFor(this.login ?? Math.random());
+    this.peers = [];
     this.state = { status: 'connecting', phase: 'sync', peers: 0, here: [], seededBy: null, error: null };
 
     this.shadow = new Y.Doc();
@@ -380,7 +414,15 @@ export class CollabSession {
     this.provider.on('synced', synced => { if (synced) this.#onSynced(); });
     this.provider.on('custom-message', s => this.#onMessage(s));
     this.provider.awareness.on('change', () => this.#presence());
-    if (this.login) this.provider.awareness.setLocalStateField('login', this.login);
+    this.provider.awareness.setLocalState({ login: this.login, color: this.color });
+    if (this.presence) {
+      this.#presenceTimer = setInterval(() => {
+        if (this.state.phase !== 'ready') return;
+        let p = null;
+        try { p = this.presence(); } catch { return; }
+        if (p) this.setPresence(p);
+      }, PRESENCE_POLL_MS);
+    }
 
     if (o.connect !== false) this.connect();
   }
@@ -388,8 +430,24 @@ export class CollabSession {
   #initial;
   #pending = [];
   #drainTimer = 0;
+  #presenceTimer = 0;
+  #lastPresence = '';
   #readyRes; #readyRej;
   #lastEmitted = null;
+
+  /* ----------------------------------------------------------- presence */
+
+  /** Publish what this editor is doing: {sel: [ids], page, slot, drag}.
+   *  Only sends when something changed — awareness fans out to everyone. */
+  setPresence(p) {
+    const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag };
+    const sig = JSON.stringify(next);
+    if (sig === this.#lastPresence) return false;
+    this.#lastPresence = sig;
+    const aw = this.provider.awareness;
+    aw.setLocalState({ ...(aw.getLocalState() || {}), login: this.login, color: this.color, ...next });
+    return true;
+  }
 
   connect() {
     this.provider.connect().catch(e => this.#set({ status: 'offline', error: String(e && e.message || e) }));
@@ -429,6 +487,7 @@ export class CollabSession {
 
   close() {
     clearTimeout(this.#drainTimer);
+    clearInterval(this.#presenceTimer);
     try { this.provider.destroy(); } catch (e) { /* already closed */ }
     this.undoManager.destroy();
     this.shadow.destroy();
@@ -543,9 +602,12 @@ export class CollabSession {
 
   #presence() {
     const states = this.provider.awareness.getStates();
-    const here = [];
-    for (const [id, st] of states) if (id !== this.net.clientID && st) here.push(st.login ?? null);
-    this.#set({ peers: states.size, here });
+    const peers = [];
+    for (const [id, st] of states) if (id !== this.net.clientID && st) peers.push(peerOf(id, st));
+    peers.sort((a, b) => a.id - b.id);
+    this.peers = peers;
+    this.#set({ peers: states.size, here: peers.map(p => p.login) });
+    this.onPeers(peers);
   }
 
   #set(patch) {

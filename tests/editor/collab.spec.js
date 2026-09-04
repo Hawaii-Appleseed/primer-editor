@@ -37,10 +37,10 @@ async function waitLive(page) {
   }, { timeout: 60_000, message: 'the editor never joined the room' }).toBe('live');
 }
 
-async function open(browser) {
+async function open(browser, as) {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await gotoEditor(page, `?collab=http://127.0.0.1:${RELAY_PORT}&collabroom=${room}`);
+  await gotoEditor(page, `?collab=http://127.0.0.1:${RELAY_PORT}&collabroom=${room}&collabas=${as}`);
   await waitLive(page);
   return { ctx, page };
 }
@@ -51,8 +51,8 @@ test.beforeAll(async ({ browser }) => {
     port: RELAY_PORT,
     vars: { ALLOWED_ORIGINS: `http://localhost:${EDITOR_PORT},http://127.0.0.1:${EDITOR_PORT}` },
   });
-  ({ ctx: ctxA, page: a } = await open(browser));
-  ({ ctx: ctxB, page: b } = await open(browser));
+  ({ ctx: ctxA, page: a } = await open(browser, 'ada'));
+  ({ ctx: ctxB, page: b } = await open(browser, 'grace'));
 });
 
 test.afterAll(async () => {
@@ -153,15 +153,74 @@ test('a remote edit waits while B is typing in a slot, then lands', async () => 
 });
 
 test('a third editor arriving late adopts the room, not its own files', async ({ browser }) => {
-  const { ctx, page: c } = await open(browser);
+  const { ctx, page: c } = await open(browser, 'linus');
   try {
     expect(await slot(c)).toBe(await slot(a));
     expect(await c.evaluate('layout.positions["cover.logo"].x')).toBeCloseTo(1.25, 1);
     await expect(c.locator('#collab')).toHaveText(/live · 3/);
     expect((await status(c)).peers).toBe(3);
+    // Presence: a newcomer sees who is here and in what colour, immediately.
+    const s = await status(c);
+    expect(s.peerList.map(p => p.login).sort()).toEqual(['ada', 'grace']);
+    await expect(c.locator('#collab i')).toHaveCount(2);
   } finally {
     await ctx.close();
   }
+  await expect.poll(async () => (await status(a)).peers, { timeout: 10_000 }).toBe(2);
+});
+
+test('presence: A\'s selection shows in B as a ring with A\'s name; it clears when A deselects', async () => {
+  await a.evaluate(`setSel(document.getElementById('out').contentDocument, ['cover.logo'])`);
+  const ring = b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer');
+  await expect(ring).toHaveCount(1, { timeout: 10_000 });
+  await expect(ring).toHaveAttribute('data-peer', 'ada');
+  const color = await ring.evaluate(el => el.style.getPropertyValue('--peer'));
+  expect(color).toMatch(/^#[0-9A-F]{6}$/i);
+  // The dot in B's chip for ada is the same colour as the ring.
+  const dot = b.locator('#collab i[title^="ada"]');
+  await expect(dot).toHaveCount(1);
+  expect((await dot.evaluate(el => el.style.background)).toLowerCase())
+    .toBe((await ring.evaluate((el, c) => { el.style.background = c; const v = el.style.background; el.style.background = ''; return v; }, color)).toLowerCase());
+  // A's own view carries no peer ring for its own selection.
+  await expect(a.frameLocator('#out').locator('.ds-peer')).toHaveCount(0);
+
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+  await expect(b.frameLocator('#out').locator('.ds-peer')).toHaveCount(0, { timeout: 10_000 });
+});
+
+test('presence: the paragraph B is typing in is tagged in A, and A is told when opening it', async () => {
+  const inv = await api(b, 'inventory()');
+  const key = inv.pages.slice(1).flatMap(p => p.slots).find(s => s.key !== SLOT && s.text).key;
+  const el = b.frameLocator('#out').locator(`[data-slot="${key}"]`).first();
+  await el.scrollIntoViewIfNeeded();
+  await el.dblclick();
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  expect(await b.evaluate('collabEditTarget()')).toBe(key);
+
+  const tag = a.frameLocator('#out').locator(`[data-slot="${key}"].ds-peer-typing`);
+  await expect(tag).toHaveCount(1, { timeout: 10_000 });
+  await expect(tag).toHaveAttribute('data-peer', 'grace · typing');
+  await expect(a.locator('#collab i[title="grace · typing"]')).toHaveCount(1);
+
+  // A opens the same paragraph: told, not blocked.
+  const elA = a.frameLocator('#out').locator(`[data-slot="${key}"]`).first();
+  await elA.scrollIntoViewIfNeeded();
+  await elA.dblclick();
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await expect(a.locator('#stat')).toHaveText(/grace is also editing this paragraph/);
+
+  await a.keyboard.press('Escape');
+  await b.keyboard.press('Escape');
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(false);
+  await expect(a.frameLocator('#out').locator('.ds-peer-typing')).toHaveCount(0, { timeout: 10_000 });
+});
+
+test('presence survives a re-render: B\'s ring for A is back after B edits', async () => {
+  await a.evaluate(`setSel(document.getElementById('out').contentDocument, ['cover.logo'])`);
+  await expect(b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer')).toHaveCount(1, { timeout: 10_000 });
+  await api(b, `setSlot(${JSON.stringify(SLOT)}, ${JSON.stringify('B re-rendered at ' + Date.now())})`);
+  await expect(b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer')).toHaveCount(1, { timeout: 10_000 });
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
 });
 
 test('an unshared project shows no chip and keeps the snapshot undo stack', async ({ page }) => {
