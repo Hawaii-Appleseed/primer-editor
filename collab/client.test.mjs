@@ -10,7 +10,8 @@
  *
  * End to end: two CollabSessions against a real `wrangler dev`, exercising
  * the seed handshake, convergence through the mirror API the editor actually
- * calls (flush / onFiles), the busy hold, and reconnection.
+ * calls (flush / onFiles), the busy hold, reconnection, presence, and (Phase
+ * 4) the beforeRemote / onBaseSha hooks and cursors as relative positions.
  */
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -255,6 +256,39 @@ describe('an offline session (no provider connection)', () => {
     assert.equal(s.canUndo(), false);
     s.close();
   });
+
+  test('a cursor names a character, not an offset: it holds through edits around it and dies with its slot', () => {
+    const s = make();
+    s.shadow.transact(() => writeFiles(s.shadow, p), ORIGIN.SEED);
+    s.state = { ...s.state, phase: 'ready' };
+    const doc = parseContent(p.content);
+    const slot = doc.blocks.find(b => b.kind === 'slot' && b.text.length > 20);
+    const c = s.cursorAt(slot.key, 5);
+    assert.equal(c.slot, slot.key);
+    assert.ok(c.rel && typeof c.rel === 'object', 'a relative position as plain JSON');
+    assert.deepEqual(s.resolveCursor(c), { slot: slot.key, index: 5 });
+    const t = s.slotText(slot.key);
+    // A collaborator's insert BEFORE it moves it along; one after it does not.
+    s.shadow.transact(() => t.insert(0, 'AAA '), ORIGIN.REMOTE);
+    assert.equal(s.resolveCursor(c).index, 9);
+    s.shadow.transact(() => t.insert(t.length, ' tail'), ORIGIN.REMOTE);
+    assert.equal(s.resolveCursor(c).index, 9);
+    // The character it names is deleted: it lands where that was.
+    s.shadow.transact(() => t.delete(4, 6), ORIGIN.REMOTE);
+    assert.equal(s.resolveCursor(c).index, 4);
+    // Past the end clamps to the end; an unknown slot is nothing.
+    assert.equal(s.resolveCursor(s.cursorAt(slot.key, 10_000)).index, t.length);
+    assert.equal(s.cursorAt('no.such.slot', 0), null);
+    assert.equal(s.resolveCursor(null), null);
+    // The slot is moved (syncBlocks re-creates a moved block, and so its
+    // Y.Text): a position into the old one points at nothing.
+    const moved = doc.blocks.filter(b => b !== slot);
+    if (doc.blocks[0] === slot) moved.push(slot); else moved.unshift(slot);
+    s.shadow.transact(() => writeFiles(s.shadow,
+      { content: serializeContent({ preamble: doc.preamble, blocks: moved }), layout: p.layout }), ORIGIN.LOCAL);
+    assert.equal(s.resolveCursor(c), null);
+    s.close();
+  });
 });
 
 /* --------------------------------------------------------------------- e2e */
@@ -437,6 +471,60 @@ describe('two editors on one room', { skip: E2E ? false : 'COLLAB_E2E=0' }, () =
     await waitFor(() => !b.peers.some(x => x.login === 'ada'), 5000, 'ada never left');
     assert.ok(seenB.length >= 3, 'onPeers fired for arrival, change and departure');
     b.close(); c.close();
+  });
+
+  test('beforeRemote runs just before a collaborator\'s update lands; a collaborator\'s Save is announced, our own is not', async () => {
+    const room = uniqueRoom('hooks');
+    const order = [], shas = [];
+    let a;
+    const has = () => a.files().content.includes('B typed.') ? 'has' : 'not';
+    a = open(room, 'ada', p, {
+      beforeRemote: () => order.push('before:' + has()),
+      onFiles: (f, why) => order.push(why + ':' + (f.content.includes('B typed.') ? 'has' : 'not')),
+      onBaseSha: sha => shas.push(sha),
+    });
+    await a.ready;
+    const b = open(room, 'grace', p);
+    await b.ready;
+    const docB = parseContent(p.content);
+    const slot = docB.blocks.find(x => x.kind === 'slot' && x.text.length > 20);
+    slot.text = 'B typed. ' + slot.text;
+    b.flush({ content: serializeContent(docB), layout: p.layout });
+    await waitFor(() => order.includes('remote:has'), 10_000, 'B\'s edit never reached A');
+    const i = order.indexOf('remote:has');
+    assert.equal(order[i - 1], 'before:not', 'beforeRemote ran right before, with the old text still in place: ' + order.join(' '));
+
+    a.setBaseSha('a'.repeat(40));
+    await sleep(500);
+    assert.deepEqual(shas, [], 'our own Save is not announced back to us');
+    b.setBaseSha('b'.repeat(40));
+    await waitFor(() => shas.length > 0, 5000, 'onBaseSha never fired for the collaborator\'s Save');
+    assert.deepEqual(shas, ['b'.repeat(40)]);
+    assert.equal(a.baseSha(), 'b'.repeat(40));
+    a.close(); b.close();
+  });
+
+  test('a cursor published by A resolves in B against B\'s own copy, and moves with B\'s edits', async () => {
+    const room = uniqueRoom('cursor');
+    const a = open(room, 'ada', p);
+    await a.ready;
+    const b = open(room, 'grace', p);
+    await b.ready;
+    await waitFor(() => a.peers.length === 1 && b.peers.length === 1, 5000, 'never saw each other');
+    const doc = parseContent(p.content);
+    const slot = doc.blocks.find(x => x.kind === 'slot' && x.text.length > 20);
+    a.setPresence({ slot: slot.key, cursor: a.cursorAt(slot.key, 7) });
+    await waitFor(() => b.peers[0]?.cursor, 5000, 'the cursor never arrived');
+    assert.deepEqual(b.resolveCursor(b.peers[0].cursor), { slot: slot.key, index: 7 });
+    // B inserts before it: on B's screen A's caret is further along now, and
+    // A's own copy agrees once B's edit arrives.
+    const docB = parseContent(p.content);
+    docB.blocks.find(x => x.key === slot.key).text = 'BB ' + slot.text;
+    b.flush({ content: serializeContent(docB), layout: p.layout });
+    assert.equal(b.resolveCursor(b.peers[0].cursor).index, 10);
+    await waitFor(() => a.files().content.includes('BB '), 5000, 'B\'s edit never reached A');
+    assert.equal(a.resolveCursor(a.provider.awareness.getLocalState().cursor).index, 10);
+    a.close(); b.close();
   });
 
   test('baseSha rides in meta and is not an undo step', async () => {

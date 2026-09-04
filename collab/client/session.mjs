@@ -35,6 +35,19 @@
  *   layout: Y.Map            nested Y.Map / Y.Array; leaves are JSON scalars
  *   meta:   Y.Map            {preamble, baseSha}
  *
+ * Phase 4 adds three things on top of that shape, none of which change it:
+ *
+ *   - `beforeRemote()` runs just before a collaborator's update is replayed
+ *     onto the shadow, so an editor holding text OUTSIDE its `source` (an
+ *     open paragraph) can flush it first — the diff is then against the text
+ *     it was typed into, and Yjs merges the two as concurrent operations.
+ *   - `onBaseSha(sha)` fires when a collaborator records a Save in `meta`,
+ *     so every editor in the room knows the document is now on the branch.
+ *   - `cursorAt()` / `resolveCursor()` turn a caret offset into a slot's
+ *     markdown into a Y.RelativePosition and back. A relative position names
+ *     a character, not an index, so it stays put while text is inserted and
+ *     deleted around it — on this side and on every other.
+ *
  * This file is bundled into docsync/editor/collab-client.js by build-client.mjs
  * and also imported directly by the Node tests (client.test.mjs).
  */
@@ -328,6 +341,7 @@ function peerOf(clientId, st) {
     page: st.page ?? null,
     slot: st.slot ?? null,      // the slot / element id an inline editor is open on
     drag: !!st.drag,
+    cursor: st.cursor ?? null,  // {slot, rel}: a caret in that slot, as a relative position
   };
 }
 
@@ -347,6 +361,8 @@ export class CollabSession {
    * @param {string|null} [o.login]     for presence
    * @param {() => boolean} [o.busy]    true while the editor must not be disturbed
    * @param {(files, why: 'adopt'|'remote'|'undo'|'redo') => void} [o.onFiles]
+   * @param {() => void} [o.beforeRemote]  runs just before a collaborator's update lands on the shadow
+   * @param {(sha: string|null) => void} [o.onBaseSha]  a collaborator recorded a Save (meta.baseSha)
    * @param {(state) => void} [o.onStatus]
    * @param {() => void} [o.onHistory]
    * @param {boolean} [o.debug]        assert the document round-trips after every local write
@@ -357,6 +373,8 @@ export class CollabSession {
     this.login = o.login ?? null;
     this.busy = o.busy || (() => false);
     this.onFiles = o.onFiles || (() => {});
+    this.beforeRemote = o.beforeRemote || (() => {});
+    this.onBaseSha = o.onBaseSha || (() => {});
     this.onStatus = o.onStatus || (() => {});
     this.onHistory = o.onHistory || (() => {});
     this.onPeers = o.onPeers || (() => {});
@@ -383,6 +401,12 @@ export class CollabSession {
     for (const ev of ['stack-item-added', 'stack-item-popped', 'stack-cleared']) {
       this.undoManager.on(ev, () => this.onHistory());
     }
+    // A Save recorded by a collaborator: their commit now holds this document,
+    // so the editor's own "unsaved changes" should reset to it. Our own
+    // setBaseSha() is META origin and the editor already knows about it.
+    this.shadow.getMap('meta').observe((ev, tr) => {
+      if (tr.origin === ORIGIN.REMOTE && ev.keysChanged.has('baseSha')) this.onBaseSha(this.baseSha());
+    });
 
     // shadow -> net: every local (non-remote) shadow update is replayed onto
     // the network document, whose provider broadcasts it.
@@ -440,7 +464,8 @@ export class CollabSession {
   /** Publish what this editor is doing: {sel: [ids], page, slot, drag}.
    *  Only sends when something changed — awareness fans out to everyone. */
   setPresence(p) {
-    const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag };
+    const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag,
+                   cursor: p.cursor ?? null };
     const sig = JSON.stringify(next);
     if (sig === this.#lastPresence) return false;
     this.#lastPresence = sig;
@@ -485,6 +510,49 @@ export class CollabSession {
     this.shadow.transact(() => this.shadow.getMap('meta').set('baseSha', sha || null), ORIGIN.META);
   }
 
+  /* ------------------------------------------------------------ cursors */
+
+  /** The Y.Text behind a slot in the shadow, or null. */
+  slotText(key) {
+    for (const m of this.shadow.getArray('blocks').toArray()) {
+      if (m.get('kind') === 'slot' && m.get('key') === key) {
+        const t = m.get('text');
+        return t instanceof Y.Text ? t : null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * A caret at `index` into a slot's markdown, as something that survives
+   * edits around it: {slot, rel}, where `rel` is a Y.RelativePosition as JSON
+   * (small, plain, and meaningful on every client that shares the document).
+   * Null when the slot is not in the document.
+   */
+  cursorAt(key, index) {
+    const t = this.slotText(key);
+    if (!t) return null;
+    const i = Math.max(0, Math.min(Number(index) || 0, t.length));
+    return { slot: key, rel: Y.relativePositionToJSON(Y.createRelativePositionFromTypeIndex(t, i)) };
+  }
+
+  /**
+   * Where a cursor is NOW, against what this editor holds: {slot, index}, or
+   * null when the character it named is gone with its slot (a section moved
+   * or removed re-creates the block, and a position into the old one has
+   * nothing to point at).
+   */
+  resolveCursor(c) {
+    if (!c || !c.rel || !c.slot) return null;
+    try {
+      const abs = Y.createAbsolutePositionFromRelativePosition(Y.createRelativePositionFromJSON(c.rel), this.shadow);
+      if (!abs) return null;
+      const t = this.slotText(c.slot);
+      if (!t || abs.type !== t) return null;
+      return { slot: c.slot, index: abs.index };
+    } catch { return null; }
+  }
+
   close() {
     clearTimeout(this.#drainTimer);
     clearInterval(this.#presenceTimer);
@@ -509,6 +577,13 @@ export class CollabSession {
     if (this.busy()) {
       this.#drainTimer = setTimeout(() => { this.#drainTimer = 0; this.#drain(); }, STATUS_POLL_MS);
       return false;
+    }
+    // The editor's last word before the document moves under it: anything it
+    // holds outside `source` goes in now, as a diff against the text it was
+    // typed into. (Only once the room is ready — before that a flush is a
+    // no-op by design, see flush().)
+    if (this.state.phase === 'ready') {
+      try { this.beforeRemote(); } catch (e) { /* the editor's problem, not the document's */ }
     }
     const merged = this.#pending.length === 1 ? this.#pending[0] : Y.mergeUpdates(this.#pending);
     this.#pending = [];

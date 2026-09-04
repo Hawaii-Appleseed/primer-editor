@@ -1,6 +1,8 @@
-// Real-time collaboration, end to end through the editor (Phase 2 of
+// Real-time collaboration, end to end through the editor (Phases 2–4 of
 // collab/README.md): two browser contexts open the same project against a
-// real `wrangler dev` relay and edit at once.
+// real `wrangler dev` relay and edit at once — including the same paragraph,
+// in two open inline editors. The branch side of Phase 4 (the shared draft
+// branch, a commit landing outside the session) is collab-drafts.spec.js.
 //
 // The relay is booted HERE, per spec file, rather than as a second entry in
 // playwright.config's webServer: only this spec needs it, and a ~10s Worker
@@ -36,6 +38,13 @@ async function waitLive(page) {
     return s.status;
   }, { timeout: 60_000, message: 'the editor never joined the room' }).toBe('live');
 }
+
+/** edit() opens a paragraph with all of it selected; put the caret at one
+ *  end instead, so typing adds words rather than replacing them. */
+const collapse = (page, where) => page.evaluate(w => {
+  const sel = document.getElementById('out').contentDocument.getSelection();
+  if (w === 'end') sel.collapseToEnd(); else sel.collapseToStart();
+}, where);
 
 async function open(browser, as) {
   const ctx = await browser.newContext();
@@ -132,7 +141,7 @@ test('a move in A lands in B\'s layout and geometry', async () => {
   expect(logo.box.x).toBeCloseTo(1.25, 1);
 });
 
-test('a remote edit waits while B is typing in a slot, then lands', async () => {
+test('a remote edit to ANOTHER slot lands in B\'s source while B\'s paragraph editor is open, and paints when it closes', async () => {
   // Open B's inline editor on a DIFFERENT slot — on another page, clear of
   // the logo the previous test parked over the cover — and leave it open.
   const inv = await api(b, 'inventory()');
@@ -142,14 +151,20 @@ test('a remote edit waits while B is typing in a slot, then lands', async () => 
   await el.dblclick();
   await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
 
-  const text = 'Landed after B finished typing.';
+  const text = 'Landed while B was typing elsewhere.';
   await api(a, `setSlot(${JSON.stringify(SLOT)}, ${JSON.stringify(text)})`);
-  await b.waitForTimeout(1500);
-  expect(await slot(b)).not.toBe(text);          // held: B is busy
+  // Phase 4: an open PARAGRAPH is not busy. The change is in B's source at
+  // once, the editor undisturbed — and not on B's page, which nothing
+  // re-renders under an open editor.
+  await expect.poll(() => slot(b), { timeout: 10_000 }).toBe(text);
+  expect(await b.evaluate('editing')).toBe(true);
+  expect(await b.evaluate('collabEditTarget()')).toBe(other);
+  await expect(b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`)).not.toContainText('Landed while');
 
   await b.keyboard.press('Escape');               // close the editor, keep nothing
   await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(false);
-  await expect.poll(() => slot(b), { timeout: 20_000 }).toBe(text);
+  await expect(b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`)).toContainText('Landed while', { timeout: 20_000 });
+  expect(await slot(b)).toBe(text);
 });
 
 test('a third editor arriving late adopts the room, not its own files', async ({ browser }) => {
@@ -221,6 +236,69 @@ test('presence survives a re-render: B\'s ring for A is back after B edits', asy
   await api(b, `setSlot(${JSON.stringify(SLOT)}, ${JSON.stringify('B re-rendered at ' + Date.now())})`);
   await expect(b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer')).toHaveCount(1, { timeout: 10_000 });
   await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+});
+
+test('typing in a paragraph reaches A while B\'s editor is still open, with B\'s caret; Escape takes it back', async () => {
+  const before = await slot(b);
+  const el = b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`).first();
+  await el.scrollIntoViewIfNeeded();
+  await el.dblclick();
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await collapse(b, 'end');
+  await b.keyboard.type(' LIVE');
+  // A has the words before B has committed anything: B's editor is still open.
+  await expect.poll(() => slot(a), { timeout: 10_000 }).toBe(before + ' LIVE');
+  expect(await b.evaluate('editing')).toBe(true);
+  expect(await slot(b)).toBe(before);   // B's own source waits for the commit, as ever
+  // B's caret — a relative position into the shared paragraph — is drawn in
+  // A at the end of the words, in B's colour.
+  const caret = a.frameLocator('#out').locator('.ds-peer-caret[data-peer="grace"]');
+  await expect(caret).toHaveCount(1, { timeout: 10_000 });
+  await expect(caret).toHaveAttribute('data-slot', SLOT);
+  await expect.poll(async () => {
+    const g = (await status(a)).peerList.find(p => p.login === 'grace');
+    return g && g.cursor && `${g.cursor.slot}@${g.cursor.index}`;
+  }, { timeout: 10_000 }).toBe(`${SLOT}@${(before + ' LIVE').length}`);
+
+  await b.keyboard.press('Escape');                  // keep nothing — including what the room already saw
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(false);
+  await expect.poll(() => slot(b), { timeout: 10_000 }).toBe(before);
+  await expect.poll(() => slot(a), { timeout: 10_000 }).toBe(before);
+  await expect(a.frameLocator('#out').locator('.ds-peer-caret')).toHaveCount(0, { timeout: 10_000 });
+});
+
+test('both editors type in the SAME paragraph at once, each sees the other\'s words land around its caret, and both keep theirs', async () => {
+  const base = await slot(a);
+  for (const [pg, where, text] of [[a, 'end', ' says Ada'], [b, 'start', 'Grace says ']]) {
+    // B opens once A's words have LANDED in B: a remote change arriving
+    // between B's double-click and the caret placement below rebuilds the
+    // host with the caret at the end, and then "start" is the end.
+    if (pg === b) await expect.poll(() => slot(b), { timeout: 10_000 }).toBe(base + ' says Ada');
+    const el = pg.frameLocator('#out').locator(`[data-slot="${SLOT}"]`).first();
+    await el.scrollIntoViewIfNeeded();
+    await el.dblclick();
+    await expect.poll(() => pg.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+    await collapse(pg, where);
+    await pg.keyboard.type(text);
+  }
+  const merged = 'Grace says ' + base + ' says Ada';
+  // Each OPEN editor shows both, merged, before either has committed — and
+  // each shows the other's caret inside its own editing surface.
+  for (const [pg, other] of [[a, 'grace'], [b, 'ada']]) {
+    await expect.poll(() => pg.evaluate('collabHostMd()'), { timeout: 10_000 }).toBe(merged);
+    expect(await pg.evaluate('editing')).toBe(true);
+    await expect(pg.frameLocator('#out').locator(`.ds-peer-caret[data-peer="${other}"]`)).toHaveCount(1, { timeout: 10_000 });
+  }
+  // A's caret stayed at the end of ITS words as Grace's arrived in front.
+  const idx = await a.evaluate('collabHostCaretIndex()');
+  expect(idx).toBe(merged.length);
+  // A blur is a commit, in both; the document agrees everywhere.
+  for (const pg of [a, b]) {
+    await pg.evaluate(`document.getElementById('out').contentDocument.activeElement.blur()`);
+    await expect.poll(() => pg.evaluate('editing'), { timeout: 10_000 }).toBe(false);
+  }
+  await expect.poll(() => slot(a), { timeout: 10_000 }).toBe(merged);
+  await expect.poll(() => slot(b), { timeout: 10_000 }).toBe(merged);
 });
 
 test('an unshared project shows no chip and keeps the snapshot undo stack', async ({ page }) => {

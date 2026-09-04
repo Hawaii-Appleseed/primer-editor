@@ -195,6 +195,23 @@ class FakeGitHub {
     return route.fulfill({ status: 404, json: { message: `fake-github: unhandled ${method} ${url.pathname}` } });
   }
 
+  /** A commit made OUTSIDE the editor — a push from a laptop, a docsync
+   *  tool — on top of `branch`'s tip, changing the given {path: content}.
+   *  Returns the new tip. */
+  commit(branch, files) {
+    const parent = this.refs.get(branch) || null;
+    const base = parent ? (this.trees.get(this.commits.get(parent).tree) || []) : [];
+    const byPath = new Map(base.map(f => [f.path, f.content]));
+    for (const [p, c] of Object.entries(files)) byPath.set(p, c);
+    const tree = sha(this._seq++);
+    this.trees.set(tree, [...byPath].map(([path, content]) => ({ path, content })));
+    const s = sha(this._seq++);
+    this.commits.set(s, { tree, parents: parent ? [parent] : [] });
+    this.refs.set(branch, s);
+    this._materialize(branch, s);
+    return s;
+  }
+
   /** Seed a file as it exists on `branch` today (what fromBranch()/contents-GET see). */
   seedFile(branch, path, content) {
     this.contents.set(`${branch}:${path}`, content);
