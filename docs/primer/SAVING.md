@@ -22,6 +22,13 @@ phased plan.
 > device flow needs only the public client id). Dormant until the manifest
 > gains an `oauth` block — `OAUTH_SETUP.md` has the two ~5-minute
 > account-bound steps (create the GitHub App, paste the relay worker).
+>
+> **Phase 3 (Option C, real-time) is under way in `collab/`** — see
+> [`collab/README.md`](../../collab/README.md). Phases 0–2 are done: a
+> Cloudflare Durable Object holds one Yjs document per project, and the
+> editor mirrors `source`/`layout` off it, so two people edit one report at
+> once and ⌘Z undoes only your own edits. Switched on per project by a
+> `"collab": {"url": …}` entry in `projects.json`; not deployed yet.
 
 ---
 

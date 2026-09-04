@@ -87,7 +87,15 @@ async function handleAuth(request, env, cors) {
   const token = typeof body?.token === 'string' ? body.token.trim() : '';
   if (!token) return json({ error: 'a GitHub token is required' }, { status: 400 }, cors);
 
-  const verdict = await checkRepoPermission(token, room.nwo);
+  // Development tokens: `dev:<login>` mints a ticket without asking GitHub —
+  // what the editor's Playwright spec and a local `wrangler dev` session
+  // use, since neither has a real token to offer. Accepted ONLY where the
+  // development signing secret is in force: a deployed Worker always binds
+  // COLLAB_SECRET, so there this branch cannot be reached at all. No
+  // separate flag to leave switched on by mistake.
+  const verdict = (!env.COLLAB_SECRET && token.startsWith('dev:'))
+    ? { ok: true, login: token.slice(4).replace(/[^A-Za-z0-9-]/g, '').slice(0, 39) || 'dev' }
+    : await checkRepoPermission(token, room.nwo);
   if (!verdict.ok) {
     return json({ error: verdict.reason, repo: room.nwo }, { status: 403 }, cors);
   }

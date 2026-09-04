@@ -169,6 +169,19 @@ Rules that bite:
   passing the smallest font-size it uses in its own user units.
 - **Never launch or kill a dev server the user owns**; Playwright starts its
   own throwaway servers and that's fine.
+- **Real-time collaboration lives in `collab/`** (`collab/README.md` is the
+  design record: Phases 0–2 done, not deployed). The editor's state model is
+  deliberately untouched — `source`/`layout` are MIRRORED onto a Yjs doc by
+  `collab/client/session.mjs`: `renderOnce()` flushes local → doc as a diff,
+  `collabAdopt()` paints doc → local, and in a session `pushHistory()` marks
+  an undo step on a `Y.UndoManager` instead of snapshotting. So a new
+  mutation site needs nothing special AS LONG AS it ends in `render()` and
+  starts with `pushHistory()`. Two rules: after touching
+  `collab/client/session.mjs` or `collab/serialize.mjs`, run `cd collab &&
+  npm run build:client` — `docsync/editor/collab-client.js` is a committed
+  bundle the editor `import()`s, and only `collab.spec.js` notices it being
+  stale; and `?collab=` / `?collabroom=` are honoured by a LOCAL editor only,
+  because the page POSTs the GitHub token to whatever `collab` names.
 - A report is bound in **`docsync.yml`** (id, content, build command, editor
   block); `python3 -m docsync.stage --id <id>` stages the editor + engine next
   to that report's published dir.

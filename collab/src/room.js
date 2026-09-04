@@ -98,6 +98,11 @@ export class PrimerRoom extends YServer {
       ro: ctx.request.headers.get('x-collab-ro') === '1',
       room: url.pathname.split('/').pop(),
     });
+    // YServer's own onConnect opens the sync and — the part that is easy to
+    // lose — sends the newcomer everyone's current awareness state. Without
+    // it a second editor sees an empty room until someone moves, because the
+    // client only ever learns presence from updates, never from a query.
+    super.onConnect(connection, ctx);
   }
 
   onCustomMessage(connection, message) {

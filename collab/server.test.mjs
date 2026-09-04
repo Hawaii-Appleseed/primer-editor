@@ -13,18 +13,13 @@
  */
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
 import http from 'node:http';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import * as Y from 'yjs';
 import YProvider from 'y-partyserver/provider';
 import { mintTicket, verifyTicket, parseRoom, formatRoom } from './src/auth.js';
+import { startDev } from './devserver.mjs';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
 const DEV_SECRET = 'dev-only-insecure-secret';
 const PORT = Number(process.env.COLLAB_TEST_PORT || 8788);
 const HOST = `127.0.0.1:${PORT}`;
@@ -99,40 +94,10 @@ describe('tickets', () => {
 /* ------------------------------------------------------------------- e2e */
 
 let dev = null;
-let persistDir = null;
 
 describe('end to end', { skip: E2E ? false : 'COLLAB_E2E=0' }, () => {
-  before(async () => {
-    persistDir = mkdtempSync(join(tmpdir(), 'primer-collab-'));
-    dev = spawn('npx', [
-      'wrangler', 'dev',
-      '--ip', '127.0.0.1', '--port', String(PORT),
-      '--persist-to', persistDir,
-      '--log-level', 'warn',
-    ], { cwd: HERE, stdio: ['ignore', 'pipe', 'pipe'] });
-
-    const log = [];
-    dev.stdout.on('data', d => log.push(String(d)));
-    dev.stderr.on('data', d => log.push(String(d)));
-    dev.on('exit', c => { if (c) log.push(`\n[wrangler exited ${c}]`); });
-
-    const deadline = Date.now() + 90_000;
-    for (;;) {
-      if (Date.now() > deadline) {
-        throw new Error(`wrangler dev did not come up in 90s:\n${log.join('')}`);
-      }
-      try {
-        const r = await fetch(`http://${HOST}/health`);
-        if (r.ok) break;
-      } catch { /* not up yet */ }
-      await sleep(400);
-    }
-  });
-
-  after(async () => {
-    if (dev && !dev.killed) { dev.kill('SIGTERM'); await sleep(500); dev.kill('SIGKILL'); }
-    if (persistDir) rmSync(persistDir, { recursive: true, force: true });
-  });
+  before(async () => { dev = await startDev({ port: PORT }); });
+  after(async () => { if (dev) await dev.stop(); });
 
   test('health is public', async () => {
     const r = await fetch(`http://${HOST}/health`);
