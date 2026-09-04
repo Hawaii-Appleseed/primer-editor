@@ -1,0 +1,31 @@
+{
+  "name": "primer-collab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Real-time collaboration relay for the docsync draft editor: one Cloudflare Durable Object per project, holding the Yjs document.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test serialize.test.mjs server.test.mjs",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "partyserver": "^0.5.10",
+    "y-partyserver": "^2.2.0",
+    "yjs": "^13.6.32"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260903.1",
+    "wrangler": "^4.129.0"
+  },
+  "comment:overrides": [
+    "partyserver accepts @cloudflare/workers-types ^5.20260703.1 and wrangler",
+    "demands ^5.20260903.1; npm refuses to reconcile them even though the",
+    "later version satisfies both ranges. It is a types-only package with no",
+    "runtime presence in the Worker bundle, so pinning one copy is safe."
+  ],
+  "overrides": {
+    "@cloudflare/workers-types": "^5.20260903.1"
+  }
+}

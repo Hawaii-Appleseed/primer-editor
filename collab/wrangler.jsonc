@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "primer-collab",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // One Durable Object per project document. `new_sqlite_classes` (rather than
+  // `new_classes`) is required: SQLite-backed Durable Objects are the only kind
+  // available on the Workers free plan.
+  "durable_objects": {
+    "bindings": [{ "name": "PrimerRoom", "class_name": "PrimerRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PrimerRoom"] }],
+
+  "observability": { "enabled": true },
+
+  "vars": {
+    // Browsers allowed to open a collaborative session. Mirrors the ALLOW list
+    // in docs/primer/oauth-relay.js — the hosted editor and local dev.
+    "ALLOWED_ORIGINS": "https://dtomkatsu.github.io,http://localhost:8777,http://localhost:8010,http://127.0.0.1:8777,http://127.0.0.1:8010",
+    // Repositories whose collaborators may open a room here. A room names its
+    // repo, so without this anyone with push access to ANY repo could mint a
+    // ticket for a room named after someone else's.
+    "ALLOWED_REPOS": "dtomkatsu/primer-editor,dtomkatsu/BudgetPrimerFinal"
+  }
+
+  // COLLAB_SECRET is a secret, not a var:
+  //   npx wrangler secret put COLLAB_SECRET
+  // Any high-entropy string; it only ever signs short-lived connection
+  // tickets. `wrangler dev` falls back to a fixed development value.
+}
