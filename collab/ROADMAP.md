@@ -109,4 +109,4 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   hub 3fefae0).
 - 2026-09-05 — Suggesting mode: a viewer's or an editor's edit proposed as
   a thread with the change, drawn inline, accepted or rejected from the
-  card (primer-editor + hub, see the commits after this line).
+  card (primer-editor f4023c4, hub 3ce43cc).
