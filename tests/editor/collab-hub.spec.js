@@ -550,6 +550,7 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   expect(marked).toBeGreaterThanOrEqual(0);
   // Resolve from B; A's count drops on its next refresh.
   await b.locator('#cpanel .cmt button', { hasText: 'Resolve' }).first().click();
+  await expect(b.locator('#cpanel .cmt').first()).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(a.locator('#comments')).toHaveText('Comments', { timeout: 30_000 });
   await b.locator('#cpanel-close').click();
   await a.locator('#cpanel-close').click();
@@ -566,6 +567,11 @@ const clearComments = async () => {
   for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${c.id}`);
 };
 const cmtRow = (page, text) => page.locator('#cpanel .cmt', { hasText: text });
+// Delete, Show, Edit and Copy link live in the card's ⋮ menu, as in Docs.
+const openMenu = row => row.locator('.cmt-msg').first().locator('.cmt-more').click();
+const menuItem = (row, label) => row.locator('.cmt-menu button', { hasText: label });
+const viaMenu = async (row, label) => { await openMenu(row); await menuItem(row, label).click(); };
+const closeMenu = page => page.locator('#cpanel .cpanel-head b').click();
 const marker = (page, id) => page.frameLocator('#out').locator(`[data-el="${id}"][data-ds-comments], [data-slot="${id}"][data-ds-comments]`);
 
 test('comments: on the document, a paragraph and an element - each anchored where it was set', async () => {
@@ -639,19 +645,24 @@ test('comments: resolved from the other editor, the marker and the count drop ev
 
 test('comments: who may delete - the author, and the owner; nobody else sees the button', async () => {
   // Grace wrote nothing yet: no Delete on Ada's comments for her (Ada owns the record).
-  await expect(cmtRow(b, 'Overall: shorter').locator('button', { hasText: 'Delete' })).toHaveCount(0);
+  await openMenu(cmtRow(b, 'Overall: shorter'));
+  await expect(menuItem(cmtRow(b, 'Overall: shorter'), 'Delete')).toHaveCount(0);
+  await expect(menuItem(cmtRow(b, 'Overall: shorter'), 'Resolve')).toHaveCount(1);
+  await closeMenu(b);
   await b.locator('#cpanel-text').fill("Grace's own note.");
   await b.locator('#cpanel-add').click();
   await expect(cmtRow(b, "Grace's own note")).toBeVisible({ timeout: 10_000 });
-  await expect(cmtRow(b, "Grace's own note").locator('button', { hasText: 'Delete' })).toBeVisible();
+  await openMenu(cmtRow(b, "Grace's own note"));
+  await expect(menuItem(cmtRow(b, "Grace's own note"), 'Delete')).toBeVisible();
+  await expect(menuItem(cmtRow(b, "Grace's own note"), 'Edit')).toBeVisible();
+  await closeMenu(b);
   // Ada, the owner, may delete Grace's; and her own.
   await expect(cmtRow(a, "Grace's own note")).toBeVisible({ timeout: 20_000 });
-  await expect(cmtRow(a, "Grace's own note").locator('button', { hasText: 'Delete' })).toBeVisible();
-  await cmtRow(a, "Grace's own note").locator('button', { hasText: 'Delete' }).click();
+  await viaMenu(cmtRow(a, "Grace's own note"), 'Delete');
   await a.locator('dialog[open] button.dsdlg-ok').click();
   await expect(cmtRow(a, "Grace's own note")).toHaveCount(0, { timeout: 10_000 });
   await expect(cmtRow(b, "Grace's own note")).toHaveCount(0, { timeout: 20_000 });
-  await cmtRow(a, 'Nudge this').locator('button', { hasText: 'Delete' }).click();
+  await viaMenu(cmtRow(a, 'Nudge this'), 'Delete');
   await a.locator('dialog[open] button.dsdlg-ok').click();
   await expect(cmtRow(a, 'Nudge this')).toHaveCount(0, { timeout: 10_000 });
   await expect(a.locator('#comments')).toHaveText('Comments · 2');
@@ -659,16 +670,18 @@ test('comments: who may delete - the author, and the owner; nobody else sees the
 });
 
 test('comments: Show flashes the paragraph; a comment on something no longer on the page says so', async () => {
-  await cmtRow(a, 'runs long').locator('button', { hasText: 'Show' }).click();
+  await viaMenu(cmtRow(a, 'runs long'), 'Show');
   await expect(a.frameLocator('#out').locator('.ds-comment-flash')).toHaveCount(1);
   await expect(a.frameLocator('#out').locator('.ds-comment-flash')).toHaveCount(0, { timeout: 5000 });
   // The document-level comment has no Show; one anchored to a ghost says so.
-  await expect(cmtRow(a, 'Overall: shorter').locator('button', { hasText: 'Show' })).toHaveCount(0);
+  await openMenu(cmtRow(a, 'Overall: shorter'));
+  await expect(menuItem(cmtRow(a, 'Overall: shorter'), 'Show')).toHaveCount(0);
+  await closeMenu(a);
   await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: 'ghost.element', text: 'Orphaned note.' } });
   await expect(cmtRow(a, 'Orphaned note')).toBeVisible({ timeout: 20_000 });
-  await cmtRow(a, 'Orphaned note').locator('button', { hasText: 'Show' }).click();
+  await viaMenu(cmtRow(a, 'Orphaned note'), 'Show');
   await expect(a.locator('#stat')).toContainText('not on the page any more');
-  await cmtRow(a, 'Orphaned note').locator('button', { hasText: 'Delete' }).click();
+  await viaMenu(cmtRow(a, 'Orphaned note'), 'Delete');
   await a.locator('dialog[open] button.dsdlg-ok').click();
   await expect(cmtRow(a, 'Orphaned note')).toHaveCount(0, { timeout: 10_000 });
 });
@@ -712,6 +725,160 @@ test('comments: they survive a reload, and the list page counts the open ones', 
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
 });
 
+// --- comments, the way Google Docs does them ---------------------------------
+// Words selected in a paragraph become the quote and the highlight; a click
+// on the highlight opens the thread; replies thread under it and reopen a
+// resolved one; Edit rewords; @ offers people and For you lists what names
+// you; ⌘⌥M starts one on what is in hand; a link opens on a thread.
+const highlightCount = (page, name) => page.evaluate(`(() => { const w = document.getElementById('out').contentWindow;
+  const h = w.CSS && w.CSS.highlights && w.CSS.highlights.get(${JSON.stringify(name)}); return h ? h.size : 0; })()`);
+// Either set: the thread in hand paints darker, every other one lighter.
+const highlighted = async page => (await highlightCount(page, 'ds-comment')) + (await highlightCount(page, 'ds-comment-active'));
+
+test('comments: words selected in a paragraph are quoted and highlighted; a click on the highlight opens the thread', async () => {
+  await clearComments();
+  const inv = await a.evaluate('docsync.api.inventory()');
+  // A body paragraph, not the cover's: the cover moves under a click.
+  const key = (inv.pages.slice(1).flatMap(p => p.slots || []).find(s => s.text && s.text.length > 40)
+            || inv.pages.flatMap(p => p.slots || []).find(s => s.text && s.text.length > 40)).key;
+  const el = a.frameLocator('#out').locator(`[data-slot="${key}"]`).first();
+  await el.scrollIntoViewIfNeeded();
+  // What the paragraph's double-click does, called directly: the hub's frame
+  // is never "stable" enough for Playwright's own double-click.
+  await a.evaluate(`edit(document.getElementById('out').contentDocument, ${JSON.stringify(key)})`);
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  // Select the first twelve characters of the paragraph, as a drag would.
+  await expect.poll(() => a.evaluate('!!(richHost && richHost.textContent.trim())'), { timeout: 10_000 }).toBe(true);
+  const quote = await a.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    const w = d.createTreeWalker(richHost, NodeFilter.SHOW_TEXT); let n = w.nextNode(); while (n && !n.nodeValue.trim()) n = w.nextNode();
+    const r = d.createRange(); r.setStart(n, 0); r.setEnd(n, Math.min(12, n.length));
+    const s = d.getSelection(); s.removeAllRanges(); s.addRange(r); return r.toString().trim(); })()`);
+  expect(quote.length).toBeGreaterThan(3);
+  await expect(a.locator('#cmt-plus')).toBeVisible({ timeout: 5000 });
+  await a.locator('#cmt-plus').dispatchEvent('mousedown');
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(a.locator('#cpanel-anchor q')).toHaveText(quote);
+  await expect(a.locator('#cpanel-text')).toBeFocused();
+  await a.locator('#cpanel-text').fill('Rephrase this bit.');
+  await a.keyboard.press('Meta+Enter');
+  await expect(cmtRow(a, 'Rephrase this bit')).toBeVisible({ timeout: 10_000 });
+  await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-quote q')).toHaveText(quote);
+  await expect(cmtRow(a, 'Rephrase this bit')).toHaveClass(/active/);
+  // The quoted words carry the highlight, not the paragraph a badge.
+  await expect.poll(() => highlightCount(a, 'ds-comment-active')).toBe(1);
+  await expect(marker(a, key)).toHaveCount(0);
+  await expect.poll(() => highlightCount(b, 'ds-comment'), { timeout: 20_000 }).toBe(1);
+  await expect(marker(b, key)).toHaveCount(0);
+  const stored = (await allComments())[0];
+  expect(stored.anchor).toBe(key);
+  expect(stored.quote).toBe(quote);
+  // B clicks the highlighted words: the panel opens on that thread.
+  await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument; const h = hubCommentRanges[0];
+    h.el.scrollIntoView({ block: 'center' }); const r = h.range.getBoundingClientRect();
+    d.dispatchEvent(new MouseEvent('mousedown', { clientX: r.left + 3, clientY: r.top + r.height / 2, bubbles: true, button: 0 })); })()`);
+  await expect(b.locator('#cpanel')).toBeVisible();
+  await expect(b.locator('#cpanel .cmt.active')).toContainText('Rephrase this bit', { timeout: 10_000 });
+  await expect.poll(() => highlightCount(b, 'ds-comment-active')).toBe(1);
+  if (await a.evaluate('editing')) await a.keyboard.press('Escape');
+});
+
+test('comments: a reply threads under it for everyone; resolved says who; a reply on a resolved thread reopens it', async () => {
+  const row = cmtRow(b, 'Rephrase this bit');
+  await row.locator('.cmt-reply-line').click();
+  await row.locator('.cmt-reply-text').fill('Done.');
+  await row.locator('button', { hasText: 'Reply' }).click();
+  await expect(row.locator('.cmt-msg.reply')).toContainText('Done.', { timeout: 10_000 });
+  await expect(row.locator('.cmt-msg.reply .cmt-meta b')).toHaveText('grace');
+  await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-msg.reply')).toContainText('Done.', { timeout: 20_000 });
+  // Resolve from A: the card greys, says who, the highlight goes.
+  await cmtRow(a, 'Rephrase this bit').locator('.cmt-actions button', { hasText: 'Resolve' }).click();
+  await expect(cmtRow(a, 'Rephrase this bit')).toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-resolved-line')).toContainText('Marked as resolved by ada');
+  await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-reply-line')).toHaveAttribute('placeholder', /reopen/);
+  await expect.poll(() => highlighted(a)).toBe(0);
+  await expect(cmtRow(b, 'Rephrase this bit')).toHaveClass(/resolved/, { timeout: 20_000 });
+  // B answers anyway: that reopens it, everywhere.
+  await cmtRow(b, 'Rephrase this bit').locator('.cmt-reply-line').click();
+  await cmtRow(b, 'Rephrase this bit').locator('.cmt-reply-text').fill('Not quite - the second half too.');
+  await cmtRow(b, 'Rephrase this bit').locator('button', { hasText: 'Reply' }).click();
+  await expect(cmtRow(b, 'Rephrase this bit')).not.toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(cmtRow(a, 'Rephrase this bit')).not.toHaveClass(/resolved/, { timeout: 20_000 });
+  await expect.poll(() => highlighted(a), { timeout: 10_000 }).toBeGreaterThan(0);
+  if (process.env.PRIMER_SHOTS) await a.screenshot({ path: 'test-results/comments-panel.png' });
+  const stored = (await allComments())[0];
+  expect(stored.replies.map(r => r.by)).toEqual([GRACE, GRACE]);
+  expect(stored.resolved).toBe(false);
+  expect(stored.resolved_by).toBeNull();
+});
+
+test('comments: Edit rewords your own words and says so; @ offers people; For you lists what names you', async () => {
+  const thread = (await allComments())[0];
+  const card = a.locator(`#cpanel .cmt[data-id="${thread.id}"]`);
+  await viaMenu(cmtRow(a, 'Rephrase this bit'), 'Edit');
+  const box = card.locator('.cmt-edit');
+  await expect(box).toBeVisible();
+  await expect(box).toHaveValue('Rephrase this bit.');
+  await box.fill('Rephrase this sentence.');
+  await card.locator('button', { hasText: 'Save' }).click();
+  await expect(cmtRow(a, 'Rephrase this sentence')).toBeVisible({ timeout: 10_000 });
+  await expect(cmtRow(a, 'Rephrase this sentence').locator('.cmt-meta span').first()).toContainText('edited');
+  expect((await allComments())[0].edited_at).toBeTruthy();
+  // Grace cannot Edit Ada's words: no such item for her.
+  await openMenu(cmtRow(b, 'Rephrase'));
+  await expect(menuItem(cmtRow(b, 'Rephrase'), 'Edit')).toHaveCount(0);
+  await closeMenu(b);
+  // A new comment that names Grace, picked from the @ list.
+  await a.evaluate('docsync.api.select(null)');
+  await a.locator('#cpanel-text').click();
+  await a.keyboard.type('Ping @gr');
+  await expect(a.locator('#cpanel .cmt-mentions button')).toContainText(/grace/, { timeout: 5000 });
+  await a.keyboard.press('Enter');
+  await expect(a.locator('#cpanel-text')).toHaveValue(/^Ping @grace /);
+  await a.keyboard.type('- see the cover.');
+  await a.locator('#cpanel-add').click();
+  await expect(cmtRow(a, 'Ping @grace')).toBeVisible({ timeout: 10_000 });
+  await expect(cmtRow(a, 'Ping @grace').locator('.mention')).toHaveText('@grace');
+  const ping = (await allComments()).find(c => c.text.startsWith('Ping'));
+  expect(ping.mentions).toEqual([GRACE]);
+  // For you, on Grace's side: the one that names her. On Ada's: the one Grace answered.
+  await expect(cmtRow(b, 'Ping @grace')).toBeVisible({ timeout: 20_000 });
+  await expect(b.locator('#cpanel-tab-you')).toHaveText('For you · 1');
+  await b.locator('#cpanel-tab-you').click();
+  await expect(b.locator('#cpanel .cmt')).toHaveCount(1);
+  await expect(cmtRow(b, 'Ping @grace')).toBeVisible();
+  await b.locator('#cpanel-tab-all').click();
+  await expect(b.locator('#cpanel .cmt')).toHaveCount(2);
+  await a.locator('#cpanel-tab-you').click();
+  await expect(a.locator('#cpanel .cmt')).toHaveCount(1);
+  await expect(cmtRow(a, 'Rephrase this sentence')).toBeVisible();
+  await a.locator('#cpanel-tab-all').click();
+});
+
+test('comments: ⌘⌥M starts one on what is in hand, and a link opens the editor on a thread', async () => {
+  const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
+  test.skip(!id, 'this project has no addressable elements');
+  await a.locator('#cpanel-close').click();
+  await a.evaluate(`docsync.api.select(${JSON.stringify(id)})`);
+  await a.keyboard.press('Meta+Alt+KeyM');
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(a.locator('#cpanel-anchor')).toHaveText(`New comment on ${id}`);
+  await expect(a.locator('#cpanel-text')).toBeFocused();
+  await a.locator('#cpanel-cancel').click();
+  // Copy link puts ?comment=<id> on the clipboard (or in the status line when it cannot).
+  const thread = (await allComments()).find(c => c.text.startsWith('Rephrase'));
+  await viaMenu(cmtRow(a, 'Rephrase'), 'Copy link');
+  await expect(a.locator('#stat')).toHaveText(new RegExp('copied|comment=' + thread.id));
+  const page = await ctxA.newPage();
+  await page.goto(`${hubAs(ADA_PORT)}/primer/edit.html?project=${PROJECT}&comment=${thread.id}`);
+  await waitForFirstRender(page);
+  await expect(page.locator('#cpanel')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('#cpanel .cmt.active')).toContainText('Rephrase this sentence');
+  await expect.poll(() => highlightCount(page, 'ds-comment-active'), { timeout: 10_000 }).toBe(1);
+  await page.close();
+  await clearComments();
+  for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
+});
+
 test('the list says what changed since you looked, and the Editor tab counts it', async () => {
   // A browser that has seen nothing of this document: to it, it changed.
   const fresh = await browser.newContext();
@@ -732,6 +899,24 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
   await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
   await mine.close();
+});
+
+test('save: an expired sign-in cannot pass for a Save, and nothing is marked saved', async () => {
+  // Access answers a signed-out browser with its sign-in page: 200, HTML.
+  const key = await firstSlot(a);
+  await a.route('**/api/docs/**', route => route.request().method() === 'PUT'
+    ? route.fulfill({ status: 200, contentType: 'text/html', body: '<html><title>Sign in</title></html>' })
+    : route.continue());
+  const version = await a.evaluate('docVersion');
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Typed while signed out.")`);
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/save failed: signed out of the hub/, { timeout: 20_000 });
+  await expect(a.locator('#save')).toBeEnabled();
+  expect(await a.evaluate('docVersion')).toBe(version);
+  await a.unroute('**/api/docs/**');
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
+  expect(await a.evaluate('docVersion')).not.toBe(version);
 });
 
 test('no GitHub token was asked for or stored', async () => {

@@ -628,14 +628,29 @@ letting people change it:
   selection", and the strip's button glows when the selection already has
   open comments. `docsync.api.select(ids)` selects the way a click does, so
   a pilot (or a spec) can do the same.
-- **Comments** live beside the store's files (`comments.json`), not in the
-  Yjs document — a note about the document is not part of what renders or
-  exports. Anchored to a slot key or element id, or to the document. Anyone
-  who may open the document may comment and resolve; only the author
-  rewords; the author or the owner deletes. The panel refreshes itself every
-  15 s while open, and every open anchored comment puts a small orange
-  marker on its paragraph or element inside the report (`hubCommentsPaint`,
-  called from `wire()` like the peer marks).
+- **Comments**, the way Google Docs does them. Threads live beside the
+  store's files (`comments.json`), not in the Yjs document — a note about
+  the document is not part of what renders or exports. A thread is on a run
+  of words in a paragraph (`anchor` + `quote`), on a paragraph or element
+  (`anchor`), or on the document. What a person sees: the quoted words
+  highlighted in the report (CSS Custom Highlight API; a whole-paragraph
+  thread gets a count badge instead), a "＋ Comment" pill beside a text
+  selection in the open paragraph, ⌘⌥M on whatever is in hand, cards with
+  an avatar, name and time, ordered as the document reads, a click on the
+  highlight raising the card and a click on the card flashing the words, a
+  checkmark to resolve and a ⋮ menu (Edit for the author, Delete for the
+  author or the owner, Show, Copy link — `?comment=<id>` opens the editor
+  on that thread), replies threaded under the first message, "Marked as
+  resolved by …" on a resolved thread and a reply to it reopening it,
+  @-mentions picked from the staff roster (`/data/staff.json`, plus whoever
+  is in the room) and a **For you** tab for threads that name you or answer
+  you. Anyone who may open the document may comment, reply and resolve;
+  only the author rewords; the author or the owner deletes. The panel
+  refreshes itself every 15 s while open, presence carries a change the
+  moment it happens, and a refresh never runs under someone typing a reply.
+  Server side, every change to `comments.json` is one read-modify-write
+  conditional on the etag the read saw (R2 `onlyIf`), retried when someone
+  wrote meanwhile — two replies in the same second both survive.
 - **What changed since you looked.** The editor records the version it
   showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
   answers every document the person may open with its version, who saved
@@ -643,6 +658,53 @@ letting people change it:
   and sorts them first, and the Editor tab on every hub page wears the count
   (`assets/nav.js`, the calendar badge's pattern). No email, no push: a badge
   where people already look, on data the store already had.
+
+## What can go wrong, and what happens
+
+The obvious ways comments, Save, the live session and the editor's
+operations fail, and what was done about each (all under test):
+
+- **Two people change the comments at once.** Was: last writer wins, the
+  other's reply silently gone. Now: conditional writes with retry
+  (`mutateComments`), pinned by "two replies at once: neither is lost".
+- **The hub sign-in expired.** Access answers every request with its sign-in
+  page — 200 and HTML. Was: a Save read that as success with no version,
+  cleared the unsaved mark, and the words never reached the store. Now:
+  `hubJson()` guards every hub call (load, Save, restore, history, naming,
+  share, publish, upload, comments); a Save says "signed out of the hub —
+  reload this page", stays unsaved, and the draft cache keeps the words.
+  Pinned by "an expired sign-in cannot pass for a Save".
+- **A collaborator's change lands the document exactly where you last
+  saw it** (a restore, an undo of your edit from their side). Was: dropped
+  as "nothing new" while you kept superseded words. Now: `#localSinceEmit`
+  in the session. Pinned in `client.test.mjs` and the hub spec.
+- **The room is behind the store.** Someone saved from outside the session
+  (or restored while the room slept): the room's document is older than the
+  store's, and what is on screen is the room's. Was: only discovered at
+  Save, as a 409. Now: said on joining ("this session holds an older version
+  than the store"); Save still asks before replacing it.
+- **The store moved under a Save.** 409 with who and when; the person
+  chooses; `force` says they did. Nothing merges — the two are whole files.
+- **A comment's words were rewritten.** The quote no longer matches: the
+  thread falls back to a badge on its paragraph; Show still finds the
+  paragraph. A paragraph or element removed altogether: Show says so.
+- **The comments could not be refreshed** (offline, a 5xx). Said once in
+  the status line while the panel is open, not on every poll; the panel
+  keeps what it had.
+- **A refresh while typing a reply.** Deferred until the box loses focus;
+  a poll never eats a half-written reply.
+- **No Highlight API** (an older browser). Quoted threads show as badges on
+  their paragraph; everything else is the same.
+- **The websocket drops.** The editor keeps working on its own copy; the
+  provider reconnects and Yjs merges what both sides did meanwhile
+  (tested: "a session that reconnects does not re-seed and picks up what it
+  missed"). The room's storage gone: the next editor refills it from what
+  it holds rather than adopting nothing.
+- **A Save while another is in flight.** The button is disabled for the
+  duration, so a second click cannot carry the old base.
+- **The document is too large, the layout is not JSON, an upload is not an
+  image.** Refused with the reason (413 / 400 / 415), said in the status
+  line, nothing written.
 
 ## Known gaps, for later
 
