@@ -780,6 +780,21 @@ letting people change it:
   `localStorage['primer-comments-view']`; below 1100px the width decides
   and the panel is the ordered list it always was, which at 375px fits
   inside the phone (pinned by the hub spec).
+  Three details finish it. The **new comment is a card at its anchor** too,
+  not a foot to the panel — but only once it is in use (the box focused,
+  holding words, or quoting a selection), since an empty box beside the
+  words would push every card below it down for nothing; it moves the
+  moment it is used rather than at the next refresh, the cursor goes back
+  after the move (moving a node blurs what is inside it), and the move is
+  flagged so the blur it causes cannot ask for another render — that was a
+  loop which took the cards out from under every click. A **line** joins
+  the card in hand to its words across the ground between page and gutter,
+  drawn only when both ends are on screen and never for a resolved thread,
+  which has no highlight to point at. A card **taller than the gutter
+  scrolls inside itself** rather than being cut off at the bottom edge.
+  Resolved threads stay in the margin, trailing the open ones under the
+  "N resolved" line: they have no words to sit beside any more, and the
+  panel is the only place they can be found again.
 - **For you, where people already look.** A mention or a reply used to be
   seen only by opening the document. The store's summary (`GET /api/docs`)
   now answers, per person, `for_you` — the open threads that name them

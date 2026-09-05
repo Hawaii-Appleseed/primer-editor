@@ -49,52 +49,51 @@ Ground rules for whoever picks this up (a person or the 6 am session):
    "change box"), and a suggestion shown at its place in the margin
    beside the words it proposes.
 
-2. **The margin, the rest of the way.** The new-comment box as a card at
-    the anchor's height (it is the panel's foot today); a connector from
-    the card in hand to its highlight; resolved threads out of the margin
-    altogether (Docs keeps them for the list; ours trail the open ones
-    under "N resolved"); a card that overruns the gutter's bottom scrolls
-    within itself instead of being clipped.
 
 ## Organising project files
 
-3. **Folders and tags on the hub's list page.** Projects grouped by folder
+2. **Folders and tags on the hub's list page.** Projects grouped by folder
    (a `folder` field in the registry, editable from the list), tags as
    chips, a search box that filters by name, tag, and last editor. Drag a
    tile onto a folder. Remember the person's last view.
-4. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
+3. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
     rename (updates the registry and the room name safely — the room is
     named by project id, so rename the display name only), duplicate as a
     new project (files + assets + no comments), archive (hidden from the
     default view, restorable), delete (owner only, to a trash folder in R2
     with a 30-day sweep).
-5. **Starred and recent.** A star on each tile and a "Recent" row at the
+4. **Starred and recent.** A star on each tile and a "Recent" row at the
     top of the list — the documents this person opened last, from the
     `primer-seen` keys the editor already writes.
-6. **Assets library per project.** Insert image shows what has already
+5. **Assets library per project.** Insert image shows what has already
     been uploaded to this project's store with a thumbnail and who added it,
     delete an unused one, and a project-wide "images in use / unused" view.
-7. **Move a section between projects.** Copy a slot (words + layout +
+6. **Move a section between projects.** Copy a slot (words + layout +
     assets it names) into another project as a new section — the pilot
     `addExtra` + `setSlot` path, from a "Copy to…" on the section menu.
 
 ## Aesthetic
 
-8. **One quiet chrome.** The comments panel, share dialog, history and
+7. **One quiet chrome.** The comments panel, share dialog, history and
     the top bar on the hub path share one type scale and one radius set
     (`--r-ctl`/`--r-card`/`--r-edge`), one shadow, and the hub's own palette
     (Ash/Teal/Slate/Charcoal, Manrope/Poppins). Audit every new surface at
     375px.
-9. **Motion that explains.** A card raising when its highlight is clicked,
+8. **Motion that explains.** A card raising when its highlight is clicked,
     a highlight pulsing once when its card is hovered, the "+ Comment" pill
     fading in beside the selection, the reply box growing — 120–180 ms, no
     bounce.
-10. **Empty states that teach.** No comments yet: a two-line hint with the
+9. **Empty states that teach.** No comments yet: a two-line hint with the
     shortcut. First time on the hub: what Save does here. No projects: how
     to make one from a template.
-11. **Dark mode for the chrome** (not the report), following the OS.
+10. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — The margin finished: the new comment is a card at its anchor
+  once it is in use, a line joins the card in hand to its words, and a card
+  taller than the gutter scrolls inside itself (primer-editor SHA_PE9,
+  hub SHA_HUB9).
 
 - 2026-09-05 — Suggestions counted and decided in bulk: "Accept all N" /
   "Reject all N" on the panel (one question, then each through its own

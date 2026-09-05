@@ -1170,6 +1170,62 @@ test('comments: under 1100px the panel is the list again, and it fits a phone', 
   await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
 });
 
+test('comments: in the margin the new comment is a card at its anchor, a line joins the card in hand to its words, and a resolved thread trails the rest', async () => {
+  await clearComments();
+  await a.setViewportSize({ width: 1280, height: 720 });
+  if (await a.locator('#cpanel').isHidden()) await a.locator('#comments').click();
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  await expect(a.locator('#cpanel .cmt')).toHaveCount(0, { timeout: 15_000 });
+  const geo = () => a.evaluate(`(() => { const list = document.getElementById('cpanel-list');
+    const comp = document.getElementById('cpanel-composer'); const cr = comp.getBoundingClientRect();
+    const led = document.getElementById('cmt-leader');
+    const out = document.getElementById('out'); const f = out.getBoundingClientRect(); const z = f.width / out.clientWidth;
+    const d = out.contentDocument; const el = hubCommentAnchor() && hubCommentEl(d, hubCommentAnchor());
+    const r = el && el.getBoundingClientRect();
+    return { inList: comp.parentElement === list, pos: getComputedStyle(comp).position, top: cr.top,
+      anchor: r ? f.top + r.top * z : null, leader: led.hidden ? null : led.getBoundingClientRect().top,
+      panelLeft: document.getElementById('cpanel').getBoundingClientRect().left,
+      leaderRight: led.hidden ? null : led.getBoundingClientRect().right }; })()`);
+  // Idle, the box is the panel's foot: an empty card beside the words would
+  // push every card below it down for nothing.
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const el = (inv.pages.flatMap(p => p.elements).find(e => e.kind === 'prose') || inv.pages[0].elements[0]).id;
+  await a.evaluate(`docsync.api.select(${JSON.stringify(el)})`);
+  await expect.poll(async () => (await geo()).inList, { timeout: 5000 }).toBe(false);
+  // In use, it moves to its anchor and keeps the cursor.
+  await a.evaluate('document.getElementById("cpanel-text").focus()');
+  await a.keyboard.type('About this bit');
+  await expect(a.locator('#cpanel-text')).toBeFocused();
+  await expect.poll(async () => JSON.stringify(await geo()),
+    { timeout: 10_000, message: 'the new-comment card at its anchor' }).toMatch(/"inList":true.*"pos":"absolute"/);
+  // Level with its words — or at the top of the gutter when the words sit
+  // beside the panel's head, the same rule the cards follow.
+  await expect.poll(() => a.evaluate(`(() => { hubMarginLayout(); const comp = document.getElementById('cpanel-composer');
+    const out = document.getElementById('out'); const f = out.getBoundingClientRect(); const z = f.width / out.clientWidth;
+    const el = hubCommentEl(out.contentDocument, hubCommentAnchor()); if (!el) return 'no anchor';
+    const listTop = document.getElementById('cpanel-list').getBoundingClientRect().top;
+    const want = Math.max(f.top + el.getBoundingClientRect().top * z, listTop);
+    return Math.abs(Math.round(comp.getBoundingClientRect().top - want)); })()`),
+    { timeout: 10_000, message: 'the new-comment card level with its words' }).toBeLessThanOrEqual(3);
+  await a.locator('#cpanel-cancel').click();
+  await expect.poll(async () => (await geo()).inList, { timeout: 5000 }).toBe(false);
+  // A thread in hand: the line joins its words to the gutter.
+  await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: el, text: 'Joined by a line.' } });
+  await a.evaluate('hubCommentsLoad()');   // rather than waiting out the panel's own poll
+  await expect(cmtRow(a, 'Joined by a line')).toBeVisible({ timeout: 20_000 });
+  await bring(cmtRow(a, 'Joined by a line'));
+  await expect.poll(async () => { const g = await geo(); return g.leader != null && Math.abs(g.leaderRight - g.panelLeft) <= 2; },
+    { timeout: 10_000, message: 'a line from the words to the gutter' }).toBe(true);
+  // Resolved: it trails the open ones under its line, and the line goes.
+  const stored = (await allComments()).find(c => c.text.includes('Joined by a line'));
+  await a.request.patch(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${stored.id}`, { data: { resolved: true } });
+  await expect(cmtRow(a, 'Joined by a line')).toHaveClass(/resolved/, { timeout: 15_000 });
+  await expect(a.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
+  await expect(a.locator('#cmt-leader')).toBeHidden();   // nothing in hand on the page
+  await clearComments();
+  await a.evaluate('docsync.api.select(null)');
+});
+
 // --- suggesting, the way Google Docs does it ---------------------------------
 // A viewer's edit is proposed, not made: shown inline (red struck, green
 // underlined), as a card an editor accepts or rejects. An editor can switch
