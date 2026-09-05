@@ -231,11 +231,19 @@ test('Publish asks the hub, and the hub says plainly when it cannot', async () =
 test('Share shows the record, and a change narrows the document', async () => {
   await a.locator('#share').click();
   const dlg = a.locator('dialog[open]');
+  // The link first - the document's own address - and Copy puts it in hand.
+  await expect(dlg.locator('.hub-share-link input')).toHaveValue(new RegExp(`^http://127\\.0\\.0\\.1:\\d+/primer/edit(\\.html)?\\?project=${PROJECT}$`));
+  await dlg.locator('.hub-share-copy').click();
+  await expect(a.locator('#stat')).toHaveText(/link copied|select the link/);
+  // Who has access, each with a face: everyone on the hub closes the list.
+  await expect(dlg.locator('.hub-share-everyone .hub-share-av')).toBeVisible();
   await expect(dlg.locator('.hub-share-default')).toHaveValue('editor');
   await dlg.locator('.hub-share-default').selectOption('viewer');
   await dlg.locator('.hub-share-add').click();
-  const row = dlg.locator('.hub-share-row').last();
+  const people = dlg.locator('.hub-share-row:not(.hub-share-everyone):not(.hub-share-owner)');
+  const row = people.last();
   await row.locator('input').fill(ADA);
+  await expect(row.locator('.hub-share-av')).toHaveText('A');   // the face follows the address
   await row.locator('select').selectOption('editor');
   await dlg.locator('button.dsdlg-ok').click();
   await expect(a.locator('#stat')).toHaveText(/sharing saved — everyone may view, 1 named/, { timeout: 10_000 });
@@ -244,6 +252,18 @@ test('Share shows the record, and a change narrows the document', async () => {
   expect(rec.default).toBe('viewer');
   expect(rec.people[ADA]).toBe('editor');
   expect(rec.you.role).toBe('owner');
+  // Opened again: the owner leads the list, by name; and on a phone it fits.
+  await a.locator('#share').click();
+  await expect(a.locator('dialog[open] .hub-share-owner .hub-share-name')).toContainText(/ada/i);
+  await expect(a.locator('dialog[open] .hub-share-owner .hub-share-role')).toHaveText('Owner');
+  await a.setViewportSize({ width: 375, height: 800 });
+  const box = await a.locator('dialog[open] .dsdlg-form').boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(375);
+  const sel = await a.locator('dialog[open] .hub-share-default').boundingBox();
+  expect(sel.x + sel.width).toBeLessThanOrEqual(375);
+  await a.setViewportSize({ width: 1280, height: 720 });
+  await a.locator('dialog[open] .dsdlg-cancel').click();
 });
 
 test('a viewer watches: the chip says so, Save stays off, and their edit reaches nobody', async () => {

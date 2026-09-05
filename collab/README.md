@@ -640,6 +640,19 @@ letting people change it:
   too — when they click the avatar again, or when the one followed leaves
   ("Ada left the session"). Nothing new is published: it is all read from
   the presence the room already carries.
+- **Share, laid out as Docs lays it out.** The dialog opens on the link —
+  the document's own address (`hubDocLink()`: the page's URL with only
+  `project` kept, so a comment or a tab being open is not what gets pasted
+  into Slack) with a Copy button; the clipboard refused means the field is
+  selected and the status line says so. Under it, who has access, each with
+  a face (the comments' avatar: initial, colour by address, name from the
+  roster on hover): the owner first with "Owner" (a label, not a lock —
+  `canShare` is still "anyone who can edit"), the named people with a role
+  each and a × (the address field offers the staff roster as you type, a
+  `<datalist>`, and the face follows what is typed), and "Everyone on the
+  hub" closing the list with the default role. No "notify by email": the
+  hub cannot send mail, and a box that did nothing would be worse than none
+  (ROADMAP, "Needs a human").
 - **Comment on this element.** The arrange strip (what an element shows when
   selected) carries a comment button on the store path: one click opens the
   panel with that element named as the anchor and the box focused. The
