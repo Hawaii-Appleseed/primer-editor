@@ -13,6 +13,8 @@
 # is one ⌘Z away. Set it from the editor rather than by hand.
 #
 #   id       kebab-case, unique
+#   name     the title the staff hub's list shows (docsync/hub.py); the id otherwise
+#   hub      false keeps a binding off the staff hub; every editor binding goes by default
 #   content  the committed source the report reads
 #   doc      optional: the Google Doc id this report is drafted in
 #   build    the one command that rebuilds and publishes (make pub)
@@ -20,6 +22,8 @@
 
 bindings:
   - id: budget-primer
+    name: "Budget Primer FY2026–27"
+    hub: false            # off the staff hub (docsync/hub.py): the test fixture; the live report is ~/BudgetPrimerFinal, a consumer
     content: report2027/content.md
     # The one build command, shared by the live server, the save endpoint and
     # CI — so the deployed page is always exactly what a build produces.
@@ -68,6 +72,7 @@ bindings:
   # taller in this fixed column than Squarespace's wider live layout), not a
   # print page — this project is a scrolling web page.
   - id: rxkids
+    name: "RxKids Hawaiʻi"
     content: projects/rxkids/content.md
     # STAGE TWO done 2026-08-25: the cost table (county names, births, TANF
     # and additional-dollars columns) is fully slotted, keyed by county slug
@@ -110,6 +115,7 @@ bindings:
   # report. Scaffolded by hand the way "+ New report" would; its renderer
   # demonstrates the shared building blocks (docsync.blocks: graphic, card).
   - id: demo-report
+    name: "Demo report"
     content: projects/demo-report/content.md
     # See rxkids' build command above — same gap, same fix.
     build: python3 projects/demo-report/render_report.py && python3 -m docsync.stage --id demo-report
@@ -140,6 +146,7 @@ bindings:
   # left unwired is now a slot. page height is a generous no-clip default for
   # a scrolling web page; trim once visible.
   - id: our-mission
+    name: "Our Mission"
     content: projects/our-mission/content.md
     # The remaining findings are all Squarespace SITE nav/footer, carried
     # over verbatim by docsync.scaffold — this page does not own that chrome,
@@ -184,6 +191,7 @@ bindings:
   # ~/repos/hawaii-tax-testimony; this page is the printable summary of it.
   # A real letter page, not a scrolling web page — it is meant to be handed out.
   - id: tax-testimony
+    name: "Tax Testimony One-Pager"
     content: projects/tax-testimony/content.md
     # STAGE TWO done 2026-08-24: section labels and organisation names are
     # slots; every tally is declared with C.derived(TALLY), naming the
@@ -221,6 +229,7 @@ bindings:
   # through docsync.blocks.graphic(). Figures are DATA constants at the top of
   # render_report.py, reproduced from ~/Census-Forecaster.
   - id: rxkids-fiscal
+    name: "Rx Kids fiscal one-pager"
     content: projects/rxkids-fiscal/content.md
     # Fully wired 2026-08-20 (captions moved out of the SVGs into slots);
     # editability findings are errors from here on.
@@ -253,6 +262,7 @@ bindings:
   # figure is arithmetic on two published tables — `render_report.py --verify`
   # asserts all of it against what the sources printed.
   - id: dotax-itep
+    name: "DOTAX vs ITEP on Act 46"
     content: projects/dotax-itep/content.md
     # Fully wired 2026-08-20 (scope-chart explanations became in-place SVG
     # slots); editability findings are errors from here on.
@@ -284,6 +294,7 @@ bindings:
   # per-page job — see the report-editor skill. page height is a generous
   # no-clip default for a scrolling web page; trim once visible.
   - id: tfc-2027-priorities
+    name: "TFC 2027 Priorities: What the Poll Said"
     content: projects/tfc-2027-priorities/content.md
     # STAGE TWO done 2026-08-25: the 5 stat numbers (2 propose left as bare
     # literals under 2 chars, which its dead-text scanner cannot see either —
@@ -310,6 +321,8 @@ bindings:
 
   # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed policy brief" template.
   - id: my-report
+    name: "My report"
+    hub: false            # off the staff hub (docsync/hub.py): a scratch project from "+ New report"
     content: projects/my-report/content.md
     editability: strict
     build: python3 projects/my-report/render_report.py && python3 -m docsync.stage --id my-report
@@ -325,6 +338,7 @@ bindings:
 
   # Added by "+ New report" (docsync/new.py) — from the "Hawaiʻi Appleseed report" template.
   - id: eviction-code-guide
+    name: "Eviction Code Guide"
     content: projects/eviction-code-guide/content.md
     editability: strict
     build: python3 projects/eviction-code-guide/render_report.py && python3 -m docsync.stage --id eviction-code-guide
@@ -347,6 +361,7 @@ bindings:
   # docsync.blocks.graphic(). Figures are DATA constants at the top of
   # render_report.py, reproduced from ~/Census-Forecaster.
   - id: retitc
+    name: "RETITC — the Renewable Energy Technologies Income Tax Credit"
     content: projects/retitc/content.md
     editability: strict
     # The stage half is required: without it the watcher rebuilds the published

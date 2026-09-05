@@ -170,7 +170,9 @@ Rules that bite:
 - **Never launch or kill a dev server the user owns**; Playwright starts its
   own throwaway servers and that's fine.
 - **Real-time collaboration lives in `collab/`** (`collab/README.md` is the
-  design record: Phases 0–2 done, not deployed). The editor's state model is
+  design record: Phases 0–4 done, the relay deployed, and the editor served
+  from the staff hub by `python3 -m docsync.hub` — its docstring is the
+  contract; the hook runs it after every engine or project commit). The editor's state model is
   deliberately untouched — `source`/`layout` are MIRRORED onto a Yjs doc by
   `collab/client/session.mjs`: `renderOnce()` flushes local → doc as a diff,
   `collabAdopt()` paints doc → local, and in a session `pushHistory()` marks

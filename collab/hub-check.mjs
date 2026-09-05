@@ -72,7 +72,7 @@ const eq = (label, got, want) =>
 /* ------------------------------------------------------------- the hub */
 
 /** `wrangler pages dev` over the hub repo, with the relay's class bound. */
-async function startPages({ port, timeoutMs = 120_000 }) {
+export async function startPages({ port, hubDir = HUB_DIR, timeoutMs = 120_000 }) {
   const persistDir = mkdtempSync(pathJoin(tmpdir(), 'hub-check-'));
   // Run from the hub's directory, with this repo's wrangler binary. From
   // here, `wrangler pages dev` would read collab/wrangler.jsonc and merge in
@@ -80,7 +80,7 @@ async function startPages({ port, timeoutMs = 120_000 }) {
   // it fails to boot with a message about the entrypoint that has nothing to
   // do with the actual mistake.
   const proc = spawn(pathJoin(HERE, 'node_modules/.bin/wrangler'), [
-    'pages', 'dev', HUB_DIR,
+    'pages', 'dev', hubDir,
     '--ip', '127.0.0.1', '--port', String(port),
     '--inspector-port', String(port + 1000),
     '--compatibility-date', '2026-09-01',
@@ -93,7 +93,7 @@ async function startPages({ port, timeoutMs = 120_000 }) {
     // Its own process group: wrangler spawns workerd, and killing only the
     // parent leaves workerd holding the port — which then looks like "address
     // already in use" on the next run rather than like a leak here.
-  ], { cwd: HUB_DIR, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+  ], { cwd: hubDir, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
 
   const kill = (sig) => { try { process.kill(-proc.pid, sig); } catch { /* already gone */ } };
 
@@ -109,7 +109,7 @@ async function startPages({ port, timeoutMs = 120_000 }) {
       throw new Error(`wrangler pages dev did not come up:\n${log.join('')}`);
     }
     try {
-      const r = await fetch(`http://${HUB}/robots.txt`);
+      const r = await fetch(`http://127.0.0.1:${port}/robots.txt`);
       if (r.ok) break;
     } catch { /* not up yet */ }
     await sleep(500);
@@ -272,4 +272,6 @@ async function eventually(fn, ms = 4000) {
   }
 }
 
-await main();
+// Run as a script; imported (tests/editor/collab-hub.spec.js borrows
+// startPages), it boots nothing.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

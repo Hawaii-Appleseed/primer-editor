@@ -481,6 +481,44 @@ Locally the Access header is forgeable, and `hub-check.mjs` forges it. In
 production the edge strips `Cf-Access-Authenticated-User-Email` from inbound
 requests and re-signs it, which is the only reason the Function may trust it.
 
+## Served from the staff hub
+
+The hub's door (above) only helps if the editor is on the hub's origin, and it
+is: `python3 -m docsync.hub` vendors it into
+`staff-updates-internal/primer/` — one `edit.html`, one `collab-client.js`, a
+`projects.json`, and an `engine/` + `assets/` per project — from every binding
+here with an `editor:` block (unless it says `hub: false`) and from every
+consumer in `vendor.yml` / `vendor.local.yml`, each staged by its own vendored
+`docsync.stage`. The hub's path comes from `hub:` in `vendor.local.yml`, and
+the post-commit hook runs it after `docsync.vendor`, so the hub's working tree
+is always current; committing there is a person's act, because a push there is
+a deploy. The list page, `primer/index.html`, is the hub's own file and is
+never written by the vendor.
+
+What differs for an editor served there, and nothing else does:
+
+- Its registry entry says `"collab": {"path": "/api/collab", "me": "/api/me"}`
+  instead of `"url"`. `collabDoor()` in `edit.html` returns the one or the
+  other; on a path the editor mints no ticket and asks for no token — the
+  socket goes to `location.origin + path + '/' + room`, and the Access
+  session the page already carries is what the door checks. `/api/me` names
+  the person for presence; the room itself learns the login from the header
+  the door set and trusts nothing the client says.
+- The manifest's `repo` is canonicalised to the source checkout's origin
+  (`Hawaii-Appleseed/…`), because that is the room's name and the hub serves
+  only those spellings.
+- Save is unchanged, which means it still wants a GitHub token: the documents
+  are still in git. That is the next step (R2), not this one. A staff member
+  with no token can open a document, edit it live with everyone else, and
+  leave the saving to whoever holds one.
+
+Proof: `npx playwright test collab-hub.spec.js` vendors this tree's editor
+into the hub checkout beside this repo, boots the same two wranglers
+`hub-check.mjs` does, and opens the editor in two browser contexts carrying
+Access identities — the list page names the project, both are live in one
+room as the people Access says they are, an edit crosses, and no token was
+asked for. Skipped when the hub is not checked out beside this repo.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the
@@ -496,6 +534,3 @@ requests and re-signs it, which is the only reason the Function may trust it.
   because that permission model is binary (push or no access). The hub's door
   does set it — a *viewer* in its share list connects `ro: 1` — so the
   enforcement is now exercised; it is only this route that has nothing to say.
-- **The editor is not served from the hub yet.** The front door and the client
-  option exist and are tested, but nothing on the hub opens a document until
-  `/primer/` is vendored into it.

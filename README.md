@@ -223,6 +223,14 @@ the latest editor.
 So: **editor development happens here**; reports pull updates when they choose,
 and their fast local loop never depends on a network.
 
+### On the staff hub
+
+Staff who have no GitHub account use the editor on the internal hub
+(`staff-updates-internal/primer/`), behind the Google sign-in they already
+have. `python3 -m docsync.hub` vendors the editor and every project's engine
+there, and the post-commit hook keeps that copy current — see
+[collab/README.md](collab/README.md), "Served from the staff hub".
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
