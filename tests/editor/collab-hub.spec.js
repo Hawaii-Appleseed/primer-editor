@@ -259,6 +259,9 @@ test('a viewer watches: the chip says so, Save stays off, and their edit reaches
   await expect(page.locator('#save')).toBeDisabled();
   await page.waitForTimeout(2000);
   expect(await slot(a, key)).toBe(before);
+  // Their edit became a suggestion (the suggesting tests below cover the rest); tidied here.
+  await expect.poll(async () => (await allComments()).filter(c => c.kind === 'suggestion').length, { timeout: 10_000 }).toBe(1);
+  for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}/comments/${c.id}`);
   // The dialog is readable, not changeable, for them.
   await page.locator('#share').click();
   await expect(page.locator('dialog[open] .hub-share-default')).toBeDisabled();
@@ -535,6 +538,8 @@ test('a comment on the selected element, from its own strip, marks it on the pag
 });
 
 test('a comment on a paragraph marks it on the page, and the other editor sees it', async () => {
+  // Painting the marks must never throw: a throw here silently stops every refresh after it.
+  for (const p of [a, b]) expect(await p.evaluate("(() => { try { hubCommentsPaint(document.getElementById('out').contentDocument); return 'ok'; } catch (e) { return String(e.stack || e); } })()")).toBe('ok');
   const key = await firstSlot(a);
   await a.evaluate('docsync.api.select(null)');
   await a.locator('#comments').click();
@@ -875,6 +880,110 @@ test('comments: ⌘⌥M starts one on what is in hand, and a link opens the edit
   await expect(page.locator('#cpanel .cmt.active')).toContainText('Rephrase this sentence');
   await expect.poll(() => highlightCount(page, 'ds-comment-active'), { timeout: 10_000 }).toBe(1);
   await page.close();
+  await clearComments();
+  for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
+});
+
+// --- suggesting, the way Google Docs does it ---------------------------------
+// A viewer's edit is proposed, not made: shown inline (red struck, green
+// underlined), as a card an editor accepts or rejects. An editor can switch
+// to Suggesting too; a move becomes a suggestion; Reject leaves the page.
+const suggestRow = (page, text) => page.locator('#cpanel .cmt.suggest', { hasText: text });
+const suggestions = async () => (await allComments()).filter(c => c.kind === 'suggestion');
+
+test("suggesting: a viewer's edit is proposed, shown inline, and an editor accepts it", async () => {
+  await clearComments();
+  const room = `Hawaii-Appleseed~primer-editor~${PROJECT}`;
+  await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/${room}`, { data: { default: 'viewer', people: { [ADA]: 'editor' } } });
+  // A body paragraph (plain HTML), so the proposal can be drawn inline.
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const key = (inv.pages.slice(1).flatMap(p => p.slots || []).find(s => s.text && s.text.length > 40)
+            || inv.pages.flatMap(p => p.slots || []).find(s => s.text && s.text.length > 40)).key;
+  const before = await slot(a, key);
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  await waitLive(page);
+  await expect(page.locator('#mode')).toHaveText('Suggesting ▾');
+  await expect(page.locator('#mode')).toBeDisabled();
+  // The viewer edits the first paragraph. It shows, then goes back, and a suggestion exists.
+  await page.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Suggested words here.")`);
+  await expect.poll(() => slot(page, key), { timeout: 10_000 }).toBe(before);
+  await expect(page.locator('#stat')).toHaveText(/suggested — an editor can accept/, { timeout: 10_000 });
+  await expect(page.locator('#cpanel')).toBeVisible();
+  await expect(suggestRow(page, 'Suggested words here')).toBeVisible({ timeout: 10_000 });
+  await expect(suggestRow(page, 'Suggested words here').locator('.cmt-kind')).toHaveText('Suggests');
+  await expect(suggestRow(page, 'Suggested words here').locator('.cmt-diff ins')).toHaveText('Suggested words here.');
+  await expect(suggestRow(page, 'Suggested words here').locator('button', { hasText: 'Accept' })).toHaveCount(0);
+  await expect(suggestRow(page, 'Suggested words here').locator('button', { hasText: 'Withdraw' })).toHaveCount(1);
+  const [sg] = await suggestions();
+  expect(sg.by).toBe(GRACE);
+  expect(sg.status).toBe('open');
+  expect(sg.change.content[key]).toEqual({ before, after: 'Suggested words here.' });
+  // Nothing reached the room: A still has the words as they were.
+  await page.waitForTimeout(1500);
+  expect(await slot(a, key)).toBe(before);
+  // A sees the proposal inline and on a card, with Accept and Reject.
+  await expect(a.locator('#comments')).toHaveText(/1 suggested/, { timeout: 20_000 });
+  await expect(a.frameLocator('#out').locator('ins.ds-suggest')).toHaveText('Suggested words here.', { timeout: 20_000 });
+  if (!(await a.locator('#cpanel').isVisible())) await a.locator('#comments').click();
+  await expect(suggestRow(a, 'Suggested words here')).toBeVisible({ timeout: 10_000 });
+  if (process.env.PRIMER_SHOTS) { await suggestRow(a, 'Suggested words here').hover(); await a.screenshot({ path: 'test-results/suggesting.png' }); }
+  await suggestRow(a, 'Suggested words here').locator('button', { hasText: 'Accept' }).click();
+  await expect.poll(() => slot(a, key), { timeout: 10_000 }).toBe('Suggested words here.');
+  await expect(a.locator('#stat')).toHaveText(/suggestion accepted/);
+  await expect(suggestRow(a, 'Suggested words here')).toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(suggestRow(a, 'Suggested words here').locator('.cmt-resolved-line')).toContainText('Accepted by ada');
+  await expect(a.frameLocator('#out').locator('ins.ds-suggest')).toHaveCount(0);
+  // It reached the room as an edit: B has it, unsaved; and the viewer sees it land.
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe('Suggested words here.');
+  await expect.poll(() => slot(page, key), { timeout: 20_000 }).toBe('Suggested words here.');
+  await expect(a.locator('#save')).toBeEnabled();
+  expect((await suggestions())[0].status).toBe('accepted');
+  await ctx.close();
+  await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/${room}`, { data: { default: 'editor', people: {} } });
+  // Save it, so the store and the room agree for the tests after.
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
+});
+
+test('suggesting: an editor in Suggesting mode proposes a move; the other rejects it; the page is as it was', async () => {
+  const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements).find(e => e.kind !== 'prose') || {}).id || null`);
+  test.skip(!id, 'this project has no movable elements');
+  await a.locator('#mode').click();
+  await a.locator('.mode-menu button', { hasText: 'Suggesting' }).click();
+  await expect(a.locator('#mode')).toHaveText('Suggesting ▾');
+  await expect(a.locator('#stat')).toHaveText(/suggesting — edits you make are proposed/);
+  const pos = await a.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`);
+  await a.evaluate(`docsync.api.place(${JSON.stringify(id)}, { x: 1.25, y: 4.5 })`);
+  await expect.poll(() => a.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`), { timeout: 10_000 }).toBe(pos);
+  await expect(suggestRow(a, `Move ${id}`)).toBeVisible({ timeout: 10_000 });
+  await expect(a.frameLocator('#out').locator(`[data-el="${id}"].ds-suggested`)).toHaveCount(1);
+  await expect(a.locator('#save')).toBeDisabled();
+  const [sg] = (await suggestions()).filter(s => s.status === 'open');
+  expect(sg.change.layout[0]).toMatchObject({ section: 'positions', id });
+  expect(sg.change.layout[0].after.x).toBeCloseTo(1.25, 1);   // place() corrects into the page's own space
+  expect(sg.change.layout[0].after.y).toBeCloseTo(4.5, 1);
+  // B rejects.
+  if (!(await b.locator('#cpanel').isVisible())) await b.locator('#comments').click();
+  await expect(suggestRow(b, `Move ${id}`)).toBeVisible({ timeout: 20_000 });
+  await suggestRow(b, `Move ${id}`).locator('button', { hasText: 'Reject' }).click();
+  await expect(suggestRow(b, `Move ${id}`)).toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(suggestRow(b, `Move ${id}`).locator('.cmt-resolved-line')).toContainText('Rejected by grace');
+  await expect(suggestRow(a, `Move ${id}`)).toHaveClass(/resolved/, { timeout: 20_000 });
+  expect(await a.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`)).toBe(pos);
+  expect(await b.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`)).toBe(pos);
+  await expect(a.frameLocator('#out').locator(`[data-el="${id}"].ds-suggested`)).toHaveCount(0, { timeout: 10_000 });
+  // Back to Editing: the same move is made, not proposed.
+  await a.locator('#mode').click();
+  await a.locator('.mode-menu button', { hasText: 'Editing' }).click();
+  await expect(a.locator('#mode')).toHaveText('Editing ▾');
+  await a.evaluate(`docsync.api.place(${JSON.stringify(id)}, { x: 1.25, y: 4.5 })`);
+  await expect.poll(() => a.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`)).not.toBe(pos);
+  await a.waitForTimeout(1200);
+  expect((await suggestions()).filter(s => s.status === 'open').length).toBe(0);
+  await a.evaluate(`docsync.api.place(${JSON.stringify(id)}, ${pos || 'null'} || { x: 1, y: 1 })`).catch(() => {});
   await clearComments();
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
 });

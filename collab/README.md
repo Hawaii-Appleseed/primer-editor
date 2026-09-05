@@ -651,6 +651,27 @@ letting people change it:
   Server side, every change to `comments.json` is one read-modify-write
   conditional on the etag the read saw (R2 `onlyIf`), retried when someone
   wrote meanwhile — two replies in the same second both survive.
+- **Suggesting**, Google Docs' Suggesting mode. The bar's Editing ▾ switch
+  becomes Suggesting ▾: an edit is proposed, not made. Every mutation in
+  the editor starts with `pushHistory()` and ends in `render()`; in this
+  mode the first takes a copy of the files, the render shows the change
+  locally without flushing it to the room, and a quiet spell after the
+  last render turns before → after into a thread of kind `suggestion`
+  (beside the comments, so replies, mentions, Show and For you come free)
+  with the change recorded as per-paragraph words before and after plus
+  layout entries (`suggestDiff`), then puts the files back the way the
+  room has them. The page shows the proposal inline — words to go struck
+  through in red, words to come underlined in green (an `<ins>` the
+  paragraph editor strips before it opens), a dashed outline on an element
+  to move or change — and the card says "Replace … with …" / "Move X"
+  with Accept and Reject for an editor, Withdraw for whoever suggested it.
+  Accepting applies the change through the editor's own path (`writeSlot`,
+  the layout entry, one `pushHistory`, one render, so it is one ⌘Z and
+  reaches the room like any edit), after saying so when the paragraph was
+  rewritten since. A **viewer** is put in Suggesting and kept there: the
+  room drops their writes anyway, and this gives them a voice. Server
+  side, `status` (open / accepted / rejected) is decided by an editor,
+  withdrawn by its author, and `resolved` follows it.
 - **What changed since you looked.** The editor records the version it
   showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
   answers every document the person may open with its version, who saved
@@ -702,6 +723,11 @@ operations fail, and what was done about each (all under test):
   it holds rather than adopting nothing.
 - **A Save while another is in flight.** The button is disabled for the
   duration, so a second click cannot carry the old base.
+- **A suggestion's paragraph was rewritten before it was accepted.** Said
+  at Accept, with the choice to apply over it or not. A proposal whose
+  words can no longer be drawn inline (an SVG heading, a rewritten
+  paragraph) gets the dashed outline, and one that cannot be drawn never
+  stops the others.
 - **The document is too large, the layout is not JSON, an upload is not an
   image.** Refused with the reason (413 / 400 / 415), said in the status
   line, nothing written.

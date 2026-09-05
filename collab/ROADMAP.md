@@ -36,26 +36,28 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 3. **Presence you can see at a glance.** Avatars of who is in the document
    in the top bar (initials, colour, name on hover), "Ada is typing in §2"
    as a jump link, and a "follow Ada" mode that scrolls with her.
-4. **Suggesting mode.** Edits proposed rather than made: a suggestion is a
-   thread with a diff on one slot, accepted or rejected from its card.
-   Store it beside comments (`suggestions.json`), apply through the pilot
-   `setSlot` so it is one undo step.
-5. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
+4. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
    field, a people list with roles, a "notify by email" checkbox, and a
    link that opens straight to the document (works today, just not from
    here). Show avatars of who has access in the dialog.
-6. **Version history like Docs' side panel.** The History dialog becomes a
+5. **Version history like Docs' side panel.** The History dialog becomes a
    panel: versions grouped by day, named versions first, a diff view of one
    version against the current (per slot, words added/removed), restore
    from the panel, "show changes" toggle that colours changed paragraphs.
-7. **Autosave on the hub.** With the store as the record, every quiet
+6. **Autosave on the hub.** With the store as the record, every quiet
    two seconds after an edit is a Save (the room already carries the live
    document, so nothing is lost either way — this only removes the button
    from people's minds). Keep the Save button as "Saved · just now".
    Guard: not while a paragraph editor is open mid-word; not on a 409.
-8. **Offline that says so.** The chip already reads offline; add a banner
+7. **Offline that says so.** The chip already reads offline; add a banner
    "working offline — edits are kept here and shared when you are back",
    and prove a reconnect merges (there is a test; make the UI honest).
+
+8. **Suggestions, the rest of the way.** A suggestion on a text box's
+   words (they live in layout as a scalar today, so a box edit reads as
+   "change box"); the list page and nav badge counting open suggestions;
+   "Accept all" / "Reject all" on the panel; a suggestion shown at its
+   place in the margin once cards live there.
 
 ## Organising project files
 
@@ -105,3 +107,6 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   For you; the obvious failure modes closed (lost comment updates, expired
   sign-in passing for a Save, room behind the store) (primer-editor 85097f5,
   hub 3fefae0).
+- 2026-09-05 — Suggesting mode: a viewer's or an editor's edit proposed as
+  a thread with the change, drawn inline, accepted or rejected from the
+  card (primer-editor + hub, see the commits after this line).
