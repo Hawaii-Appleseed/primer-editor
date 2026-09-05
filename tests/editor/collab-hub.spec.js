@@ -303,7 +303,7 @@ test('History lists every Save, names one, and brings one back as a new version'
   await a.locator('#save').click();
   await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
   await a.locator('#history').click();
-  const dlg = a.locator('dialog[open]');
+  const dlg = a.locator('#hpanel');
   await expect(dlg).toBeVisible({ timeout: 10_000 });
   const rows = dlg.locator('.hub-history-row');
   await expect(rows.nth(1)).toBeVisible({ timeout: 10_000 });
@@ -331,8 +331,9 @@ test('History lists every Save, names one, and brings one back as a new version'
 // read-only list, and naming from the dialog.
 const DOC_URL = () => `${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}`;
 const versions = async () => (await a.request.get(`${DOC_URL()}/history`)).json();
-const historyRows = page => page.locator('dialog[open] .hub-history-row');
+const historyRows = page => page.locator('#hpanel .hub-history-row');   // the side panel, since the dialog became one
 const closeDialog = page => page.locator('dialog[open] button.dsdlg-cancel').click();
+const closeHistory = page => page.locator('#hpanel-close').click();
 let N = 0;   // versions in the store when this block starts (earlier tests save too)
 const namedRow = async () => (await versions()).findIndex(h => h.label === 'before the rewrite');
 
@@ -356,8 +357,8 @@ test('history: after a restore both editors are clean on it, and both lists say 
   await expect(rows.first().locator('.hub-history-restore')).toHaveCount(0);
   await expect(rows.nth(1).locator('.hub-history-restore')).toHaveCount(1);
   await expect(rows.nth(2).locator('.hub-history-label')).toHaveValue('before the rewrite');
-  await closeDialog(b);
-  await expect(b.locator('dialog[open]')).toHaveCount(0);
+  await closeHistory(b);
+  await expect(b.locator('#hpanel')).toBeHidden();
 });
 
 test('history: a Save after a restore builds on it - no conflict, one more plain version', async () => {
@@ -465,7 +466,7 @@ test('history: a reload and a fresh editor both open on the restored version, no
   await page.locator('#history').click();
   await expect(historyRows(page)).toHaveCount(N + 3, { timeout: 10_000 });
   await expect(historyRows(page).first()).toHaveClass(/current/);
-  await closeDialog(page);
+  await closeHistory(page);
   await ctx.close();
 });
 
@@ -483,9 +484,9 @@ test('history: a viewer reads the list and may neither name nor restore', async 
   const rows = historyRows(page);
   await expect(rows).toHaveCount(N + 3, { timeout: 10_000 });
   await expect(rows.first()).toHaveClass(/current/);
-  await expect(page.locator('dialog[open] .hub-history-restore')).toHaveCount(0);
+  await expect(page.locator('#hpanel .hub-history-restore')).toHaveCount(0);
   for (let i = 0; i < N + 3; i++) await expect(rows.nth(i).locator('.hub-history-label')).toBeDisabled();
-  await closeDialog(page);
+  await closeHistory(page);
   // And the store agrees, whatever the page shows.
   const hist = await versions();
   r = await page.request.post(`${hubAs(GRACE_PORT)}/api/docs/${room}/restore`, { data: { version: hist[1].version } });
@@ -498,14 +499,68 @@ test('history: a viewer reads the list and may neither name nor restore', async 
   expect((await versions()).length).toBe(N + 3);
 });
 
-test('history: a name given in the dialog is kept, shown to the other editor and the list page, and cleared', async () => {
+test('history: the panel groups versions by day, a version opens on what it changed and marks it on the page, and Named only filters', async () => {
+  const key = await firstSlot(a);
+  await a.locator('#history').click();
+  const rows = historyRows(a);
+  await expect(rows).toHaveCount(N + 3, { timeout: 10_000 });
+  await expect(a.locator('#hpanel .hub-history-day').first()).toHaveText('Today');
+  await expect(a.locator('body')).toHaveClass(/cmt-margin/);   // the stage made room
+  // An unsaved edit to a paragraph that is on the page (the first slot is
+  // the document's <title>, which no page shows), so there is something to mark.
+  const intro = 'page1.intro';
+  const introWas = await slot(a, intro);
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(intro)}, "Marked on the page, for the test.")`);
+  // The named version opened: the paragraphs that differ - the words that
+  // went struck, the words on screen underlined - and the page marks them.
+  const named = rows.nth(await namedRow());
+  await named.locator('.hub-history-head').click();
+  await expect(named).toHaveClass(/on/);
+  const diff = named.locator('.hub-history-diff');
+  await expect(diff.locator('.sum')).toHaveText(/2 paragraphs differ .* unsaved edits included/, { timeout: 10_000 });
+  await expect(diff.locator('.key', { hasText: key })).toHaveCount(1);
+  await expect(diff.locator('.key', { hasText: intro })).toHaveCount(1);
+  await expect(diff.locator('ins', { hasText: 'on top of the restore' })).toHaveCount(1);   // the shared leading word is not repeated
+  const marked = a.frameLocator('#out').locator('.ds-hist-changed');
+  await expect(a.frameLocator('#out').locator(`[data-slot="${intro}"].ds-hist-changed, [data-el="${intro}"].ds-hist-changed`)).toHaveCount(1);
+  await expect(marked).toHaveCount(1);   // the <title> has nowhere to be marked
+  // Marking is a choice.
+  await a.locator('#hpanel-show').uncheck();
+  await expect(marked).toHaveCount(0);
+  await a.locator('#hpanel-show').check();
+  await expect(marked).toHaveCount(1);
+  // The edit taken back: the current version against the screen has nothing to mark.
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(intro)}, ${JSON.stringify(introWas)})`);
+  await rows.first().locator('.hub-history-head').click();
+  await expect(rows.first().locator('.hub-history-diff .sum')).toHaveText(/This is the version on screen|No difference in the words/, { timeout: 10_000 });
+  await expect(marked).toHaveCount(0);
+  // Named only: the one someone named.
+  await a.locator('#hpanel-named').click();
+  await expect(historyRows(a)).toHaveCount(1);
+  await expect(historyRows(a).first().locator('.hub-history-label')).toHaveValue('before the rewrite');
+  await a.locator('#hpanel-named').click();
+  await expect(historyRows(a)).toHaveCount(N + 3);
+  // On a phone the panel floats over the page and fits; wide again, the gutter returns.
+  await a.setViewportSize({ width: 375, height: 800 });
+  await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
+  const box = await a.locator('#hpanel').boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(375);
+  await a.setViewportSize({ width: 1280, height: 720 });
+  await expect(a.locator('body')).toHaveClass(/cmt-margin/);
+  await closeHistory(a);
+  await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
+  await expect(marked).toHaveCount(0);
+});
+
+test('history: a name given in the panel is kept, shown to the other editor and the list page, and cleared', async () => {
   await a.locator('#history').click();
   const rows = historyRows(a);
   await expect(rows).toHaveCount(N + 3, { timeout: 10_000 });
   await rows.first().locator('.hub-history-label').fill('sent to the board');
   await rows.first().locator('.hub-history-label').press('Tab');
   await expect(rows.first().locator('.hub-history-label')).toHaveClass(/saved/, { timeout: 5000 });
-  await closeDialog(a);
+  await closeHistory(a);
   // The current version wears it: on the store, in the summary, and for B.
   const meta = await (await a.request.get(DOC_URL())).json();
   expect(meta.label).toBe('sent to the board');
@@ -518,7 +573,7 @@ test('history: a name given in the dialog is kept, shown to the other editor and
   await historyRows(b).first().locator('.hub-history-label').fill('');
   await historyRows(b).first().locator('.hub-history-label').press('Tab');
   await expect(historyRows(b).first().locator('.hub-history-label')).toHaveClass(/saved/, { timeout: 5000 });
-  await closeDialog(b);
+  await closeHistory(b);
   expect((await (await a.request.get(DOC_URL())).json()).label).toBeNull();
   expect((await versions())[0].label).toBeNull();
   expect((await versions()).find(h => h.label === 'before the rewrite')).toBeTruthy();

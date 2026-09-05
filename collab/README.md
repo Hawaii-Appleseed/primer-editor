@@ -617,6 +617,29 @@ letting people change it:
   state an editor was LAST HANDED was dropped as "nothing new", even when
   that editor had flushed its own edits since — which is precisely what a
   restore does. `#localSinceEmit` now says so; `client.test.mjs` pins it.)
+- **Version history as Docs' side panel.** History is a panel beside the
+  page (`#hpanel`, the comments panel's frame; on a wide window it takes the
+  gutter the stage makes room for — `hubGutterSync()` decides that for both
+  panels, and only one is open at a time), not a dialog, so the page stays in
+  view while a person reads the differences. Every Save, newest first,
+  grouped by day ("Today", "Yesterday", the date); "Named only" keeps the
+  ones someone named. A row is the version: a click opens what it changed
+  against what is on screen — `slotsOf()` reads the `[[key]]` blocks of
+  that version's `content.md` and of `source`, each paragraph whose plain
+  words differ is listed with the words that went struck and the words on
+  screen underlined (`suggestSplit`, the suggestion cards' own diff), plus
+  the paragraphs only on one side and whether the layout differs; with
+  unsaved edits on screen the summary says "unsaved edits included", since
+  that is what it is compared against. "Mark what changed on the page"
+  outlines those paragraphs in the report (`.ds-hist-changed`, repainted on
+  every render from state) and is a checkbox because a marked-up page is
+  not always what someone wants while reading. Restore and naming are the
+  same rows' controls as before (Restore closes the panel and asks, as it
+  did). A new version landing (a Save here or elsewhere, a restore) reloads
+  the list — only a NEW version: the room re-announces the same one as
+  people come and go, and a reload then rebuilt the rows under someone
+  typing a name (the spec caught it); nor does the list ever rebuild while
+  a name box has focus.
 - **Who is where, by name.** A collaborator's selection has always been
   ringed in their colour with a tag, their open paragraph marked, their caret
   drawn (Phase 3); the tag now says the person — the roster's name, else the

@@ -39,26 +39,22 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Now — the next runs
 
-1. **Version history like Docs' side panel.** The History dialog becomes a
-   panel: versions grouped by day, named versions first, a diff view of one
-   version against the current (per slot, words added/removed), restore
-   from the panel, "show changes" toggle that colours changed paragraphs.
-2. **Autosave on the hub.** With the store as the record, every quiet
+1. **Autosave on the hub.** With the store as the record, every quiet
    two seconds after an edit is a Save (the room already carries the live
    document, so nothing is lost either way — this only removes the button
    from people's minds). Keep the Save button as "Saved · just now".
    Guard: not while a paragraph editor is open mid-word; not on a 409.
-3. **Offline that says so.** The chip already reads offline; add a banner
+2. **Offline that says so.** The chip already reads offline; add a banner
    "working offline — edits are kept here and shared when you are back",
    and prove a reconnect merges (there is a test; make the UI honest).
 
-4. **Suggestions, the rest of the way.** A suggestion on a text box's
+3. **Suggestions, the rest of the way.** A suggestion on a text box's
    words (they live in layout as a scalar today, so a box edit reads as
    "change box"); the list page and nav badge counting open suggestions;
    "Accept all" / "Reject all" on the panel; a suggestion shown at its
    place in the margin once cards live there.
 
-5. **The margin, the rest of the way.** The new-comment box as a card at
+4. **The margin, the rest of the way.** The new-comment box as a card at
     the anchor's height (it is the panel's foot today); a connector from
     the card in hand to its highlight; resolved threads out of the margin
     altogether (Docs keeps them for the list; ours trail the open ones
@@ -67,43 +63,49 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Organising project files
 
-6. **Folders and tags on the hub's list page.** Projects grouped by folder
+5. **Folders and tags on the hub's list page.** Projects grouped by folder
    (a `folder` field in the registry, editable from the list), tags as
    chips, a search box that filters by name, tag, and last editor. Drag a
    tile onto a folder. Remember the person's last view.
-7. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
+6. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
     rename (updates the registry and the room name safely — the room is
     named by project id, so rename the display name only), duplicate as a
     new project (files + assets + no comments), archive (hidden from the
     default view, restorable), delete (owner only, to a trash folder in R2
     with a 30-day sweep).
-8. **Starred and recent.** A star on each tile and a "Recent" row at the
+7. **Starred and recent.** A star on each tile and a "Recent" row at the
     top of the list — the documents this person opened last, from the
     `primer-seen` keys the editor already writes.
-9. **Assets library per project.** Insert image shows what has already
+8. **Assets library per project.** Insert image shows what has already
     been uploaded to this project's store with a thumbnail and who added it,
     delete an unused one, and a project-wide "images in use / unused" view.
-10. **Move a section between projects.** Copy a slot (words + layout +
+9. **Move a section between projects.** Copy a slot (words + layout +
     assets it names) into another project as a new section — the pilot
     `addExtra` + `setSlot` path, from a "Copy to…" on the section menu.
 
 ## Aesthetic
 
-11. **One quiet chrome.** The comments panel, share dialog, history and
+10. **One quiet chrome.** The comments panel, share dialog, history and
     the top bar on the hub path share one type scale and one radius set
     (`--r-ctl`/`--r-card`/`--r-edge`), one shadow, and the hub's own palette
     (Ash/Teal/Slate/Charcoal, Manrope/Poppins). Audit every new surface at
     375px.
-12. **Motion that explains.** A card raising when its highlight is clicked,
+11. **Motion that explains.** A card raising when its highlight is clicked,
     a highlight pulsing once when its card is hovered, the "+ Comment" pill
     fading in beside the selection, the reply box growing — 120–180 ms, no
     bounce.
-13. **Empty states that teach.** No comments yet: a two-line hint with the
+12. **Empty states that teach.** No comments yet: a two-line hint with the
     shortcut. First time on the hub: what Save does here. No projects: how
     to make one from a template.
-14. **Dark mode for the chrome** (not the report), following the OS.
+13. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — Version history as Docs' side panel: grouped by day, Named
+  only, a version opens on what it changed (per paragraph, words gone and
+  come; paragraphs only on one side; the layout), marks it on the page with
+  a toggle, Restore and naming from the same rows; the list never rebuilds
+  under a name being typed (primer-editor SHA_PE5, hub SHA_HUB5).
 
 - 2026-09-05 — Share as Docs lays it out: the link first with Copy, the
   owner named, people with faces and roster suggestions, everyone on the
