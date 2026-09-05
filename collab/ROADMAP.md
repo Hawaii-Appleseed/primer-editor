@@ -99,7 +99,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 - 2026-09-05 — Autosave on the hub: a quiet two seconds after an edit is a
   Save; not mid-word, not mid-Save, held after a 409 or a failure until Save
   is pressed; "Saved · just now" on the button; off per browser from the
-  File menu (primer-editor SHA_PE6, hub SHA_HUB6).
+  File menu (primer-editor 2effa3b, hub 0593c8d).
 
 - 2026-09-05 — Version history as Docs' side panel: grouped by day, Named
   only, a version opens on what it changed (per paragraph, words gone and
