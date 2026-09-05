@@ -110,7 +110,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 - 2026-09-05 — Presence at a glance: avatars in the bar (initial, colour,
   typing dot, "Ada · typing on page 2" as the title), a click goes to where
   they are, a second click follows them until a gesture, the avatar again,
-  or their leaving stops it (primer-editor SHA_PE3, hub SHA_HUB3).
+  or their leaving stops it (primer-editor 290c3d0, hub 91f5070).
 
 - 2026-09-05 — For you, where people already look: the store's summary
   answers `for_you` / `for_you_at` per person (one shared rule), the list
