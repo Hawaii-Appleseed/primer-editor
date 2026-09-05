@@ -183,9 +183,9 @@ test('Save goes to the hub, not to git, and the room learns the version', async 
   // B did not save, but B's "unsaved changes" now means "since Ada's save".
   await expect(b.locator('#save')).toBeDisabled();
   expect(await b.evaluate('docVersion')).toBe(meta.version);
-  // No draft branch, no Share, no Publish: the git verbs do not exist here.
+  // No draft branch and no Share link; Publish stays, as the export to git.
   await expect(a.locator('#share')).toBeHidden();
-  await expect(a.locator('#publish')).toBeHidden();
+  await expect(a.locator('#publish')).toBeVisible();
   expect(await a.evaluate('draftBranch')).toBeNull();
 });
 
@@ -211,6 +211,18 @@ test('an image uploads to the store and is served at the project path', async ()
   expect(r.status()).toBe(200);
   expect(r.headers()['content-type']).toBe('image/png');
   expect((await r.body()).length).toBe(png.length);
+});
+
+test('Publish asks the hub, and the hub says plainly when it cannot', async () => {
+  // Nothing here holds an export key, so the honest answer is "not
+  // configured" - proof that the verb reaches the store route and comes back
+  // as words, not that a commit lands (that is collab/export.test.mjs).
+  await expect(a.locator('#publish')).toBeVisible();
+  await expect(a.locator('#publish')).toBeEnabled();
+  await a.locator('#publish').click();
+  // The editor's own confirm (dsConfirm), not a browser dialog.
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(a.locator('#stat')).toHaveText(/publish failed: publishing is not configured/, { timeout: 20_000 });
 });
 
 test('no GitHub token was asked for or stored', async () => {

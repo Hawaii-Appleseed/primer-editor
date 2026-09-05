@@ -15,6 +15,13 @@
 
   "observability": { "enabled": true },
 
+  // The hub's document store (step 04) — the same bucket the hub's
+  // /api/docs writes. Read here by the export (src/export.js), which is the
+  // only writer to git: one commit per Publish, and the sweep below.
+  "r2_buckets": [{ "binding": "PRIMER_DOCS", "bucket_name": "primer-docs" }],
+  // 04:00 Hawaiʻi. Every room whose saved version the branch lacks gets one commit.
+  "triggers": { "crons": ["0 14 * * *"] },
+
   "vars": {
     // Browsers allowed to open a collaborative session. Mirrors the ALLOW list
     // in docs/primer/oauth-relay.js — the hosted editor and local dev.
@@ -33,8 +40,14 @@
     "ALLOWED_REPOS": "Hawaii-Appleseed/primer-editor,Hawaii-Appleseed/BudgetPrimerFinal,dtomkatsu/primer-editor,dtomkatsu/BudgetPrimerFinal"
   }
 
-  // COLLAB_SECRET is a secret, not a var:
-  //   npx wrangler secret put COLLAB_SECRET
-  // Any high-entropy string; it only ever signs short-lived connection
-  // tickets. `wrangler dev` falls back to a fixed development value.
+  // Secrets, not vars (npx wrangler secret put <NAME>):
+  //   COLLAB_SECRET        signs short-lived connection tickets; any high-entropy
+  //                        string. `wrangler dev` falls back to a fixed value.
+  //   EXPORT_KEY           shared with the hub (its EXPORT_KEY env var): what a
+  //                        caller must present to trigger an export. Without it
+  //                        /export/* answers 501.
+  //   GITHUB_EXPORT_TOKEN  a fine-grained PAT, Contents: read and write, on the
+  //                        repositories in ALLOWED_REPOS and nothing else. The
+  //                        only GitHub credential anywhere on the hub path.
+  // GITHUB_API (a var) overrides https://api.github.com for a test double.
 }

@@ -1,20 +1,27 @@
 /**
  * primer-collab — the Worker in front of the rooms.
  *
- * Three routes:
+ * Four routes and a schedule:
  *
  *   POST /auth                      exchange a GitHub token for a room ticket
  *   GET  /parties/primer-room/:room the collaborative websocket
  *   GET  /health                    liveness, no auth
+ *   GET|POST /export/:room          the store -> git (src/export.js); keyed,
+ *                                   for the hub's Publish. Nightly for every room.
  *
- * The Worker's whole job is to decide who may open a room. Once a socket is
- * accepted, everything else happens in the Durable Object (src/room.js).
+ * The Worker's job is to decide who may open a room; once a socket is
+ * accepted, everything else happens in the Durable Object (src/room.js). The
+ * export is the one other thing it does, because it is the one place a
+ * GitHub credential may live: scoped to the repositories served, and able
+ * only to commit what the store already holds.
  */
 import { routePartykitRequest } from 'partyserver';
 import {
   mintTicket, verifyTicket, parseRoom, checkRepoPermission,
   corsHeaders, allowedRepos, signingSecret, TICKET_TTL_SECONDS,
 } from './auth.js';
+
+import { exportRoom, exportAll } from './export.js';
 
 export { PrimerRoom } from './room.js';
 
@@ -38,6 +45,10 @@ export default {
       return json({ ok: true, service: 'primer-collab' }, {}, cors);
     }
 
+    if (url.pathname.startsWith('/export/')) {
+      return handleExport(request, env, url);
+    }
+
     if (url.pathname === '/auth') {
       if (request.method !== 'POST') return json({ error: 'POST required' }, { status: 405 }, cors);
       return handleAuth(request, env, cors);
@@ -53,7 +64,60 @@ export default {
 
     return json({ error: 'not found' }, { status: 404 }, cors);
   },
+
+  /** The nightly sweep (wrangler.jsonc triggers): every room whose version
+   *  the branch does not have yet gets one commit. */
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => {
+      if (!env.PRIMER_DOCS || !env.GITHUB_EXPORT_TOKEN) {
+        console.warn('export sweep skipped: PRIMER_DOCS or GITHUB_EXPORT_TOKEN not bound');
+        return;
+      }
+      const out = await exportAll({ bucket: env.PRIMER_DOCS, token: env.GITHUB_EXPORT_TOKEN, api: env.GITHUB_API });
+      console.log('export sweep', JSON.stringify(out.map(r => [r.room, r.status, r.sha || r.error || r.reason || ''])));
+    })());
+  },
 };
+
+/**
+ * GET|POST /export/<room>: the hub's Publish. Server to server, keyed with
+ * EXPORT_KEY (the hub holds the same string). The key lets a caller cause a
+ * commit of what the store already holds and read the last one's sha —
+ * nothing else — so it is a shared secret rather than a signed identity.
+ * No CORS: a browser is never the caller.
+ */
+async function handleExport(request, env, url) {
+  const room = decodeURIComponent(url.pathname.slice('/export/'.length));
+  if (!parseRoom(room)) return json({ error: 'room must be "owner~repo~project"' }, { status: 400 });
+  if (!env.EXPORT_KEY) return json({ error: 'export is not configured (EXPORT_KEY)' }, { status: 501 });
+  const given = request.headers.get('x-export-key') || '';
+  if (!timingSafeEqual(given, env.EXPORT_KEY)) return json({ error: 'export key required' }, { status: 401 });
+  if (!env.PRIMER_DOCS) return json({ error: 'the document store is not bound (PRIMER_DOCS)' }, { status: 501 });
+  if (!env.GITHUB_EXPORT_TOKEN) return json({ error: 'export is not configured (GITHUB_EXPORT_TOKEN)' }, { status: 501 });
+  const allowed = allowedRepos(env);
+  const nwo = parseRoom(room).nwo.toLowerCase();
+  if (allowed.length && !allowed.includes(nwo)) return json({ error: `repository ${nwo} is not served here` }, { status: 403 });
+
+  if (request.method === 'GET') {
+    const o = await env.PRIMER_DOCS.get(`docs/${room}/export.json`);
+    return json({ room, exported: o ? await o.json() : null });
+  }
+  if (request.method !== 'POST') return json({ error: 'GET or POST' }, { status: 405 });
+  try {
+    const r = await exportRoom({ bucket: env.PRIMER_DOCS, room, token: env.GITHUB_EXPORT_TOKEN, api: env.GITHUB_API });
+    return json(r, { status: r.status === 'unexportable' ? 409 : 200 });
+  } catch (e) {
+    return json({ error: String(e.message || e) }, { status: 502 });
+  }
+}
+
+function timingSafeEqual(a, b) {
+  const x = new TextEncoder().encode(String(a)), y = new TextEncoder().encode(String(b));
+  if (x.length !== y.length) return false;
+  let d = 0;
+  for (let i = 0; i < x.length; i++) d |= x[i] ^ y[i];
+  return d === 0;
+}
 
 /**
  * POST /auth  {room, token}  ->  {ticket, exp, login}

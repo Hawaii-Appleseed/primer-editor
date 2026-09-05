@@ -536,6 +536,39 @@ editor loads the stored document, an upload is served at the project path,
 and no token was asked for. Skipped when the hub is not checked out beside
 this repo. The handlers alone: `node dev/test_docs.mjs` in the hub.
 
+## Export to git (step 05)
+
+What the store gives up by leaving git — a log, blame, a diff on github.com,
+a clone as an off-Cloudflare backup — comes back on a schedule instead of the
+hot path. `src/export.js` writes ONE commit of a document's current state to
+`hub/<project>` in its repository: the two files at the paths the editor
+recorded in meta on every Save (`paths`), every uploaded image as a blob at
+the assets path, parented on the branch's tip, the branch made from the
+deploy branch the first time. `docs/<room>/export.json` remembers the last
+version exported, so an unchanged store writes nothing. The deploy branch is
+never touched: a pipeline report builds from main on a machine, and an
+editor-native one is published by a person merging what this wrote.
+
+Two ways it runs, both in this Worker, because this is the one place a
+GitHub credential may live — `GITHUB_EXPORT_TOKEN`, a fine-grained PAT with
+Contents read/write on the repositories in `ALLOWED_REPOS` and nothing else:
+
+- **Publish, from the hub.** The editor's Publish on the store path POSTs
+  `/api/docs/<room>/publish`; the hub's Function asks this Worker's
+  `POST /export/<room>` with the shared `EXPORT_KEY` (a secret on both sides)
+  and hands the answer back — the commit's sha and URL, or the refusal in
+  words. The key lets a caller cause a commit of what the store already
+  holds and nothing else.
+- **Nightly**, `0 14 * * *` UTC (04:00 Hawaiʻi): `scheduled()` sweeps every
+  room and exports the ones whose version the branch lacks. A room failing
+  fails that room only.
+
+`GITHUB_API` (a var) points the Worker at a test double. `export.test.mjs`
+drives the export against an in-memory Git Data API: first export makes the
+branch and commits files and assets, an unchanged store is silent, a new
+version is one more commit on the same branch, main is untouched, no
+recorded paths is a refusal, the sweep survives one failure.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the
@@ -547,6 +580,8 @@ this repo. The handlers alone: `node dev/test_docs.mjs` in the hub.
 - **Text boxes still hold.** A box's markdown is one scalar in a `Y.Map`;
   making it a `Y.Text` would let two people type in one box the way they
   now can in one paragraph.
+- **Export is one-way.** Nothing merges a commit someone makes on `hub/<id>`
+  back into the store; the store is the live copy and the branch its record.
 - **No read-only ticket on the GitHub door.** `/auth` always sets `ro: false`,
   because that permission model is binary (push or no access). The hub's door
   does set it — a *viewer* in its share list connects `ro: 1` — so the

@@ -175,7 +175,9 @@ Rules that bite:
   contract; the hook runs it after every engine or project commit, and
   FAILS if a project's page links a file its hub copy lacks. On the hub
   the document lives in R2 via `/api/docs`, decided once in
-  `docStoreDecide()`; git verbs hide there). The editor's state model is
+  `docStoreDecide()`; Publish there = one commit to `hub/<id>` by the
+  Worker's `src/export.js`, nightly sweep too — the Worker holds the only
+  GitHub credential on that path). The editor's state model is
   deliberately untouched — `source`/`layout` are MIRRORED onto a Yjs doc by
   `collab/client/session.mjs`: `renderOnce()` flushes local → doc as a diff,
   `collabAdopt()` paints doc → local, and in a session `pushHistory()` marks
