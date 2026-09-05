@@ -178,7 +178,8 @@ Rules that bite:
   `docStoreDecide()`; Publish there = one commit to `hub/<id>` by the
   Worker's `src/export.js`, nightly sweep too — the Worker holds the only
   GitHub credential on that path; Share… there is the hub's share list,
-  and a viewer is told `view only` — the room and store enforce it). The editor's state model is
+  and a viewer is told `view only` — the room and store enforce it;
+  History/Comments there read the hub's store, not the Yjs doc). The editor's state model is
   deliberately untouched — `source`/`layout` are MIRRORED onto a Yjs doc by
   `collab/client/session.mjs`: `renderOnce()` flushes local → doc as a diff,
   `collabAdopt()` paints doc → local, and in a session `pushHistory()` marks

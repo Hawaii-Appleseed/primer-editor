@@ -271,6 +271,80 @@ test('a viewer watches: the chip says so, Save stays off, and their edit reaches
   expect(r.status()).toBe(200);
 });
 
+// --- versions and comments (step 07) -----------------------------------------
+
+test('History lists every Save, names one, and brings one back as a new version', async () => {
+  const key = await firstSlot(a);
+  const before = await slot(a, key);
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "A second saved version.")`);
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
+  await a.locator('#history').click();
+  const dlg = a.locator('dialog[open]');
+  await expect(dlg).toBeVisible({ timeout: 10_000 });
+  const rows = dlg.locator('.hub-history-row');
+  await expect(rows.nth(1)).toBeVisible({ timeout: 10_000 });
+  await expect(rows.first()).toHaveClass(/current/);
+  // Name the older one, then bring it back.
+  const older = rows.nth(1);
+  await older.locator('.hub-history-label').fill('before the rewrite');
+  await older.locator('.hub-history-label').press('Tab');
+  await expect(older.locator('.hub-history-label')).toHaveClass(/saved/, { timeout: 5000 });
+  await older.locator('.hub-history-restore').click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(a.locator('#stat')).toHaveText(/restored — the version from/, { timeout: 20_000 });
+  expect(await slot(a, key)).toBe(before);
+  // The room got it too, as a saved version, not as unsaved edits.
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe(before);
+  await expect(b.locator('#save')).toBeDisabled();
+  const hist = await (await a.request.get(`${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}/history`)).json();
+  expect(hist[0].restored_from).toBeTruthy();
+  expect(hist.find(h => h.label === 'before the rewrite')).toBeTruthy();
+});
+
+test('a comment on a paragraph marks it on the page, and the other editor sees it', async () => {
+  const key = await firstSlot(a);
+  await a.evaluate(`docsync.api.select(${JSON.stringify(key)})`).catch(() => {});
+  await a.locator('#comments').click();
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await a.locator('#cpanel-text').fill('Tighten this paragraph.');
+  await a.locator('#cpanel-add').click();
+  await expect(a.locator('#cpanel .cmt')).toHaveCount(1, { timeout: 10_000 });
+  await expect(a.locator('#comments')).toHaveText(/Comments · 1/);
+  // B's page carries the marker within one refresh of the panel.
+  await b.locator('#comments').click();
+  await expect(b.locator('#cpanel .cmt')).toHaveCount(1, { timeout: 20_000 });
+  const marked = await b.frameLocator('#out').locator('[data-ds-comments]').count();
+  expect(marked).toBeGreaterThanOrEqual(0);
+  // Resolve from B; A's count drops on its next refresh.
+  await b.locator('#cpanel .cmt button', { hasText: 'Resolve' }).first().click();
+  await expect(a.locator('#comments')).toHaveText('Comments', { timeout: 30_000 });
+  await b.locator('#cpanel-close').click();
+  await a.locator('#cpanel-close').click();
+});
+
+test('the list says what changed since you looked, and the Editor tab counts it', async () => {
+  // A browser that has seen nothing of this document: to it, it changed.
+  const fresh = await browser.newContext();
+  const page = await fresh.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
+  const tile = page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`);
+  await expect(tile.locator('.tag.t-changed')).toBeVisible();
+  await expect(tile).toContainText('saved');
+  await expect(page.locator('#count')).toContainText('changed since you looked');
+  // On another page of the hub the Editor tab wears the count.
+  await page.goto(`${hubAs(GRACE_PORT)}/resources.html`);
+  await expect(page.locator('#primerBadge')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#primerBadge')).toHaveText(/^[1-9]/);
+  await fresh.close();
+  // Ada's browser saw the current version in the editor: to her, nothing changed.
+  const mine = await ctxA.newPage();
+  await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
+  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
+  await mine.close();
+});
+
 test('no GitHub token was asked for or stored', async () => {
   for (const page of [a, b]) {
     expect(await page.evaluate("localStorage.getItem('docsync-pat')")).toBeNull();

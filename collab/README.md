@@ -592,6 +592,30 @@ letting people change it:
   avatars: the roster has none, and Access's identity endpoint was not
   relied on for a picture it may not carry.
 
+## Versions, comments, and what changed (step 07)
+
+- **History** on the store path lists every Save (`/api/docs/<room>/history`),
+  lets an editor name a version (`PATCH …/history/<v>` `{label}`) and bring
+  one back (`POST …/restore` `{version}`). A restore is a NEW version on top
+  — nothing saved is lost, and the log reads "restored from …". The editor
+  adopts the files the way a collaborator's change lands and records the
+  version the way a Save does, so the room gets it through `meta.baseSha`.
+- **Comments** live beside the store's files (`comments.json`), not in the
+  Yjs document — a note about the document is not part of what renders or
+  exports. Anchored to a slot key or element id, or to the document. Anyone
+  who may open the document may comment and resolve; only the author
+  rewords; the author or the owner deletes. The panel refreshes itself every
+  15 s while open, and every open anchored comment puts a small orange
+  marker on its paragraph or element inside the report (`hubCommentsPaint`,
+  called from `wire()` like the peer marks).
+- **What changed since you looked.** The editor records the version it
+  showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
+  answers every document the person may open with its version, who saved
+  it, and its open comments; `primer/index.html` marks the ones that moved
+  and sorts them first, and the Editor tab on every hub page wears the count
+  (`assets/nav.js`, the calendar badge's pattern). No email, no push: a badge
+  where people already look, on data the store already had.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the
@@ -603,6 +627,8 @@ letting people change it:
 - **Text boxes still hold.** A box's markdown is one scalar in a `Y.Map`;
   making it a `Y.Text` would let two people type in one box the way they
   now can in one paragraph.
+- **Comments do not follow a rename.** A comment is anchored to a slot key or
+  element id; a renderer that renames one leaves the comment on the document.
 - **Export is one-way.** Nothing merges a commit someone makes on `hub/<id>`
   back into the store; the store is the live copy and the branch its record.
 - **No read-only ticket on the GitHub door.** `/auth` always sets `ro: false`,
