@@ -115,7 +115,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   page wears "N for you" (a click opens the editor on the For you tab), the
   count line says it, the Editor tab's badge counts documents that want you
   and says why, and the editor records when you looked so the badge rests
-  (primer-editor SHA_PE2, hub SHA_HUB2). The digest email is under
+  (primer-editor 678d946, hub 0ab3b5f). The digest email is under
   "Needs a human".
 
 - 2026-09-05 — Comments in the margin: on a wide window the panel is a
