@@ -90,6 +90,12 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Done
 
+- 2026-09-05 — The margin keeps up and keeps still: reads before writes and
+  transforms on a scroll, a reconciled list instead of a rebuilt one on a
+  click, comments shown at once with the hub asked after; and editing in
+  place looks like the page (heading marker hidden, inline styles worn)
+  (primer-editor e4f28cd).
+
 - 2026-09-05 — The margin finished: the new comment is a card at its anchor
   once it is in use, a line joins the card in hand to its words, and a card
   taller than the gutter scrolls inside itself (primer-editor 38278b0,
