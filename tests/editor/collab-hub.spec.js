@@ -302,6 +302,205 @@ test('History lists every Save, names one, and brings one back as a new version'
   expect(hist.find(h => h.label === 'before the rewrite')).toBeTruthy();
 });
 
+// The rest of History: what both editors show after a restore, a Save on
+// top of one, the confirmation refused, a restore from the OTHER editor,
+// unsaved edits superseded, a reload and a fresh editor, the viewer's
+// read-only list, and naming from the dialog.
+const DOC_URL = () => `${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}`;
+const versions = async () => (await a.request.get(`${DOC_URL()}/history`)).json();
+const historyRows = page => page.locator('dialog[open] .hub-history-row');
+const closeDialog = page => page.locator('dialog[open] button.dsdlg-cancel').click();
+let N = 0;   // versions in the store when this block starts (earlier tests save too)
+const namedRow = async () => (await versions()).findIndex(h => h.label === 'before the rewrite');
+
+test('history: after a restore both editors are clean on it, and both lists say so', async () => {
+  const hist = await versions();
+  N = hist.length;
+  expect(N).toBeGreaterThanOrEqual(3);
+  expect(hist[0].restored_from).toBe(hist[2].version);
+  // Nothing unsaved on either side: the restore IS the saved version.
+  await expect(a.locator('#save')).toBeDisabled();
+  await expect(b.locator('#save')).toBeDisabled();
+  expect(await a.evaluate('docVersion')).toBe(hist[0].version);
+  expect(await b.evaluate('docVersion')).toBe(hist[0].version);
+  // B's list, who did not click Restore: the same rows, the same current.
+  await b.locator('#history').click();
+  const rows = historyRows(b);
+  await expect(rows).toHaveCount(N, { timeout: 10_000 });
+  await expect(rows.first()).toHaveClass(/current/);
+  await expect(rows.first().locator('.hub-history-when')).toHaveText(/· current · restored$/);
+  await expect(rows.first().locator('.hub-history-when')).toHaveText(/ada/);
+  await expect(rows.first().locator('.hub-history-restore')).toHaveCount(0);
+  await expect(rows.nth(1).locator('.hub-history-restore')).toHaveCount(1);
+  await expect(rows.nth(2).locator('.hub-history-label')).toHaveValue('before the rewrite');
+  await closeDialog(b);
+  await expect(b.locator('dialog[open]')).toHaveCount(0);
+});
+
+test('history: a Save after a restore builds on it - no conflict, one more plain version', async () => {
+  const key = await firstSlot(a);
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Saved on top of the restore.")`);
+  await expect(a.locator('#save')).toBeEnabled();
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
+  const hist = await versions();
+  expect(hist.length).toBe(N + 1);
+  expect(hist[0].restored_from).toBeNull();
+  expect(hist[0].updated_by).toBe(ADA);
+  expect(hist[1].restored_from).toBeTruthy();
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe('Saved on top of the restore.');
+  await expect(b.locator('#save')).toBeDisabled();
+  expect(await b.evaluate('docVersion')).toBe(hist[0].version);
+});
+
+test('history: a session that missed the restore is refused, and told where the store is', async () => {
+  const hist = await versions();
+  const stale = hist[2].version;          // the version before the restore
+  const r = await a.request.put(DOC_URL(), { data: { content: 'From a browser that was not here.', base: stale } });
+  expect(r.status()).toBe(409);
+  const j = await r.json();
+  expect(j.version).toBe(hist[0].version);
+  expect(j.updated_by).toBe(ADA);
+  expect((await versions()).length).toBe(N + 1);   // nothing written
+});
+
+test('history: Restore, then Cancel at the confirmation, changes nothing', async () => {
+  const key = await firstSlot(a);
+  const before = await slot(a, key);
+  const version = await a.evaluate('docVersion');
+  await a.locator('#history').click();
+  await expect(historyRows(a)).toHaveCount(N + 1, { timeout: 10_000 });
+  await historyRows(a).nth(await namedRow()).locator('.hub-history-restore').click();
+  // The history dialog closed and the confirmation opened in its place.
+  await expect(a.locator('dialog[open] button.dsdlg-ok')).toHaveText('Restore');
+  await expect(a.locator('dialog[open] .dsdlg-msg')).toHaveText(/"before the rewrite"/);
+  await closeDialog(a);
+  await expect(a.locator('dialog[open]')).toHaveCount(0);
+  expect(await slot(a, key)).toBe(before);
+  expect(await a.evaluate('docVersion')).toBe(version);
+  await expect(a.locator('#save')).toBeDisabled();
+  expect((await versions()).length).toBe(N + 1);
+});
+
+test('history: the other editor may restore too, and the first sees it land as saved', async () => {
+  const key = await firstSlot(a);
+  const hist = await versions();
+  const second = hist[2];                   // "A second saved version."
+  await b.locator('#history').click();
+  const rows = historyRows(b);
+  await expect(rows).toHaveCount(N + 1, { timeout: 10_000 });
+  await rows.nth(2).locator('.hub-history-restore').click();
+  await b.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(b.locator('#stat')).toHaveText(/restored — the version from/, { timeout: 20_000 });
+  expect(await slot(b, key)).toBe('A second saved version.');
+  await expect(b.locator('#save')).toBeDisabled();
+  await expect.poll(() => slot(a, key), { timeout: 20_000 }).toBe('A second saved version.');
+  await expect(a.locator('#save')).toBeDisabled();
+  await expect(a.locator('#stat')).toHaveText(/a collaborator saved/);
+  const after = await versions();
+  expect(after.length).toBe(N + 2);
+  expect(after[0].updated_by).toBe(GRACE);
+  expect(after[0].restored_from).toBe(second.version);
+  expect(await a.evaluate('docVersion')).toBe(after[0].version);
+  expect(await b.evaluate('docVersion')).toBe(after[0].version);
+});
+
+test("history: a restore supersedes the other editor's unsaved edits, and says so", async () => {
+  const key = await firstSlot(a);
+  await b.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Grace, not yet saved.")`);
+  await expect(b.locator('#save')).toBeEnabled();
+  await expect.poll(() => slot(a, key), { timeout: 20_000 }).toBe('Grace, not yet saved.');
+  // Newest first: Grace's restore, then the Save Ada made on top of the first restore.
+  const hist = await versions();
+  expect(hist[1].updated_by).toBe(ADA);
+  expect(hist[1].restored_from).toBeNull();
+  const idx = 1;
+  await a.locator('#history').click();
+  await expect(historyRows(a)).toHaveCount(N + 2, { timeout: 10_000 });
+  await historyRows(a).nth(idx).locator('.hub-history-restore').click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(a.locator('#stat')).toHaveText(/restored — the version from/, { timeout: 20_000 });
+  expect(await slot(a, key)).toBe('Saved on top of the restore.');
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe('Saved on top of the restore.');
+  await expect(b.locator('#save')).toBeDisabled();
+  await expect(b.locator('#stat')).toHaveText(/a collaborator saved/);
+  expect((await versions()).length).toBe(N + 3);
+});
+
+test('history: a reload and a fresh editor both open on the restored version, not on what came before', async () => {
+  const key = await firstSlot(a);
+  const current = (await versions())[0];
+  await a.reload();
+  await waitForFirstRender(a);
+  await waitLive(a);
+  expect(await slot(a, key)).toBe('Saved on top of the restore.');
+  expect(await a.evaluate('docVersion')).toBe(current.version);
+  await expect(a.locator('#save')).toBeDisabled();
+  const { ctx, page } = await open(browser, GRACE_PORT);
+  expect(await slot(page, key)).toBe('Saved on top of the restore.');
+  expect(await page.evaluate('docVersion')).toBe(current.version);
+  await page.locator('#history').click();
+  await expect(historyRows(page)).toHaveCount(N + 3, { timeout: 10_000 });
+  await expect(historyRows(page).first()).toHaveClass(/current/);
+  await closeDialog(page);
+  await ctx.close();
+});
+
+test('history: a viewer reads the list and may neither name nor restore', async () => {
+  const room = `Hawaii-Appleseed~primer-editor~${PROJECT}`;
+  let r = await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/${room}`, { data: { default: 'viewer', people: { [ADA]: 'editor' } } });
+  expect(r.status()).toBe(200);
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  await waitLive(page);
+  await expect(page.locator('#collab')).toHaveText(/view only/);
+  await page.locator('#history').click();
+  const rows = historyRows(page);
+  await expect(rows).toHaveCount(N + 3, { timeout: 10_000 });
+  await expect(rows.first()).toHaveClass(/current/);
+  await expect(page.locator('dialog[open] .hub-history-restore')).toHaveCount(0);
+  for (let i = 0; i < N + 3; i++) await expect(rows.nth(i).locator('.hub-history-label')).toBeDisabled();
+  await closeDialog(page);
+  // And the store agrees, whatever the page shows.
+  const hist = await versions();
+  r = await page.request.post(`${hubAs(GRACE_PORT)}/api/docs/${room}/restore`, { data: { version: hist[1].version } });
+  expect(r.status()).toBe(403);
+  r = await page.request.patch(`${hubAs(GRACE_PORT)}/api/docs/${room}/history/${hist[1].version}`, { data: { label: 'no' } });
+  expect(r.status()).toBe(403);
+  await ctx.close();
+  r = await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/${room}`, { data: { default: 'editor', people: {} } });
+  expect(r.status()).toBe(200);
+  expect((await versions()).length).toBe(N + 3);
+});
+
+test('history: a name given in the dialog is kept, shown to the other editor and the list page, and cleared', async () => {
+  await a.locator('#history').click();
+  const rows = historyRows(a);
+  await expect(rows).toHaveCount(N + 3, { timeout: 10_000 });
+  await rows.first().locator('.hub-history-label').fill('sent to the board');
+  await rows.first().locator('.hub-history-label').press('Tab');
+  await expect(rows.first().locator('.hub-history-label')).toHaveClass(/saved/, { timeout: 5000 });
+  await closeDialog(a);
+  // The current version wears it: on the store, in the summary, and for B.
+  const meta = await (await a.request.get(DOC_URL())).json();
+  expect(meta.label).toBe('sent to the board');
+  const sum = await (await a.request.get(`${hubAs(ADA_PORT)}/api/docs`)).json();
+  expect(sum.find(d => d.project === PROJECT).label).toBe('sent to the board');
+  await b.locator('#history').click();
+  await expect(historyRows(b).first().locator('.hub-history-label')).toHaveValue('sent to the board', { timeout: 10_000 });
+  await expect(historyRows(b).nth(await namedRow()).locator('.hub-history-label')).toHaveValue('before the rewrite');
+  // B clears it.
+  await historyRows(b).first().locator('.hub-history-label').fill('');
+  await historyRows(b).first().locator('.hub-history-label').press('Tab');
+  await expect(historyRows(b).first().locator('.hub-history-label')).toHaveClass(/saved/, { timeout: 5000 });
+  await closeDialog(b);
+  expect((await (await a.request.get(DOC_URL())).json()).label).toBeNull();
+  expect((await versions())[0].label).toBeNull();
+  expect((await versions()).find(h => h.label === 'before the rewrite')).toBeTruthy();
+});
+
 test('what A selects, B sees ringed with her name', async () => {
   const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
   test.skip(!id, 'this project has no addressable elements');

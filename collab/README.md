@@ -533,8 +533,18 @@ contexts carrying Access identities — the list page names the project, both
 are live in one room as the people Access says they are, an edit crosses, a
 Save lands in the store and the other editor learns the version, a fresh
 editor loads the stored document, an upload is served at the project path,
-and no token was asked for. Skipped when the hub is not checked out beside
-this repo. The handlers alone: `node dev/test_docs.mjs` in the hub.
+and no token was asked for. The `history:` tests take versions further:
+both editors clean on a restore, a Save on top of one, the confirmation
+refused, a restore from either side, unsaved edits superseded, a reload and
+a fresh editor opening on the restored version, the viewer's read-only list,
+and naming from the dialog. Skipped when the hub is not checked out beside
+this repo. The handlers alone: `node dev/test_docs.mjs` in the hub — its
+"edges of restore and naming" section covers the refusals (viewer, bad
+version, nothing saved), what a restore carries (paths, seeded_from, no
+label), a content-only version leaving the layout alone, restoring the
+current version, the 409 for a session that missed a restore, and names
+(trimmed, cut at 80, cleared, surviving a later Save, on the store and the
+summary when current).
 
 ## Export to git (step 05)
 
@@ -600,6 +610,13 @@ letting people change it:
   — nothing saved is lost, and the log reads "restored from …". The editor
   adopts the files the way a collaborator's change lands and records the
   version the way a Save does, so the room gets it through `meta.baseSha`.
+  An editor holding unsaved edits when a collaborator restores gets the
+  restored files and is told "a collaborator saved" — its edits are
+  superseded, as by any Save from the room. (This needed a fix in
+  `session.mjs`: a remote update that lands the document on exactly the
+  state an editor was LAST HANDED was dropped as "nothing new", even when
+  that editor had flushed its own edits since — which is precisely what a
+  restore does. `#localSinceEmit` now says so; `client.test.mjs` pins it.)
 - **Who is where, by name.** A collaborator's selection has always been
   ringed in their colour with a tag, their open paragraph marked, their caret
   drawn (Phase 3); the tag now says the person — the roster's name, else the
