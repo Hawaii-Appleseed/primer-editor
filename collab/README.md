@@ -672,6 +672,36 @@ letting people change it:
   room drops their writes anyway, and this gives them a voice. Server
   side, `status` (open / accepted / rejected) is decided by an editor,
   withdrawn by its author, and `resolved` follows it.
+- **Comments in the margin.** On a window 1100px or wider the panel is a
+  gutter beside the page — `body.cmt-margin` gives `#stage` a right margin
+  the width of the gutter and `applyZoom()` refits the page into what is
+  left, the one time a panel is allowed to move the page (a card has to line
+  up with the words it is about, so it needs its own column, not a float
+  over the page's right third). Inside, `#cpanel-list` is a positioning
+  box and `hubMarginLayout()` places every card by hand: at its anchor's
+  top on screen (the quote's Range when the words are highlighted, else
+  the element; the iframe's rect and scale turn page pixels into screen
+  pixels, as the "+ Comment" pill does), never over the card before it, a
+  thread on the document at the top, one whose words are gone or one that
+  is resolved trailing the rest under the "N resolved" line; a card whose
+  words have scrolled off the top goes with them, out of sight, as in Docs.
+  The thread in hand sits at its exact place and the others are pushed up
+  or down to clear it — but never out of the gutter: Docs' margin runs the
+  whole document, ours is a window on it, so when the cards above have no
+  room left it is the card in hand that gives way and sits lower (a card
+  whose words are on the page must stay reachable; the first cut of this
+  pushed them off the top and a ⋮ landed on the canvas). The gutter starts
+  where the stage does and its head is kept short, so the band of page with
+  no margin beside it is as thin as it can be. A scroll of
+  the report (a listener on the iframe's window, one layout per frame), a
+  zoom (`applyZoom` ends by asking for one), a window resize and a card
+  changing height (a ResizeObserver: a reply box opening restacks the
+  rest) all move `top` and nothing else — the cards are never rebuilt for
+  that, so a reply being typed is never disturbed. A `List` / `Margin`
+  switch in the panel's head is the person's choice, kept in
+  `localStorage['primer-comments-view']`; below 1100px the width decides
+  and the panel is the ordered list it always was, which at 375px fits
+  inside the phone (pinned by the hub spec).
 - **What changed since you looked.** The editor records the version it
   showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
   answers every document the person may open with its version, who saved

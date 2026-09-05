@@ -24,40 +24,42 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Now — the next runs
 
-1. **Comments in the margin.** Cards pinned beside their anchor (a right
-   gutter the page frame leaves room for when the panel is open), stacked
-   without overlap, the active one nudging the rest — the one visible
-   difference from Docs left. Scroll the page and the cards follow.
-   Fall back to the ordered list below a narrow width.
-2. **Comment notifications that reach people.** Mentions and replies are
+1. **Comment notifications that reach people.** Mentions and replies are
    only seen by opening the document. Add "For you" to the hub's list page
    and nav badge (the store already knows mentions), and a daily digest
    email through the hub's existing mail path for threads that name you.
-3. **Presence you can see at a glance.** Avatars of who is in the document
+2. **Presence you can see at a glance.** Avatars of who is in the document
    in the top bar (initials, colour, name on hover), "Ada is typing in §2"
    as a jump link, and a "follow Ada" mode that scrolls with her.
-4. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
+3. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
    field, a people list with roles, a "notify by email" checkbox, and a
    link that opens straight to the document (works today, just not from
    here). Show avatars of who has access in the dialog.
-5. **Version history like Docs' side panel.** The History dialog becomes a
+4. **Version history like Docs' side panel.** The History dialog becomes a
    panel: versions grouped by day, named versions first, a diff view of one
    version against the current (per slot, words added/removed), restore
    from the panel, "show changes" toggle that colours changed paragraphs.
-6. **Autosave on the hub.** With the store as the record, every quiet
+5. **Autosave on the hub.** With the store as the record, every quiet
    two seconds after an edit is a Save (the room already carries the live
    document, so nothing is lost either way — this only removes the button
    from people's minds). Keep the Save button as "Saved · just now".
    Guard: not while a paragraph editor is open mid-word; not on a 409.
-7. **Offline that says so.** The chip already reads offline; add a banner
+6. **Offline that says so.** The chip already reads offline; add a banner
    "working offline — edits are kept here and shared when you are back",
    and prove a reconnect merges (there is a test; make the UI honest).
 
-8. **Suggestions, the rest of the way.** A suggestion on a text box's
+7. **Suggestions, the rest of the way.** A suggestion on a text box's
    words (they live in layout as a scalar today, so a box edit reads as
    "change box"); the list page and nav badge counting open suggestions;
    "Accept all" / "Reject all" on the panel; a suggestion shown at its
    place in the margin once cards live there.
+
+8. **The margin, the rest of the way.** The new-comment box as a card at
+    the anchor's height (it is the panel's foot today); a connector from
+    the card in hand to its highlight; resolved threads out of the margin
+    altogether (Docs keeps them for the list; ours trail the open ones
+    under "N resolved"); a card that overruns the gutter's bottom scrolls
+    within itself instead of being clipped.
 
 ## Organising project files
 
@@ -98,6 +100,12 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 17. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — Comments in the margin: on a wide window the panel is a
+  gutter the stage makes room for, each card beside its words, none
+  overlapping, the one in hand at its place with the rest nudged clear,
+  riding the page's scroll and zoom; List / Margin switch kept; the list
+  below 1100px and on a phone (primer-editor SHA_MARGIN, hub SHA_HUB).
 
 - 2026-09-05 — History and restore tested to their edges; the restore-
   reaches-an-editor-with-unsaved-edits session fix (primer-editor f2327f7,

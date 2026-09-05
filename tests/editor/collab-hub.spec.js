@@ -572,8 +572,16 @@ const clearComments = async () => {
   for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${c.id}`);
 };
 const cmtRow = (page, text) => page.locator('#cpanel .cmt', { hasText: text });
+// In the margin a card sits beside its words, which may be scrolled off: take
+// the thread in hand first (what a click on its highlight does), so the page
+// scrolls to it and the card is in the gutter.
+const bring = async row => {
+  const id = await row.getAttribute('data-id');
+  await row.page().evaluate(`hubCommentFocus(${JSON.stringify(id)})`);
+  await expect(row).toHaveClass(/active/);
+};
 // Delete, Show, Edit and Copy link live in the card's ⋮ menu, as in Docs.
-const openMenu = row => row.locator('.cmt-msg').first().locator('.cmt-more').click();
+const openMenu = async row => { await bring(row); await row.locator('.cmt-msg').first().locator('.cmt-more').click(); };
 const menuItem = (row, label) => row.locator('.cmt-menu button', { hasText: label });
 const viaMenu = async (row, label) => { await openMenu(row); await menuItem(row, label).click(); };
 const closeMenu = page => page.locator('#cpanel .cpanel-head b').click();
@@ -882,6 +890,111 @@ test('comments: ⌘⌥M starts one on what is in hand, and a link opens the edit
   await page.close();
   await clearComments();
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
+});
+
+// --- comments in the margin ----------------------------------------------------
+// Docs' arrangement on a wide window: the stage makes room for a gutter, each
+// card sits beside its words, none overlap, the one in hand at its exact
+// place with the rest nudged clear, and a scroll of the page carries them.
+// Under 1100px the panel is the ordered list, and fits a phone.
+const marginGeo = page => page.evaluate(`(() => {
+  const out = document.getElementById('out'); const f = out.getBoundingClientRect(); const z = f.width / out.clientWidth;
+  const d = out.contentDocument; const list = document.getElementById('cpanel-list').getBoundingClientRect();
+  const pageTop = document.getElementById('work').getBoundingClientRect().top;
+  const cards = [...document.querySelectorAll('#cpanel .cmt')].map(el => {
+    const r = el.getBoundingClientRect(); const c = hubComments.find(x => x.id === el.dataset.id);
+    const t = hubCommentEl(d, c.anchor).getBoundingClientRect(); const anchor = f.top + t.top * z;
+    // Words on the page keep their card in the gutter; words scrolled off take it with them.
+    return { text: el.textContent, top: r.top, bottom: r.bottom, anchor, want: anchor >= pageTop ? Math.max(anchor, list.top) : anchor, active: el.classList.contains('active') };
+  });
+  return { z, frameRight: f.right, panelLeft: document.getElementById('cpanel').getBoundingClientRect().left, listTop: list.top, cards };
+})()`);
+
+test('comments: in the margin, each card sits beside its words, none overlap, the one in hand takes its place, and they follow the page', async () => {
+  await clearComments();
+  if (await a.locator('#cpanel').isVisible()) await a.locator('#cpanel-close').click();
+  await a.setViewportSize({ width: 1280, height: 720 });
+  const inv = await a.evaluate('docsync.api.inventory()');
+  // Three text slots, as the document reads.
+  const keys = inv.pages.flatMap(p => p.slots || []).filter(s => s.text && s.text.trim().length > 10).map(s => s.key).slice(0, 3);
+  expect(keys.length).toBe(3);
+  for (const [i, key] of keys.entries())
+    await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: key, text: `Margin note ${i + 1}` } });
+  await a.evaluate('document.getElementById("out").contentWindow.scrollTo(0, 0)');
+  await a.locator('#comments').click();
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  await expect(a.locator('body')).toHaveClass(/cmt-margin/);
+  await expect(a.locator('#cpanel-view')).toHaveText('List');
+  await expect(cmtRow(a, 'Margin note 3')).toBeVisible({ timeout: 10_000 });
+  // The stage made room: the page ends where the gutter begins.
+  await expect.poll(async () => { const g = await marginGeo(a); return g.frameRight <= g.panelLeft + 1; }).toBe(true);
+  // Nothing in hand: each card at its words, or just under the card before it.
+  await expect.poll(async () => {
+    const g = await marginGeo(a);
+    let prev = -Infinity, ok = g.cards.length === 3;
+    for (const c of g.cards) {
+      ok = ok && Math.abs(c.top - Math.max(c.want, prev + 8)) <= 2;
+      prev = c.bottom;
+    }
+    return ok;
+  }, { message: 'cards beside their words, none overlapping' }).toBe(true);
+  // The third card taken in hand (a click on it, or on its words): the page
+  // scrolls to its words and the card sits exactly beside them, the second
+  // nudged up clear of it.
+  // (Unless the cards above have no room left: then it is the card in hand
+  // that sits lower, because a card whose words are on the page is never
+  // pushed out of the gutter.)
+  await bring(cmtRow(a, 'Margin note 3'));
+  await expect.poll(async () => {
+    const g = await marginGeo(a);
+    const [first, second, third] = g.cards;
+    if (!third || !third.active) return false;
+    const exact = Math.abs(third.top - third.want) <= 2;
+    const gaveWay = Math.abs(third.top - (second.bottom + 8)) <= 2 && third.top > third.want;
+    const clear = second.bottom <= third.top - 7 && first.bottom <= second.top - 7;
+    const kept = first.top >= Math.min(first.want, g.listTop) - 1;   // not pushed out of the gutter
+    return (exact || gaveWay) && clear && kept;
+  }, { timeout: 10_000, message: 'the active card beside its words, or as near as the cards above allow; none pushed out' }).toBe(true);
+  // The page scrolls: the cards ride with it - each still beside its words.
+  await a.evaluate('hubCommentActive = null; hubCommentsRender()');
+  await a.waitForTimeout(400);   // the cards' .16s slide, settled
+  const before = await marginGeo(a);
+  await a.evaluate('document.getElementById("out").contentWindow.scrollBy(0, 120)');
+  await a.waitForTimeout(400);
+  const after = await marginGeo(a);
+  const scrollY = await a.evaluate('document.getElementById("out").contentWindow.scrollY');
+  const dump = JSON.stringify({ before: before.cards, after: after.cards, scrollY, z: after.z, listTop: after.listTop });
+  expect(after.cards[2].top, dump).toBeLessThan(before.cards[2].top - 1);
+  let prev = -Infinity;
+  for (const c of after.cards) { expect(Math.abs(c.top - Math.max(c.want, prev + 8)), dump).toBeLessThanOrEqual(2); prev = c.bottom; }
+  // The list view is a choice, and it is kept.
+  await a.locator('#cpanel-view').click();
+  await expect(a.locator('#cpanel')).not.toHaveClass(/margin/);
+  await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
+  await expect(a.locator('#cpanel-view')).toHaveText('Margin');
+  expect(await a.evaluate('localStorage.getItem("primer-comments-view")')).toBe('list');
+  await a.locator('#cpanel-view').click();
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+});
+
+test('comments: under 1100px the panel is the list again, and it fits a phone', async () => {
+  await a.setViewportSize({ width: 375, height: 800 });
+  await expect(a.locator('#cpanel')).not.toHaveClass(/margin/);
+  await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
+  await expect(a.locator('#cpanel-view')).toBeHidden();
+  const g = await a.evaluate(`(() => { const p = document.getElementById('cpanel').getBoundingClientRect();
+    const cards = [...document.querySelectorAll('#cpanel .cmt')].map(c => ({ pos: getComputedStyle(c).position, top: c.getBoundingClientRect().top }));
+    return { left: p.left, right: p.right, cards }; })()`);
+  expect(g.left).toBeGreaterThanOrEqual(0);
+  expect(g.right).toBeLessThanOrEqual(375);
+  expect(g.cards.length).toBe(3);
+  for (const c of g.cards) expect(c.pos).not.toBe('absolute');   // in the flow, one under the other
+  for (let i = 1; i < g.cards.length; i++) expect(g.cards[i].top).toBeGreaterThan(g.cards[i - 1].top);
+  // Wide again: the margin comes back on its own.
+  await a.setViewportSize({ width: 1280, height: 720 });
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  await a.locator('#cpanel-close').click();
+  await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
 });
 
 // --- suggesting, the way Google Docs does it ---------------------------------
