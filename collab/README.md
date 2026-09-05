@@ -485,8 +485,8 @@ requests and re-signs it, which is the only reason the Function may trust it.
 
 The hub's door (above) only helps if the editor is on the hub's origin, and it
 is: `python3 -m docsync.hub` vendors it into
-`staff-updates-internal/primer/` — one `edit.html`, one `collab-client.js`, a
-`projects.json`, and an `engine/` + `assets/` per project — from every binding
+`staff-updates-internal/primer/` — one `edit.html`, one `collab-client.js`, one
+`sw.js`, a `projects.json`, and an `engine/` + `assets/` per project — from every binding
 here with an `editor:` block (unless it says `hub: false`) and from every
 consumer in `vendor.yml` / `vendor.local.yml`, each staged by its own vendored
 `docsync.stage`. The hub's path comes from `hub:` in `vendor.local.yml`, and
@@ -497,6 +497,17 @@ never written by the vendor.
 
 What differs for an editor served there, and nothing else does:
 
+- It has the editor's **service worker** beside it (`sw.js`, vendored since
+  2026-09-05). The worker keeps Pyodide's ~30MB runtime cache-first in Cache
+  Storage and the shell network-first; before, the file lived only in the
+  engine repo's untracked `docs/primer/`, so on the hub `register('sw.js')`
+  404'd silently and a cold open paid the whole CDN download whenever the
+  browser's HTTP cache had let it go. The manifest link carries
+  `crossorigin="use-credentials"` for the same reason a hub fetch does: without
+  cookies the Access edge bounced it to sign-in, two seconds per open for
+  nothing. Measured warm on 2026-09-05 (Chrome, fast link): the demo report
+  is live 4.7s after navigation, the budget primer 3.7s; every network fetch
+  is done by ~3.5s and the rest is Pyodide's start and the first render.
 - Its registry entry says `"collab": {"path": "/api/collab", "me": "/api/me"}`
   instead of `"url"`. `collabDoor()` in `edit.html` returns the one or the
   other; on a path the editor mints no ticket and asks for no token — the
