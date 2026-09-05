@@ -100,7 +100,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   "Reject all N" on the panel (one question, then each through its own
   path, so one undo step each), and the list page's tile, its count line
   and the Editor tab's badge all say how many wait on an editor
-  (primer-editor SHA_PE8, hub SHA_HUB8).
+  (primer-editor 4feea0f, hub f9ce2d5).
 
 - 2026-09-05 — Offline that says so: a band above the page while the
   session is down, gone on its own when it is back with "what you did
