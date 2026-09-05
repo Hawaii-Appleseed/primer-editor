@@ -19,6 +19,11 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   touching the session, `npx playwright test tests/editor/boot-errors.spec.js`
   after touching edit.html's stylesheet (it is a template literal).
 - Verify every layout change at 375px as well as desktop.
+- `collab.spec.js` (the relay path) serves the STAGED editor under
+  `docs/primer/`, which the commit hook refreshes — so before running it
+  against uncommitted edits to `edit.html`, `python3 -m docsync.stage --id
+  budget-primer`, or it quietly tests the last commit. The hub spec vendors
+  the working tree itself and has no such trap.
 - Push only when told to in the message that asks for the work; the
   scheduled session may push its own commits (the person asked for that).
 
@@ -39,17 +44,13 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Now — the next runs
 
-1. **Offline that says so.** The chip already reads offline; add a banner
-   "working offline — edits are kept here and shared when you are back",
-   and prove a reconnect merges (there is a test; make the UI honest).
-
-2. **Suggestions, the rest of the way.** A suggestion on a text box's
+1. **Suggestions, the rest of the way.** A suggestion on a text box's
    words (they live in layout as a scalar today, so a box edit reads as
    "change box"); the list page and nav badge counting open suggestions;
    "Accept all" / "Reject all" on the panel; a suggestion shown at its
    place in the margin once cards live there.
 
-3. **The margin, the rest of the way.** The new-comment box as a card at
+2. **The margin, the rest of the way.** The new-comment box as a card at
     the anchor's height (it is the panel's foot today); a connector from
     the card in hand to its highlight; resolved threads out of the margin
     altogether (Docs keeps them for the list; ours trail the open ones
@@ -58,43 +59,49 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Organising project files
 
-4. **Folders and tags on the hub's list page.** Projects grouped by folder
+3. **Folders and tags on the hub's list page.** Projects grouped by folder
    (a `folder` field in the registry, editable from the list), tags as
    chips, a search box that filters by name, tag, and last editor. Drag a
    tile onto a folder. Remember the person's last view.
-5. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
+4. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
     rename (updates the registry and the room name safely — the room is
     named by project id, so rename the display name only), duplicate as a
     new project (files + assets + no comments), archive (hidden from the
     default view, restorable), delete (owner only, to a trash folder in R2
     with a 30-day sweep).
-6. **Starred and recent.** A star on each tile and a "Recent" row at the
+5. **Starred and recent.** A star on each tile and a "Recent" row at the
     top of the list — the documents this person opened last, from the
     `primer-seen` keys the editor already writes.
-7. **Assets library per project.** Insert image shows what has already
+6. **Assets library per project.** Insert image shows what has already
     been uploaded to this project's store with a thumbnail and who added it,
     delete an unused one, and a project-wide "images in use / unused" view.
-8. **Move a section between projects.** Copy a slot (words + layout +
+7. **Move a section between projects.** Copy a slot (words + layout +
     assets it names) into another project as a new section — the pilot
     `addExtra` + `setSlot` path, from a "Copy to…" on the section menu.
 
 ## Aesthetic
 
-9. **One quiet chrome.** The comments panel, share dialog, history and
+8. **One quiet chrome.** The comments panel, share dialog, history and
     the top bar on the hub path share one type scale and one radius set
     (`--r-ctl`/`--r-card`/`--r-edge`), one shadow, and the hub's own palette
     (Ash/Teal/Slate/Charcoal, Manrope/Poppins). Audit every new surface at
     375px.
-10. **Motion that explains.** A card raising when its highlight is clicked,
+9. **Motion that explains.** A card raising when its highlight is clicked,
     a highlight pulsing once when its card is hovered, the "+ Comment" pill
     fading in beside the selection, the reply box growing — 120–180 ms, no
     bounce.
-11. **Empty states that teach.** No comments yet: a two-line hint with the
+10. **Empty states that teach.** No comments yet: a two-line hint with the
     shortcut. First time on the hub: what Save does here. No projects: how
     to make one from a template.
-12. **Dark mode for the chrome** (not the report), following the OS.
+11. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — Offline that says so: a band above the page while the
+  session is down, gone on its own when it is back with "what you did
+  offline is shared now"; the relay spec proves an edit made offline
+  reaches the other editor after the reconnect (primer-editor SHA_PE7,
+  hub SHA_HUB7).
 
 - 2026-09-05 — Autosave on the hub: a quiet two seconds after an edit is a
   Save; not mid-word, not mid-Save, held after a 409 or a failure until Save

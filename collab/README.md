@@ -836,8 +836,14 @@ operations fail, and what was done about each (all under test):
 - **The websocket drops.** The editor keeps working on its own copy; the
   provider reconnects and Yjs merges what both sides did meanwhile
   (tested: "a session that reconnects does not re-seed and picks up what it
-  missed"). The room's storage gone: the next editor refills it from what
-  it holds rather than adopting nothing.
+  missed"). And it SAYS so: a band above the page — "Working offline — your
+  edits are kept here and shared when the session is back" — drawn by
+  `renderNotices` from the chip's status (so a render never loses it), not
+  dismissible because it goes on its own, and "back in the session — what
+  you did offline is shared now" in the status line when it does (the relay
+  spec drops A's socket, edits, reconnects, and watches B get the words).
+  The room's storage gone: the next editor refills it from what it holds
+  rather than adopting nothing.
 - **A Save while another is in flight.** The button is disabled for the
   duration, so a second click cannot carry the old base.
 - **A suggestion's paragraph was rewritten before it was accepted.** Said

@@ -328,6 +328,28 @@ test('an automated edit in B is shown to A as Claude at work, via grace, and cle
   await expect(b.locator('#agentlive')).toBeHidden();
 });
 
+test('offline is said above the page, and what was done offline is shared when the session is back', async () => {
+  // A dropped connection, as the provider sees one: its socket's close event
+  // (see client.test.mjs for why not disconnect() alone). disconnect() first,
+  // so the provider does not reconnect on its own before the band is seen.
+  await a.evaluate(`(() => { const p = collab.provider; const ws = p.ws; p.disconnect();
+    if (ws) { ws.dispatchEvent(new Event('close')); try { ws.close(); } catch (e) { /* closing */ } } })()`);
+  await expect(a.locator('#collab')).toHaveText(/offline/, { timeout: 10_000 });
+  await expect(a.locator('#notices .ds-offline')).toBeVisible();
+  await expect(a.locator('#notices .ds-offline')).toHaveText(/Working offline — your edits are kept here and shared when the session is back/);
+  await expect(b.locator('#notices .ds-offline')).toHaveCount(0);   // B is fine
+  // An edit made offline stays here for now.
+  await api(a, `setSlot(${JSON.stringify(SLOT)}, "Typed while offline.")`);
+  await a.waitForTimeout(800);
+  expect(await slot(b)).not.toBe('Typed while offline.');
+  // Back: the band goes, the status line says so, and B gets the words.
+  await a.evaluate('collab.provider.connect()');
+  await waitLive(a);
+  await expect(a.locator('#notices .ds-offline')).toHaveCount(0);
+  await expect(a.locator('#stat')).toHaveText(/back in the session — what you did offline is shared now/);
+  await expect.poll(() => slot(b), { timeout: 15_000 }).toBe('Typed while offline.');
+});
+
 test('an unshared project shows no chip and keeps the snapshot undo stack', async ({ page }) => {
   await gotoEditor(page, '?collab=0');
   const s = await status(page);
