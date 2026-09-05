@@ -105,7 +105,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   gutter the stage makes room for, each card beside its words, none
   overlapping, the one in hand at its place with the rest nudged clear,
   riding the page's scroll and zoom; List / Margin switch kept; the list
-  below 1100px and on a phone (primer-editor SHA_MARGIN, hub SHA_HUB).
+  below 1100px and on a phone (primer-editor 7925b30, hub 862fa56).
 
 - 2026-09-05 — History and restore tested to their edges; the restore-
   reaches-an-editor-with-unsaved-edits session fix (primer-editor f2327f7,
