@@ -27,7 +27,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { test, expect, waitForFirstRender } = require('./fixtures/editor-test');
+const { test, expect, waitForFirstRender, openFileMenu, openShare } = require('./fixtures/editor-test');
 
 const REPO = path.resolve(__dirname, '../..');
 const HUB_DIR = process.env.PRIMER_HUB_DIR || path.resolve(REPO, '../staff-updates-internal');
@@ -234,7 +234,7 @@ test('Publish asks the hub, and the hub says plainly when it cannot', async () =
 // --- who may open it (step 06) ------------------------------------------------
 
 test('Share shows the record, and a change narrows the document', async () => {
-  await a.locator('#share').click();
+  await openShare(a);
   const dlg = a.locator('dialog[open]');
   // The link first - the document's own address - and Copy puts it in hand.
   await expect(dlg.locator('.hub-share-link input')).toHaveValue(new RegExp(`^http://127\\.0\\.0\\.1:\\d+/primer/edit(\\.html)?\\?project=${PROJECT}$`));
@@ -258,7 +258,7 @@ test('Share shows the record, and a change narrows the document', async () => {
   expect(rec.people[ADA]).toBe('editor');
   expect(rec.you.role).toBe('owner');
   // Opened again: the owner leads the list, by name; and on a phone it fits.
-  await a.locator('#share').click();
+  await openShare(a);
   await expect(a.locator('dialog[open] .hub-share-owner .hub-share-name')).toContainText(/ada/i);
   await expect(a.locator('dialog[open] .hub-share-owner .hub-share-role')).toHaveText('Owner');
   await a.setViewportSize({ width: 375, height: 800 });
@@ -288,7 +288,7 @@ test('a viewer watches: the chip says so, Save stays off, and their edit reaches
   await expect.poll(async () => (await allComments()).filter(c => c.kind === 'suggestion').length, { timeout: 10_000 }).toBe(1);
   for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}/comments/${c.id}`);
   // The dialog is readable, not changeable, for them.
-  await page.locator('#share').click();
+  await openShare(page);
   await expect(page.locator('dialog[open] .hub-share-default')).toBeDisabled();
   await expect(page.locator('dialog[open] button.dsdlg-ok')).toHaveCount(0);
   await page.locator('dialog[open] button.dsdlg-cancel').click();
@@ -750,7 +750,7 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   await a.locator('#cpanel-text').fill('Tighten this paragraph.');
   await a.locator('#cpanel-add').click();
   await expect(a.locator('#cpanel .cmt')).toHaveCount(1, { timeout: 10_000 });
-  await expect(a.locator('#comments')).toHaveText(/Comments · 1/);
+  await expect(cmtCount(a)).toHaveText('1');
   // B's page carries the marker within one refresh of the panel.
   await b.locator('#comments').click();
   await expect(b.locator('#cpanel .cmt')).toHaveCount(1, { timeout: 20_000 });
@@ -759,7 +759,7 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   // Resolve from B; A's count drops on its next refresh.
   await b.locator('#cpanel .cmt button', { hasText: 'Resolve' }).first().click();
   await expect(b.locator('#cpanel .cmt').first()).toHaveClass(/resolved/, { timeout: 10_000 });
-  await expect(a.locator('#comments')).toHaveText('Comments', { timeout: 30_000 });
+  await expect(cmtCount(a)).toHaveCount(0, { timeout: 30_000 });
   await b.locator('#cpanel-close').click();
   await a.locator('#cpanel-close').click();
 });
@@ -775,6 +775,9 @@ const clearComments = async () => {
   for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${c.id}`);
 };
 const cmtRow = (page, text) => page.locator('#cpanel .cmt', { hasText: text });
+/** The open-comment count, which the button carries as a superscript numeral
+ *  rather than spelling out. Absent entirely when nothing is open. */
+const cmtCount = page => page.locator('#comments .cmt-n');
 // In the margin a card sits beside its words, which may be scrolled off: take
 // the thread in hand first (what a click on its highlight does), so the page
 // scrolls to it and the card is in the gutter.
@@ -822,7 +825,7 @@ test('comments: on the document, a paragraph and an element - each anchored wher
   await a.locator('#cpanel-text').fill('Nudge this to the left.');
   await a.locator('#cpanel-add').click();
   await expect(cmtRow(a, 'Nudge this')).toBeVisible({ timeout: 10_000 });
-  await expect(a.locator('#comments')).toHaveText('Comments · 3');
+  await expect(cmtCount(a)).toHaveText('3');
 
   const stored = await allComments();
   expect(stored.map(c => c.anchor).sort()).toEqual([null, prose.id, other.id].sort());
@@ -830,7 +833,7 @@ test('comments: on the document, a paragraph and an element - each anchored wher
   // Both markers, on both editors, with the count of what is open there.
   await expect(marker(b, prose.id)).toHaveAttribute('data-ds-comments', '1', { timeout: 20_000 });
   await expect(marker(b, other.id)).toHaveAttribute('data-ds-comments', '1');
-  await expect(b.locator('#comments')).toHaveText('Comments · 3', { timeout: 20_000 });
+  await expect(cmtCount(b)).toHaveText('3', { timeout: 20_000 });
 });
 
 test('comments: resolved from the other editor, the marker and the count drop everywhere; reopened, they return', async () => {
@@ -841,10 +844,10 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   await cmtRow(b, 'runs long').locator('button', { hasText: 'Resolve' }).click();
   await expect(cmtRow(b, 'runs long')).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(cmtRow(b, 'runs long').locator('button', { hasText: 'Reopen' })).toBeVisible();
-  await expect(b.locator('#comments')).toHaveText('Comments · 2');
+  await expect(cmtCount(b)).toHaveText('2');
   await expect(marker(b, prose)).toHaveCount(0);
   // A hears it through presence, not a poll.
-  await expect(a.locator('#comments')).toHaveText('Comments · 2', { timeout: 20_000 });
+  await expect(cmtCount(a)).toHaveText('2', { timeout: 20_000 });
   await expect(marker(a, prose)).toHaveCount(0);
   await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
   const rec = (await allComments()).find(c => c.text.includes('runs long'));
@@ -855,7 +858,7 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   await expect(cmtRow(a, 'runs long')).not.toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(marker(a, prose)).toHaveCount(1);
   await expect(marker(b, prose)).toHaveCount(1, { timeout: 20_000 });
-  await expect(b.locator('#comments')).toHaveText('Comments · 3', { timeout: 20_000 });
+  await expect(cmtCount(b)).toHaveText('3', { timeout: 20_000 });
   expect((await allComments()).find(c => c.text.includes('runs long')).resolved_by).toBeNull();
 });
 
@@ -881,7 +884,7 @@ test('comments: who may delete - the author, and the owner; nobody else sees the
   await viaMenu(cmtRow(a, 'Nudge this'), 'Delete');
   await a.locator('dialog[open] button.dsdlg-ok').click();
   await expect(cmtRow(a, 'Nudge this')).toHaveCount(0, { timeout: 10_000 });
-  await expect(a.locator('#comments')).toHaveText('Comments · 2');
+  await expect(cmtCount(a)).toHaveText('2');
   expect((await allComments()).length).toBe(2);
 });
 
@@ -930,7 +933,7 @@ test('comments: they survive a reload, and the list page counts the open ones', 
   await page.goto(`${hubAs(ADA_PORT)}/primer/edit.html?project=${PROJECT}`);
   await waitForFirstRender(page);
   // Two open (runs long, from a viewer), one resolved (overall) - before any panel is opened.
-  await expect(page.locator('#comments')).toHaveText('Comments · 2', { timeout: 20_000 });
+  await expect(cmtCount(page)).toHaveText('2', { timeout: 20_000 });
   await page.locator('#comments').click();
   await expect(page.locator('#cpanel .cmt')).toHaveCount(3, { timeout: 10_000 });
   await expect(page.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
@@ -1297,7 +1300,7 @@ test("suggesting: a viewer's edit is proposed, shown inline, and an editor accep
   await page.waitForTimeout(1500);
   expect(await slot(a, key)).toBe(before);
   // A sees the proposal inline and on a card, with Accept and Reject.
-  await expect(a.locator('#comments')).toHaveText(/1 suggested/, { timeout: 20_000 });
+  await expect(a.locator('#comments')).toHaveAttribute('title', /1 of them suggested/, { timeout: 20_000 });
   await expect(a.frameLocator('#out').locator('ins.ds-suggest')).toHaveText('Suggested words here.', { timeout: 20_000 });
   if (!(await a.locator('#cpanel').isVisible())) await a.locator('#comments').click();
   await expect(suggestRow(a, 'Suggested words here')).toBeVisible({ timeout: 10_000 });

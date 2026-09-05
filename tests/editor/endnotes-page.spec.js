@@ -6,7 +6,7 @@
 // function the floating Sources panel's own fields call. Since the page's
 // <li> list is rebuilt fresh from content.md's [[sources]] block on every
 // render, editing either surface can never leave the other stale. Local mode.
-const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection, openSources } = require('./fixtures/editor-test');
 
 
 /** Add a brand-new source through the real UI flow. The inline toolbar (and
@@ -135,7 +135,7 @@ test.describe('endnotes page', () => {
     const frame = page.frameLocator('#out');
     await addSourceViaUi(page, 'en-edit-b', 'Panel original.', 'https://example.com/panel');
 
-    await page.click('#sources');
+    await openSources(page);
     const row = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[en-edit-b]' }) });
     await row.locator('.srctext').fill('Panel updated.');
     await row.locator('.srctext').evaluate(el => el.blur());

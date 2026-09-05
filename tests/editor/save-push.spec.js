@@ -13,7 +13,7 @@
 // the call and the next assertion. Mocking makes the poll agree with the
 // scenario instead of fighting it. These tests are about the CLIENT'S state
 // machine, not serve.py's actual git plumbing.
-const { test, hostedTest, expect, gotoEditor, submitDialogIfPresent, PING } = require('./fixtures/editor-test');
+const { test, hostedTest, expect, gotoEditor, submitDialogIfPresent, PING, openFileMenu } = require('./fixtures/editor-test');
 
 /** Navigate with /__ping pinned to an `ahead`, registered before the page ever
  *  loads — detectLocal()'s first ping (which decides `local` and the button's
@@ -48,7 +48,11 @@ test.describe('local Save vs Push', () => {
   // `.hidden` DOM-property read would not have caught.
   test('Share and Publish are genuinely hidden in local mode, not just marked', async ({ page, context }) => {
     await gotoWithAhead(page, context, 0);
+    // Share is a File-menu row now: open the menu, or "hidden" would be true
+    // of the whole popover and prove nothing about the row.
+    await openFileMenu(page);
     await expect(page.locator('#share')).toBeHidden();
+    await page.click('#file');
     await expect(page.locator('#publish')).toBeHidden();
   });
 
@@ -157,7 +161,9 @@ hostedTest.describe('hosted mode: local-only controls truly hidden, not just mar
   hostedTest('Push stays hidden in hosted mode (no local dev server)', async ({ page }) => {
     await gotoEditor(page);
     await expect(page.locator('#push')).toBeHidden();
+    await openFileMenu(page);
     await expect(page.locator('#share')).toBeVisible();     // the hosted-only controls
+    await page.click('#file');
     await expect(page.locator('#publish')).toBeVisible();
   });
 });

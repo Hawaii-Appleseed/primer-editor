@@ -15,10 +15,10 @@
 // The Budget Primer fixture is the SUPPRESSION case: its renderer already
 // draws page 12, so the editor must not offer a second list that would
 // renumber alongside the first.
-const { test, expect, gotoEditor } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, openSources: reachSources } = require('./fixtures/editor-test');
 
 const openSources = async page => {
-  await page.click('#sources');
+  await reachSources(page);
   await expect(page.locator('#srcpanel')).toBeVisible();
 };
 
