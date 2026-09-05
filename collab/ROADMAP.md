@@ -92,8 +92,8 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 - 2026-09-05 — The margin finished: the new comment is a card at its anchor
   once it is in use, a line joins the card in hand to its words, and a card
-  taller than the gutter scrolls inside itself (primer-editor SHA_PE9,
-  hub SHA_HUB9).
+  taller than the gutter scrolls inside itself (primer-editor 38278b0,
+  hub f5fa727).
 
 - 2026-09-05 — Suggestions counted and decided in bulk: "Accept all N" /
   "Reject all N" on the panel (one question, then each through its own
