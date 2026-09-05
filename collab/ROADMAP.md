@@ -107,7 +107,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 - 2026-09-05 — Share as Docs lays it out: the link first with Copy, the
   owner named, people with faces and roster suggestions, everyone on the
-  hub closing the list; fits a phone (primer-editor SHA_PE4, hub SHA_HUB4).
+  hub closing the list; fits a phone (primer-editor d2d2446, hub 18c49af).
 
 - 2026-09-05 — Presence at a glance: avatars in the bar (initial, colour,
   typing dot, "Ada · typing on page 2" as the title), a click goes to where
