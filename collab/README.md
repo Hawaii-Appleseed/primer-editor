@@ -774,8 +774,23 @@ letting people change it:
   the report (a listener on the iframe's window, one layout per frame), a
   zoom (`applyZoom` ends by asking for one), a window resize and a card
   changing height (a ResizeObserver: a reply box opening restacks the
-  rest) all move `top` and nothing else — the cards are never rebuilt for
-  that, so a reply being typed is never disturbed. A `List` / `Margin`
+  rest) all move the cards and nothing else — they are never rebuilt for
+  that, so a reply being typed is never disturbed. Each card is moved by
+  `transform`, not `top` (a composite, not a layout of the gutter), and a
+  layout reads everything it needs — the iframe's rect, the list's, the
+  panel's, every anchor's — before it writes anything: a write between two
+  reads made the browser lay the page out again for the second, twice a
+  frame, which was the lag the cards had behind a scrolling page. Heights
+  come from the ResizeObserver, each card observed once when it appears.
+  Nor does a render rebuild the list: cards are kept by thread id (and
+  separators by their words) when nothing the card shows has changed —
+  `hubCommentsRenderInner` reconciles the list into the new order,
+  touching only what moved — so a click on the page (which re-renders the
+  panel for the "On the selection" tag) leaves every card where it was;
+  rebuilding them put each one back at the top of the gutter to glide down
+  again, which read as the cards reshuffling. A card that is rebuilt
+  starts where the old one stood, and a card placed for the first time
+  takes its place without gliding (`.fresh`). A `List` / `Margin`
   switch in the panel's head is the person's choice, kept in
   `localStorage['primer-comments-view']`; below 1100px the width decides
   and the panel is the ordered list it always was, which at 375px fits
@@ -795,6 +810,15 @@ letting people change it:
   Resolved threads stay in the margin, trailing the open ones under the
   "N resolved" line: they have no words to sit beside any more, and the
   panel is the only place they can be found again.
+  And every change shows **at once**: a new comment is a provisional card
+  (`.pending`, in hand) the moment Add is pressed, a reply, a resolve, an
+  edit or a deletion is shown as it will stand, and the hub is asked after
+  — its answer to a change is the thread itself, which takes the shown
+  one's place (`hubCommentsMerge`) with no second round trip to read the
+  list back; a refusal puts things back as they were and says so in the
+  status line (a refused reply comes back into an open box). Posting used
+  to wait for the POST and then a GET of the whole list before anything
+  appeared, which read as the button not working.
 - **For you, where people already look.** A mention or a reply used to be
   seen only by opening the document. The store's summary (`GET /api/docs`)
   now answers, per person, `for_you` — the open threads that name them
