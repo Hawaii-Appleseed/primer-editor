@@ -48,7 +48,7 @@ test.skip(!fs.existsSync(path.join(HUB_DIR, 'functions/api/collab')),
 
 let relay = null, pages = null;
 const proxies = [];
-let ctxA, ctxB, a, b;
+let ctxA, ctxB, a, b, browser;
 
 /** The Access edge, in miniature: everything through `port` reaches the hub
  *  on HUB_PORT carrying `email` as the identity header — plain requests and
@@ -106,7 +106,8 @@ async function open(browser, port) {
   return { ctx, page };
 }
 
-test.beforeAll(async ({ browser }) => {
+test.beforeAll(async ({ browser: b_ }) => {
+  browser = b_;
   execFileSync('python3', ['-m', 'docsync.hub', '--into', HUB_DIR], { cwd: REPO, stdio: 'inherit' });
   const { startDev } = await import('../../collab/devserver.mjs');
   const { startPages } = await import('../../collab/hub-check.mjs');
@@ -183,8 +184,8 @@ test('Save goes to the hub, not to git, and the room learns the version', async 
   // B did not save, but B's "unsaved changes" now means "since Ada's save".
   await expect(b.locator('#save')).toBeDisabled();
   expect(await b.evaluate('docVersion')).toBe(meta.version);
-  // No draft branch and no Share link; Publish stays, as the export to git.
-  await expect(a.locator('#share')).toBeHidden();
+  // No draft branch. Share is the share LIST here, Publish the export to git.
+  await expect(a.locator('#share')).toHaveText('Share…');
   await expect(a.locator('#publish')).toBeVisible();
   expect(await a.evaluate('draftBranch')).toBeNull();
 });
@@ -223,6 +224,51 @@ test('Publish asks the hub, and the hub says plainly when it cannot', async () =
   // The editor's own confirm (dsConfirm), not a browser dialog.
   await a.locator('dialog[open] button.dsdlg-ok').click();
   await expect(a.locator('#stat')).toHaveText(/publish failed: publishing is not configured/, { timeout: 20_000 });
+});
+
+// --- who may open it (step 06) ------------------------------------------------
+
+test('Share shows the record, and a change narrows the document', async () => {
+  await a.locator('#share').click();
+  const dlg = a.locator('dialog[open]');
+  await expect(dlg.locator('.hub-share-default')).toHaveValue('editor');
+  await dlg.locator('.hub-share-default').selectOption('viewer');
+  await dlg.locator('.hub-share-add').click();
+  const row = dlg.locator('.hub-share-row').last();
+  await row.locator('input').fill(ADA);
+  await row.locator('select').selectOption('editor');
+  await dlg.locator('button.dsdlg-ok').click();
+  await expect(a.locator('#stat')).toHaveText(/sharing saved — everyone may view, 1 named/, { timeout: 10_000 });
+  const r = await a.request.get(`${hubAs(ADA_PORT)}/api/collab/share/Hawaii-Appleseed~primer-editor~${PROJECT}`);
+  const rec = await r.json();
+  expect(rec.default).toBe('viewer');
+  expect(rec.people[ADA]).toBe('editor');
+  expect(rec.you.role).toBe('owner');
+});
+
+test('a viewer watches: the chip says so, Save stays off, and their edit reaches nobody', async () => {
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  await waitLive(page);
+  await expect(page.locator('#collab')).toHaveText(/view only/);
+  const key = await firstSlot(a);
+  const before = await slot(a, key);
+  await page.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "A viewer typed this.")`);
+  await expect(page.locator('#save')).toBeDisabled();
+  await page.waitForTimeout(2000);
+  expect(await slot(a, key)).toBe(before);
+  // The dialog is readable, not changeable, for them.
+  await page.locator('#share').click();
+  await expect(page.locator('dialog[open] .hub-share-default')).toBeDisabled();
+  await expect(page.locator('dialog[open] button.dsdlg-ok')).toHaveCount(0);
+  await page.locator('dialog[open] button.dsdlg-cancel').click();
+  await ctx.close();
+  // Back to open, so the tests after this see the door's default.
+  const r = await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/Hawaii-Appleseed~primer-editor~${PROJECT}`,
+                                { data: { default: 'editor', people: {} } });
+  expect(r.status()).toBe(200);
 });
 
 test('no GitHub token was asked for or stored', async () => {

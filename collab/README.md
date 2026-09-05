@@ -569,6 +569,29 @@ branch and commits files and assets, an unchanged store is silent, a new
 version is one more commit on the same branch, main is untouched, no
 recorded paths is a refusal, the sweep survives one failure.
 
+## Who may open it, and as whom (step 06)
+
+The hub's share record (`functions/api/collab/share/`) was enforced from the
+day the door opened — a viewer's socket is read-only in the room, and the
+store refuses their Save. What step 06 adds is the editor SAYING so and
+letting people change it:
+
+- **Share…** on the store path opens the share dialog: a default for everyone
+  through Access (can edit / view only / no access) and named exceptions.
+  Anyone who can edit can re-share; a viewer sees the record and cannot
+  change it. Sharing outside the staff domains is not a row — the dialog
+  says it is a change to the hub's sign-in.
+- **A viewer is told.** `hubShareLoad()` reads the record at boot: the chip
+  says `· view only`, Save and Publish stay off, an upload is refused before
+  it starts, and the status line says edits here are not kept. The room and
+  the store enforce; the editor only spares the person the surprise.
+- **Names.** `/api/me` on the hub answers `{email, name}`, the name from the
+  staff roster (`data/staff.json`) — so presence says "Abbey" rather than an
+  address. It rides awareness as `name` beside `login` (the identity stays
+  the email); `peerOf()` passes it through and the chip prefers it. No
+  avatars: the roster has none, and Access's identity endpoint was not
+  relied on for a picture it may not carry.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the

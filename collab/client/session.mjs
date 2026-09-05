@@ -336,6 +336,7 @@ function peerOf(clientId, st) {
   return {
     id: clientId,
     login: st.login ?? null,
+    name: st.name ?? null,      // a display name, when the door knows one (the hub's roster)
     color: st.color || colorFor(st.login ?? clientId),
     sel: Array.isArray(st.sel) ? st.sel : [],
     page: st.page ?? null,
@@ -363,7 +364,8 @@ export class CollabSession {
    *                               the request itself.
    * @param {{content: string, layout: object|string}} o.files   what the editor holds now
    * @param {string|null} [o.baseSha]   the commit those files came from
-   * @param {string|null} [o.login]     for presence
+   * @param {string|null} [o.login]     for presence — the identity (a login, an email)
+   * @param {string|null} [o.name]      for presence — what to call them, when known
    * @param {() => boolean} [o.busy]    true while the editor must not be disturbed
    * @param {(files, why: 'adopt'|'remote'|'undo'|'redo') => void} [o.onFiles]
    * @param {() => void} [o.beforeRemote]  runs just before a collaborator's update lands on the shadow
@@ -377,6 +379,7 @@ export class CollabSession {
   constructor(o) {
     this.room = o.room;
     this.login = o.login ?? null;
+    this.name = o.name ?? null;
     this.busy = o.busy || (() => false);
     this.onFiles = o.onFiles || (() => {});
     this.beforeRemote = o.beforeRemote || (() => {});
@@ -460,7 +463,7 @@ export class CollabSession {
     this.provider.on('synced', synced => { if (synced) this.#onSynced(); });
     this.provider.on('custom-message', s => this.#onMessage(s));
     this.provider.awareness.on('change', () => this.#presence());
-    this.provider.awareness.setLocalState({ login: this.login, color: this.color });
+    this.provider.awareness.setLocalState({ login: this.login, name: this.name, color: this.color });
     if (this.presence) {
       this.#presenceTimer = setInterval(() => {
         if (this.state.phase !== 'ready') return;
@@ -492,7 +495,7 @@ export class CollabSession {
     if (sig === this.#lastPresence) return false;
     this.#lastPresence = sig;
     const aw = this.provider.awareness;
-    aw.setLocalState({ ...(aw.getLocalState() || {}), login: this.login, color: this.color, ...next });
+    aw.setLocalState({ ...(aw.getLocalState() || {}), login: this.login, name: this.name, color: this.color, ...next });
     return true;
   }
 
