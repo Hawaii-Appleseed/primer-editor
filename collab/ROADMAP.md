@@ -100,8 +100,8 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 - 2026-09-05 — Offline that says so: a band above the page while the
   session is down, gone on its own when it is back with "what you did
   offline is shared now"; the relay spec proves an edit made offline
-  reaches the other editor after the reconnect (primer-editor SHA_PE7,
-  hub SHA_HUB7).
+  reaches the other editor after the reconnect (primer-editor 3e95091,
+  hub 550ba96).
 
 - 2026-09-05 — Autosave on the hub: a quiet two seconds after an edit is a
   Save; not mid-word, not mid-Save, held after a 409 or a failure until Save
