@@ -38,6 +38,27 @@ test.describe('floating chrome', () => {
     await page.waitForTimeout(600);
   });
 
+  // One scrollbar, not two. The stage keeps a small vertical range of its own
+  // (the clearance below the iframe that lets the last page rise above the
+  // floating strip) — but the report iframe is the document's scroller, and a
+  // bar for that 90-odd px stood full-height right beside the real one. The
+  // range must survive; only the chrome goes.
+  test('the canvas paints no scrollbar of its own beside the report’s',
+    async ({ page }) => {
+      const g = await page.evaluate(() => {
+        const st = document.getElementById('stage');
+        const d = document.getElementById('out').contentDocument;
+        return { hidden: getComputedStyle(st).scrollbarWidth,
+                 gutter: st.offsetWidth - st.clientWidth,
+                 range: st.scrollHeight - st.clientHeight,
+                 report: d.documentElement.scrollHeight - d.documentElement.clientHeight };
+      });
+      expect(g.hidden).toBe('none');    // no bar painted
+      expect(g.gutter).toBe(0);         // and none reserved
+      expect(g.range).toBeGreaterThan(0);    // the strip clearance is still there
+      expect(g.report).toBeGreaterThan(100); // and the report still scrolls itself
+    });
+
   test('the folded page strip floats: no ground, no clicks, canvas underneath',
     async ({ page }) => {
       await fold(page, true);
