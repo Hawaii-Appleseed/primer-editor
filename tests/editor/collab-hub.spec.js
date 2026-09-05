@@ -710,6 +710,36 @@ test('a comment on the selected element, from its own strip, marks it on the pag
   await a.locator('#cpanel-close').click();
 });
 
+test("the floating mini toolbar carries Comment too, on the element itself", async () => {
+  // The strip's #ar-comment is at the top of the window; the mini bar is the
+  // one that sits ON the selection, and it was the only place the act was
+  // missing.
+  const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
+  test.skip(!id, 'this project has no addressable elements');
+  if (await a.locator('#cpanel').isVisible()) await a.locator('#cpanel-close').click();
+  // A thread already on this element would (correctly) give the button its
+  // "Comments on…" label, which is the state asserted at the end.
+  await clearComments();
+  await a.evaluate('hubCommentsLoad()');
+  await a.evaluate('docsync.api.select(null)');
+  await a.evaluate(`docsync.api.select(${JSON.stringify(id)})`);
+  const mini = a.frameLocator('#out').locator('.ds-mini button[aria-label="Comment on this element"]');
+  await expect(mini).toHaveCount(1);
+  await mini.click();
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(a.locator('#cpanel-anchor')).toHaveText(`New comment on ${id}`);
+  await a.locator('#cpanel-text').fill('From the mini toolbar.');
+  await a.locator('#cpanel-add').click();
+  await expect(a.locator('#cpanel .cmt-here')).toBeVisible({ timeout: 10_000 });
+  // Reselecting redraws the bar, which now says the element HAS a thread.
+  await a.evaluate('docsync.api.select(null)');
+  await a.evaluate(`docsync.api.select(${JSON.stringify(id)})`);
+  await expect(a.frameLocator('#out').locator('.ds-mini button[aria-label="Comments on this element"]'))
+    .toHaveCount(1);
+  await clearComments();
+  await a.locator('#cpanel-close').click();
+});
+
 test('a comment on a paragraph marks it on the page, and the other editor sees it', async () => {
   // Painting the marks must never throw: a throw here silently stops every refresh after it.
   for (const p of [a, b]) expect(await p.evaluate("(() => { try { hubCommentsPaint(document.getElementById('out').contentDocument); return 'ok'; } catch (e) { return String(e.stack || e); } })()")).toBe('ok');
