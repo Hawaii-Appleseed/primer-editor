@@ -740,7 +740,16 @@ letting people change it:
   rewritten since. A **viewer** is put in Suggesting and kept there: the
   room drops their writes anyway, and this gives them a voice. Server
   side, `status` (open / accepted / rejected) is decided by an editor,
-  withdrawn by its author, and `resolved` follows it.
+  withdrawn by its author, and `resolved` follows it. **Accept all / Reject
+  all** sit above the panel's list for an editor with two or more open, ask
+  once, and then run each through its own path — so every Accept is its own
+  undo step and its own render, and one whose paragraph was rewritten since
+  still asks about itself. And a proposal is counted where people look: the
+  hub's summary already answered `open_suggestions`, so the list page's tile
+  says "N suggested", its count line adds them up for the documents this
+  person may edit, and the Editor tab's badge counts them with the reason in
+  its title (a viewer's own suggestions never pull them in — a proposal
+  waits on an editor).
 - **Comments in the margin.** On a window 1100px or wider the panel is a
   gutter beside the page — `body.cmt-margin` gives `#stage` a right margin
   the width of the gutter and `applyZoom()` refits the page into what is

@@ -1274,6 +1274,50 @@ test('suggesting: an editor in Suggesting mode proposes a move; the other reject
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
 });
 
+test('suggestions: Accept all applies every one; the list page and the Editor tab count what waits on an editor', async () => {
+  await clearComments();
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const keys = inv.pages.flatMap(p => p.slots || []).filter(s => s.text && s.text.trim().length > 10).map(s => s.key).slice(0, 2);
+  expect(keys.length).toBe(2);
+  const was = {};
+  for (const k of keys) was[k] = await slot(a, k);
+  // Two proposals, as a viewer's editor would record them.
+  for (const [i, k] of keys.entries())
+    await a.request.post(`${hubAs(GRACE_PORT)}${ROOM_URL}/comments`, { data: {
+      kind: 'suggestion', anchor: k, text: `Proposal ${i + 1}`,
+      change: { content: { [k]: { before: was[k], after: `Proposed words ${i + 1}.` } } } } });
+  // The list page and the Editor tab say so, for an editor.
+  const fresh = await browser.newContext();
+  const page = await fresh.newPage();
+  await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
+  await expect(page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 suggested');
+  await expect(page.locator('#count')).toContainText('2 suggested');
+  await page.goto(`${hubAs(ADA_PORT)}/resources.html`);
+  await expect(page.locator('#primerBadge')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#primerBadge')).toHaveAttribute('title', /2 suggestions wait for your decision/);
+  await fresh.close();
+  // Accept all, from the panel: both applied, each its own undo step.
+  if (await a.locator('#cpanel').isHidden()) await a.locator('#comments').click();
+  await expect(a.locator('#cpanel-bulk')).toBeVisible({ timeout: 10_000 });
+  await expect(a.locator('#cpanel-accept-all')).toHaveText('Accept all 2');
+  await a.locator('#cpanel-accept-all').click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(a.locator('#stat')).toHaveText(/2 suggestions accepted/, { timeout: 20_000 });
+  for (const [i, k] of keys.entries()) expect(await slot(a, k)).toBe(`Proposed words ${i + 1}.`);
+  expect((await suggestions()).every(s => s.status === 'accepted')).toBe(true);
+  await expect(a.locator('#cpanel-bulk')).toBeHidden();
+  // Undone one at a time, so the words go back the way they came.
+  await a.keyboard.press('Meta+z');
+  await expect.poll(() => slot(a, keys[1]), { timeout: 10_000 }).toBe(was[keys[1]]);
+  expect(await slot(a, keys[0])).toBe('Proposed words 1.');
+  await a.keyboard.press('Meta+z');
+  await expect.poll(() => slot(a, keys[0]), { timeout: 10_000 }).toBe(was[keys[0]]);
+  await a.locator('#cpanel-close').click();
+  await clearComments();
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
+});
+
 test('the list says what changed since you looked, and the Editor tab counts it', async () => {
   // A browser that has seen nothing of this document: to it, it changed.
   const fresh = await browser.newContext();

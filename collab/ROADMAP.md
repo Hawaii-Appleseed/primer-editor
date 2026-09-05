@@ -44,11 +44,10 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Now — the next runs
 
-1. **Suggestions, the rest of the way.** A suggestion on a text box's
+1. **Suggestions, the last stretch.** A suggestion on a text box's
    words (they live in layout as a scalar today, so a box edit reads as
-   "change box"); the list page and nav badge counting open suggestions;
-   "Accept all" / "Reject all" on the panel; a suggestion shown at its
-   place in the margin once cards live there.
+   "change box"), and a suggestion shown at its place in the margin
+   beside the words it proposes.
 
 2. **The margin, the rest of the way.** The new-comment box as a card at
     the anchor's height (it is the panel's foot today); a connector from
@@ -96,6 +95,12 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 11. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — Suggestions counted and decided in bulk: "Accept all N" /
+  "Reject all N" on the panel (one question, then each through its own
+  path, so one undo step each), and the list page's tile, its count line
+  and the Editor tab's badge all say how many wait on an editor
+  (primer-editor SHA_PE8, hub SHA_HUB8).
 
 - 2026-09-05 — Offline that says so: a band above the page while the
   session is down, gone on its own when it is back with "what you did
