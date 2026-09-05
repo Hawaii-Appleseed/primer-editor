@@ -356,6 +356,163 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   await a.locator('#cpanel-close').click();
 });
 
+// --- comments, comprehensively --------------------------------------------------
+// Set on the document, on a paragraph and on an element; resolved and
+// reopened from the OTHER editor; who may delete; a viewer's part; Show;
+// persistence across a reload; and what the list page says.
+
+const ROOM_URL = `/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}`;
+const allComments = () => a.request.get(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`).then(r => r.json());
+const clearComments = async () => {
+  for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${c.id}`);
+};
+const cmtRow = (page, text) => page.locator('#cpanel .cmt', { hasText: text });
+const marker = (page, id) => page.frameLocator('#out').locator(`[data-el="${id}"][data-ds-comments], [data-slot="${id}"][data-ds-comments]`);
+
+test('comments: on the document, a paragraph and an element - each anchored where it was set', async () => {
+  await clearComments();
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const els = inv.pages.flatMap(p => p.elements);
+  const prose = els.find(e => e.kind === 'prose') || els[0];
+  const other = els.find(e => e.id !== prose.id) || prose;
+  for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
+
+  // Nothing selected: the document.
+  await a.evaluate('docsync.api.select(null)');
+  await a.locator('#comments').click();
+  await expect(a.locator('#cpanel-anchor')).toHaveText('New comment on the document');
+  await a.locator('#cpanel-text').fill('Overall: shorter, please.');
+  await a.locator('#cpanel-add').click();
+  await expect(cmtRow(a, 'Overall: shorter')).toBeVisible({ timeout: 10_000 });
+  await expect(cmtRow(a, 'Overall: shorter')).toContainText('on the document');
+
+  // A paragraph, selected as a click would select it.
+  await a.evaluate(`docsync.api.select(${JSON.stringify(prose.id)})`);
+  await expect(a.locator('#cpanel-anchor')).toHaveText(`New comment on ${prose.id}`);
+  await a.locator('#cpanel-text').fill('This paragraph runs long.');
+  await a.locator('#cpanel-add').click();
+  await expect(cmtRow(a, 'runs long')).toBeVisible({ timeout: 10_000 });
+  await expect(marker(a, prose.id)).toHaveCount(1);
+
+  // An element, from its own strip.
+  await a.evaluate(`docsync.api.select(${JSON.stringify(other.id)})`);
+  const btn = a.locator('#ar-comment:visible, #ty-comment:visible').first();
+  await btn.click();
+  await a.locator('#cpanel-text').fill('Nudge this to the left.');
+  await a.locator('#cpanel-add').click();
+  await expect(cmtRow(a, 'Nudge this')).toBeVisible({ timeout: 10_000 });
+  await expect(a.locator('#comments')).toHaveText('Comments · 3');
+
+  const stored = await allComments();
+  expect(stored.map(c => c.anchor).sort()).toEqual([null, prose.id, other.id].sort());
+  expect(stored.every(c => c.by === ADA && !c.resolved)).toBe(true);
+  // Both markers, on both editors, with the count of what is open there.
+  await expect(marker(b, prose.id)).toHaveAttribute('data-ds-comments', '1', { timeout: 20_000 });
+  await expect(marker(b, other.id)).toHaveAttribute('data-ds-comments', '1');
+  await expect(b.locator('#comments')).toHaveText('Comments · 3', { timeout: 20_000 });
+});
+
+test('comments: resolved from the other editor, the marker and the count drop everywhere; reopened, they return', async () => {
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const prose = (inv.pages.flatMap(p => p.elements).find(e => e.kind === 'prose') || inv.pages[0].elements[0]).id;
+  await b.locator('#comments').click();
+  await expect(cmtRow(b, 'runs long')).toBeVisible({ timeout: 10_000 });
+  await cmtRow(b, 'runs long').locator('button', { hasText: 'Resolve' }).click();
+  await expect(cmtRow(b, 'runs long')).toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(cmtRow(b, 'runs long').locator('button', { hasText: 'Reopen' })).toBeVisible();
+  await expect(b.locator('#comments')).toHaveText('Comments · 2');
+  await expect(marker(b, prose)).toHaveCount(0);
+  // A hears it through presence, not a poll.
+  await expect(a.locator('#comments')).toHaveText('Comments · 2', { timeout: 20_000 });
+  await expect(marker(a, prose)).toHaveCount(0);
+  await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
+  const rec = (await allComments()).find(c => c.text.includes('runs long'));
+  expect(rec.resolved).toBe(true);
+  expect(rec.resolved_by).toBe(GRACE);
+  // Reopen from A this time.
+  await cmtRow(a, 'runs long').locator('button', { hasText: 'Reopen' }).click();
+  await expect(cmtRow(a, 'runs long')).not.toHaveClass(/resolved/, { timeout: 10_000 });
+  await expect(marker(a, prose)).toHaveCount(1);
+  await expect(marker(b, prose)).toHaveCount(1, { timeout: 20_000 });
+  await expect(b.locator('#comments')).toHaveText('Comments · 3', { timeout: 20_000 });
+  expect((await allComments()).find(c => c.text.includes('runs long')).resolved_by).toBeNull();
+});
+
+test('comments: who may delete - the author, and the owner; nobody else sees the button', async () => {
+  // Grace wrote nothing yet: no Delete on Ada's comments for her (Ada owns the record).
+  await expect(cmtRow(b, 'Overall: shorter').locator('button', { hasText: 'Delete' })).toHaveCount(0);
+  await b.locator('#cpanel-text').fill("Grace's own note.");
+  await b.locator('#cpanel-add').click();
+  await expect(cmtRow(b, "Grace's own note")).toBeVisible({ timeout: 10_000 });
+  await expect(cmtRow(b, "Grace's own note").locator('button', { hasText: 'Delete' })).toBeVisible();
+  // Ada, the owner, may delete Grace's; and her own.
+  await expect(cmtRow(a, "Grace's own note")).toBeVisible({ timeout: 20_000 });
+  await expect(cmtRow(a, "Grace's own note").locator('button', { hasText: 'Delete' })).toBeVisible();
+  await cmtRow(a, "Grace's own note").locator('button', { hasText: 'Delete' }).click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(cmtRow(a, "Grace's own note")).toHaveCount(0, { timeout: 10_000 });
+  await expect(cmtRow(b, "Grace's own note")).toHaveCount(0, { timeout: 20_000 });
+  await cmtRow(a, 'Nudge this').locator('button', { hasText: 'Delete' }).click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(cmtRow(a, 'Nudge this')).toHaveCount(0, { timeout: 10_000 });
+  await expect(a.locator('#comments')).toHaveText('Comments · 2');
+  expect((await allComments()).length).toBe(2);
+});
+
+test('comments: Show flashes the paragraph; a comment on something no longer on the page says so', async () => {
+  await cmtRow(a, 'runs long').locator('button', { hasText: 'Show' }).click();
+  await expect(a.frameLocator('#out').locator('.ds-comment-flash')).toHaveCount(1);
+  await expect(a.frameLocator('#out').locator('.ds-comment-flash')).toHaveCount(0, { timeout: 5000 });
+  // The document-level comment has no Show; one anchored to a ghost says so.
+  await expect(cmtRow(a, 'Overall: shorter').locator('button', { hasText: 'Show' })).toHaveCount(0);
+  await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: 'ghost.element', text: 'Orphaned note.' } });
+  await expect(cmtRow(a, 'Orphaned note')).toBeVisible({ timeout: 20_000 });
+  await cmtRow(a, 'Orphaned note').locator('button', { hasText: 'Show' }).click();
+  await expect(a.locator('#stat')).toContainText('not on the page any more');
+  await cmtRow(a, 'Orphaned note').locator('button', { hasText: 'Delete' }).click();
+  await a.locator('dialog[open] button.dsdlg-ok').click();
+  await expect(cmtRow(a, 'Orphaned note')).toHaveCount(0, { timeout: 10_000 });
+});
+
+test('comments: a viewer may comment and resolve, and is shown the same panel', async () => {
+  await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/Hawaii-Appleseed~primer-editor~${PROJECT}`,
+                      { data: { default: 'viewer', people: { [ADA]: 'editor' } } });
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  await waitLive(page);
+  await expect(page.locator('#collab')).toHaveText(/view only/);
+  await page.locator('#comments').click();
+  await expect(cmtRow(page, 'Overall: shorter')).toBeVisible({ timeout: 10_000 });
+  await page.locator('#cpanel-text').fill('From a viewer: agreed.');
+  await page.locator('#cpanel-add').click();
+  await expect(cmtRow(page, 'From a viewer')).toBeVisible({ timeout: 10_000 });
+  await cmtRow(page, 'Overall: shorter').locator('button', { hasText: 'Resolve' }).click();
+  await expect(cmtRow(page, 'Overall: shorter')).toHaveClass(/resolved/, { timeout: 10_000 });
+  await ctx.close();
+  await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/Hawaii-Appleseed~primer-editor~${PROJECT}`,
+                      { data: { default: 'editor', people: {} } });
+  await expect(cmtRow(a, 'From a viewer')).toBeVisible({ timeout: 20_000 });
+  await expect(cmtRow(a, 'Overall: shorter')).toHaveClass(/resolved/, { timeout: 20_000 });
+});
+
+test('comments: they survive a reload, and the list page counts the open ones', async () => {
+  const page = await ctxA.newPage();
+  await page.goto(`${hubAs(ADA_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  // Two open (runs long, from a viewer), one resolved (overall) - before any panel is opened.
+  await expect(page.locator('#comments')).toHaveText('Comments · 2', { timeout: 20_000 });
+  await page.locator('#comments').click();
+  await expect(page.locator('#cpanel .cmt')).toHaveCount(3, { timeout: 10_000 });
+  await expect(page.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
+  await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
+  await expect(page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 open comments');
+  await page.close();
+  await clearComments();
+  for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
+});
+
 test('the list says what changed since you looked, and the Editor tab counts it', async () => {
   // A browser that has seen nothing of this document: to it, it changed.
   const fresh = await browser.newContext();
