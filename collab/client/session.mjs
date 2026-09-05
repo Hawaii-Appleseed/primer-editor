@@ -356,7 +356,11 @@ export class CollabSession {
    * @param {object} o
    * @param {string} o.host        the Worker: "https://x.workers.dev" or "127.0.0.1:8787"
    * @param {string} o.room        "owner~repo~project"
-   * @param {() => Promise<string>} o.ticket   mints a fresh ticket (re-run on every reconnect)
+   * @param {string} [o.path]      a front door at a path on `host` instead of the relay's
+   *                               own routing — see "two front doors" below
+   * @param {() => Promise<string>} [o.ticket]  mints a fresh ticket (re-run on every
+   *                               reconnect). Omitted when the front door authenticates
+   *                               the request itself.
    * @param {{content: string, layout: object|string}} o.files   what the editor holds now
    * @param {string|null} [o.baseSha]   the commit those files came from
    * @param {string|null} [o.login]     for presence
@@ -368,6 +372,7 @@ export class CollabSession {
    * @param {() => void} [o.onHistory]
    * @param {boolean} [o.debug]        assert the document round-trips after every local write
    * @param {boolean} [o.connect]      default true
+   * @param {Function} [o.WebSocketPolyfill]   for a Node client (see below); browsers never set it
    */
   constructor(o) {
     this.room = o.room;
@@ -425,9 +430,25 @@ export class CollabSession {
     this.ready = new Promise((res, rej) => { this.#readyRes = res; this.#readyRej = rej; });
     this.ready.catch(() => {});
 
+    // --- two front doors, one room -------------------------------------
+    //
+    // The relay Worker routes /parties/primer-room/<room> and authenticates
+    // with a ticket minted from a GitHub token. The staff hub serves the same
+    // Durable Object at a path of its own, behind Cloudflare Access, and
+    // authenticates the request itself from the session the page already
+    // carries — so there is no ticket to mint and none to refresh on
+    // reconnect. Same room, same protocol, same document; only the door.
+    //
+    // `prefix` is the WHOLE path: y-partyserver does not append the room to it
+    // (isPrefixedUrl), so `path` has to name the room itself. Getting that
+    // wrong points every document at one room rather than failing.
     this.provider = new YProvider(o.host, o.room, this.net, {
-      party: 'primer-room',
-      params: async () => ({ ticket: await o.ticket() }),
+      ...(o.path ? { prefix: o.path } : { party: 'primer-room' }),
+      ...(o.ticket ? { params: async () => ({ ticket: await o.ticket() }) } : {}),
+      // A browser has a WebSocket and a cookie jar; a Node client driving this
+      // for a test has neither, and needs to put an identity on the request by
+      // hand. y-websocket's own escape hatch, passed straight through.
+      ...(o.WebSocketPolyfill ? { WebSocketPolyfill: o.WebSocketPolyfill } : {}),
       connect: false,
     });
     this.provider.on('status', ({ status }) => {

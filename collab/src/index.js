@@ -137,5 +137,12 @@ async function gateConnection(req, env) {
   const headers = new Headers(req.headers);
   headers.set('x-collab-login', payload.login ?? '');
   headers.set('x-collab-ro', payload.ro ? '1' : '0');
+  // Only a router sets this, and the router in front of this room is the line
+  // above. Anything arriving under that name came from the browser, and
+  // partyserver decodes it into `this.props` without asking who sent it.
+  // Nothing reads props today; the point is that adding something that does
+  // should not silently become an injection point. (The hub's front door
+  // strips the same header, for the same reason.)
+  headers.delete('x-partykit-props');
   return new Request(req, { headers });
 }

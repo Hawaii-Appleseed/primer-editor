@@ -195,6 +195,39 @@ describe('plain <-> Y bridge', () => {
   });
 });
 
+describe('two front doors, one room', () => {
+  const p = projects()[0];
+  const room = formatRoom('Hawaii-Appleseed', 'primer-editor', 'doors');
+
+  test('the relay is reached through its own party routing, with a ticket', () => {
+    const s = new CollabSession({
+      host: HOST, room, files: p, connect: false, ticket: async () => 'unused',
+    });
+    assert.equal(s.provider.url, `ws://${HOST}/parties/primer-room/${room}`);
+    s.close();
+  });
+
+  test('a path front door is addressed exactly as given, and mints nothing', () => {
+    // The hub authenticates the request itself (Cloudflare Access), so there
+    // is no ticket function at all — a session that demanded one would fail
+    // to connect there rather than fail loudly here.
+    const s = new CollabSession({
+      host: HOST, room, files: p, connect: false, path: `/api/collab/${room}`,
+    });
+    assert.equal(s.provider.url, `ws://${HOST}/api/collab/${room}`);
+    s.close();
+  });
+
+  test('the path must name the room — y-partyserver does not append it', () => {
+    // Pinned because the failure is silent and total: a prefix that stops at
+    // /api/collab puts every document in the same room.
+    const s = new CollabSession({ host: HOST, room, files: p, connect: false, path: '/api/collab' });
+    assert.ok(!s.provider.url.endsWith(room),
+              'a prefix is used verbatim; this is why collabPath() appends the room');
+    s.close();
+  });
+});
+
 describe('an offline session (no provider connection)', () => {
   const p = projects()[0];
   const make = () => new CollabSession({

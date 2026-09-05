@@ -416,6 +416,71 @@ and `collab.peerList[].agent` who is relaying one. Tested end to end in
 grace* with the tag on the paragraph, clears when it is done, and a person's
 own edit says nothing of the kind.
 
+## A second front door: the staff hub
+
+Everything above authenticates against GitHub. The Hawaiʻi Appleseed staff hub
+authenticates against Google, through Cloudflare Access, and most of the people
+who would use the editor have no GitHub account at all. So the hub has a door
+of its own onto the *same rooms*:
+
+```
+              ticket (GitHub push)              Access session (Google SSO)
+browser ──▶ primer-collab Worker  ──┐      ┌──  hub /api/collab/<room>  ◀── browser
+                                     ├─ PrimerRoom ─┤
+            /parties/primer-room/…  ─┘  Durable Object └─  functions/api/collab/[room].js
+```
+
+The room is untouched. Both doors decide who you are and hand it over on the
+same two headers — `x-collab-login` and `x-collab-ro` — which is all the room
+has ever read. `isReadOnly` finally has something that sets it: the hub's share
+list maps *viewer* to `ro: 1`.
+
+**Why the hub binds the class rather than proxying to the Worker.** The Access
+session is a first-party cookie on the hub's hostname; a request from the hub to
+`*.workers.dev` would not carry it, and third-party cookie blocking would finish
+the job even with `SameSite=None`. There is no zone on the account to give the
+Worker a same-site hostname, and a Durable Object cannot be defined inside a
+Pages project. So the class stays here and the hub binds it —
+`PRIMER_ROOM = PrimerRoom @ primer-collab`.
+
+The client side is one option. `CollabSession` takes a `path` instead of a
+`party`, and no `ticket`:
+
+```js
+new CollabSession({ host: 'hub.example', room, path: `/api/collab/${room}`, files })
+```
+
+`path` is the WHOLE path — y-partyserver's `prefix` is used verbatim and the
+room is **not** appended to it, so a path that stops at `/api/collab` puts every
+document in one room. `client.test.mjs` pins both shapes for that reason.
+
+### Checking the hop
+
+```bash
+node hub-check.mjs [--hub ../../staff-updates-internal]
+```
+
+Not part of `npm test`: it needs the hub repo checked out and boots two
+wranglers — a `wrangler dev` holding the class, a `wrangler pages dev` over the
+hub with the binding — then drives the result with real `CollabSession`s. It
+watches the refusals refuse, the identity arrive in the room's `here`, two
+clients converge, a viewer's write get dropped *by the room* while they keep
+receiving, and the document survive everyone leaving.
+
+Two things it cost an hour to learn, both worth keeping:
+
+- **Run `wrangler pages dev` from the hub's directory, not this one.** From
+  here it reads `wrangler.jsonc`, merges in the *local* `PrimerRoom` binding,
+  and dies complaining that the Pages shim does not export the class — a
+  message about the entrypoint that has nothing to do with the mistake.
+- **`fetch()` cannot send an `Upgrade` header.** undici refuses it outright, so
+  every refusal check has to go through `node:http` or it looks like a
+  client-side `TypeError` rather than the status the Function returned.
+
+Locally the Access header is forgeable, and `hub-check.mjs` forges it. In
+production the edge strips `Cf-Access-Authenticated-User-Email` from inbound
+requests and re-signs it, which is the only reason the Function may trust it.
+
 ## Known gaps, for later
 
 - **Nothing merges an outside commit.** The moved-branch check names the
@@ -427,7 +492,10 @@ own edit says nothing of the kind.
 - **Text boxes still hold.** A box's markdown is one scalar in a `Y.Map`;
   making it a `Y.Text` would let two people type in one box the way they
   now can in one paragraph.
-- **`isReadOnly` is wired but nothing mints a read-only ticket.** The `/auth`
-  route always sets `ro: false`, because the current permission model is binary
-  (push or no access). It exists so a future "commenter" role is a ticket field
-  rather than a redesign.
+- **No read-only ticket on the GitHub door.** `/auth` always sets `ro: false`,
+  because that permission model is binary (push or no access). The hub's door
+  does set it — a *viewer* in its share list connects `ro: 1` — so the
+  enforcement is now exercised; it is only this route that has nothing to say.
+- **The editor is not served from the hub yet.** The front door and the client
+  option exist and are tested, but nothing on the hub opens a document until
+  `/primer/` is vendored into it.

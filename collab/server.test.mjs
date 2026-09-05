@@ -106,7 +106,12 @@ describe('end to end', { skip: E2E ? false : 'COLLAB_E2E=0' }, () => {
   });
 
   describe('POST /auth', () => {
-    const ORIGIN = 'https://dtomkatsu.github.io';
+    // The hosted editor's own origin, and it must be one wrangler.jsonc's
+    // ALLOWED_ORIGINS actually lists — every test below that expects anything
+    // other than a 403 is really testing that. It was dtomkatsu.github.io
+    // until both repos moved to the Hawaii-Appleseed org; the old Pages site
+    // 404s now, so the allowlist moved with them and this had to follow.
+    const ORIGIN = 'https://hawaii-appleseed.github.io';
 
     test('refuses an origin that is not on the list', async () => {
       const r = await post('/auth', { room: ROOM, token: 'x' }, 'https://evil.example');
