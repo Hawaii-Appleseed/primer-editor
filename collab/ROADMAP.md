@@ -37,33 +37,30 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Now — the next runs
 
-1. **Presence you can see at a glance.** Avatars of who is in the document
-   in the top bar (initials, colour, name on hover), "Ada is typing in §2"
-   as a jump link, and a "follow Ada" mode that scrolls with her.
-2. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
+1. **Share, like Docs' dialog.** A "Share" button top-right with a copy-link
    field, a people list with roles, a "notify by email" checkbox, and a
    link that opens straight to the document (works today, just not from
    here). Show avatars of who has access in the dialog.
-3. **Version history like Docs' side panel.** The History dialog becomes a
+2. **Version history like Docs' side panel.** The History dialog becomes a
    panel: versions grouped by day, named versions first, a diff view of one
    version against the current (per slot, words added/removed), restore
    from the panel, "show changes" toggle that colours changed paragraphs.
-4. **Autosave on the hub.** With the store as the record, every quiet
+3. **Autosave on the hub.** With the store as the record, every quiet
    two seconds after an edit is a Save (the room already carries the live
    document, so nothing is lost either way — this only removes the button
    from people's minds). Keep the Save button as "Saved · just now".
    Guard: not while a paragraph editor is open mid-word; not on a 409.
-5. **Offline that says so.** The chip already reads offline; add a banner
+4. **Offline that says so.** The chip already reads offline; add a banner
    "working offline — edits are kept here and shared when you are back",
    and prove a reconnect merges (there is a test; make the UI honest).
 
-6. **Suggestions, the rest of the way.** A suggestion on a text box's
+5. **Suggestions, the rest of the way.** A suggestion on a text box's
    words (they live in layout as a scalar today, so a box edit reads as
    "change box"); the list page and nav badge counting open suggestions;
    "Accept all" / "Reject all" on the panel; a suggestion shown at its
    place in the margin once cards live there.
 
-7. **The margin, the rest of the way.** The new-comment box as a card at
+6. **The margin, the rest of the way.** The new-comment box as a card at
     the anchor's height (it is the panel's foot today); a connector from
     the card in hand to its highlight; resolved threads out of the margin
     altogether (Docs keeps them for the list; ours trail the open ones
@@ -72,43 +69,48 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Organising project files
 
-8. **Folders and tags on the hub's list page.** Projects grouped by folder
+7. **Folders and tags on the hub's list page.** Projects grouped by folder
    (a `folder` field in the registry, editable from the list), tags as
    chips, a search box that filters by name, tag, and last editor. Drag a
    tile onto a folder. Remember the person's last view.
-9. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
+8. **Rename, duplicate, archive, delete from the list.** Each tile's ⋮:
     rename (updates the registry and the room name safely — the room is
     named by project id, so rename the display name only), duplicate as a
     new project (files + assets + no comments), archive (hidden from the
     default view, restorable), delete (owner only, to a trash folder in R2
     with a 30-day sweep).
-10. **Starred and recent.** A star on each tile and a "Recent" row at the
+9. **Starred and recent.** A star on each tile and a "Recent" row at the
     top of the list — the documents this person opened last, from the
     `primer-seen` keys the editor already writes.
-11. **Assets library per project.** Insert image shows what has already
+10. **Assets library per project.** Insert image shows what has already
     been uploaded to this project's store with a thumbnail and who added it,
     delete an unused one, and a project-wide "images in use / unused" view.
-12. **Move a section between projects.** Copy a slot (words + layout +
+11. **Move a section between projects.** Copy a slot (words + layout +
     assets it names) into another project as a new section — the pilot
     `addExtra` + `setSlot` path, from a "Copy to…" on the section menu.
 
 ## Aesthetic
 
-13. **One quiet chrome.** The comments panel, share dialog, history and
+12. **One quiet chrome.** The comments panel, share dialog, history and
     the top bar on the hub path share one type scale and one radius set
     (`--r-ctl`/`--r-card`/`--r-edge`), one shadow, and the hub's own palette
     (Ash/Teal/Slate/Charcoal, Manrope/Poppins). Audit every new surface at
     375px.
-14. **Motion that explains.** A card raising when its highlight is clicked,
+13. **Motion that explains.** A card raising when its highlight is clicked,
     a highlight pulsing once when its card is hovered, the "+ Comment" pill
     fading in beside the selection, the reply box growing — 120–180 ms, no
     bounce.
-15. **Empty states that teach.** No comments yet: a two-line hint with the
+14. **Empty states that teach.** No comments yet: a two-line hint with the
     shortcut. First time on the hub: what Save does here. No projects: how
     to make one from a template.
-16. **Dark mode for the chrome** (not the report), following the OS.
+15. **Dark mode for the chrome** (not the report), following the OS.
 
 ## Done
+
+- 2026-09-05 — Presence at a glance: avatars in the bar (initial, colour,
+  typing dot, "Ada · typing on page 2" as the title), a click goes to where
+  they are, a second click follows them until a gesture, the avatar again,
+  or their leaving stops it (primer-editor SHA_PE3, hub SHA_HUB3).
 
 - 2026-09-05 — For you, where people already look: the store's summary
   answers `for_you` / `for_you_at` per person (one shared rule), the list

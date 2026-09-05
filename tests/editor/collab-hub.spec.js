@@ -515,6 +515,59 @@ test('what A selects, B sees ringed with her name', async () => {
   await expect(ring).toHaveAttribute('data-peer', /^ada/);
 });
 
+test('presence: avatars in the bar say who is here and where; a click goes there; a second click follows; a scroll stops it', async () => {
+  // A short window for B, so the first and the last thing on the page that
+  // can be selected are further apart than one screen - going to one means
+  // leaving the other. (The fixture is a short report.)
+  await b.setViewportSize({ width: 1280, height: 460 });
+  await b.evaluate("setZoom('1.5', false)");   // and zoomed in: the window on the page is smaller still
+  await b.waitForTimeout(300);
+  const spots = await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    const pages = [...d.querySelectorAll('section.page')];
+    const els = [...d.querySelectorAll('[data-el]')].filter(e => e.closest('section.page') && e.getBoundingClientRect().height > 0);
+    const at = e => pages.indexOf(e.closest('section.page')) + 1;
+    const top = e => e.getBoundingClientRect().top + d.defaultView.scrollY;
+    els.sort((x, y) => top(x) - top(y));   // by where they sit, not by document order (a text box is placed, not flowed)
+    const f = els[0], l = els[els.length - 1];
+    return { first: f.dataset.el, last: l.dataset.el, lastPage: at(l), vh: d.defaultView.innerHeight,
+             apart: top(l) - top(f) > d.defaultView.innerHeight }; })()`);
+  expect(spots.apart, JSON.stringify(spots)).toBe(true);
+  const { first, last } = spots;
+  const pages = { length: spots.lastPage };   // the page number the avatar's title should say
+  const inView = id => b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    const el = d.querySelector('[data-el="${id}"]') || d.querySelector('[data-slot="${id}"]'); if (!el) return false;
+    const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= d.defaultView.innerHeight; })()`);
+  await a.evaluate(`docsync.api.select(${JSON.stringify(last)})`);
+  const av = b.locator('#collab i[title^="ada"]');
+  await expect(av).toHaveCount(1, { timeout: 10_000 });
+  await expect(av).toHaveText('A');
+  await expect(av).toHaveAttribute('title', new RegExp(`on page ${pages.length}\\. Click to go there`), { timeout: 10_000 });
+  // B is at the top; a click takes B to what Ada has in hand.
+  await b.evaluate('document.getElementById("out").contentWindow.scrollTo(0, 0)');
+  expect(await inView(last)).toBe(false);
+  // Presence takes a beat to cross: the jump goes where B KNOWS Ada is, so
+  // wait until B has heard the new selection (the old one was on page 1 too).
+  const adaSel = () => b.evaluate('(collabPeers.find(p => /^ada/.test(p.login)) || {}).sel || []');
+  await expect.poll(adaSel, { timeout: 10_000 }).toContain(last);
+  await av.click();
+  await expect.poll(() => inView(last), { timeout: 10_000 }).toBe(true);
+  await expect(b.locator('#stat')).toHaveText(new RegExp(`ada is working on page ${pages.length}`, 'i'));
+  // A second click follows: when Ada moves to the first page, B goes along.
+  await av.click();
+  await expect(b.locator('#collab')).toHaveText(/following ada/i);
+  await expect(av).toHaveClass(/following/);
+  await a.evaluate(`docsync.api.select(${JSON.stringify(first)})`);
+  await expect.poll(() => inView(first), { timeout: 10_000 }).toBe(true);
+  // B turns the wheel: the following stops, and says so.
+  await b.evaluate('document.getElementById("out").contentDocument.dispatchEvent(new WheelEvent("wheel", { deltaY: 40, bubbles: true }))');
+  await expect(b.locator('#collab')).not.toHaveText(/following/);
+  await expect(b.locator('#stat')).toHaveText(/stopped following ada/i);
+  await expect(av).not.toHaveClass(/following/);
+  await a.evaluate('docsync.api.select(null)');
+  await b.evaluate("setZoom('', false)");
+  await b.setViewportSize({ width: 1280, height: 720 });
+});
+
 test('a comment on the selected element, from its own strip, marks it on the page for everyone', async () => {
   const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
   test.skip(!id, 'this project has no addressable elements');

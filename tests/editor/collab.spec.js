@@ -215,7 +215,7 @@ test('presence: the paragraph B is typing in is tagged in A, and A is told when 
   const tag = a.frameLocator('#out').locator(`[data-slot="${key}"].ds-peer-typing`);
   await expect(tag).toHaveCount(1, { timeout: 10_000 });
   await expect(tag).toHaveAttribute('data-peer', 'grace · typing');
-  await expect(a.locator('#collab i[title="grace · typing"]')).toHaveCount(1);
+  await expect(a.locator('#collab i[title^="grace · typing"]')).toHaveCount(1);   // …and where, and what a click does
 
   // A opens the same paragraph: told, not blocked.
   const elA = a.frameLocator('#out').locator(`[data-slot="${key}"]`).first();

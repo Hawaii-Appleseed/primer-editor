@@ -621,6 +621,25 @@ letting people change it:
   ringed in their colour with a tag, their open paragraph marked, their caret
   drawn (Phase 3); the tag now says the person — the roster's name, else the
   local part of the address — never a whole email.
+- **Who is here, at a glance, and going to them.** The chip's dots are
+  avatars: an initial in the person's colour (the colour of the ring around
+  what they have selected), a small amber dot when they are typing, and a
+  title that says where — "Ada · typing on page 2. Click to go there; click
+  again to follow". `collabPeerPlace()` finds the place: the paragraph they
+  are typing in, else what they have selected, else the page they are on;
+  the page number is the section's position in the document. A click
+  scrolls there (`collabGoTo`, centred, only when it is not already in
+  view — and instantly, as Docs jumps: a smooth scroll was cancelled by the
+  editor's other scroll writes, and the click went nowhere) and says so in
+  the status line. A second click on the same
+  avatar **follows**: every presence tick that finds their place out of
+  view scrolls to it (`collabFollowTick`, from `onPeers`), the chip says
+  "following Ada", the avatar wears a ring. Following stops when the person
+  here turns the wheel, touches, clicks or keys through the page — the
+  gesture, not the scroll event, since this editor's own scrolls fire that
+  too — when they click the avatar again, or when the one followed leaves
+  ("Ada left the session"). Nothing new is published: it is all read from
+  the presence the room already carries.
 - **Comment on this element.** The arrange strip (what an element shows when
   selected) carries a comment button on the store path: one click opens the
   panel with that element named as the anchor and the box focused. The
