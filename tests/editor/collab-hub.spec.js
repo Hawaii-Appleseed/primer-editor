@@ -99,6 +99,11 @@ async function waitLive(page) {
 /** A staff member's browser: through their door, no GitHub anything. */
 async function open(browser, port) {
   const ctx = await browser.newContext();
+  // Autosave is on by default on the hub; these tests press Save themselves
+  // and count versions, so it is off here and exercised by its own test.
+  // (Only when nothing is set: this runs in the report's frame on every
+  // render too, and would otherwise undo a test that turned it on.)
+  await ctx.addInitScript(() => { try { if (localStorage.getItem('primer-autosave') == null) localStorage.setItem('primer-autosave', 'off'); } catch (e) { /* private mode */ } });
   const page = await ctx.newPage();
   await page.goto(`${hubAs(port)}/primer/edit.html?project=${PROJECT}`);
   await waitForFirstRender(page);
@@ -577,6 +582,46 @@ test('history: a name given in the panel is kept, shown to the other editor and 
   expect((await (await a.request.get(DOC_URL())).json()).label).toBeNull();
   expect((await versions())[0].label).toBeNull();
   expect((await versions()).find(h => h.label === 'before the rewrite')).toBeTruthy();
+});
+
+test('autosave on the hub: a quiet moment after an edit is a Save; not while a paragraph is open; the File menu turns it off', async () => {
+  const key = await firstSlot(a);
+  const nBefore = (await versions()).length;
+  await a.evaluate("localStorage.setItem('primer-autosave', 'on'); hubAutosaveMenu()");
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Saved by itself.")`);
+  await expect(a.locator('#save')).toBeEnabled();
+  await expect(a.locator('#stat')).toHaveText(/saved automatically/, { timeout: 10_000 });
+  await expect(a.locator('#save')).toBeDisabled();
+  await expect(a.locator('#save')).toHaveText('Saved · just now');
+  expect((await versions()).length).toBe(nBefore + 1);
+  // For the room too: B has it as the saved version, not as unsaved edits.
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe('Saved by itself.');
+  await expect(b.locator('#save')).toBeDisabled();
+  // With a paragraph open, nothing is saved until it closes.
+  const para = 'page1.intro';
+  const was = await slot(a, para);
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(para)}, "Half a thought")`);
+  await a.evaluate(`edit(document.getElementById('out').contentDocument, ${JSON.stringify(para)})`);
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await a.waitForTimeout(3500);
+  await expect(a.locator('#save')).toBeEnabled();
+  expect((await versions()).length).toBe(nBefore + 1);
+  await a.keyboard.press('Escape');
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(false);
+  await expect(a.locator('#stat')).toHaveText(/saved automatically/, { timeout: 10_000 });
+  expect((await versions()).length).toBe(nBefore + 2);
+  // The File menu says so, and turns it off.
+  await a.locator('#file').click();
+  await expect(a.locator('#file-autosave .shp-t')).toHaveText('Autosave on the hub: on');
+  await a.locator('#file-autosave').click();
+  await expect(a.locator('#stat')).toHaveText(/autosave off/);
+  expect(await a.evaluate("localStorage.getItem('primer-autosave')")).toBe('off');
+  // The words put back for the tests after - by hand, autosave being off.
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(para)}, ${JSON.stringify(was)})`);
+  await a.waitForTimeout(2500);
+  await expect(a.locator('#save')).toBeEnabled();
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening/, { timeout: 20_000 });
 });
 
 test('what A selects, B sees ringed with her name', async () => {

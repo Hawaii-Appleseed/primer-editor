@@ -640,6 +640,20 @@ letting people change it:
   people come and go, and a reload then rebuilt the rows under someone
   typing a name (the spec caught it); nor does the list ever rebuild while
   a name box has focus.
+- **Autosave on the hub.** With the store as the record, a quiet two
+  seconds after an edit is a Save (`hubAutosaveSchedule`, armed from
+  `markDirty`, so every mutation site gets it for free): the room already
+  carries the live document, so nothing was ever lost — this only takes the
+  button out of people's minds, the way Docs never has one. Not while a
+  paragraph or box editor is open (a half-typed sentence is not a version),
+  not while a Save is in flight or a dialog is up (it re-arms), and not
+  after a 409 or a failure until a press of Save settles it — an automatic
+  Save must never ask a question or keep failing quietly, so it holds and
+  the status line says "press Save". The button stays, reading "Saved ·
+  just now" after one lands and "Saved" once that is old news. Per
+  browser, on unless turned off in the File menu
+  (`localStorage['primer-autosave']`); the hub spec runs with it off, since
+  it presses Save itself and counts versions, and one test turns it on.
 - **Who is where, by name.** A collaborator's selection has always been
   ringed in their colour with a tag, their open paragraph marked, their caret
   drawn (Phase 3); the tag now says the person — the roster's name, else the
