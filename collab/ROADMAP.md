@@ -105,7 +105,7 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   only, a version opens on what it changed (per paragraph, words gone and
   come; paragraphs only on one side; the layout), marks it on the page with
   a toggle, Restore and naming from the same rows; the list never rebuilds
-  under a name being typed (primer-editor SHA_PE5, hub SHA_HUB5).
+  under a name being typed (primer-editor 1da335c, hub f15cc87).
 
 - 2026-09-05 — Share as Docs lays it out: the link first with Copy, the
   owner named, people with faces and roster suggestions, everyone on the
