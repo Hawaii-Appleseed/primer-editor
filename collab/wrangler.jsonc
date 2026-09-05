@@ -18,11 +18,19 @@
   "vars": {
     // Browsers allowed to open a collaborative session. Mirrors the ALLOW list
     // in docs/primer/oauth-relay.js — the hosted editor and local dev.
-    "ALLOWED_ORIGINS": "https://dtomkatsu.github.io,http://localhost:8777,http://localhost:8010,http://127.0.0.1:8777,http://127.0.0.1:8010",
+    "ALLOWED_ORIGINS": "https://hawaii-appleseed.github.io,http://localhost:8777,http://localhost:8010,http://127.0.0.1:8777,http://127.0.0.1:8010",
     // Repositories whose collaborators may open a room here. A room names its
     // repo, so without this anyone with push access to ANY repo could mint a
     // ticket for a room named after someone else's.
-    "ALLOWED_REPOS": "dtomkatsu/primer-editor,dtomkatsu/BudgetPrimerFinal"
+    //
+    // BOTH owner spellings are listed on purpose. Both repos moved to the
+    // Hawaii-Appleseed org, but the staged manifests still say `dtomkatsu/…`,
+    // and the room name is built from whatever the manifest says. Listing one
+    // spelling only would 403 either today's editors or tomorrow's.
+    // NOTE: the two spellings are DIFFERENT ROOMS — canonicalise the manifests
+    // to Hawaii-Appleseed/… before anyone shares a document, or two people can
+    // sit in separate rooms believing they are in one.
+    "ALLOWED_REPOS": "Hawaii-Appleseed/primer-editor,Hawaii-Appleseed/BudgetPrimerFinal,dtomkatsu/primer-editor,dtomkatsu/BudgetPrimerFinal"
   }
 
   // COLLAB_SECRET is a secret, not a var:
