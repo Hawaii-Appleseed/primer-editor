@@ -27,6 +27,7 @@ await docsync.api.setSlot('whopays.p1', '…new markdown…')
 await docsync.api.place('cover.logo', { x: 1, y: 4 })   // inches; clamps like a drag
 await docsync.api.recolor('page.3', '#FFF6D8')          // null = reset
 await docsync.api.addTextBox({ page: 3, x: 1, y: 1, w: 2.5, md: 'Note' })
+await docsync.api.select('cover.logo')                  // as a click would; null clears
 docsync.api.save()      // presses the real Save; Push stays with the human
 
 // Several edits as ONE undo step and ONE render — batch() over separate

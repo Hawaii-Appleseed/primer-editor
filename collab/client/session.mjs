@@ -344,6 +344,7 @@ function peerOf(clientId, st) {
     drag: !!st.drag,
     cursor: st.cursor ?? null,  // {slot, rel}: a caret in that slot, as a relative position
     agent: st.agent ?? null,    // {by, what, target}: an AI is editing THROUGH this editor right now
+    comments: st.comments ?? null,  // when this editor last changed the document's comments (a stamp)
   };
 }
 
@@ -490,7 +491,7 @@ export class CollabSession {
    *  Only sends when something changed — awareness fans out to everyone. */
   setPresence(p) {
     const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag,
-                   cursor: p.cursor ?? null, agent: p.agent ?? null };
+                   cursor: p.cursor ?? null, agent: p.agent ?? null, comments: p.comments ?? null };
     const sig = JSON.stringify(next);
     if (sig === this.#lastPresence) return false;
     this.#lastPresence = sig;

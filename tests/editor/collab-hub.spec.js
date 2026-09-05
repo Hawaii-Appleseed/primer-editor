@@ -302,9 +302,42 @@ test('History lists every Save, names one, and brings one back as a new version'
   expect(hist.find(h => h.label === 'before the rewrite')).toBeTruthy();
 });
 
+test('what A selects, B sees ringed with her name', async () => {
+  const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
+  test.skip(!id, 'this project has no addressable elements');
+  await a.evaluate(`docsync.api.select(${JSON.stringify(id)})`);
+  const ring = b.frameLocator('#out').locator(`[data-el="${id}"].ds-peer`);
+  await expect(ring).toHaveCount(1, { timeout: 20_000 });
+  // The label is the person, by name when the roster knows one, else the
+  // local part of the address - never the whole email.
+  await expect(ring).toHaveAttribute('data-peer', /^ada/);
+});
+
+test('a comment on the selected element, from its own strip, marks it on the page for everyone', async () => {
+  const id = await a.evaluate(`(docsync.api.inventory().pages.flatMap(p => p.elements)[0] || {}).id || null`);
+  test.skip(!id, 'this project has no addressable elements');
+  await a.evaluate(`docsync.api.select(${JSON.stringify(id)})`);
+  // Whichever strip this element gets, its comment button is on it.
+  const btn = a.locator('#ar-comment:visible, #ty-comment:visible').first();
+  await expect(btn).toBeVisible();
+  await btn.click();
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(a.locator('#cpanel-anchor')).toHaveText(`New comment on ${id}`);
+  await a.locator('#cpanel-text').fill('Move this up a little.');
+  await a.locator('#cpanel-add').click();
+  await expect(a.locator('#cpanel .cmt-here')).toBeVisible({ timeout: 10_000 });
+  await expect(btn).toHaveClass(/has/);
+  await expect(b.frameLocator('#out').locator(`[data-el="${id}"][data-ds-comments="1"], [data-slot="${id}"][data-ds-comments="1"]`)).toHaveCount(1, { timeout: 25_000 });
+  const list = await (await a.request.get(`${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}/comments`)).json();
+  const c = list.find(x => x.anchor === id);
+  expect(c).toBeTruthy();
+  await a.request.delete(`${hubAs(ADA_PORT)}/api/docs/Hawaii-Appleseed~primer-editor~${PROJECT}/comments/${c.id}`);
+  await a.locator('#cpanel-close').click();
+});
+
 test('a comment on a paragraph marks it on the page, and the other editor sees it', async () => {
   const key = await firstSlot(a);
-  await a.evaluate(`docsync.api.select(${JSON.stringify(key)})`).catch(() => {});
+  await a.evaluate('docsync.api.select(null)');
   await a.locator('#comments').click();
   await expect(a.locator('#cpanel')).toBeVisible();
   await a.locator('#cpanel-text').fill('Tighten this paragraph.');

@@ -600,6 +600,17 @@ letting people change it:
   — nothing saved is lost, and the log reads "restored from …". The editor
   adopts the files the way a collaborator's change lands and records the
   version the way a Save does, so the room gets it through `meta.baseSha`.
+- **Who is where, by name.** A collaborator's selection has always been
+  ringed in their colour with a tag, their open paragraph marked, their caret
+  drawn (Phase 3); the tag now says the person — the roster's name, else the
+  local part of the address — never a whole email.
+- **Comment on this element.** The arrange strip (what an element shows when
+  selected) carries a comment button on the store path: one click opens the
+  panel with that element named as the anchor and the box focused. The
+  panel puts comments on the current selection first, under "On the
+  selection", and the strip's button glows when the selection already has
+  open comments. `docsync.api.select(ids)` selects the way a click does, so
+  a pilot (or a spec) can do the same.
 - **Comments** live beside the store's files (`comments.json`), not in the
   Yjs document — a note about the document is not part of what renders or
   exports. Anchored to a slot key or element id, or to the document. Anyone
