@@ -702,6 +702,24 @@ letting people change it:
   `localStorage['primer-comments-view']`; below 1100px the width decides
   and the panel is the ordered list it always was, which at 375px fits
   inside the phone (pinned by the hub spec).
+- **For you, where people already look.** A mention or a reply used to be
+  seen only by opening the document. The store's summary (`GET /api/docs`)
+  now answers, per person, `for_you` — the open threads that name them
+  (someone else did, in the thread or a reply) or are theirs and answered by
+  someone else — and `for_you_at`, when the newest of those last moved. One
+  rule, `threadForYou` in `assets/docs.js`, shared by the API and its tests;
+  the editor's `hubCommentForMe` is its twin and must stay so, or a badge
+  would point at a tab that shows nothing. The list page wears an amber
+  "N for you" on the tile (a click opens the editor with `?comments=you`,
+  the panel on the For you tab), the count line says it, and the Editor
+  tab's badge counts documents that want you — changed, or new for you —
+  with the title saying which. "New" is decided the way "changed" is: the
+  editor records `localStorage['primer-seen-you:<room>']` = that same
+  activity time when the For you tab is shown, so a badge rests once you
+  have looked and wakes when the thread moves again. Nothing is sent
+  anywhere: the hub has no mail path (its only outbound is the Apps
+  Script's Slack webhook), so a daily digest is left as a human decision
+  (ROADMAP, "Needs a human").
 - **What changed since you looked.** The editor records the version it
   showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
   answers every document the person may open with its version, who saved

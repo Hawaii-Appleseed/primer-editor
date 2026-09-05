@@ -1123,6 +1123,55 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   await mine.close();
 });
 
+test('a comment that names you reaches the list page and the Editor tab, and rests once you have looked', async () => {
+  await clearComments();
+  const made = await (await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { text: 'Grace, your call.', mentions: [GRACE] } })).json();
+  expect(made.mentions).toEqual([GRACE]);
+  const fresh = await browser.newContext();
+  const page = await fresh.newPage();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
+  const tile = page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`);
+  await expect(tile.locator('.tag.t-you')).toHaveText('1 for you');
+  await expect(tile.locator('.tag.t-you')).toHaveClass(/is-new/);
+  await expect(page.locator('#count')).toContainText('1 for you');
+  // On another page of the hub the Editor tab's badge says why.
+  await page.goto(`${hubAs(GRACE_PORT)}/resources.html`);
+  await expect(page.locator('#primerBadge')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#primerBadge')).toHaveAttribute('title', /1 comment names you/);
+  // The tag opens the editor on the For you tab, with the thread in it.
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
+  await tile.locator('.tag.t-you').click();
+  await expect(page).toHaveURL(/comments=you/);
+  await waitForFirstRender(page);
+  await waitLive(page);
+  await expect(page.locator('#cpanel')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('#cpanel-tab-you')).toHaveClass(/on/);
+  await expect(cmtRow(page, 'Grace, your call')).toBeVisible({ timeout: 10_000 });
+  // Looked at: the badge rests (the document is seen too, so nothing counts),
+  // and the list still says the thread is hers, only not new.
+  const answered = page.waitForResponse(r => r.url().endsWith('/api/docs'));
+  await page.goto(`${hubAs(GRACE_PORT)}/resources.html`);
+  await answered;
+  await expect(page.locator('#primerBadge')).toBeHidden();
+  await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
+  await expect(tile.locator('.tag.t-you')).toHaveText('1 for you');
+  await expect(tile.locator('.tag.t-you')).not.toHaveClass(/is-new/);
+  // On a phone the tile, its tags included, stays inside the screen.
+  await page.setViewportSize({ width: 375, height: 800 });
+  await expect(tile).toBeVisible();
+  const tileBox = await tile.boundingBox(), tagBox = await tile.locator('.tag.t-you').boundingBox();
+  expect(tileBox.x + tileBox.width).toBeLessThanOrEqual(375);
+  expect(tagBox.x + tagBox.width).toBeLessThanOrEqual(375);
+  await fresh.close();
+  // Ada wrote it: it is not for her.
+  const mine = await ctxA.newPage();
+  await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
+  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"] .tag.t-you`)).toHaveCount(0);
+  await mine.close();
+  await clearComments();
+});
+
 test('save: an expired sign-in cannot pass for a Save, and nothing is marked saved', async () => {
   // Access answers a signed-out browser with its sign-in page: 200, HTML.
   const key = await firstSlot(a);
