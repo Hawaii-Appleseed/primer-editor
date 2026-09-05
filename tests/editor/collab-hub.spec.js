@@ -164,6 +164,55 @@ test('an edit in A appears in B', async () => {
   await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe(text);
 });
 
+// --- the document store (step 04) --------------------------------------------
+
+test('Save goes to the hub, not to git, and the room learns the version', async () => {
+  const key = await firstSlot(a);
+  const text = 'Saved to the store at ' + Date.now() + '.';
+  await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, ${JSON.stringify(text)})`);
+  await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe(text);
+  await expect(a.locator('#save')).toBeEnabled();
+  await a.locator('#save').click();
+  await expect(a.locator('#stat')).toHaveText(/saved — anyone opening this document/, { timeout: 20_000 });
+  // The store has it, under the room, with a version - read straight off the API.
+  const meta = await a.evaluate(async () => (await fetch(docStore(), { cache: 'no-store' })).json());
+  expect(meta.exists).toBe(true);
+  expect(meta.updated_by).toBe(ADA);
+  const stored = await a.evaluate(async () => (await fetch(docStore() + '/content', { cache: 'no-store' })).text());
+  expect(stored).toContain(text);
+  // B did not save, but B's "unsaved changes" now means "since Ada's save".
+  await expect(b.locator('#save')).toBeDisabled();
+  expect(await b.evaluate('docVersion')).toBe(meta.version);
+  // No draft branch, no Share, no Publish: the git verbs do not exist here.
+  await expect(a.locator('#share')).toBeHidden();
+  await expect(a.locator('#publish')).toBeHidden();
+  expect(await a.evaluate('draftBranch')).toBeNull();
+});
+
+test('a fresh editor loads the stored document, not the vendored copy', async () => {
+  const key = await firstSlot(a);
+  const saved = await slot(a, key);
+  const page = await ctxA.newPage();
+  await page.goto(`${hubAs(ADA_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  expect(await slot(page, key)).toBe(saved);
+  expect(await page.evaluate('docVersion')).toBe(await a.evaluate('docVersion'));
+  await page.close();
+});
+
+test('an image uploads to the store and is served at the project path', async () => {
+  // A 1x1 PNG. The editor compresses uploads; a tiny one comes back as is.
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+  const chooser = a.waitForEvent('filechooser');
+  await a.locator('#toolbar-image, [aria-label^="Insert image"]').first().click();
+  await (await chooser).setFiles({ name: 'Hub Upload.png', mimeType: 'image/png', buffer: png });
+  await expect(a.locator('#stat')).toHaveText(/hub-upload\.png (uploaded|placed)/, { timeout: 20_000 });
+  const r = await a.request.get(`${hubAs(ADA_PORT)}/primer/${PROJECT}/assets/hub-upload.png`);
+  expect(r.status()).toBe(200);
+  expect(r.headers()['content-type']).toBe('image/png');
+  expect((await r.body()).length).toBe(png.length);
+});
+
 test('no GitHub token was asked for or stored', async () => {
   for (const page of [a, b]) {
     expect(await page.evaluate("localStorage.getItem('docsync-pat')")).toBeNull();

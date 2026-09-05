@@ -89,6 +89,8 @@ export async function startPages({ port, hubDir = HUB_DIR, timeoutMs = 120_000 }
     // binding, which names a script and a class.
     '--do', 'PRIMER_ROOM=PrimerRoom@primer-collab',
     '--kv', 'COLLAB',
+    // The document store (functions/api/docs/), local R2 emulation.
+    '--r2', 'PRIMER_DOCS',
     '--persist-to', persistDir, '--log-level', 'warn',
     // Its own process group: wrangler spawns workerd, and killing only the
     // parent leaves workerd holding the port — which then looks like "address

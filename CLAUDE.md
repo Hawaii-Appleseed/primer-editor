@@ -172,7 +172,10 @@ Rules that bite:
 - **Real-time collaboration lives in `collab/`** (`collab/README.md` is the
   design record: Phases 0–4 done, the relay deployed, and the editor served
   from the staff hub by `python3 -m docsync.hub` — its docstring is the
-  contract; the hook runs it after every engine or project commit). The editor's state model is
+  contract; the hook runs it after every engine or project commit, and
+  FAILS if a project's page links a file its hub copy lacks. On the hub
+  the document lives in R2 via `/api/docs`, decided once in
+  `docStoreDecide()`; git verbs hide there). The editor's state model is
   deliberately untouched — `source`/`layout` are MIRRORED onto a Yjs doc by
   `collab/client/session.mjs`: `renderOnce()` flushes local → doc as a diff,
   `collabAdopt()` paints doc → local, and in a session `pushHistory()` marks

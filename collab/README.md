@@ -507,17 +507,34 @@ What differs for an editor served there, and nothing else does:
 - The manifest's `repo` is canonicalised to the source checkout's origin
   (`Hawaii-Appleseed/…`), because that is the room's name and the hub serves
   only those spellings.
-- Save is unchanged, which means it still wants a GitHub token: the documents
-  are still in git. That is the next step (R2), not this one. A staff member
-  with no token can open a document, edit it live with everyone else, and
-  leave the saving to whoever holds one.
+- The document itself lives in the hub's store, not in git. The same door
+  names it — `"docs": "/api/docs"` — and `docStoreDecide()` in `edit.html`
+  settles it ONCE at boot, right after local mode is known: on that path the
+  document is loaded from `/api/docs/<room>` over the vendored copy, Save
+  PUTs it back, an image upload POSTs to `…/assets/<name>`, and the git
+  verbs (draft branch, Share, Publish, Push) hide. The store's version stamp
+  plays the part a commit sha played: it seeds the room's `meta.baseSha`, a
+  Save carries it as `base`, and a store that moved past it (a Save from a
+  session this browser was not in) answers 409 and the person chooses —
+  `collabBranchStillOurs`'s rule, on a store that cannot merge either. Every
+  Save is kept whole under `history/<version>/`. No GitHub credential
+  anywhere in a hub-served editor. Server side: the hub's
+  `functions/api/docs/[[path]].js` (R2 binding `PRIMER_DOCS` → bucket
+  `primer-docs`) and `functions/primer/[id]/assets/[name].js`, which serves
+  an uploaded image at the very path the layout names, ahead of the vendored
+  file. Pipeline reports (the Budget Primer) still BUILD from git and are
+  vendored from their repo's checkout; what staff edit on the hub is the
+  store's copy of that, and nothing flows back to git until step 05's export.
 
 Proof: `npx playwright test collab-hub.spec.js` vendors this tree's editor
 into the hub checkout beside this repo, boots the same two wranglers
-`hub-check.mjs` does, and opens the editor in two browser contexts carrying
-Access identities — the list page names the project, both are live in one
-room as the people Access says they are, an edit crosses, and no token was
-asked for. Skipped when the hub is not checked out beside this repo.
+`hub-check.mjs` does (with local R2), and opens the editor in two browser
+contexts carrying Access identities — the list page names the project, both
+are live in one room as the people Access says they are, an edit crosses, a
+Save lands in the store and the other editor learns the version, a fresh
+editor loads the stored document, an upload is served at the project path,
+and no token was asked for. Skipped when the hub is not checked out beside
+this repo. The handlers alone: `node dev/test_docs.mjs` in the hub.
 
 ## Known gaps, for later
 
