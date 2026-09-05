@@ -90,6 +90,11 @@ Ground rules for whoever picks this up (a person or the 6 am session):
 
 ## Done
 
+- 2026-09-05 — The service worker ships with the editor (staged and vendored
+  to the hub, where a cold open no longer re-downloads Pyodide once it has
+  been seen), and the manifest link carries its cookies past the access
+  gate (primer-editor 3c9a5de).
+
 - 2026-09-05 — The margin keeps up and keeps still: reads before writes and
   transforms on a scroll, a reconciled list instead of a rebuilt one on a
   click, comments shown at once with the hub asked after; and editing in
