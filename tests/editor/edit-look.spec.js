@@ -12,6 +12,10 @@
 //    600">, a title's span, a styled paragraph). The host's fresh elements now
 //    wear the same styles, by tag, and the inline host stays `display:inline`
 //    — an inline-block changed the line's height, so a heading grew on open.
+//  - A TEXT BOX is styled entirely inline by layout.py (its text style, fill,
+//    padding, rotation), and editBox()'s wrapper carried only the geometry:
+//    a 22px bold red centred note on a cream fill opened as 15px regular
+//    slate on white. The wrapper now wears the box's class and style.
 const { test, expect, gotoEditor } = require('./fixtures/editor-test');
 
 const PROPS = ['fontFamily', 'fontSize', 'fontWeight', 'color', 'lineHeight'];
@@ -60,5 +64,34 @@ test.describe('editing in place looks like the page', () => {
     await expect(frame.locator('[data-slot="page1.card.title"]').first()).toHaveText('Key Points X');
     await page.evaluate(() => undo());
     await expect.poll(() => page.evaluate(() => readSlot('page1.card.title'))).toBe('### Key Points');
+  });
+
+  test('a styled text box keeps its look while edited', async ({ page }) => {
+    await gotoEditor(page, '?project=demo-report');
+    const frame = page.frameLocator('#out');
+    const id = await page.evaluate(async () => {
+      await docsync.api.addTextBox({ page: 1, x: 1, y: 6, w: 3.5, md: 'A styled note **in a box** that people will edit.' });
+      const b = layout.boxes[layout.boxes.length - 1];
+      b.style = { size: 22, weight: 700, color: '#C0392B', align: 'center' };
+      b.fill = '#FFF6D8';
+      await render();
+      return 'text.' + b.id;
+    });
+    const P = [...PROPS, 'textAlign', 'backgroundColor', 'paddingLeft'];
+    const el = frame.locator(`[data-el="${id}"]`).first();
+    await el.scrollIntoViewIfNeeded();
+    const before = await el.evaluate(look, P);
+    await el.dblclick({ force: true });
+    const host = frame.locator('.ds-edit');
+    await host.waitFor({ state: 'visible' });
+    // The wrapper around the host is the box; the words inside are the p.
+    const during = await host.evaluate((h, P) => {
+      const pick = n => { const cs = getComputedStyle(n); const o = {}; for (const p of P) o[p] = cs[p]; return o; };
+      return { text: pick(h.querySelector('p')), box: pick(h.parentElement), h: h.parentElement.getBoundingClientRect().height };
+    }, P);
+    expect(during.text).toEqual(before.text);
+    expect(during.box.backgroundColor).toBe(before.text.backgroundColor === 'rgba(0, 0, 0, 0)' ? during.box.backgroundColor : before.text.backgroundColor);
+    expect(Math.abs(during.h - before.h)).toBeLessThan(1);
+    await page.keyboard.press('Escape');
   });
 });
