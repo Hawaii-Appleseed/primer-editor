@@ -409,6 +409,35 @@ describe('two editors on one room', { skip: E2E ? false : 'COLLAB_E2E=0' }, () =
     a.close(); b.close();
   });
 
+  test('a remote change back to exactly what this editor last received still reaches it', async () => {
+    // B was last handed the document at adopt. B then edits (a flush moves
+    // the shadow; nothing is handed back for one's own edit). A brings the
+    // document back to exactly that adopted state — what a restore does, and
+    // what an undo of B's edit from A's side would do. B must be told, or it
+    // keeps words the document no longer holds.
+    const room = uniqueRoom('back-to-last');
+    const a = open(room, 'ada', p);
+    await a.ready;
+    const b = open(room, 'grace', p);
+    await b.ready;
+    const adopted = b.got.length;
+    const docB = parseContent(p.content);
+    const slot = docB.blocks.find(x => x.kind === 'slot' && x.text.length > 20);
+    slot.text = 'B typed. ' + slot.text;
+    b.mark(); b.flush({ content: serializeContent(docB), layout: p.layout });
+    await waitFor(() => a.files().content.includes('B typed.'), 10_000, "B's edit never reached A");
+    assert.equal(b.got.length, adopted, "nothing is handed back for one's own edit");
+
+    // A puts the original files back: byte-for-byte what B was given at adopt.
+    a.mark(); a.flush({ content: p.content, layout: p.layout });
+    await waitFor(() => b.got.length > adopted, 10_000, 'B was never told the document went back');
+    const last = b.got[b.got.length - 1];
+    assert.equal(last.why, 'remote');
+    assert.equal(last.f.content, p.content);
+    assert.ok(!b.files().content.includes('B typed.'), 'the shadow agrees');
+    a.close(); b.close();
+  });
+
   test('a remote edit is held while the editor is busy and lands when it is not', async () => {
     const room = uniqueRoom('busy');
     let busy = false;

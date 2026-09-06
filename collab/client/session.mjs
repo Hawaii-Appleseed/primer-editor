@@ -484,6 +484,7 @@ export class CollabSession {
   #lastPresence = '';
   #readyRes; #readyRej;
   #lastEmitted = null;
+  #localSinceEmit = false;   // the editor moved the shadow since it was last handed the document
 
   /* ----------------------------------------------------------- presence */
 
@@ -517,6 +518,7 @@ export class CollabSession {
     if (this.state.phase !== 'ready') return false;
     let changed = false;
     this.shadow.transact(() => { changed = writeFiles(this.shadow, files); }, ORIGIN.LOCAL);
+    if (changed) this.#localSinceEmit = true;
     if (changed && this.debug) checkY(this.shadow);
     return changed;
   }
@@ -618,12 +620,17 @@ export class CollabSession {
     return true;
   }
 
-  /** Hand the editor the document, if it differs from what it was last given. */
+  /** Hand the editor the document, if it differs from what the editor holds.
+   *  "Holds" is what it was last given — unless it has flushed since, in
+   *  which case a collaborator's update that lands the document back on
+   *  exactly that earlier state (a restore, an undo of our edit) must still
+   *  be handed over, or the editor keeps its own superseded words. */
   #emit(why) {
     const f = this.files();
-    const sig = f.content + ' ' + f.layoutText;
-    if (sig === this.#lastEmitted && why === 'remote') return;
+    const sig = f.content + ' ' + f.layoutText;
+    if (sig === this.#lastEmitted && why === 'remote' && !this.#localSinceEmit) return;
     this.#lastEmitted = sig;
+    this.#localSinceEmit = false;
     this.onFiles(f, why);
   }
 

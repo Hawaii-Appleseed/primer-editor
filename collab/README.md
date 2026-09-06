@@ -485,8 +485,8 @@ requests and re-signs it, which is the only reason the Function may trust it.
 
 The hub's door (above) only helps if the editor is on the hub's origin, and it
 is: `python3 -m docsync.hub` vendors it into
-`staff-updates-internal/primer/` — one `edit.html`, one `collab-client.js`, a
-`projects.json`, and an `engine/` + `assets/` per project — from every binding
+`staff-updates-internal/primer/` — one `edit.html`, one `collab-client.js`, one
+`sw.js`, a `projects.json`, and an `engine/` + `assets/` per project — from every binding
 here with an `editor:` block (unless it says `hub: false`) and from every
 consumer in `vendor.yml` / `vendor.local.yml`, each staged by its own vendored
 `docsync.stage`. The hub's path comes from `hub:` in `vendor.local.yml`, and
@@ -497,6 +497,17 @@ never written by the vendor.
 
 What differs for an editor served there, and nothing else does:
 
+- It has the editor's **service worker** beside it (`sw.js`, vendored since
+  2026-09-05). The worker keeps Pyodide's ~30MB runtime cache-first in Cache
+  Storage and the shell network-first; before, the file lived only in the
+  engine repo's untracked `docs/primer/`, so on the hub `register('sw.js')`
+  404'd silently and a cold open paid the whole CDN download whenever the
+  browser's HTTP cache had let it go. The manifest link carries
+  `crossorigin="use-credentials"` for the same reason a hub fetch does: without
+  cookies the Access edge bounced it to sign-in, two seconds per open for
+  nothing. Measured warm on 2026-09-05 (Chrome, fast link): the demo report
+  is live 4.7s after navigation, the budget primer 3.7s; every network fetch
+  is done by ~3.5s and the rest is Pyodide's start and the first render.
 - Its registry entry says `"collab": {"path": "/api/collab", "me": "/api/me"}`
   instead of `"url"`. `collabDoor()` in `edit.html` returns the one or the
   other; on a path the editor mints no ticket and asks for no token — the
@@ -533,8 +544,18 @@ contexts carrying Access identities — the list page names the project, both
 are live in one room as the people Access says they are, an edit crosses, a
 Save lands in the store and the other editor learns the version, a fresh
 editor loads the stored document, an upload is served at the project path,
-and no token was asked for. Skipped when the hub is not checked out beside
-this repo. The handlers alone: `node dev/test_docs.mjs` in the hub.
+and no token was asked for. The `history:` tests take versions further:
+both editors clean on a restore, a Save on top of one, the confirmation
+refused, a restore from either side, unsaved edits superseded, a reload and
+a fresh editor opening on the restored version, the viewer's read-only list,
+and naming from the dialog. Skipped when the hub is not checked out beside
+this repo. The handlers alone: `node dev/test_docs.mjs` in the hub — its
+"edges of restore and naming" section covers the refusals (viewer, bad
+version, nothing saved), what a restore carries (paths, seeded_from, no
+label), a content-only version leaving the layout alone, restoring the
+current version, the 409 for a session that missed a restore, and names
+(trimmed, cut at 80, cleared, surviving a later Save, on the store and the
+summary when current).
 
 ## Export to git (step 05)
 
@@ -600,10 +621,86 @@ letting people change it:
   — nothing saved is lost, and the log reads "restored from …". The editor
   adopts the files the way a collaborator's change lands and records the
   version the way a Save does, so the room gets it through `meta.baseSha`.
+  An editor holding unsaved edits when a collaborator restores gets the
+  restored files and is told "a collaborator saved" — its edits are
+  superseded, as by any Save from the room. (This needed a fix in
+  `session.mjs`: a remote update that lands the document on exactly the
+  state an editor was LAST HANDED was dropped as "nothing new", even when
+  that editor had flushed its own edits since — which is precisely what a
+  restore does. `#localSinceEmit` now says so; `client.test.mjs` pins it.)
+- **Version history as Docs' side panel.** History is a panel beside the
+  page (`#hpanel`, the comments panel's frame; on a wide window it takes the
+  gutter the stage makes room for — `hubGutterSync()` decides that for both
+  panels, and only one is open at a time), not a dialog, so the page stays in
+  view while a person reads the differences. Every Save, newest first,
+  grouped by day ("Today", "Yesterday", the date); "Named only" keeps the
+  ones someone named. A row is the version: a click opens what it changed
+  against what is on screen — `slotsOf()` reads the `[[key]]` blocks of
+  that version's `content.md` and of `source`, each paragraph whose plain
+  words differ is listed with the words that went struck and the words on
+  screen underlined (`suggestSplit`, the suggestion cards' own diff), plus
+  the paragraphs only on one side and whether the layout differs; with
+  unsaved edits on screen the summary says "unsaved edits included", since
+  that is what it is compared against. "Mark what changed on the page"
+  outlines those paragraphs in the report (`.ds-hist-changed`, repainted on
+  every render from state) and is a checkbox because a marked-up page is
+  not always what someone wants while reading. Restore and naming are the
+  same rows' controls as before (Restore closes the panel and asks, as it
+  did). A new version landing (a Save here or elsewhere, a restore) reloads
+  the list — only a NEW version: the room re-announces the same one as
+  people come and go, and a reload then rebuilt the rows under someone
+  typing a name (the spec caught it); nor does the list ever rebuild while
+  a name box has focus.
+- **Autosave on the hub.** With the store as the record, a quiet two
+  seconds after an edit is a Save (`hubAutosaveSchedule`, armed from
+  `markDirty`, so every mutation site gets it for free): the room already
+  carries the live document, so nothing was ever lost — this only takes the
+  button out of people's minds, the way Docs never has one. Not while a
+  paragraph or box editor is open (a half-typed sentence is not a version),
+  not while a Save is in flight or a dialog is up (it re-arms), and not
+  after a 409 or a failure until a press of Save settles it — an automatic
+  Save must never ask a question or keep failing quietly, so it holds and
+  the status line says "press Save". The button stays, reading "Saved ·
+  just now" after one lands and "Saved" once that is old news. Per
+  browser, on unless turned off in the File menu
+  (`localStorage['primer-autosave']`); the hub spec runs with it off, since
+  it presses Save itself and counts versions, and one test turns it on.
 - **Who is where, by name.** A collaborator's selection has always been
   ringed in their colour with a tag, their open paragraph marked, their caret
   drawn (Phase 3); the tag now says the person — the roster's name, else the
   local part of the address — never a whole email.
+- **Who is here, at a glance, and going to them.** The chip's dots are
+  avatars: an initial in the person's colour (the colour of the ring around
+  what they have selected), a small amber dot when they are typing, and a
+  title that says where — "Ada · typing on page 2. Click to go there; click
+  again to follow". `collabPeerPlace()` finds the place: the paragraph they
+  are typing in, else what they have selected, else the page they are on;
+  the page number is the section's position in the document. A click
+  scrolls there (`collabGoTo`, centred, only when it is not already in
+  view — and instantly, as Docs jumps: a smooth scroll was cancelled by the
+  editor's other scroll writes, and the click went nowhere) and says so in
+  the status line. A second click on the same
+  avatar **follows**: every presence tick that finds their place out of
+  view scrolls to it (`collabFollowTick`, from `onPeers`), the chip says
+  "following Ada", the avatar wears a ring. Following stops when the person
+  here turns the wheel, touches, clicks or keys through the page — the
+  gesture, not the scroll event, since this editor's own scrolls fire that
+  too — when they click the avatar again, or when the one followed leaves
+  ("Ada left the session"). Nothing new is published: it is all read from
+  the presence the room already carries.
+- **Share, laid out as Docs lays it out.** The dialog opens on the link —
+  the document's own address (`hubDocLink()`: the page's URL with only
+  `project` kept, so a comment or a tab being open is not what gets pasted
+  into Slack) with a Copy button; the clipboard refused means the field is
+  selected and the status line says so. Under it, who has access, each with
+  a face (the comments' avatar: initial, colour by address, name from the
+  roster on hover): the owner first with "Owner" (a label, not a lock —
+  `canShare` is still "anyone who can edit"), the named people with a role
+  each and a × (the address field offers the staff roster as you type, a
+  `<datalist>`, and the face follows what is typed), and "Everyone on the
+  hub" closing the list with the default role. No "notify by email": the
+  hub cannot send mail, and a box that did nothing would be worse than none
+  (ROADMAP, "Needs a human").
 - **Comment on this element.** The arrange strip (what an element shows when
   selected) carries a comment button on the store path: one click opens the
   panel with that element named as the anchor and the box focused. The
@@ -611,14 +708,146 @@ letting people change it:
   selection", and the strip's button glows when the selection already has
   open comments. `docsync.api.select(ids)` selects the way a click does, so
   a pilot (or a spec) can do the same.
-- **Comments** live beside the store's files (`comments.json`), not in the
-  Yjs document — a note about the document is not part of what renders or
-  exports. Anchored to a slot key or element id, or to the document. Anyone
-  who may open the document may comment and resolve; only the author
-  rewords; the author or the owner deletes. The panel refreshes itself every
-  15 s while open, and every open anchored comment puts a small orange
-  marker on its paragraph or element inside the report (`hubCommentsPaint`,
-  called from `wire()` like the peer marks).
+- **Comments**, the way Google Docs does them. Threads live beside the
+  store's files (`comments.json`), not in the Yjs document — a note about
+  the document is not part of what renders or exports. A thread is on a run
+  of words in a paragraph (`anchor` + `quote`), on a paragraph or element
+  (`anchor`), or on the document. What a person sees: the quoted words
+  highlighted in the report (CSS Custom Highlight API; a whole-paragraph
+  thread gets a count badge instead), a "＋ Comment" pill beside a text
+  selection in the open paragraph, ⌘⌥M on whatever is in hand, cards with
+  an avatar, name and time, ordered as the document reads, a click on the
+  highlight raising the card and a click on the card flashing the words, a
+  checkmark to resolve and a ⋮ menu (Edit for the author, Delete for the
+  author or the owner, Show, Copy link — `?comment=<id>` opens the editor
+  on that thread), replies threaded under the first message, "Marked as
+  resolved by …" on a resolved thread and a reply to it reopening it,
+  @-mentions picked from the staff roster (`/data/staff.json`, plus whoever
+  is in the room) and a **For you** tab for threads that name you or answer
+  you. Anyone who may open the document may comment, reply and resolve;
+  only the author rewords; the author or the owner deletes. The panel
+  refreshes itself every 15 s while open, presence carries a change the
+  moment it happens, and a refresh never runs under someone typing a reply.
+  Server side, every change to `comments.json` is one read-modify-write
+  conditional on the etag the read saw (R2 `onlyIf`), retried when someone
+  wrote meanwhile — two replies in the same second both survive.
+- **Suggesting**, Google Docs' Suggesting mode. The bar's Editing ▾ switch
+  becomes Suggesting ▾: an edit is proposed, not made. Every mutation in
+  the editor starts with `pushHistory()` and ends in `render()`; in this
+  mode the first takes a copy of the files, the render shows the change
+  locally without flushing it to the room, and a quiet spell after the
+  last render turns before → after into a thread of kind `suggestion`
+  (beside the comments, so replies, mentions, Show and For you come free)
+  with the change recorded as per-paragraph words before and after plus
+  layout entries (`suggestDiff`), then puts the files back the way the
+  room has them. The page shows the proposal inline — words to go struck
+  through in red, words to come underlined in green (an `<ins>` the
+  paragraph editor strips before it opens), a dashed outline on an element
+  to move or change — and the card says "Replace … with …" / "Move X"
+  with Accept and Reject for an editor, Withdraw for whoever suggested it.
+  Accepting applies the change through the editor's own path (`writeSlot`,
+  the layout entry, one `pushHistory`, one render, so it is one ⌘Z and
+  reaches the room like any edit), after saying so when the paragraph was
+  rewritten since. A **viewer** is put in Suggesting and kept there: the
+  room drops their writes anyway, and this gives them a voice. Server
+  side, `status` (open / accepted / rejected) is decided by an editor,
+  withdrawn by its author, and `resolved` follows it. **Accept all / Reject
+  all** sit above the panel's list for an editor with two or more open, ask
+  once, and then run each through its own path — so every Accept is its own
+  undo step and its own render, and one whose paragraph was rewritten since
+  still asks about itself. And a proposal is counted where people look: the
+  hub's summary already answered `open_suggestions`, so the list page's tile
+  says "N suggested", its count line adds them up for the documents this
+  person may edit, and the Editor tab's badge counts them with the reason in
+  its title (a viewer's own suggestions never pull them in — a proposal
+  waits on an editor).
+- **Comments in the margin.** On a window 1100px or wider the panel is a
+  gutter beside the page — `body.cmt-margin` gives `#stage` a right margin
+  the width of the gutter and `applyZoom()` refits the page into what is
+  left, the one time a panel is allowed to move the page (a card has to line
+  up with the words it is about, so it needs its own column, not a float
+  over the page's right third). Inside, `#cpanel-list` is a positioning
+  box and `hubMarginLayout()` places every card by hand: at its anchor's
+  top on screen (the quote's Range when the words are highlighted, else
+  the element; the iframe's rect and scale turn page pixels into screen
+  pixels, as the "+ Comment" pill does), never over the card before it, a
+  thread on the document at the top, one whose words are gone or one that
+  is resolved trailing the rest under the "N resolved" line; a card whose
+  words have scrolled off the top goes with them, out of sight, as in Docs.
+  The thread in hand sits at its exact place and the others are pushed up
+  or down to clear it — but never out of the gutter: Docs' margin runs the
+  whole document, ours is a window on it, so when the cards above have no
+  room left it is the card in hand that gives way and sits lower (a card
+  whose words are on the page must stay reachable; the first cut of this
+  pushed them off the top and a ⋮ landed on the canvas). The gutter starts
+  where the stage does and its head is kept short, so the band of page with
+  no margin beside it is as thin as it can be. A scroll of
+  the report (a listener on the iframe's window, one layout per frame), a
+  zoom (`applyZoom` ends by asking for one), a window resize and a card
+  changing height (a ResizeObserver: a reply box opening restacks the
+  rest) all move the cards and nothing else — they are never rebuilt for
+  that, so a reply being typed is never disturbed. Each card is moved by
+  `transform`, not `top` (a composite, not a layout of the gutter), and a
+  layout reads everything it needs — the iframe's rect, the list's, the
+  panel's, every anchor's — before it writes anything: a write between two
+  reads made the browser lay the page out again for the second, twice a
+  frame, which was the lag the cards had behind a scrolling page. Heights
+  come from the ResizeObserver, each card observed once when it appears.
+  Nor does a render rebuild the list: cards are kept by thread id (and
+  separators by their words) when nothing the card shows has changed —
+  `hubCommentsRenderInner` reconciles the list into the new order,
+  touching only what moved — so a click on the page (which re-renders the
+  panel for the "On the selection" tag) leaves every card where it was;
+  rebuilding them put each one back at the top of the gutter to glide down
+  again, which read as the cards reshuffling. A card that is rebuilt
+  starts where the old one stood, and a card placed for the first time
+  takes its place without gliding (`.fresh`). A `List` / `Margin`
+  switch in the panel's head is the person's choice, kept in
+  `localStorage['primer-comments-view']`; below 1100px the width decides
+  and the panel is the ordered list it always was, which at 375px fits
+  inside the phone (pinned by the hub spec).
+  Three details finish it. The **new comment is a card at its anchor** too,
+  not a foot to the panel — but only once it is in use (the box focused,
+  holding words, or quoting a selection), since an empty box beside the
+  words would push every card below it down for nothing; it moves the
+  moment it is used rather than at the next refresh, the cursor goes back
+  after the move (moving a node blurs what is inside it), and the move is
+  flagged so the blur it causes cannot ask for another render — that was a
+  loop which took the cards out from under every click. A **line** joins
+  the card in hand to its words across the ground between page and gutter,
+  drawn only when both ends are on screen and never for a resolved thread,
+  which has no highlight to point at. A card **taller than the gutter
+  scrolls inside itself** rather than being cut off at the bottom edge.
+  Resolved threads stay in the margin, trailing the open ones under the
+  "N resolved" line: they have no words to sit beside any more, and the
+  panel is the only place they can be found again.
+  And every change shows **at once**: a new comment is a provisional card
+  (`.pending`, in hand) the moment Add is pressed, a reply, a resolve, an
+  edit or a deletion is shown as it will stand, and the hub is asked after
+  — its answer to a change is the thread itself, which takes the shown
+  one's place (`hubCommentsMerge`) with no second round trip to read the
+  list back; a refusal puts things back as they were and says so in the
+  status line (a refused reply comes back into an open box). Posting used
+  to wait for the POST and then a GET of the whole list before anything
+  appeared, which read as the button not working.
+- **For you, where people already look.** A mention or a reply used to be
+  seen only by opening the document. The store's summary (`GET /api/docs`)
+  now answers, per person, `for_you` — the open threads that name them
+  (someone else did, in the thread or a reply) or are theirs and answered by
+  someone else — and `for_you_at`, when the newest of those last moved. One
+  rule, `threadForYou` in `assets/docs.js`, shared by the API and its tests;
+  the editor's `hubCommentForMe` is its twin and must stay so, or a badge
+  would point at a tab that shows nothing. The list page wears an amber
+  "N for you" on the tile (a click opens the editor with `?comments=you`,
+  the panel on the For you tab), the count line says it, and the Editor
+  tab's badge counts documents that want you — changed, or new for you —
+  with the title saying which. "New" is decided the way "changed" is: the
+  editor records `localStorage['primer-seen-you:<room>']` = that same
+  activity time when the For you tab is shown, so a badge rests once you
+  have looked and wakes when the thread moves again. Nothing is sent
+  anywhere: the hub has no mail path (its only outbound is the Apps
+  Script's Slack webhook), so a daily digest is left as a human decision
+  (ROADMAP, "Needs a human").
 - **What changed since you looked.** The editor records the version it
   showed as `localStorage['primer-seen:<room>']`. The hub's `GET /api/docs`
   answers every document the person may open with its version, who saved
@@ -626,6 +855,64 @@ letting people change it:
   and sorts them first, and the Editor tab on every hub page wears the count
   (`assets/nav.js`, the calendar badge's pattern). No email, no push: a badge
   where people already look, on data the store already had.
+
+## What can go wrong, and what happens
+
+The obvious ways comments, Save, the live session and the editor's
+operations fail, and what was done about each (all under test):
+
+- **Two people change the comments at once.** Was: last writer wins, the
+  other's reply silently gone. Now: conditional writes with retry
+  (`mutateComments`), pinned by "two replies at once: neither is lost".
+- **The hub sign-in expired.** Access answers every request with its sign-in
+  page — 200 and HTML. Was: a Save read that as success with no version,
+  cleared the unsaved mark, and the words never reached the store. Now:
+  `hubJson()` guards every hub call (load, Save, restore, history, naming,
+  share, publish, upload, comments); a Save says "signed out of the hub —
+  reload this page", stays unsaved, and the draft cache keeps the words.
+  Pinned by "an expired sign-in cannot pass for a Save".
+- **A collaborator's change lands the document exactly where you last
+  saw it** (a restore, an undo of your edit from their side). Was: dropped
+  as "nothing new" while you kept superseded words. Now: `#localSinceEmit`
+  in the session. Pinned in `client.test.mjs` and the hub spec.
+- **The room is behind the store.** Someone saved from outside the session
+  (or restored while the room slept): the room's document is older than the
+  store's, and what is on screen is the room's. Was: only discovered at
+  Save, as a 409. Now: said on joining ("this session holds an older version
+  than the store"); Save still asks before replacing it.
+- **The store moved under a Save.** 409 with who and when; the person
+  chooses; `force` says they did. Nothing merges — the two are whole files.
+- **A comment's words were rewritten.** The quote no longer matches: the
+  thread falls back to a badge on its paragraph; Show still finds the
+  paragraph. A paragraph or element removed altogether: Show says so.
+- **The comments could not be refreshed** (offline, a 5xx). Said once in
+  the status line while the panel is open, not on every poll; the panel
+  keeps what it had.
+- **A refresh while typing a reply.** Deferred until the box loses focus;
+  a poll never eats a half-written reply.
+- **No Highlight API** (an older browser). Quoted threads show as badges on
+  their paragraph; everything else is the same.
+- **The websocket drops.** The editor keeps working on its own copy; the
+  provider reconnects and Yjs merges what both sides did meanwhile
+  (tested: "a session that reconnects does not re-seed and picks up what it
+  missed"). And it SAYS so: a band above the page — "Working offline — your
+  edits are kept here and shared when the session is back" — drawn by
+  `renderNotices` from the chip's status (so a render never loses it), not
+  dismissible because it goes on its own, and "back in the session — what
+  you did offline is shared now" in the status line when it does (the relay
+  spec drops A's socket, edits, reconnects, and watches B get the words).
+  The room's storage gone: the next editor refills it from what it holds
+  rather than adopting nothing.
+- **A Save while another is in flight.** The button is disabled for the
+  duration, so a second click cannot carry the old base.
+- **A suggestion's paragraph was rewritten before it was accepted.** Said
+  at Accept, with the choice to apply over it or not. A proposal whose
+  words can no longer be drawn inline (an SVG heading, a rewritten
+  paragraph) gets the dashed outline, and one that cannot be drawn never
+  stops the others.
+- **The document is too large, the layout is not JSON, an upload is not an
+  image.** Refused with the reason (413 / 400 / 415), said in the status
+  line, nothing written.
 
 ## Known gaps, for later
 

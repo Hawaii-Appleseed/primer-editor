@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="manifest" href="manifest.webmanifest">
+<!-- use-credentials: behind an access gate (the staff hub) a manifest fetched
+     without cookies is bounced to the sign-in page - two seconds, every open,
+     for nothing. -->
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
 <!-- The render engine's assets, started at HTML-parse time. The script tag
      that asks for them sits at the END of this (large) document, and its
      loader then fetches them one after another — so the 10MB wasm did not
@@ -91,10 +94,23 @@
   /* The two top rows read as ONE chrome zone now: same dark ground, no rule
      between them, and the contextual controls floating on it as a light card.
      A hairline border under each row cut the chrome into stripes. */
-  #bar { position:relative; display:flex; gap:8px; align-items:center; padding:9px 14px;
-         background:var(--chrome); color:var(--txt); flex-wrap:nowrap; }
+  /* Tight by design: a hosted session shows every control at once (Mode,
+     Comments, History, Share, Publish on top of the local set) and the row
+     does not wrap — so anything past the window edge was simply gone. Every
+     number below is a few pixels taken back from padding and gaps rather
+     than a control removed. */
+  #bar { position:relative; display:flex; gap:5px; align-items:center; padding:8px 10px;
+         background:var(--chrome); color:var(--txt); flex-wrap:nowrap;
+         /* Last resort, for a window narrow enough that even the tightened
+            row runs long: the overflow SCROLLS instead of being clipped, so
+            Publish is reachable rather than simply gone. No visible bar (it
+            would add height to a fixed-height row and read as chrome); the
+            popovers are all position:fixed, so none of them is clipped by
+            this. */
+         overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+  #bar::-webkit-scrollbar { display:none; }
   /* A thin rule between the history/commit group and the rest. */
-  .bar-sep { flex:none; width:1px; height:20px; background:var(--line); margin:0 3px; }
+  .bar-sep { flex:none; width:1px; height:18px; background:var(--line); margin:0 1px; }
   #stat { flex:1 1 40px; min-width:40px; opacity:.9; overflow:hidden;
           text-overflow:ellipsis; white-space:nowrap;
           transition:opacity .5s ease; }
@@ -114,22 +130,22 @@
   /* Canva's zoom control: a track between two end dots, a round handle, and
      the level read out beside it. Sized to sit on the bar's 30px button row
      without setting its own height. */
-  #zoombar { display:inline-flex; align-items:center; gap:7px; flex:none;
-             padding:0 4px; }
+  #zoombar { display:inline-flex; align-items:center; gap:5px; flex:none;
+             padding:0 2px; }
   /* The two ends of the track are the step buttons — one click per rung of
      ZOOM_STEPS, the same ladder ⌘+ / ⌘- walk. They replaced a pair of purely
      decorative dots: the ends of a zoom track are exactly where a hand
      reaches, so spending them on ornament was a waste of the only two
      obvious targets the control has. #bar's button styling is a CHILD
      selector, so these need their own rules. */
-  .zb-step { flex:none; width:19px; height:19px; padding:0; display:grid;
+  .zb-step { flex:none; width:18px; height:18px; padding:0; display:grid;
             place-items:center; border:1px solid var(--ctl-line); border-radius:50%;
             background:var(--ctl); color:var(--txt); cursor:pointer;
             font:15px/1 system-ui; transition:background .12s, border-color .12s; }
   .zb-step:hover:not(:disabled) { border-color:var(--sage); background:#4B5B68; }
   .zb-step:disabled { opacity:.4; cursor:default; }
   .zb-step:focus-visible { outline:2px solid rgba(107,158,120,.55); outline-offset:2px; }
-  #zb-range { -webkit-appearance:none; appearance:none; width:96px; height:5px;
+  #zb-range { -webkit-appearance:none; appearance:none; width:68px; height:5px;
              border-radius:99px; background:var(--ctl-line); cursor:pointer;
              flex:none; margin:0; }
   #zb-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
@@ -143,8 +159,8 @@
   #zb-range:focus-visible { outline:2px solid rgba(107,158,120,.55); outline-offset:3px; }
   /* Tabular figures: the readout changes constantly while dragging, and
      proportional digits make the whole bar twitch as it does. */
-  #zb-val { font:12px system-ui; font-variant-numeric:tabular-nums;
-            color:var(--dim); min-width:38px; text-align:right; flex:none; }
+  #zb-val { font:11.5px system-ui; font-variant-numeric:tabular-nums;
+            color:var(--dim); min-width:32px; text-align:right; flex:none; }
   /* +Section, hidden for now. Same treatment as the zoom segment above: the
      button and every handler stay live, so bringing it back is deleting this
      one line — not rebuilding a feature. */
@@ -271,6 +287,10 @@
          color:#8A7433; cursor:pointer; font:16px/1 system-ui; padding:0 2px;
          border-radius:5px; }
   .ds-note-x:hover { background:#E5D9B6; color:#4A3D1C; }
+  /* Offline: the same band, in the chip's own grey, so it reads as a state
+     of the session rather than a note about the report. */
+  .ds-note.ds-offline { background:#EEF2EF; color:#334049; border-bottom-color:#C9D6CD; }
+  .ds-note.ds-offline::before { content:'○'; color:#5B6E66; }
   .ds-note-all { flex:none; border:0; background:none; color:#8A7433;
          cursor:pointer; font:11.5px system-ui; text-decoration:underline; }
   /* Which build is running. Deliberately the quietest thing in the bar — it is
@@ -287,8 +307,16 @@
             white-space:nowrap; cursor:default; }
   #collab.live { color:#2E7D4F; opacity:.9; }
   #collab.can-click { cursor:pointer; text-decoration:underline dotted; opacity:.9; }
-  #collab i { display:inline-block; width:8px; height:8px; border-radius:50%;
-              margin-left:5px; vertical-align:middle; }
+  /* Who is here, as Docs shows it: an initial in the person's colour - the
+     same colour as the ring around whatever they have selected on the page.
+     A click goes to where they are; a second click follows them. */
+  #collab i { display:inline-flex; justify-content:center; align-items:center; position:relative;
+              width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle;
+              color:#fff; font:700 8.5px/1 system-ui; font-style:normal; letter-spacing:0; cursor:pointer;
+              box-shadow:0 0 0 1.5px var(--chrome); }
+  #collab i.typing::after { content:''; position:absolute; right:-2px; bottom:-2px; width:7px; height:7px;
+              border-radius:50%; background:#C2703A; border:1.5px solid var(--chrome); }
+  #collab i.following { box-shadow:0 0 0 1.5px var(--chrome), 0 0 0 3.5px #C2703A; }
   /* The AI at work: shown while an automated editor is changing this report
      — through this tab (pilot ops), through a collaborator's, or on disk
      after announcing itself. Same purple as #agentnote, which is the SAME
@@ -321,8 +349,30 @@
                cursor:pointer; max-width:22rem; overflow:hidden;
                text-overflow:ellipsis; white-space:nowrap; }
   #bar > #agentnote:hover { background:#7A6AB6; border-color:#9A8CD0; }
+  /* The open-comment count, as an exponent on the button's own word. Sage
+     rather than the label's grey so it reads as a number about something,
+     and no line-height of its own — a <sup> that inherits the row's would
+     push the button taller than every other one on the bar. */
+  #comments .cmt-n { font:700 10px/1 system-ui; color:var(--sage);
+        margin-left:1px; vertical-align:super; }
+  #comments.on .cmt-n { color:#fff; }
   #cupd[disabled] { opacity:.6; cursor:default; }
   #upd[disabled] { opacity:.6; cursor:default; }
+  /* The three chips whose text is written at runtime, and which therefore
+     have no width of their own to budget for: an update headline, a
+     cut-in-print warning naming every offending page. Each is a SUMMARY with
+     its detail on title= and its action on click, so an ellipsis costs
+     nothing — where being pushed off the end of an unwrapping row cost the
+     whole control. */
+  /* display:inline-block, not the row's inline-flex: an ellipsis belongs to
+     an inline box, and a flex container's anonymous text item never gets
+     one. line-height replaces the centring flex was doing. */
+  #bar > #upd, #bar > #cupd, #bar > #fit {
+        max-width:14rem; overflow:hidden; text-overflow:ellipsis;
+        white-space:nowrap; display:inline-block; line-height:16px; }
+  /* …and a display of any kind beats the hidden attribute's own display:none.
+     The same trap as #bar > button[hidden] below. */
+  #bar > #upd[hidden], #bar > #cupd[hidden], #bar > #fit[hidden] { display:none; }
   /* A caution, not an offer — amber rather than #upd/#cupd's inviting sage/
      blue, since clicking it does not fix anything, only dismisses the notice
      (checkStage2()). */
@@ -337,10 +387,15 @@
      dark slab of chrome sitting on a white card. That is what made the Shape,
      Text and Download menus look the way they did. */
   #bar > button, #zoom button {
-                display:inline-flex; align-items:center; gap:6px; font:12.5px system-ui;
+                display:inline-flex; align-items:center; gap:5px; font:12px system-ui;
                 background:var(--ctl); color:var(--txt); border:1px solid var(--ctl-line);
-                border-radius:var(--r-ctl); padding:5px 13px; cursor:pointer; height:30px;
+                border-radius:var(--r-ctl); padding:5px 9px; cursor:pointer; height:28px;
                 transition:background .12s, border-color .12s, transform .08s; }
+  /* The icon-only buttons are square: a 14px glyph in a 13px-per-side text
+     button was mostly padding, and four of them side by side spent more of
+     the row than any label does. Two ids each: "#bar > button" is (id + type) and
+     outranks a bare id, the same trap #agentnote fell into above. */
+  #bar > #reload, #bar > #guides, #bar > #layers, #bar > #present { padding:5px 6px; }
   #bar > button:active:not(:disabled) { transform:translateY(1px); }
   /* The flex rule above beats [hidden]'s own (non-!important) display:none —
      Share/Publish/Push all render anyway once "hidden" is only an attribute.
@@ -351,7 +406,7 @@
   #bar > button:disabled { opacity:.45; cursor:default; border-color:var(--ctl-line);
                          background:var(--ctl); }
   #bar > button.on { background:var(--sage); border-color:var(--sage); color:#fff; }
-  #undo, #redo { font-size:16px; line-height:1; padding:4px 9px; }
+  #undo, #redo { font-size:15px; line-height:1; padding:4px 6px; }
 
   /* Sources manager — a light panel over the preview, in the top document so a
      re-render of the iframe never disturbs it. top is set from the bar height. */
@@ -481,7 +536,18 @@
      whole iframe is SCALED to the pane, never reflowed. A narrow pane would
      otherwise fire the report's mobile media queries, and a drag would record
      the phone layout's geometry into layout.json as if it were the page. */
-  #stage { flex:1; min-height:0; overflow:auto; position:relative; background:var(--canvas); }
+  #stage { flex:1; min-height:0; overflow:auto; position:relative; background:var(--canvas);
+        /* The REPORT is the scroller — the iframe holds the whole document and
+           carries its own bar. The stage's own vertical range is only the
+           clearance applyZoom leaves below the iframe so the last page can be
+           lifted clear of the floating page strip (90-odd px, 154 in the
+           comments gutter), and painting a bar for it put a second, nearly
+           full-height scrollbar hard against the real one — two side by side,
+           which is what the comments panel made impossible to miss. The RANGE
+           stays, so a wheel still clears the strip; only the duplicate chrome
+           goes. */
+        scrollbar-width:none; }
+  #stage::-webkit-scrollbar { display:none; }
   /* #ds-warm is the warm-boot preview: the last render, painted into its OWN
      overlay iframe while Pyodide compiles, and removed by the first real
      swap. Its own frame and not #out, so that "#out has a page in it" keeps
@@ -1151,6 +1217,12 @@
      File-menu row that hides itself (New window, local-only) stayed on screen. */
   .pop .shp[hidden] { display:none; }
   .pop .shp:hover { background:var(--sage); color:#fff; }
+  /* A row can be disabled now that Share lives in the menu — it is offered
+     only once the draft has something to share. Greyed and inert, and it must
+     not take the hover paint. */
+  .pop .shp:disabled { opacity:.45; cursor:default; }
+  .pop .shp:disabled:hover, .pop.menu .shp:disabled:hover
+        { background:none; color:var(--ink); }
   /* A row that stops the whole editor should not look like the row that opens
      a dialog. Quiet until reached for — the same red the confirm it raises
      uses, so the two read as one action. */
@@ -1255,8 +1327,21 @@
         border:1px solid #C9D6CD; border-radius:7px; background:#fff; width:100%;
         box-sizing:border-box; }
   .dsdlg-field > textarea { resize:vertical; min-height:64px; }
+  /* Share, as Docs lays it out: the link first, then who has access, each
+     with a face - the owner, the named people, everyone on the hub. */
+  .hub-share-link { display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; }
+  .hub-share-link > input { font:12px ui-monospace, SFMono-Regular, Menlo, monospace; padding:7px 9px; border:1px solid #C9D6CD;
+    border-radius:var(--r-ctl, 8px); background:#F8FAF8; color:var(--ink); min-width:0; text-overflow:ellipsis; }
+  .hub-share-copy { font:600 12px system-ui; padding:7px 12px; border:1px solid #2D5A3D; border-radius:var(--r-ctl, 8px);
+    background:#2D5A3D; color:#fff; cursor:pointer; white-space:nowrap; }
+  .hub-share-copy:hover { background:#24492F; }
   .hub-share-people { display:flex; flex-direction:column; gap:6px; }
-  .hub-share-row { display:grid; grid-template-columns: 1fr auto auto; gap:6px; align-items:center; }
+  .hub-share-row { display:grid; grid-template-columns: 28px 1fr auto auto; gap:6px; align-items:center; }
+  .hub-share-row.hub-share-owner, .hub-share-row.hub-share-everyone { grid-template-columns: 28px 1fr auto; padding-right:34px; }
+  .hub-share-av { flex:none; }
+  .hub-share-all { background:#E1E8E3 !important; color:#5B6E66; font-size:14px; }
+  .hub-share-name { font:13px system-ui; color:var(--ink); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hub-share-role { font:12px system-ui; color:#5B6E66; padding:6px 0; }
   .hub-share-row > input, .hub-share-row > select, .hub-share-default {
     font:13px system-ui; padding:6px 8px; border:1px solid #C9D6CD; border-radius:6px; background:#fff; color:var(--ink); }
   .hub-share-rm { font:16px/1 system-ui; padding:4px 8px; border:0; background:none; color:#5B6E66; cursor:pointer; border-radius:6px; }
@@ -1264,43 +1349,177 @@
   .hub-share-add { align-self:flex-start; font:12px system-ui; padding:5px 10px; border:1px dashed #C9D6CD; border-radius:6px; background:none; color:#5B6E66; cursor:pointer; }
   .hub-share-note { font-size:11.5px; color:#5B6E66; }
   .dsdlg-err { font:12px system-ui; color:#B3412F; margin:0; min-height:14px; }
-  .hub-history-list { display:flex; flex-direction:column; gap:8px; max-height:52vh; overflow:auto; }
-  .hub-history-row { display:grid; grid-template-columns: 1fr auto; gap:4px 10px; padding:8px 10px; border:1px solid #E1E8E3; border-radius:8px; }
+  /* Version history, the side panel: the comments panel's frame (same
+     radii, same head), rows grouped by day, the chosen one open on what it
+     changed. Under 1100px it floats over the page as the comments list does. */
+  #hpanel { position:fixed; right:12px; top:104px; bottom:60px; width:min(360px, 90vw); z-index:45;
+    display:flex; flex-direction:column; background:#F8FAF8; border:1px solid #C9D6CD; border-radius:var(--r-card, 10px);
+    box-shadow:0 8px 28px rgba(30,44,50,.18); font:13px system-ui; color:var(--ink); }
+  #hpanel[hidden] { display:none; }
+  #hpanel.gutter { right:0; bottom:0; width:var(--cmt-gutter, 384px); border-radius:var(--r-edge) 0 0 0; border-right:0; border-bottom:0; box-shadow:none; background:#EEF2EF; }
+  #hpanel-named { border:1px solid #C9D6CD; background:#fff; font:600 11px system-ui; color:#5B6E66; padding:3px 9px; border-radius:999px; cursor:pointer; margin-left:auto; margin-right:8px; }
+  #hpanel-named:hover { background:#E8EDE6; color:var(--ink); }
+  #hpanel-named.on { background:#2D5A3D; border-color:#2D5A3D; color:#fff; }
+  .hpanel-show { display:flex; align-items:center; gap:6px; font:12px system-ui; color:#5B6E66; padding:4px 14px 8px; border-bottom:1px solid #E1E8E3; cursor:pointer; }
+  #hpanel-list { flex:1; overflow:auto; padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+  .hpanel-note { font:11.5px system-ui; color:#5B6E66; margin:0; padding:8px 14px 10px; border-top:1px solid #E1E8E3; }
+  .hub-history-day { font:600 11px system-ui; color:#5B6E66; text-transform:uppercase; letter-spacing:.04em; margin:6px 0 -2px; }
+  .hub-history-day:first-child { margin-top:0; }
+  .hub-history-empty { font:12.5px system-ui; color:#5B6E66; margin:0; }
+  .hub-history-row { display:grid; grid-template-columns: 1fr auto; gap:4px 10px; padding:8px 10px; border:1px solid #E1E8E3; border-radius:10px; background:#fff; cursor:pointer; }
   .hub-history-row.current { border-color:#6B9E78; background:#F3F7F3; }
+  .hub-history-row.on { border-color:#C2703A; box-shadow:0 2px 12px rgba(194,112,58,.22); }
   .hub-history-head { grid-column:1 / -1; font:12px system-ui; color:#5B6E66; }
-  .hub-history-label { font:13px system-ui; padding:5px 8px; border:1px solid #C9D6CD; border-radius:6px; background:#fff; color:var(--ink); }
+  .hub-history-label { font:13px system-ui; padding:5px 8px; border:1px solid #C9D6CD; border-radius:6px; background:#fff; color:var(--ink); min-width:0; }
   .hub-history-label.saved { border-color:#6B9E78; }
   .hub-history-btns { display:flex; align-items:center; }
   .hub-history-restore { font:12px system-ui; padding:5px 10px; border:1px solid #C9D6CD; border-radius:6px; background:#fff; cursor:pointer; }
   .hub-history-restore:hover { background:#E8EDE6; }
+  .hub-history-diff { grid-column:1 / -1; font:12.5px/1.45 system-ui; margin:4px 0 0; padding-top:6px; border-top:1px solid #EEF2EE; white-space:pre-wrap; }
+  .hub-history-diff .sum { display:block; color:#5B6E66; font-size:12px; margin-bottom:4px; }
+  .hub-history-diff .key { display:block; font:600 11px system-ui; color:#5B6E66; margin-top:6px; }
+  .hub-history-diff del { color:#B3412F; background:#FBE9E5; text-decoration:line-through; }
+  .hub-history-diff ins { color:#1F6B3A; background:#E6F4EA; text-decoration:underline; }
+  .hub-history-diff .lay { display:block; color:#5B6E66; }
   /* Below the bar AND the contextual strip, so it never sits over a
      control that is about the selection - the strip's own comment button
-     was under its head once, and every click on it landed on the panel. */
-  #cpanel { position:fixed; right:12px; top:104px; bottom:60px; width:min(340px, 90vw); z-index:45;
-    display:flex; flex-direction:column; background:#fff; border:1px solid #C9D6CD; border-radius:var(--r-card, 10px);
+     was under its head once, and every click on it landed on the panel.
+     Shaped like Google Docs' comments: cards with an avatar, name and
+     time, the quoted words above, replies threaded under, a checkmark and
+     a ⋮ on hover, a one-line reply box that opens into a real one. */
+  #cpanel { position:fixed; right:12px; top:104px; bottom:60px; width:min(360px, 90vw); z-index:45;
+    display:flex; flex-direction:column; background:#F8FAF8; border:1px solid #C9D6CD; border-radius:var(--r-card, 10px);
     box-shadow:0 8px 28px rgba(30,44,50,.18); font:13px system-ui; color:var(--ink); }
   #cpanel[hidden] { display:none; }
-  .cpanel-head { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid #E1E8E3; }
+  .cpanel-head { display:flex; align-items:center; justify-content:space-between; padding:10px 14px 4px; }
+  .cpanel-head b { font-size:15px; }
   .cpanel-head button { border:0; background:none; font:18px/1 system-ui; cursor:pointer; color:#5B6E66; }
+  .cpanel-tabs { display:flex; gap:2px; padding:0 10px; border-bottom:1px solid #E1E8E3; }
+  .cpanel-tab { font:600 12px system-ui; padding:8px 10px; border:0; background:none; border-bottom:2px solid transparent; color:#5B6E66; cursor:pointer; }
+  .cpanel-tab.on { color:#2D5A3D; border-bottom-color:#2D5A3D; }
   #cpanel-list { flex:1; overflow:auto; padding:10px 12px; display:flex; flex-direction:column; gap:10px; }
-  .cmt { border:1px solid #E1E8E3; border-radius:8px; padding:8px 10px; }
-  .cmt.resolved { opacity:.6; }
-  .cmt-head { font-size:11.5px; color:#5B6E66; }
-  .cmt-text { margin:6px 0; white-space:pre-wrap; line-height:1.45; }
-  .cmt-btns { display:flex; gap:6px; }
-  .cmt-btns button { font:12px system-ui; padding:4px 9px; border:1px solid #C9D6CD; border-radius:6px; background:#fff; cursor:pointer; }
+  .cmt { position:relative; border:1px solid #E1E8E3; border-radius:10px; padding:10px 12px; background:#fff; cursor:pointer; outline:none; }
+  .cmt:focus-visible, .cmt.active { border-color:#C2703A; box-shadow:0 2px 12px rgba(194,112,58,.22); }
+  .cmt.resolved { background:#F1F4F1; color:#5B6E66; }
+  .cmt-quote { font-size:11.5px; color:#5B6E66; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cmt-quote q, .cpanel-anchor q { quotes:"\201C" "\201D"; font-style:italic; color:var(--ink); background:#FBE7A1; padding:0 2px; border-radius:3px; }
+  .cmt-msg { display:grid; grid-template-columns:28px 1fr auto; column-gap:8px; align-items:start; margin-top:8px; }
+  .cmt-msg.reply { margin-top:10px; padding-top:10px; border-top:1px solid #EEF2EE; }
+  .cmt-avatar { width:28px; height:28px; border-radius:50%; background:var(--av,#6B9E78); color:#fff; font:700 11px/28px system-ui; text-align:center; letter-spacing:.02em; flex:none; }
+  .cmt-meta { min-width:0; } .cmt-meta b { display:block; font-size:12.5px; line-height:1.2; } .cmt-meta span { font-size:11px; color:#5B6E66; }
+  .cmt-actions { display:flex; gap:2px; opacity:0; transition:opacity .12s; }
+  .cmt:hover .cmt-actions, .cmt.active .cmt-actions, .cmt:focus-within .cmt-actions { opacity:1; }
+  .cmt-actions button { border:0; background:none; font:12px system-ui; padding:3px 7px; border-radius:6px; cursor:pointer; color:#2D5A3D; }
+  .cmt-actions button:hover { background:#E8EDE6; }
+  .cmt-actions button.cmt-more { font-size:16px; line-height:1; padding:1px 6px; }
+  .cmt-text { grid-column:2 / -1; margin:4px 0 0; white-space:pre-wrap; line-height:1.45; }
+  .cmt-text .mention { font-weight:600; color:#2D5A3D; }
+  .cmt-edit { grid-column:2 / -1; font:13px system-ui; padding:6px 8px; border:1px solid #C9D6CD; border-radius:8px; resize:vertical; margin-top:4px; }
+  .cmt-menu { position:absolute; right:10px; top:38px; z-index:5; background:#fff; border:1px solid #C9D6CD; border-radius:8px;
+    box-shadow:0 6px 20px rgba(0,0,0,.15); display:flex; flex-direction:column; min-width:150px; padding:4px; }
+  .cmt-menu button { text-align:left; border:0; background:none; font:13px system-ui; padding:7px 10px; border-radius:6px; cursor:pointer; color:var(--ink); }
+  .cmt-menu button:hover { background:#E8EDE6; }
+  .cmt-menu button.danger { color:#B3412F; }
+  .cmt-resolved-line { font-size:11.5px; color:#5B6E66; margin:8px 0 0; }
+  .cmt-replybox { margin-top:8px; position:relative; }
+  .cmt-reply-line { width:100%; box-sizing:border-box; font:12.5px system-ui; padding:7px 12px; border:1px solid #C9D6CD; border-radius:999px; background:#fff; cursor:text; color:var(--ink); }
+  .cmt-reply-text { width:100%; box-sizing:border-box; font:13px system-ui; padding:7px 10px; border:1px solid #6B9E78; border-radius:8px; resize:vertical; }
+  .cmt-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:6px; }
+  .cmt-btns button { font:600 12px system-ui; padding:5px 12px; border:1px solid #C9D6CD; border-radius:999px; background:#fff; cursor:pointer; color:var(--ink); }
   .cmt-btns button:hover { background:#E8EDE6; }
-  .cmt-btns button.danger { color:#B3412F; }
-  .cmt-btns button.primary { background:#6B9E78; border-color:#6B9E78; color:#fff; }
+  .cmt-btns button.primary { background:#2D5A3D; border-color:#2D5A3D; color:#fff; }
+  .cmt-btns button.primary:disabled { opacity:.5; }
   .cmt-empty, .cmt-sep { color:#5B6E66; font-size:12px; margin:0; }
   .cmt-sep { border-top:1px solid #E1E8E3; padding-top:8px; }
   .cmt-here { border-top:0; padding-top:0; color:#C2703A; font-weight:600; }
+  .cmt-mentions { position:absolute; left:0; z-index:6; background:#fff; border:1px solid #C9D6CD; border-radius:8px;
+    box-shadow:0 6px 20px rgba(0,0,0,.15); max-height:220px; overflow:auto; width:min(280px, 100%); padding:4px; }
+  .cmt-mentions button { display:flex; gap:8px; align-items:center; width:100%; text-align:left; border:0; background:none; padding:5px 8px; border-radius:6px; font:13px system-ui; cursor:pointer; color:var(--ink); }
+  .cmt-mentions button.on, .cmt-mentions button:hover { background:#E8EDE6; }
+  .cmt-mentions small { display:block; color:#5B6E66; font-size:11px; }
+  .cmt-mentions .cmt-avatar { width:24px; height:24px; line-height:24px; font-size:10px; }
   #ar-comment.has, #ty-comment.has { color:#C2703A; }
   #ty-comment { margin-left:6px; }
-  .cpanel-new { border-top:1px solid #E1E8E3; padding:10px 12px; display:flex; flex-direction:column; gap:6px; }
-  .cpanel-anchor { font-size:11.5px; color:#5B6E66; }
-  #cpanel-text { font:13px system-ui; padding:6px 8px; border:1px solid #C9D6CD; border-radius:6px; resize:vertical; }
+  .cpanel-new { border-top:1px solid #E1E8E3; padding:10px 12px; background:#fff; border-radius:0 0 var(--r-card, 10px) var(--r-card, 10px); position:relative; }
+  .cpanel-new-row { display:grid; grid-template-columns:28px 1fr; column-gap:8px; align-items:start; }
+  .cpanel-anchor { font-size:11.5px; color:#5B6E66; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cmt-unquote { border:0; background:none; color:#5B6E66; cursor:pointer; font:14px/1 system-ui; margin-left:4px; vertical-align:middle; }
+  #cpanel-text { width:100%; box-sizing:border-box; font:13px system-ui; padding:7px 10px; border:1px solid #C9D6CD; border-radius:8px; resize:vertical; }
+  #cpanel-text:focus { outline:none; border-color:#6B9E78; }
   #comments.on { background:#E8EDE6; }
+  #mode.suggesting { background:#E6F4EA; color:#1F6B3A; }
+  .mode-menu { z-index:70; }   /* above the type strip and the arrange strip */
+  .cmt.suggest { border-left:3px solid #2D8A4E; }
+  .cmt.suggest.resolved { border-left-color:#C9D6CD; }
+  .cmt-kind { font:600 11px system-ui; color:#1F6B3A; text-transform:uppercase; letter-spacing:.04em; margin-right:6px; }
+  .cmt-diff { grid-column:2 / -1; margin:6px 0 0; font-size:12.5px; line-height:1.45; white-space:pre-wrap; }
+  .cmt-diff del { color:#B3412F; background:#FBE9E5; text-decoration:line-through; }
+  .cmt-diff ins { color:#1F6B3A; background:#E6F4EA; text-decoration:underline; }
+  .cmt-diff .lay { display:block; color:#5B6E66; }
+  .cmt-decided { grid-column:1 / -1; font-size:11.5px; color:#5B6E66; margin:8px 0 0; }
+  .cmt-actions button.accept { color:#1F6B3A; font-weight:600; }
+  .cmt-actions button.reject { color:#B3412F; font-weight:600; }
+  #cmt-plus { position:fixed; z-index:46; display:inline-flex; align-items:center; gap:5px; font:600 12px system-ui; padding:5px 10px;
+    border:1px solid #C9D6CD; border-radius:999px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.18); cursor:pointer; color:#2D5A3D; }
+  #cmt-plus[hidden] { display:none; }
+  #cmt-plus:hover { background:#E8EDE6; }
+  .cpanel-bulk { display:flex; gap:6px; padding:6px 12px; border-bottom:1px solid #E1E8E3; }
+  .cpanel-bulk[hidden] { display:none; }
+  .cpanel-bulk button { font:600 12px system-ui; padding:4px 10px; border:1px solid #C9D6CD; border-radius:999px; background:#fff; cursor:pointer; }
+  .cpanel-bulk button:hover { background:#E8EDE6; }
+  .cpanel-bulk .accept { color:#1F6B3A; }
+  .cpanel-bulk .reject { color:#B3412F; }
+  /* Comments in the MARGIN, the way Docs draws them. On a wide window the
+     panel is a gutter beside the page - the stage makes room for it (this is
+     the one panel that may move the page: a card has to line up with the
+     words it is about, so it needs its own column, not a float over the
+     page's right third) - and each card sits at its anchor's height, stacked
+     so none overlap, the one in hand at its exact place with the rest nudged
+     out of its way; they follow the page as it scrolls. Under 1100px (a
+     phone, a narrow pane) the panel stays the ordered list, and the switch
+     in its head is hidden because there is nothing to switch to. */
+  body.cmt-margin #stage { margin-right:var(--cmt-gutter, 384px); }
+  body.cmt-margin #rail, body.cmt-margin #context { right:var(--cmt-gutter, 384px); }
+  /* The history panel shares the gutter on a wide window (hubGutterSync). */
+  /* The gutter starts where the stage starts (its top is set from #work in
+     hubCommentsMode) and its head is kept short, so the band of page with no
+     margin beside it is as thin as it can be. */
+  #cpanel.margin { right:0; bottom:0; width:var(--cmt-gutter, 384px); border-radius:var(--r-edge) 0 0 0;
+    border-right:0; border-bottom:0; box-shadow:none; background:#EEF2EF; }
+  #cpanel.margin .cpanel-head { padding:4px 12px 0; }
+  #cpanel.margin .cpanel-head b { font-size:12px; }
+  #cpanel.margin .cpanel-head button { font-size:15px; }
+  #cpanel.margin #cpanel-view { font-size:11px; }
+  #cpanel.margin .cpanel-tab { padding:3px 8px; font-size:11.5px; }
+  #cpanel.margin #cpanel-list { position:relative; overflow:hidden; padding:0; display:block; }
+  #cpanel.margin #cpanel-list > * { position:absolute; left:12px; right:12px; top:0; margin:0; box-sizing:border-box; }
+  /* Placed by transform, not `top`: a transform costs a composite, `top` a
+     layout of the gutter, and the cards move on every scrolled frame. A card
+     placed for the first time takes its place at once; only a card that was
+     already somewhere glides. */
+  #cpanel.margin #cpanel-list.anim > * { transition:transform .16s ease; }
+  #cpanel.margin #cpanel-list.anim > .fresh { transition:none; }
+  .cmt.pending { opacity:.72; }
+  #cpanel.margin .cmt { box-shadow:0 1px 3px rgba(30,44,50,.10); }
+  #cpanel.margin .cmt.active { z-index:2; box-shadow:0 4px 16px rgba(194,112,58,.24); }
+  #cpanel.margin .cmt-empty { top:12px; }
+  #cpanel.margin .cmt-sep { border-top:0; padding:6px 2px 0; }
+  /* The new comment is a card at its anchor too, not a foot to the panel:
+     it is about a place on the page like any other. */
+  #cpanel.margin .cpanel-new { border:1px solid #C2703A; border-top:1px solid #C2703A; border-radius:10px;
+    box-shadow:0 4px 16px rgba(194,112,58,.22); z-index:3; }
+  /* A thread taller than the gutter scrolls inside itself rather than
+     being cut off at the bottom edge. */
+  #cpanel.margin #cpanel-list > * { overflow-y:auto; }
+  /* The line from the card in hand to the words it is about, across the
+     ground between the page and the gutter. */
+  #cmt-leader { position:fixed; z-index:44; height:2px; background:#F5C542; pointer-events:none; border-radius:2px; }
+  #cmt-leader[hidden] { display:none; }
+  #cpanel-view { border:1px solid #C9D6CD; background:#fff; font:600 11px system-ui; color:#5B6E66; padding:3px 9px;
+    border-radius:999px; cursor:pointer; margin-left:auto; margin-right:8px; }
+  #cpanel-view:hover { background:#E8EDE6; color:var(--ink); }
+  #cpanel-view[hidden] { display:none; }
+  @media (max-width:1099px) { #cpanel-view { display:none; } }
   .dsdlg-field > input:focus, .dsdlg-field > select:focus, .dsdlg-field > textarea:focus {
         outline:none; border-color:var(--sage); box-shadow:0 0 0 3px rgba(107,158,120,.18); }
   .dsdlg-err { font:12px system-ui; color:#C0392B; margin:0; min-height:0; }
@@ -1354,13 +1573,38 @@
        currentColor: the row's colour is the icon's colour, which is what makes
        hover and the danger row work without a second rule each. -->
   <aside id="cpanel" hidden aria-label="Comments">
-    <div class="cpanel-head"><b>Comments</b><button type="button" id="cpanel-close" aria-label="Close comments">×</button></div>
-    <div id="cpanel-list"></div>
-    <div class="cpanel-new">
-      <div id="cpanel-anchor" class="cpanel-anchor">New comment on the document</div>
-      <textarea id="cpanel-text" rows="3" placeholder="Write a comment… select a paragraph or element first to attach it there"></textarea>
-      <div class="cmt-btns"><button type="button" id="cpanel-add" class="primary">Comment</button></div>
+    <div class="cpanel-head"><b>Comments</b><button type="button" id="cpanel-view" title="Show the comments as a list">List</button><button type="button" id="cpanel-close" aria-label="Close comments">×</button></div>
+    <div class="cpanel-tabs" role="tablist">
+      <button type="button" class="cpanel-tab on" id="cpanel-tab-all" role="tab">All comments</button>
+      <button type="button" class="cpanel-tab" id="cpanel-tab-you" role="tab">For you</button>
     </div>
+    <!-- Docs' "Accept all / Reject all": shown to an editor when two or more
+         suggestions are open; each goes through the same path as its own
+         button, so every one is its own undo step. -->
+    <div id="cpanel-bulk" class="cpanel-bulk" hidden>
+      <button type="button" id="cpanel-accept-all" class="accept">Accept all</button>
+      <button type="button" id="cpanel-reject-all" class="reject">Reject all</button>
+    </div>
+    <div id="cpanel-list"></div>
+    <div class="cpanel-new" id="cpanel-composer">
+      <div id="cpanel-anchor" class="cpanel-anchor">New comment on the document</div>
+      <div class="cpanel-new-row">
+        <span class="cmt-avatar" id="cpanel-me"></span>
+        <textarea id="cpanel-text" rows="2" placeholder="Comment or add others with @"></textarea>
+      </div>
+      <div class="cmt-btns"><button type="button" id="cpanel-cancel">Cancel</button><button type="button" id="cpanel-add" class="primary">Comment</button></div>
+    </div>
+  </aside>
+  <button type="button" id="cmt-plus" hidden aria-label="Comment on the selected words">＋ Comment</button>
+  <div id="cmt-leader" hidden aria-hidden="true"></div>
+  <!-- Version history as Docs' side panel: every Save grouped by day, a
+       version chosen shows what changed against what is on screen and marks
+       those paragraphs on the page; Restore and naming from the same rows. -->
+  <aside id="hpanel" hidden aria-label="Version history">
+    <div class="cpanel-head"><b>Version history</b><button type="button" id="hpanel-named" title="Only the versions someone named">Named only</button><button type="button" id="hpanel-close" aria-label="Close version history">×</button></div>
+    <label class="hpanel-show"><input type="checkbox" id="hpanel-show" checked> Mark what changed on the page</label>
+    <div id="hpanel-list"></div>
+    <p class="hpanel-note">Restoring brings a version back as a new one — nothing is lost.</p>
   </aside>
   <div class="pop menu" id="filepop" hidden>
     <p class="pop-h">Reports</p>
@@ -1373,6 +1617,11 @@
          up full Pyodide boots was a real annoyance), so wanting two at once —
          two projects side by side, or one report on two pages — is asked for
          here instead. -->
+    <!-- On the hub, where the store is the record, every quiet two seconds
+         after an edit is a Save (hubAutosaveSchedule). Per browser. -->
+    <button class="shp" id="file-autosave" hidden><svg class="shp-i" viewBox="0 0 16 16"
+      ><path d="M3 2.5h8l2.5 2.5v8.5H3z"/><path d="M5 2.5v4h5v-4M5 13v-4h6v4"
+      /></svg><span class="shp-t">Autosave on the hub: on</span></button>
     <button class="shp" id="file-newwin" hidden><svg class="shp-i" viewBox="0 0 16 16"
       ><rect x="1.8" y="5" width="8.4" height="7.8" rx="1.2"/><path
         d="M6 5V4.2a1 1 0 0 1 1-1h6.2a1 1 0 0 1 1 1V10a1 1 0 0 1-1 1h-.8"
@@ -1402,6 +1651,20 @@
       ><path d="M9.6 2.6h3.8v3.8M13.4 2.6 9.6 6.4"/><path
         d="M6.4 13.4H2.6V9.6M2.6 13.4l3.8-3.8"/></svg
       ><span class="shp-t">Resize…</span></button>
+    <!-- Sources and Share MOVED here from the bar (same ids, same handlers).
+         Neither is a per-selection act: Sources is the report's citation list
+         and Share is who may open the document — both belong with Resize and
+         Download, and taking them off the row is what let the rest of it fit
+         a normal window. -->
+    <button class="shp" id="sources" aria-label="View, edit, reorder and remove citations"
+      ><svg class="shp-i" viewBox="0 0 16 16"><path d="M2.6 3.4h10.8M2.6 8h10.8M2.6 12.6h6.6"
+      /></svg><span class="shp-t">Sources…</span></button>
+    <button class="shp" id="share" disabled
+      aria-label="Copy a link that shows this draft to anyone"
+      ><svg class="shp-i" viewBox="0 0 16 16"><circle cx="11.9" cy="3.9" r="2"/><circle
+        cx="4.1" cy="8" r="2"/><circle cx="11.9" cy="12.1" r="2"/><path
+        d="m5.9 7.05 4.2-2.1M5.9 8.95l4.2 2.1"/></svg
+      ><span class="shp-t">Share…</span></button>
     <!-- Where this report's prose was DRAFTED. Most writing here starts in a
          Google Doc, with comments and three colleagues in it, and only becomes
          a report once the words settle. These two rows are that hand-off: one
@@ -1561,7 +1824,6 @@
        control is a presentation decision, and deleting its markup would make
        bringing it back a code change instead of a CSS one. -->
   <button id="add" aria-label="Add a new prose section to a page">+ Section</button>
-  <button id="sources" aria-label="View, edit, reorder and remove citations">Sources</button>
   <button id="present" aria-label="Present — fullscreen, one page at a time; arrows or click advance, Esc exits">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
       stroke-width="1.4"><rect x="1.5" y="2" width="11" height="8" rx="1.2"/>
@@ -1572,9 +1834,9 @@
        draft branch away and return to the live report, so detectLocal() hides
        it rather than the markup deleting it. -->
   <button id="revert" disabled hidden>Discard</button>
+  <button id="mode" hidden aria-label="Editing or suggesting — whether your edits change the document or propose a change">Editing ▾</button>
   <button id="comments" hidden aria-label="Comments on this document">Comments</button>
   <button id="history" hidden aria-label="Every saved version of this document">History</button>
-  <button id="share" disabled aria-label="Copy a link that shows this draft to anyone">Share</button>
   <button id="publish" disabled aria-label="Make this draft the live report">Publish</button>
   <!-- Download moved into the File menu; its popover stays here. -->
   <div class="pop menu" id="downloadpop" hidden>
@@ -3353,7 +3615,7 @@ async function uploadImageFile(d, onDone) {
         const r = await fetch(`${docStore()}/assets/${encodeURIComponent(name)}`, {
           method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file,
         });
-        const j = await r.json().catch(() => ({}));
+        const j = await hubJson(r);
         if (!r.ok) throw new Error(j.error || `upload refused (${r.status})`);
         localImages.set(j.src, dataUrl);
         $('stat').textContent = shrunk
@@ -6784,9 +7046,22 @@ function editBox(d, el) {
   // inches, above everything while it is open.
   // Read off el's OWN rendered numbers before replaceWith() below discards it.
   const fnLabels = fnRenderedLabels(el, b.md);
+  // The wrapper IS the box as the page drew it — its class and every inline
+  // declaration it wore (the text style's size/weight/colour/alignment, a
+  // fill and its padding, rotation, opacity, shadow), so the words look the
+  // same open as they did closed: a bare wrapper dropped a 22px bold red
+  // centred note to 15px regular slate on white the moment it was opened.
+  // The host inherits the text styling from it (.ds-edit is font/color/
+  // line-height:inherit); only the geometry is restated, since a narrow box
+  // gets a floor to type in and the editor must ride above everything.
   const wrap = d.createElement('div');
-  wrap.style.cssText = `position:absolute;left:${b.x}in;top:${b.y}in;`
-    + `width:${Math.max(b.w, 1.8)}in;z-index:20000`;
+  wrap.className = el.className;
+  wrap.style.cssText = el.style.cssText;
+  wrap.style.position = 'absolute';
+  wrap.style.left = `${b.x}in`;
+  wrap.style.top = `${b.y}in`;
+  wrap.style.width = `${Math.max(b.w, 1.8)}in`;
+  wrap.style.zIndex = '20000';
   const host = d.createElement('div');
   host.contentEditable = 'true';
   host.className = 'ds-edit';
@@ -7434,6 +7709,22 @@ function showMini(d, els) {
     const speedB = btn('Expand speed…',
       '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.3"/><path d="M7 4.2v3l2 1.1"/></svg>',
       () => openTglSpeedPopover(d, speedB, tb));
+  }
+  // Comment on what is selected — the same act as the strip's #ar-comment,
+  // reachable from the object itself. Without it the only way to note
+  // something about an element was to find the top strip, which is the one
+  // control the floating bar exists to save you walking to. Only where
+  // comments have somewhere to live (the hub's store), and never for a
+  // viewer-role session, which cannot write one.
+  if (docStore() && !hubViewOnly()) {
+    const anchor = mine.length === 1 ? idOf(mine[0]) : null;
+    const hasCmt = !!anchor
+      && hubComments.some(c => !c.resolved && c.anchor === anchor);
+    const cmtB = btn(hasCmt ? 'Comments on this element' : 'Comment on this element',
+      '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor"'
+      + ' stroke-width="1.4" stroke-linejoin="round"><path d="M2 2.5h10v7H6.5L3.5 12V9.5H2z"/></svg>',
+      () => hubCommentStart(null));
+    if (hasCmt) cmtB.classList.add('on');
   }
   const dupDisabled = ![...selIds].every(id => dupModeOf(d, id));
   btn(dupDisabled ? 'Duplicate — an endnote reorders instead: drag it up or down the list'
@@ -8415,7 +8706,17 @@ function renderNotices(d) {
   const seen = notesSeen();
   const show = msgs.filter(m => typeof m === 'string' && m.trim() && !seen.has(m));
   host.textContent = '';
-  host.hidden = !show.length;
+  // Working offline is said here, above the page, not only in the chip: the
+  // one state a person must not miss. Not dismissible - it goes when the
+  // session is back, and the edits made meanwhile go with it.
+  const offline = collabInfo && collabInfo.on && collabInfo.status === 'offline';
+  host.hidden = !show.length && !offline;
+  if (offline) {
+    const row = document.createElement('div'); row.className = 'ds-note ds-offline';
+    const txt = document.createElement('span');
+    txt.textContent = 'Working offline — your edits are kept here and shared when the session is back.';
+    row.appendChild(txt); host.appendChild(row);
+  }
   if (!show.length) return;
   show.forEach(msg => {
     const row = document.createElement('div');
@@ -9052,6 +9353,7 @@ function applyZoom(recompute = true) {
   if (d && d.documentElement)
     d.documentElement.style.scrollPaddingTop = Math.round(CTX_CLEAR / s) + 'px';
   syncZoomBar();
+  if (typeof hubMarginQueue === 'function') hubMarginQueue(false);   // the comment cards follow the page's new scale
 }
 
 /** The bar shows the scale ACTUALLY in effect, never the choice that asked for
@@ -10295,6 +10597,7 @@ function syncHistoryButtons() {
 // boundary between undo steps — it just marks one in the document instead of
 // copying the state; the state itself lands at the next render's flush.
 function pushHistory() {
+  suggestCapture();
   if (collab) { collab.mark(); syncHistoryButtons(); return; }
   past.push(snapshot());
   if (past.length > 60) past.shift();
@@ -11009,6 +11312,7 @@ function markDirty() {
   $('revert').hidden = local || !draftBranch;
   $('save').classList.toggle('dirty', dirty);
   cacheDraft();                       // persist unsaved edits for offline safety
+  if (typeof hubAutosaveSchedule === 'function' && docStore()) { hubSaveLabel(); hubAutosaveSchedule(); }
 }
 
 // --- offline draft cache (idb-keyval) --------------------------------------
@@ -11730,6 +12034,7 @@ function collabWire(d) {
     d.addEventListener('pointerdown', () => { collabPointerAt = Date.now(); }, true);
     d.addEventListener('pointerup', () => { collabPointerAt = 0; }, true);
     d.addEventListener('pointercancel', () => { collabPointerAt = 0; }, true);
+    collabFollowWire(d);
   }
   if (collab) collabPaintPeers(d);
   else agentPaint();
@@ -11797,9 +12102,9 @@ function collabHostMd(host = richHost) {
   if (!host) return null;
   const inline = host.dataset.richMode === 'inline';
   try {
-    return richOpts.allowMd === false
+    return richRehead(richOpts.allowMd === false
       ? (inline ? host.textContent : host.innerText)
-      : htmlToMd(host, { allowLists: !!richOpts.allowLists, inline });
+      : htmlToMd(host, { allowLists: !!richOpts.allowLists, inline }));
   } catch (e) { return null; }
 }
 /** What the editor holds, with the open paragraph's live words overlaid. */
@@ -11826,7 +12131,7 @@ function collabParaClosed() {
 }
 /** Push the open paragraph's words into the document when they changed. */
 function collabLiveFlush() {
-  if (!collab || !collabParaOpen() || collabComposing) return;
+  if (!collab || !collabParaOpen() || collabComposing || (suggesting && !suggestApplying)) return;
   const md = collabHostMd();
   if (md == null || md === collabLastLive) return;
   collabLastLive = md;
@@ -11905,8 +12210,9 @@ function collabRefreshHost(md, index) {
   const i = index == null || !focused ? null : Math.max(0, Math.min(index, md.length));
   const marked = i == null ? md : md.slice(0, i) + CARET_MARK + md.slice(i);
   const paint = text => {
+    text = richUnhead(text);   // the marker the editor took off stays off
     if (richOpts.allowMd === false) richHost.textContent = text;
-    else richHost.innerHTML = mdToHtml(text, { allowLists: !!richOpts.allowLists, inline, fnLabels: richOpts.fnLabels });
+    else { richHost.innerHTML = mdToHtml(text, { allowLists: !!richOpts.allowLists, inline, fnLabels: richOpts.fnLabels }); richWear(richHost); }
   };
   paint(marked);
   let node = null, at = -1;
@@ -12106,10 +12412,18 @@ async function collabAdopt(files, why) {
     return;
   }
   await render();
+  if (collabSayBack) collabSayBackSoon();   // after the last of these, not between two
   if (why === 'adopt' && collabInfo.status === 'live') {
     renderSays(collabInfo.peers > 1
       ? `joined the live session — ${collabInfo.peers - 1} other${collabInfo.peers > 2 ? 's' : ''} here`
       : 'live session — edits here are shared as you make them');
+    // The room was built from one version and the store now holds another
+    // (a Save from outside the session, a restore while the room slept):
+    // what is on screen is the room's. Said now, not at the first Save.
+    const base = collab && collab.baseSha();
+    if (docStore() && docVersion && base && base !== docVersion) {
+      renderSays('this session holds an older version than the store — it was saved outside the session; Save will ask before replacing that');
+    }
   }
 }
 
@@ -12147,25 +12461,161 @@ function collabChip() {
       text = '… joining';
       title = 'Connecting to the collaboration relay.';
   }
+  if (s.status === 'live' && collabFollow) {
+    const f = collabPeers.find(p => p.login === collabFollow);
+    if (f) text += ' · following ' + (f.name || fmtWho(f.login) || 'someone');
+  }
   c.textContent = text;
-  // One dot per collaborator, in their colour — the same colour as the ring
-  // around whatever they have selected on the page, so the two read as one.
+  // One avatar per collaborator - an initial in their colour, the same colour
+  // as the ring around whatever they have selected on the page, so the two
+  // read as one. The title says where they are; a click goes there, a second
+  // click follows them (see collabFollowTick).
   if (s.status === 'live') {
+    const d = $('out') && $('out').contentDocument;
     for (const p of collabPeers) {
-      const dot = document.createElement('i');
-      dot.style.background = p.color;
-      dot.title = (p.name || p.login || 'someone') + (p.slot ? ' · typing' : '');
-      c.appendChild(dot);
+      const av = document.createElement('i');
+      const name = p.name || fmtWho(p.login) || 'someone';
+      av.style.background = p.color;
+      av.textContent = (name || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      const place = collabPeerPlace(d, p);
+      const doing = p.slot ? ' · typing' : p.drag ? ' · moving' : '';
+      const following = collabFollow === p.login;
+      av.title = name + doing + (place.page ? ` on page ${place.page}` : '')
+        + (place.el ? `. Click to go there${following ? '; following — click to stop' : '; click again to follow'}` : '');
+      av.classList.toggle('typing', !!p.slot);
+      av.classList.toggle('following', following);
+      av.setAttribute('role', 'button');
+      av.onclick = e => { e.stopPropagation(); collabAvatarClick(p); };
+      c.appendChild(av);
     }
   }
   c.title = title;
   c.classList.toggle('live', s.status === 'live');
   c.classList.toggle('can-click', s.status === 'signin');
+  // The offline band above the page comes and goes with the status.
+  if (s.status !== collabChipWas) {
+    collabChipWas = s.status;
+    const d = $('out') && $('out').contentDocument;
+    if (d && d.body) renderNotices(d);
+    // Offline is remembered through the "connecting" in between, so coming
+    // back is said once, when live.
+    if (s.status === 'offline') collabWasOffline = true;
+    if (s.status === 'live' && collabWasOffline) { collabWasOffline = false; collabSayBack = true; collabSayBackSoon(); }
+  }
+}
+let collabChipWas = null, collabWasOffline = false, collabSayBack = false, collabBackTimer = 0;
+const COLLAB_BACK_MSG = 'back in the session — what you did offline is shared now';
+/** Said once the renders that adopt what was missed have settled: each of
+ *  them announces itself and then writes its idle text, so a message said
+ *  between two would be gone before it was read. Every adopt re-arms this. */
+function collabSayBackSoon() {
+  clearTimeout(collabBackTimer);
+  collabBackTimer = setTimeout(() => {
+    if (!collabSayBack) return;
+    collabSayBack = false;
+    if (collabInfo.status === 'live') $('stat').textContent = COLLAB_BACK_MSG;
+  }, 900);
 }
 $('collab').onclick = async () => {
   if (collabInfo.status !== 'signin') return;
   if (await ensureAuth()) startCollab();
 };
+
+// --- where a collaborator is, and going there --------------------------------
+// Docs' two gestures on an avatar: a click jumps to where that person is
+// (the paragraph they are typing in, else what they have selected, else the
+// page they are on); a second click FOLLOWS them - every presence tick that
+// finds their place out of view scrolls to it - until the person here
+// scrolls, touches or clicks the page, clicks the avatar again, or the one
+// followed leaves. Programmatic scrolls (this one's own) never count as a
+// reason to stop, which is why the cancel listens to the gesture, not to
+// the scroll event.
+let collabFollow = null;        // the login being followed, or null
+let collabFollowName = '';      // their name at the time, for the goodbye
+let collabJumped = null;        // the login the last click went to: a second click follows
+/** {el, page} - the element to scroll to and the page number it sits on. */
+function collabPeerPlace(d, p) {
+  if (!d || !d.body) return { el: null, page: null };
+  // The paragraph they type in is a slot; what they selected is an element -
+  // the same lookups collabPaintPeers rings and tags, so the jump lands on
+  // what the person here can already see marked. (One id can name both a
+  // slot and an element in different places: a card's words and the card.)
+  const slotEl = id => d.querySelector(`[data-slot="${CSS.escape(id)}"]`) || d.querySelector(`[data-el="${CSS.escape(id)}"]`);
+  const elEl = id => d.querySelector(`[data-el="${CSS.escape(id)}"]`) || d.querySelector(`[data-slot="${CSS.escape(id)}"]`);
+  let el = (p.slot && slotEl(p.slot)) || null;
+  if (!el) for (const id of p.sel || []) { el = elEl(id); if (el) break; }
+  let pageEl = el ? el.closest('section.page') : null;
+  if (!pageEl && p.page != null) pageEl = [...d.querySelectorAll('section.page')].find(s => String(s.dataset.page) === String(p.page)) || null;
+  if (!el) el = pageEl;
+  const pages = [...d.querySelectorAll('section.page')];
+  const page = pageEl ? pages.indexOf(pageEl) + 1 : null;
+  return { el, page: page || null };
+}
+const collabInView = el => {
+  const w = el.ownerDocument.defaultView, r = el.getBoundingClientRect();
+  return r.bottom > 0 && r.top < w.innerHeight && r.top >= 0 && r.bottom <= w.innerHeight;
+};
+function collabGoTo(p, { say = true } = {}) {
+  const d = $('out') && $('out').contentDocument;
+  const name = p.name || fmtWho(p.login) || 'someone';
+  const place = collabPeerPlace(d, p);
+  if (!place.el) { if (say) $('stat').textContent = `${name} has nothing selected yet`; return false; }
+  // The report's own window is scrolled, by arithmetic, to put the place in
+  // the middle - not scrollIntoView, which would also drag the stage and the
+  // page around it. Instant, as Docs jumps. And asserted again on the next
+  // frame and a beat later: the editor's own housekeeping (a refit when the
+  // tab is revealed, a render restoring its scroll) can land in the same
+  // frame and put the page back where it was, and a click that went nowhere
+  // is the one thing this must never be.
+  const el = place.el;
+  const put = () => {
+    const w = el.ownerDocument && el.ownerDocument.defaultView;
+    if (!w || collabInView(el)) return;
+    const r = el.getBoundingClientRect();
+    if (!r.height && !r.width) return;   // gone from the page since
+    w.scrollTo(0, Math.max(0, w.scrollY + r.top - (w.innerHeight - r.height) / 2));
+  };
+  put();
+  requestAnimationFrame(put);
+  setTimeout(put, 200);
+  if (say) $('stat').textContent = `${name} is ${p.slot ? 'typing' : 'working'} on page ${place.page || '?'}`;
+  return true;
+}
+function collabAvatarClick(p) {
+  if (collabFollow === p.login) { collabFollowStop(); return; }
+  if (collabJumped === p.login) {
+    collabFollow = p.login; collabFollowName = p.name || fmtWho(p.login) || 'someone'; collabJumped = null;
+    collabGoTo(p, { say: false });
+    $('stat').textContent = `following ${collabFollowName} — scroll or click the page to stop`;
+    collabChip();
+    return;
+  }
+  collabFollow = null; collabJumped = p.login;
+  collabGoTo(p);
+  collabChip();
+}
+function collabFollowStop(why) {
+  if (!collabFollow) return;
+  collabFollow = null; collabJumped = null;
+  $('stat').textContent = why || `stopped following ${collabFollowName}`;
+  collabChip();
+}
+/** Each presence tick: keep the followed person's place in view. */
+function collabFollowTick() {
+  if (!collabFollow) return;
+  const p = collabPeers.find(x => x.login === collabFollow);
+  if (!p) { collabFollowStop(`${collabFollowName} left the session`); return; }
+  collabGoTo(p, { say: false });
+}
+/** The gestures that mean "I want to look somewhere else": bound once per
+ *  report document, from collabWire. */
+function collabFollowWire(d) {
+  const stop = () => { if (collabFollow) collabFollowStop(); };
+  d.addEventListener('wheel', stop, { capture: true, passive: true });
+  d.addEventListener('touchmove', stop, { capture: true, passive: true });
+  d.addEventListener('pointerdown', stop, true);
+  d.addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(e.key)) stop(); }, true);
+}
 
 /** Who this session is, by the door's own account (the hub's /api/me echoes
  *  the Access identity). For presence only: the ROOM learns the login from
@@ -12243,6 +12693,7 @@ async function startCollab() {
                                                               agent: p.agent })) };
       const d = $('out') && $('out').contentDocument;
       if (d) collabPaintPeers(d);
+      collabFollowTick();
       collabChip();
     },
     debug: !!localStorage.getItem('collab-debug'),
@@ -13347,6 +13798,7 @@ async function render() {
     renderRunning = false;
     const ws = renderWaiters; renderWaiters = [];
     ws.forEach(r => r());
+    suggestSchedule();
   }
 }
 
@@ -13370,7 +13822,7 @@ async function renderOnce() {
   // Every mutation in this file ends in a render, so this is the one place a
   // local edit becomes a document transaction the room can see. Idempotent:
   // a render that follows an adopted remote change finds nothing to write.
-  if (collab) collabFlush();
+  if (collab && !(suggesting && !suggestApplying)) collabFlush();
   py.globals.set('SRC', source);
   py.globals.set('LAYOUT', JSON.stringify(layout, null, 2));
   py.globals.set('CONTENT', M.content);
@@ -13663,6 +14115,7 @@ function wire(roots) {
   dragify(d, roots);
   collabWire(d);
   hubCommentsPaint(d);
+  hubHistoryPaint(d);
   contextify(d, roots);
   wireSections(d, roots);
   deafenStickyChrome(d);
@@ -13819,7 +14272,12 @@ function wire(roots) {
     /* display:inline (not inline-block) would let an EMPTY field collapse to
        a zero-size, unclickable box — inline-block with a floor keeps it a
        real target even before anything is typed. */
-    .ds-inline { display:inline-block; min-width:1.5em; min-height:1em; }
+    /* Inline, as the words it replaced were: an inline-block changed the
+       line's height (a heading grew while it was edited) and cannot break
+       across lines the way a caption does. Only an EMPTY slot gets a box,
+       so there is something to click into. */
+    .ds-inline { display:inline; }
+    .ds-inline:empty { display:inline-block; min-width:1.5em; min-height:1em; }
     /* user-select ALL (not none): a footnote chip must be part of a text
        selection so it travels when you cut/copy a sentence to move it.
        user-select none made the browser skip it, silently dropping the
@@ -14561,7 +15019,7 @@ function renderSources() {
     list.appendChild(row);
   });
 }
-$('sources').onclick = openSources;
+$('sources').onclick = () => { $('filepop').hidden = true; openSources(); };
 
 // --- sections: add, edit, reorder, move and delete whole prose sections -----
 // A section is an [[extra.<page>.<slug>]] overflow slot the renderer drops at
@@ -14664,8 +15122,29 @@ $('add').onclick = async () => {
  *  "work" in the editor and then render literal ** after a save. */
 const RICH_PLAINTEXT_SLOTS = new Set(['cover.title', 'cover.year', 'toc.copyright']);
 
-function edit(d, key) {
+/** The words look the same while they are edited as they do on the page.
+ *  Two things the renderer does that a fresh editor host did not: it drops a
+ *  heading marker ("### Key Points" is shown as "Key Points" — the # is
+ *  styling, not content, content.py's _HEADING_RE), and it styles many
+ *  words INLINE (a card's bold bullets, a title's span, a styled
+ *  paragraph). So the marker comes off for editing and goes back on for
+ *  the file, and the inline styles the slot's own elements wore are put on
+ *  the host's fresh ones, by tag — the first <li>'s on every li, and so on.
+ *  block_html slots (extra sections) keep their markers: there a # line IS
+ *  a heading, and mdToHtml draws it as one. */
+const HEAD_MARK_RE = /^#{1,6}[ \t]+/gm;
+const richUnhead = (md, opts = richOpts) => (typeof opts.headMark === 'string' && !opts.allowLists ? (md || '').replace(HEAD_MARK_RE, '') : md);
+const richRehead = (md, opts = richOpts) => (opts.headMark && md && md.trim() ? opts.headMark + md : md);
+function richWear(host, wear = richOpts.wear) {
+  if (!wear || !wear.size) return;
+  for (const n of host.querySelectorAll('*')) {
+    const st = wear.get(n.tagName);
+    if (st && !n.getAttribute('style')) n.setAttribute('style', st);
+  }
+}
 
+function edit(d, key) {
+  suggestUnpaint(d);   // no proposed <ins> may ride into the words
   const blocks = [...d.querySelectorAll(`[data-slot="${key}"]`)];
   if (!blocks.length || editing) return;
   editing = true;
@@ -14690,7 +15169,18 @@ function edit(d, key) {
   if (extraClass.length) host.classList.add(...extraClass);
   collabWarnShared(key, 'paragraph');
 
-  const raw = readSlot(key);
+  // What the slot's own elements wear inline, by tag (see richWear), and the
+  // host itself dressed as the element it replaces when it is the same kind.
+  const wear = new Map();
+  for (const n of [blocks[0], ...blocks[0].querySelectorAll('*')]) {
+    const st = n.getAttribute('style');
+    if (st && !wear.has(n.tagName)) wear.set(n.tagName, st);
+  }
+  if (host.tagName === blocks[0].tagName && wear.has(host.tagName)) host.setAttribute('style', wear.get(host.tagName));
+  const raw0 = readSlot(key);
+  const headMark = allowLists ? '' : (raw0.match(/^#{1,6}[ \t]+/) || [''])[0];
+  const raw = richUnhead(raw0, { headMark, allowLists });
+  const rehead = md => richRehead(md, { headMark });
   let fnLabels = null;
   if (!allowMd) {
     host.style.whiteSpace = 'pre-wrap';   // preserve cover.title's <br> lines
@@ -14702,6 +15192,7 @@ function edit(d, key) {
     host.innerHTML = mdToHtml(raw, { allowLists, inline, fnLabels });
     if (!inline && extraClass.length)
       host.querySelectorAll(':scope > p').forEach(p => p.classList.add(...extraClass));
+    richWear(host, wear);
   }
 
   // The host replaces the block ONE FOR ONE — no toolbar row, no hint line
@@ -14713,7 +15204,7 @@ function edit(d, key) {
   blocks[0].replaceWith(host);
   blocks.slice(1).forEach(b => b.remove());
   richHost = host;
-  richOpts = { allowLists, allowMd, fnLabels };
+  richOpts = { allowLists, allowMd, fnLabels, headMark, wear };
   collabParaOpened();
   // The chrome type row is where B/I/lists live now — raise it no matter how
   // this editor was opened. The click path already did (showType before
@@ -14735,8 +15226,8 @@ function edit(d, key) {
     editing = false;
     richHost = null; syncMarksBar();
     const newVal = keep
-      ? (!allowMd ? (inline ? host.textContent : host.innerText)
-                  : htmlToMd(host, { allowLists, inline }))
+      ? rehead(!allowMd ? (inline ? host.textContent : host.innerText)
+                        : htmlToMd(host, { allowLists, inline }))
       : null;
     // The old document stays VISIBLE while the re-render loads its twin —
     // so this editor must stop being one right now. Left editable, it kept
@@ -15244,9 +15735,11 @@ function docStoreDecide() {
   $('publish').setAttribute('aria-label', 'Commit the saved document to its repository');
   $('publish').title = 'One commit of this document, as saved, on its hub/ branch';
   $('comments').hidden = $('history').hidden = false;
+  hubAutosaveMenu();   // the File menu row, on the store path only
+  $('mode').hidden = false;
   $('share').hidden = false;
   $('share').disabled = false;
-  $('share').textContent = 'Share…';
+  rowLabel('share', 'Share…');
   $('share').setAttribute('aria-label', 'Who may open this document, and as what');
   $('share').title = 'Who may open this document, and as what';
   $('save').textContent = 'Save';
@@ -15281,11 +15774,14 @@ async function hubShareLoad() {
     hubRole = (hubShare.you && hubShare.you.role) || null;
   } catch (e) { return; }
   if (hubRole === 'viewer') {
-    // Watch, do not change: the room drops a viewer's writes and the store
-    // refuses their Save, so say it up front rather than at the first click.
+    // Watch, and suggest: the room drops a viewer's writes and the store
+    // refuses their Save, so their edits are proposed instead - an editor
+    // accepts or rejects them. Said up front rather than at the first click.
     $('save').disabled = true;
     $('publish').disabled = true;
-    $('stat').textContent = 'view only — this document is shared with you to read; edits here are not kept';
+    suggestSetMode(true, { say: false });
+    $('mode').disabled = true;
+    $('stat').textContent = 'view only — this document is shared with you to read; an edit you make here is suggested, for an editor to accept';
   }
   collabChip();
 }
@@ -15297,7 +15793,14 @@ function hubMarkSeen(version) {
   const room = collabRoom();
   if (!room || !version) return;
   try { localStorage.setItem('primer-seen:' + room, version); } catch (e) { /* private mode */ }
+  // A new version landed (a Save here, a collaborator's, a restore): the open
+  // history panel lists it. Only a NEW one - the room re-announces the same
+  // version as people come and go, and a reload then would rebuild the rows
+  // under someone typing a name.
+  if (version !== hubHistorySeen && $('hpanel') && !$('hpanel').hidden) hubHistoryLoad();
+  hubHistorySeen = version;
 }
+let hubHistorySeen = null;
 
 // --- every saved version (step 07) ------------------------------------------
 // The store keeps every Save whole under history/<version>/; this shows the
@@ -15308,65 +15811,223 @@ function hubMarkSeen(version) {
 const fmtWhen = iso => { try { return new Date(iso).toLocaleString(); } catch (e) { return iso || ''; } };
 const fmtWho = who => (who ? String(who).replace(/@.*$/, '') : 'someone');
 
-async function hubHistoryDialog() {
-  if (!docStore()) return;
-  let versions = [];
+// --- version history, as Docs' side panel --------------------------------------
+// Every Save, newest first, grouped by day; a version chosen shows what it
+// changed against what is on screen - per paragraph, the words that went and
+// the words that came - and marks those paragraphs on the page; Restore and
+// naming from the same rows. A side panel, not a dialog, so the page stays
+// in view while a person reads the differences; it shares the comments
+// panel's frame and, on a wide window, the gutter the stage makes room for.
+let hubHistoryVersions = [];
+let hubHistorySel = null;        // the version in hand, with its differences once loaded
+let hubHistoryNamedOnly = false;
+let hubHistoryLoading = 0;
+const HIST_CSS = `
+  .ds-hist-changed { outline: 2px solid #C2703A !important; outline-offset: 3px; background: rgba(245,197,66,.16); }
+`;
+/** The History button (and the pilot) open the panel; the name is the old dialog's. */
+async function hubHistoryDialog() { return hubHistoryToggle(); }
+async function hubHistoryToggle(open) {
+  const panel = $('hpanel');
+  if (!panel || !docStore()) return;
+  const show = open == null ? panel.hidden : open;
+  if (show && $('cpanel') && !$('cpanel').hidden) hubCommentsToggle(false);   // one side panel at a time
+  panel.hidden = !show;
+  $('history').classList.toggle('on', show);
+  hubGutterSync();
+  if (show) await hubHistoryLoad();
+  else { hubHistorySel = null; hubHistoryPaint($('out') && $('out').contentDocument); }
+}
+/** The stage makes room for whichever side panel is open on a wide window;
+ *  under 1100px both float over the page. */
+function hubGutterSync() {
+  const wide = window.matchMedia('(min-width: 1100px)').matches;
+  const c = $('cpanel'), h = $('hpanel');
+  const gutter = wide && ((c && !c.hidden && c.classList.contains('margin')) || (h && !h.hidden));
+  if (h) {
+    h.classList.toggle('gutter', wide && !h.hidden);
+    h.style.top = wide && !h.hidden && $('work') ? Math.round($('work').getBoundingClientRect().top) + 'px' : '';
+  }
+  if (document.body.classList.contains('cmt-margin') !== gutter) {
+    document.body.classList.toggle('cmt-margin', gutter);
+    if (typeof applyZoom === 'function' && $('out') && $('out').contentDocument) applyZoom();
+  }
+}
+async function hubHistoryLoad() {
+  const seq = ++hubHistoryLoading;
   try {
     const r = await fetch(`${docStore()}/history`, { cache: 'no-store' });
-    if (r.ok) versions = await r.json();
-  } catch (e) { /* listed as empty below */ }
+    const j = await hubJson(r);
+    if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
+    if (seq !== hubHistoryLoading) return;   // a later load answered first
+    hubHistoryVersions = j;
+  } catch (e) { hubHistoryVersions = []; $('stat').textContent = 'history not loaded: ' + e.message; }
+  hubHistoryRender();
+}
+/** "Today", "Yesterday", else "Sep 3" this year, else the date. */
+function fmtDay(iso) {
+  const d = new Date(iso); if (isNaN(d)) return iso || '';
+  const now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === now.toDateString()) return 'Today';
+  if (d.toDateString() === y.toDateString()) return 'Yesterday';
+  if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString();
+}
+let hubHistoryRenderLater = false;
+function hubHistoryRender() {
+  const list = $('hpanel-list');
+  if (!list) return;
+  // Not under someone's fingers: a rebuild while they type a version's name
+  // would eat it. It runs when the box loses focus.
+  const typing = document.activeElement && list.contains(document.activeElement) && document.activeElement.tagName === 'INPUT';
+  if (typing) {
+    if (!hubHistoryRenderLater) document.activeElement.addEventListener('blur', () => setTimeout(() => { if (hubHistoryRenderLater) hubHistoryRender(); }, 150), { once: true });
+    hubHistoryRenderLater = true;
+    return;
+  }
+  hubHistoryRenderLater = false;
+  list.textContent = '';
+  $('hpanel-named').classList.toggle('on', hubHistoryNamedOnly);
   const canChange = !hubViewOnly();
-  const choice = await dsModal((dlg, done) => {
-    const form = document.createElement('form');
-    form.method = 'dialog'; form.className = 'dsdlg-form hub-history';
-    const title = document.createElement('h2'); title.className = 'dsdlg-title';
-    title.textContent = 'History — ' + ((REGISTRY && REGISTRY[PROJECT] && REGISTRY[PROJECT].name) || M.id);
-    form.appendChild(title);
-    const msg = document.createElement('p'); msg.className = 'dsdlg-msg';
-    msg.textContent = versions.length
-      ? 'Every Save, newest first. Restoring brings a version back as a new one; nothing is lost.'
-      : 'Nothing saved to the hub yet.';
-    form.appendChild(msg);
-    const list = document.createElement('div'); list.className = 'hub-history-list';
-    for (const v of versions) {
-      const row = document.createElement('div'); row.className = 'hub-history-row';
-      if (v.version === docVersion) row.classList.add('current');
-      const head = document.createElement('div'); head.className = 'hub-history-head';
-      const when = document.createElement('span'); when.className = 'hub-history-when';
-      when.textContent = fmtWhen(v.updated_at) + ' · ' + fmtWho(v.updated_by)
-        + (v.version === docVersion ? ' · current' : '') + (v.restored_from ? ' · restored' : '');
-      head.appendChild(when);
-      const label = document.createElement('input');
-      label.type = 'text'; label.placeholder = canChange ? 'name this version…' : '';
-      label.value = v.label || ''; label.className = 'hub-history-label'; label.disabled = !canChange;
-      label.maxLength = 80; label.spellcheck = false;
-      label.onchange = async () => {
-        try {
-          const r = await fetch(`${docStore()}/history/${v.version}`, { method: 'PATCH',
-            headers: { 'content-type': 'application/json' }, body: JSON.stringify({ label: label.value }) });
-          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `the hub answered ${r.status}`);
-          label.classList.add('saved'); setTimeout(() => label.classList.remove('saved'), 900);
-        } catch (e) { $('stat').textContent = 'name not saved: ' + e.message; }
-      };
-      const btns = document.createElement('div'); btns.className = 'hub-history-btns';
-      if (canChange && v.version !== docVersion) {
-        const restore = document.createElement('button'); restore.type = 'button'; restore.className = 'hub-history-restore';
-        restore.textContent = 'Restore';
-        restore.onclick = () => done({ restore: v });
-        btns.appendChild(restore);
-      }
-      row.append(head, label, btns); list.appendChild(row);
-    }
-    form.appendChild(list);
-    const bar = document.createElement('div'); bar.className = 'dsdlg-btns';
-    const close = document.createElement('button'); close.type = 'button'; close.className = 'dsdlg-cancel'; close.textContent = 'Close';
-    close.onclick = () => done(null); bar.appendChild(close); form.appendChild(bar);
-    form.onsubmit = e => { e.preventDefault(); };
-    dlg.appendChild(form);
-    setTimeout(() => close.focus(), 0);
-  });
-  if (!choice || !choice.restore) return;
-  const v = choice.restore;
+  const shown = hubHistoryNamedOnly ? hubHistoryVersions.filter(v => v.label) : hubHistoryVersions;
+  if (!shown.length) {
+    const p = document.createElement('p'); p.className = 'hub-history-empty';
+    p.textContent = hubHistoryVersions.length ? 'Nobody has named a version yet — the name box on a row does it.' : 'Nothing saved to the hub yet.';
+    list.appendChild(p);
+    return;
+  }
+  let day = null;
+  for (const v of shown) {
+    const d = fmtDay(v.updated_at);
+    if (d !== day) { day = d; const h = document.createElement('p'); h.className = 'hub-history-day'; h.textContent = d; list.appendChild(h); }
+    list.appendChild(hubHistoryRow(v, canChange));
+  }
+}
+function hubHistoryRow(v, canChange) {
+  const row = document.createElement('div');
+  const on = hubHistorySel && hubHistorySel.version === v.version;
+  row.className = 'hub-history-row' + (v.version === docVersion ? ' current' : '') + (v.label ? ' named' : '') + (on ? ' on' : '');
+  row.dataset.version = v.version;
+  const head = document.createElement('div'); head.className = 'hub-history-head';
+  const when = document.createElement('span'); when.className = 'hub-history-when';
+  when.textContent = fmtWhen(v.updated_at) + ' · ' + fmtWho(v.updated_by)
+    + (v.version === docVersion ? ' · current' : '') + (v.restored_from ? ' · restored' : '');
+  head.appendChild(when);
+  const label = document.createElement('input');
+  label.type = 'text'; label.placeholder = canChange ? 'name this version…' : '';
+  label.value = v.label || ''; label.className = 'hub-history-label'; label.disabled = !canChange;
+  label.maxLength = 80; label.spellcheck = false;
+  label.onchange = async () => {
+    try {
+      const r = await fetch(`${docStore()}/history/${v.version}`, { method: 'PATCH',
+        headers: { 'content-type': 'application/json' }, body: JSON.stringify({ label: label.value }) });
+      const j = await hubJson(r);
+      if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
+      v.label = label.value; row.classList.toggle('named', !!v.label);
+      label.classList.add('saved'); setTimeout(() => label.classList.remove('saved'), 900);
+    } catch (e) { $('stat').textContent = 'name not saved: ' + e.message; }
+  };
+  const btns = document.createElement('div'); btns.className = 'hub-history-btns';
+  if (canChange && v.version !== docVersion) {
+    const restore = document.createElement('button'); restore.type = 'button'; restore.className = 'hub-history-restore';
+    restore.textContent = 'Restore';
+    restore.onclick = e => { e.stopPropagation(); hubHistoryToggle(false); hubRestore(v); };
+    btns.appendChild(restore);
+  }
+  row.append(head, label, btns);
+  if (on) row.appendChild(hubHistoryDiffEl(hubHistorySel));
+  // The row itself is the version: a click opens what it changed.
+  row.addEventListener('click', e => { if (e.target.closest('input, button, a')) return; hubHistorySelect(v); });
+  return row;
+}
+async function hubHistorySelect(v) {
+  const d = $('out') && $('out').contentDocument;
+  if (hubHistorySel && hubHistorySel.version === v.version) { hubHistorySel = null; hubHistoryRender(); hubHistoryPaint(d); return; }
+  hubHistorySel = { version: v.version, loading: true };
+  hubHistoryRender();
+  try {
+    const [rc, rl] = await Promise.all([
+      fetch(`${docStore()}/history/${v.version}/content`, { cache: 'no-store' }),
+      fetch(`${docStore()}/history/${v.version}/layout`, { cache: 'no-store' }),
+    ]);
+    if (!rc.ok) throw new Error(`the hub answered ${rc.status}`);
+    const content = await rc.text();
+    const layoutText = rl.ok ? await rl.text() : null;
+    if (!hubHistorySel || hubHistorySel.version !== v.version) return;   // moved on meanwhile
+    hubHistorySel = { version: v.version, ...hubHistoryDiff(content, layoutText) };
+  } catch (e) { hubHistorySel = { version: v.version, error: e.message }; }
+  hubHistoryRender();
+  hubHistoryPaint(d);
+}
+/** Every [[key]] block of a content.md, as key -> words. */
+function slotsOf(text) {
+  const m = new Map();
+  const re = /(?:^|\n)\[\[([^\]]+)\]\]\n([\s\S]*?)(?=\n\[\[|$)/g;
+  let x;
+  while ((x = re.exec(text || ''))) m.set(x[1], x[2].trim());
+  return m;
+}
+/** What is on screen against a version: per paragraph, what went and what
+ *  came; paragraphs that exist only on one side; whether the layout differs. */
+function hubHistoryDiff(content, layoutText) {
+  const then = slotsOf(content), now = slotsOf(source);
+  const changed = [], added = [], gone = [];
+  for (const [k, was] of then) {
+    if (!now.has(k)) gone.push(k);
+    else if (suggestPlain(was).replace(/\s+/g, ' ').trim() !== suggestPlain(now.get(k)).replace(/\s+/g, ' ').trim()) changed.push({ key: k, before: was, after: now.get(k) });
+  }
+  for (const k of now.keys()) if (!then.has(k)) added.push(k);
+  let layoutChanged = false;
+  if (layoutText != null) { try { layoutChanged = JSON.stringify(JSON.parse(layoutText)) !== JSON.stringify(layout); } catch (e) { /* unreadable: say nothing */ } }
+  const unsaved = !!($('save') && !$('save').disabled);
+  return { changed, added, gone, layoutChanged, unsaved };
+}
+function hubHistoryDiffEl(sel) {
+  const box = document.createElement('div'); box.className = 'hub-history-diff';
+  const sum = document.createElement('span'); sum.className = 'sum'; box.appendChild(sum);
+  if (sel.loading) { sum.textContent = 'loading this version…'; return box; }
+  if (sel.error) { sum.textContent = 'could not load this version: ' + sel.error; return box; }
+  if (sel.version === docVersion && !sel.unsaved) { sum.textContent = 'This is the version on screen.'; return box; }
+  const parts = [];
+  const n = sel.changed.length;
+  if (n) parts.push(`${n} paragraph${n === 1 ? '' : 's'} differ${n === 1 ? 's' : ''}`);
+  if (sel.added.length) parts.push(`${sel.added.length} only on screen`);
+  if (sel.gone.length) parts.push(`${sel.gone.length} only in this version`);
+  if (sel.layoutChanged) parts.push('the layout differs');
+  sum.textContent = (parts.length ? parts.join(' · ') : 'No difference in the words')
+    + (sel.unsaved ? ' — against what is on screen, unsaved edits included' : ' — against what is on screen');
+  for (const c of sel.changed) {
+    const key = document.createElement('span'); key.className = 'key'; key.textContent = c.key; box.appendChild(key);
+    const { prefix, gone, came } = suggestSplit(suggestPlain(c.before), suggestPlain(c.after));
+    const line = document.createElement('div');
+    const tail = prefix.trim().split(/\s+/).slice(-4).join(' ');
+    if (tail) line.append((prefix.trim().split(/\s+/).length > 4 ? '…' : '') + tail + ' ');
+    if (gone.trim()) { const dl = document.createElement('del'); dl.textContent = suggestShort(gone, 160); line.appendChild(dl); }
+    if (came.trim()) { const ins = document.createElement('ins'); ins.textContent = suggestShort(came, 160); line.appendChild(ins); }
+    if (!gone.trim() && !came.trim()) line.append('(spacing only)');
+    box.appendChild(line);
+  }
+  for (const k of sel.gone) { const l = document.createElement('span'); l.className = 'lay'; l.textContent = `${k}: only in this version`; box.appendChild(l); }
+  for (const k of sel.added) { const l = document.createElement('span'); l.className = 'lay'; l.textContent = `${k}: only on screen`; box.appendChild(l); }
+  return box;
+}
+/** Mark on the page the paragraphs that differ from the version in hand. */
+function hubHistoryPaint(d) {
+  if (!d || !d.body) return;
+  if (!d.getElementById('ds-hist-css')) {
+    const st = d.createElement('style'); st.id = 'ds-hist-css'; st.textContent = HIST_CSS;
+    d.head.appendChild(st);
+  }
+  d.querySelectorAll('.ds-hist-changed').forEach(el => el.classList.remove('ds-hist-changed'));
+  if (!hubHistorySel || !$('hpanel') || $('hpanel').hidden || !$('hpanel-show').checked) return;
+  for (const c of hubHistorySel.changed || []) { const el = hubCommentEl(d, c.key); if (el) el.classList.add('ds-hist-changed'); }
+  for (const k of hubHistorySel.added || []) { const el = hubCommentEl(d, k); if (el) el.classList.add('ds-hist-changed'); }
+}
+$('hpanel-close').onclick = () => hubHistoryToggle(false);
+$('hpanel-named').onclick = () => { hubHistoryNamedOnly = !hubHistoryNamedOnly; hubHistoryRender(); };
+$('hpanel-show').onchange = () => hubHistoryPaint($('out') && $('out').contentDocument);
+/** Bring a version back: a new version on top, everyone in the session gets it. */
+async function hubRestore(v) {
   if (!await dsConfirm(`Bring back the version from ${fmtWhen(v.updated_at)}${v.label ? ` ("${v.label}")` : ''}?\n\n`
       + 'It becomes the current version — a new Save on top of the others, so nothing is lost. '
       + 'Everyone in this session gets it.', { okLabel: 'Restore' })) return;
@@ -15374,7 +16035,7 @@ async function hubHistoryDialog() {
   try {
     const r = await fetch(`${docStore()}/restore`, { method: 'POST',
       headers: { 'content-type': 'application/json' }, body: JSON.stringify({ version: v.version }) });
-    const j = await r.json().catch(() => ({}));
+    const j = await hubJson(r);
     if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
     // Adopt the files the way a collaborator's change lands, then record the
     // version the way a Save does: the room learns it through baseSha.
@@ -15398,18 +16059,38 @@ async function hubHistoryDialog() {
   }
 }
 
-// --- comments (step 07) -------------------------------------------------------
-// Words about the document that are not in the document: a note on a
-// paragraph, an element, or the whole thing. They live beside the store's
-// files (comments.json), not in the Yjs document — a comment is not part of
-// what gets exported or rendered — and the panel refreshes itself while it
-// is open, so a colleague's note appears within seconds. Each open comment
-// puts a small marker on what it is about, inside the report.
+// --- comments (step 07, shaped like Google Docs) --------------------------------
+// Words about the document that are not in the document: a thread on a run
+// of words in a paragraph, on a paragraph or element, or on the whole thing.
+// Threads live beside the store's files (comments.json), not in the Yjs
+// document — a comment is not part of what gets exported or rendered.
+//
+// What a person sees is what they know from Google Docs: the quoted words
+// highlighted in the report (a click on the highlight opens the thread), a
+// "+ Comment" button beside a text selection, a card with an avatar, name
+// and time, replies threaded under it, a checkmark to resolve, a ⋮ menu
+// (Edit, Delete, Show, Copy link), @-mentions from the staff roster, a
+// "For you" tab, and a reply on a resolved thread reopening it. Cards are
+// ordered as the document is. The panel refreshes while open, and presence
+// carries a change the moment it happens.
 let hubComments = [];
 let hubCommentsTimer = 0;
 let hubCommentsStamp = 0;     // when THIS editor last changed the comments (rides presence)
 let hubCommentsHeard = 0;     // the newest such stamp heard from a collaborator
 let hubCommentsSlow = 0;      // the fallback poll, panel open or not
+let hubCommentsTab = 'all';   // 'all' | 'you'
+let hubCommentActive = null;  // the thread in hand: darker highlight, raised card
+let hubCommentQuote = null;   // {anchor, quote} a new comment is about, from a text selection
+let hubCommentRanges = [];    // [{id, range, el}] the highlights painted on the page, for hit-testing
+let hubCommentsRenderLater = false;   // a refresh arrived while someone was typing in the panel
+let hubCommentLink = new URLSearchParams(location.search).get('comment') || null;   // ?comment=<id>: open on it
+let hubCommentsWant = new URLSearchParams(location.search).get('comments') || null; // ?comments=you: open the panel on For you
+let hubRoster = null;         // [{email, name}] for @-mentions, from the hub's staff roster
+let hubCommentsFailed = null; // the last refresh's failure, so it is said once
+let hubCommentsView = 'margin';   // 'margin' | 'list' - the person's choice; the width has the last word
+try { hubCommentsView = localStorage.getItem('primer-comments-view') || 'margin'; } catch (e) { /* file: */ }
+let hubMarginRaf = 0;
+let hubMarginRO = null;       // watches the cards' heights: a reply box opening restacks the rest
 const COMMENT_MARK_CSS = `
   [data-ds-comments] { position: relative; }
   [data-ds-comments]::after {
@@ -15418,155 +16099,1348 @@ const COMMENT_MARK_CSS = `
     background: #C2703A; color: #fff; font: 700 10px/16px system-ui; text-align: center;
     box-shadow: 0 1px 2px rgba(0,0,0,.25); pointer-events: none;
   }
+  ::highlight(ds-comment) { background: #FBE7A1; }
+  ::highlight(ds-comment-active) { background: #F5C542; }
   .ds-comment-flash { outline: 3px solid #C2703A !important; outline-offset: 2px; transition: outline-color .8s; }
 `;
+
+/** The anchor's element on the page: the element first (a heading is both a
+ *  slot and an element under one name), then the slot. */
+function hubCommentEl(d, anchor) {
+  if (!d || !anchor) return null;
+  return d.querySelector(`[data-el="${CSS.escape(anchor)}"]`) || d.querySelector(`[data-slot="${CSS.escape(anchor)}"]`);
+}
+/** The run of words `quote` inside `el`, as a Range — whitespace folded on
+ *  both sides, so a quote taken from the editor still matches after a
+ *  re-render wrapped the paragraph differently. Null when the words are
+ *  gone (the paragraph was rewritten). */
+function hubQuoteRange(d, el, quote) {
+  if (!el || !quote) return null;
+  const walker = d.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const chars = [];       // one entry per folded character: {node, offset}
+  let folded = '', lastSpace = true;
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const t = n.nodeValue;
+    for (let i = 0; i < t.length; i++) {
+      const ch = t[i];
+      if (/\s/.test(ch)) { if (lastSpace) continue; folded += ' '; chars.push({ node: n, offset: i }); lastSpace = true; }
+      else { folded += ch; chars.push({ node: n, offset: i }); lastSpace = false; }
+    }
+  }
+  const q = quote.replace(/\s+/g, ' ').trim();
+  if (!q) return null;
+  const at = folded.indexOf(q);
+  if (at < 0) return null;
+  const s = chars[at], e = chars[at + q.length - 1];
+  const r = d.createRange();
+  r.setStart(s.node, s.offset);
+  r.setEnd(e.node, e.offset + 1);
+  return r;
+}
 function hubCommentsPaint(d) {
   if (!d || !d.body || !docStore()) return;
   if (!d.getElementById('ds-comment-css')) {
     const st = d.createElement('style'); st.id = 'ds-comment-css'; st.textContent = COMMENT_MARK_CSS;
     d.head.appendChild(st);
   }
+  hubCommentsBind(d);
   d.querySelectorAll('[data-ds-comments]').forEach(el => el.removeAttribute('data-ds-comments'));
   const here = hubCommentAnchor();
   const has = !!here && hubComments.some(c => !c.resolved && c.anchor === here);
   $('ar-comment').classList.toggle('has', has);
   $('ty-comment').classList.toggle('has', has);
+  // Quoted words get a highlight; a thread on a whole paragraph or element,
+  // or whose words are gone, gets the count badge instead.
+  const w = d.defaultView;
+  const canHighlight = !!(w && w.Highlight && w.CSS && w.CSS.highlights);
+  const plain = [], active = [];
+  hubCommentRanges = [];
   const counts = new Map();
-  for (const c of hubComments) if (!c.resolved && c.anchor) counts.set(c.anchor, (counts.get(c.anchor) || 0) + 1);
+  for (const c of hubComments) {
+    if (c.resolved || !c.anchor) continue;
+    const el = hubCommentEl(d, c.anchor);
+    const r = canHighlight && c.quote ? hubQuoteRange(d, el, c.quote) : null;
+    if (r) {
+      (c.id === hubCommentActive ? active : plain).push(r);
+      hubCommentRanges.push({ id: c.id, range: r, el });
+    } else {
+      counts.set(c.anchor, (counts.get(c.anchor) || 0) + 1);
+    }
+  }
   for (const [anchor, n] of counts) {
-    // The element first: a heading is both a slot and an element under one
-    // name, and the badge sits better on the outer box than on the text.
-    const el = d.querySelector(`[data-el="${CSS.escape(anchor)}"]`) || d.querySelector(`[data-slot="${CSS.escape(anchor)}"]`);
+    const el = hubCommentEl(d, anchor);
     if (el) el.dataset.dsComments = String(n);
   }
+  if (canHighlight) {
+    w.CSS.highlights.set('ds-comment', new w.Highlight(...plain));
+    w.CSS.highlights.set('ds-comment-active', new w.Highlight(...active));
+  }
+  suggestPaint(d);
+  hubMarginLayout(true);   // a render moved the anchors; the cards follow
+}
+
+// --- comments in the margin ---------------------------------------------------
+// Docs' arrangement: a card beside the words it is about. The panel becomes a
+// gutter the stage makes room for, the list inside it a positioning box, and
+// every card is placed by hand: at its anchor's height on screen, never over
+// the card before it, the one in hand at its exact place and the others
+// pushed up or down to clear it. Threads on the document itself sit at the
+// top; threads whose words are gone, and resolved ones, trail the rest. Only
+// `top` changes on a scroll or a zoom - the cards are never rebuilt for that,
+// so a reply being typed is never disturbed. Under 1100px there is no room
+// for a gutter and the panel is the ordered list it always was.
+const hubMarginOn = () => hubCommentsView !== 'list' && window.matchMedia('(min-width: 1100px)').matches;
+/** Put the panel in the mode the width and the person's choice call for, and
+ *  refit the page when the gutter comes or goes. */
+function hubCommentsMode() {
+  const panel = $('cpanel');
+  if (!panel) return;
+  const on = hubMarginOn();
+  panel.classList.toggle('margin', on);
+  if (!on || panel.hidden) $('cmt-leader').hidden = true;
+  // Beside the stage from its very top; the list's own top is under the bar.
+  panel.style.top = on && $('work') ? Math.round($('work').getBoundingClientRect().top) + 'px' : '';
+  const view = $('cpanel-view');
+  if (view) {
+    view.textContent = hubCommentsView === 'list' ? 'Margin' : 'List';
+    view.title = hubCommentsView === 'list' ? 'Show the comments beside the page' : 'Show the comments as a list';
+  }
+  hubGutterSync();   // the stage makes room for whichever side panel is open
+}
+/** Where a thread's card wants to be, in the list's coordinates: its anchor's
+ *  top on screen. Words still on the page (below the stage's top edge) keep
+ *  their card inside the gutter - at the top of it when they sit in the thin
+ *  band beside the panel's head - so a card about something you can see is
+ *  always reachable; words that have scrolled off the top take their card
+ *  with them, as in Docs. 0 for the document itself; Infinity when the
+ *  anchor is gone. */
+function hubMarginWant(d, c, f, z, listTop, pageTop) {
+  if (!c || !c.anchor) return { y: 0, onPage: true, rect: null };
+  if (!d) return { y: Infinity, onPage: false, rect: null };
+  const hit = hubCommentRanges.find(h => h.id === c.id);
+  const t = hit ? hit.range : hubCommentEl(d, c.anchor);
+  if (!t) return { y: Infinity, onPage: false, rect: null };
+  const r = t.getBoundingClientRect();
+  const screenY = f.top + r.top * z;
+  const onPage = screenY >= pageTop;
+  const y = screenY - listTop;
+  return { y: onPage ? Math.max(0, y) : y, onPage, rect: r };
+}
+/** A card leaving the list: the height watcher lets go of it. */
+function hubMarginForget(el) {
+  if (hubMarginRO && el && el.__dsRO) { hubMarginRO.unobserve(el); el.__dsRO = false; }
+}
+function hubMarginLayout(animate = false) {
+  const panel = $('cpanel'), list = $('cpanel-list');
+  if (!panel || panel.hidden || !panel.classList.contains('margin') || !list) return;
+  const items = [...list.children];
+  if (!items.length) return;
+  list.classList.toggle('anim', !!animate);
+  const out = $('out');
+  const d = out && out.contentDocument;
+  // This runs on every scrolled frame, so: every READ first, then every
+  // write. A write between two reads makes the browser lay the page out
+  // again for the second read - twice a frame, that was the lag the cards
+  // had behind the page.
+  const f = out.getBoundingClientRect();
+  const z = f.width / (out.clientWidth || f.width);
+  const listTop = list.getBoundingClientRect().top;
+  const pageTop = $('work') ? $('work').getBoundingClientRect().top : 0;
+  const panelBox = panel.getBoundingClientRect();
+  const GAP = 8;
+  // A card taller than the gutter scrolls inside itself rather than being
+  // cut off at the bottom edge. Written only when the room changes, and a
+  // card so written is measured afresh.
+  const room = list.clientHeight - 2 * GAP;
+  const roomPx = room > 80 ? room + 'px' : '';
+  for (const el of items) if (el.__dsRoom !== roomPx) { el.style.maxHeight = roomPx; el.__dsRoom = roomPx; el.__dsH = null; }
+  const want = items.map(el => {
+    const cmt = el.classList.contains('cmt');
+    const composer = el.id === 'cpanel-composer';
+    const c = cmt ? hubComments.find(x => x.id === el.dataset.id)
+            : composer ? { anchor: hubCommentAnchor() } : null;
+    const w = (cmt && !el.classList.contains('resolved')) || composer
+      ? hubMarginWant(d, c, f, z, listTop, pageTop) : { y: Infinity, onPage: false, rect: null };
+    // A card's height comes from the ResizeObserver once it has seen the
+    // card; one it has not seen yet is measured here, the once.
+    if (el.__dsH == null) el.__dsH = el.offsetHeight;
+    return { el, y: w.y, onPage: w.onPage, rect: w.rect, h: el.__dsH, composer, fresh: el.__dsTop == null };
+  });
+  // In the order the render gave them (as the document reads), each below the
+  // one before; a trailing item (gone, resolved, a separator) follows the last.
+  // A card whose words are above the gutter is above it too, out of sight.
+  const stack = (from, start) => {
+    let prev = start;   // the bottom of the card before, or null at the top
+    for (let i = from; i < want.length; i++) {
+      const w = want[i];
+      tops[i] = isFinite(w.y) ? (prev == null ? w.y : Math.max(w.y, prev + GAP)) : (prev == null ? 0 : prev + GAP);
+      prev = tops[i] + w.h;
+    }
+  };
+  const tops = new Array(want.length);
+  stack(0, null);
+  // The one in hand sits at its exact place and those above are pushed up out
+  // of its way - but never out of the gutter: a card whose words are on the
+  // page stays reachable, so when there is no room above, it is the card in
+  // hand that gives way and sits lower. (Docs pushes them off; its margin
+  // runs the whole document, ours is a window on it.)
+  // Whoever is being written to takes its exact place: the composer while it
+  // is open, else the thread in hand.
+  const ai = want.findIndex(w => w.composer && document.activeElement === $('cpanel-text')) >= 0
+    ? want.findIndex(w => w.composer)
+    : want.findIndex(w => w.el.classList.contains('active'));
+  if (ai >= 0 && isFinite(want[ai].y)) {
+    tops[ai] = want[ai].y;
+    for (let i = ai - 1; i >= 0; i--) tops[i] = Math.min(tops[i], tops[i + 1] - GAP - want[i].h);
+    let prev = -Infinity;
+    for (let i = 0; i <= ai; i++) {
+      const floor = want[i].onPage ? 0 : -Infinity;
+      tops[i] = Math.max(tops[i], floor, prev + GAP); prev = tops[i] + want[i].h;
+    }
+    stack(ai + 1, prev);
+  }
+  // The writes. A card is moved by transform, not `top`: a transform costs a
+  // composite, `top` a layout of the gutter. A card placed for the first
+  // time goes straight to its place - no glide from the top of the gutter,
+  // which read as the cards reshuffling on every click.
+  let fresh = false;
+  want.forEach((w, i) => {
+    const t = Math.round(tops[i]);
+    if (w.fresh) { w.el.classList.add('fresh'); fresh = true; }
+    if (w.el.__dsTop !== t) { w.el.__dsTop = t; w.el.style.transform = `translateY(${t}px)`; }
+  });
+  if (fresh) requestAnimationFrame(() => { for (const w of want) w.el.classList.remove('fresh'); });
+  hubMarginLeader(want, tops, { f, z, listTop, panelBox, pageTop });
+  // A card that changes height (a reply box opening, a message edited)
+  // restacks the rest. Observing fires once on its own for every element
+  // observed, so only a height that DIFFERS from the one last seen counts -
+  // otherwise each layout would ask for the next, every frame, for ever.
+  // Each card is observed once, when it first appears; the list itself too:
+  // the head above it grows and shrinks (the bulk row for suggestions, a
+  // longer tab label), which moves every card's origin without any card
+  // changing size.
+  if (!hubMarginRO && window.ResizeObserver) hubMarginRO = new ResizeObserver(entries => {
+    let changed = false;
+    for (const e of entries) {
+      const box = e.borderBoxSize && (e.borderBoxSize[0] || e.borderBoxSize);
+      const h = box && box.blockSize != null ? box.blockSize : e.target.offsetHeight;
+      if (e.target.__dsH != null && Math.abs(h - e.target.__dsH) > 0.5) changed = true;
+      e.target.__dsH = h;
+    }
+    if (changed) hubMarginQueue(true);
+  });
+  if (hubMarginRO) {
+    if (!list.__dsRO) { list.__dsRO = true; hubMarginRO.observe(list); }
+    for (const w of want) if (!w.el.__dsRO) { w.el.__dsRO = true; hubMarginRO.observe(w.el); }
+  }
+}
+/** The line from the card in hand to the words it is about, across the ground
+ *  between the page and the gutter — Docs' own cue for which card goes with
+ *  which highlight. Drawn only when both ends are on screen. Reads nothing:
+ *  every rectangle it needs was read by the layout before it wrote. */
+function hubMarginLeader(want, tops, { f, z, listTop, panelBox, pageTop }) {
+  const led = $('cmt-leader');
+  if (!led) return;
+  const i = want.findIndex(w => w.el.classList.contains('active'));
+  // A resolved thread has no highlight on the page to point at - and no
+  // rectangle from hubMarginWant, which gives it no place.
+  const r = i >= 0 ? want[i].rect : null;
+  if (!r) { led.hidden = true; return; }
+  const y = f.top + (r.top + r.height / 2) * z;
+  const cardTop = listTop + tops[i];
+  if (y < pageTop || y > panelBox.bottom || Math.abs(y - (cardTop + 14)) > 400) { led.hidden = true; return; }
+  const x0 = Math.min(f.left + r.right * z + 4, panelBox.left - 6);
+  led.hidden = false;
+  led.style.left = x0 + 'px';
+  led.style.width = Math.max(0, panelBox.left - x0) + 'px';
+  led.style.top = Math.round(y) + 'px';
+}
+/** One layout per frame, however many scroll events ask. */
+function hubMarginQueue(animate = false) {
+  if (hubMarginRaf) return;
+  hubMarginRaf = requestAnimationFrame(() => { hubMarginRaf = 0; hubMarginLayout(animate); });
+}
+/** Once per document: a click on a highlight opens its thread; a text
+ *  selection inside the open paragraph offers "+ Comment"; ⌘⌥M comments on
+ *  whatever is in hand. */
+function hubCommentsBind(d) {
+  if (d.__dsComments) return;
+  d.__dsComments = true;
+  d.addEventListener('mousedown', e => {
+    if (!hubCommentRanges.length || e.button !== 0) return;
+    const pos = d.caretRangeFromPoint ? d.caretRangeFromPoint(e.clientX, e.clientY) : null;
+    if (!pos) return;
+    const hit = hubCommentRanges.find(h => {
+      try { return h.range.isPointInRange(pos.startContainer, pos.startOffset); } catch (err) { return false; }
+    });
+    if (hit) hubCommentFocus(hit.id, { scrollPage: false });
+  }, true);
+  d.addEventListener('selectionchange', () => hubCommentPlus(d));
+  d.addEventListener('keydown', e => { if (hubCommentKey(e)) { e.preventDefault(); e.stopPropagation(); } }, true);
+  // The cards in the margin ride with the page: repositioned, not rebuilt.
+  if (d.defaultView) d.defaultView.addEventListener('scroll', () => hubMarginQueue(false), { passive: true });
+}
+/** The "+ Comment" pill beside a text selection in the open paragraph —
+ *  Google Docs' affordance, in the top document because the report's frame
+ *  re-renders under it. */
+function hubCommentPlus(d) {
+  const btn = $('cmt-plus');
+  if (!btn) return;
+  const sel = d.getSelection && d.getSelection();
+  const ok = docStore() && !hubViewOnly() && richHost && sel && sel.rangeCount && !sel.isCollapsed
+    && richHost.contains(sel.anchorNode) && sel.toString().trim().length > 0;
+  if (!ok) { btn.hidden = true; return; }
+  const r = sel.getRangeAt(0).getBoundingClientRect();
+  const f = $('out').getBoundingClientRect();
+  const z = f.width / ($('out').clientWidth || f.width);   // the frame is scaled on zoom
+  btn.hidden = false;
+  btn.style.left = Math.min(window.innerWidth - btn.offsetWidth - 8, f.left + r.right * z + 8) + 'px';
+  btn.style.top = Math.max(8, f.top + r.top * z - 6) + 'px';
+}
+/** What the words in hand are, for a new comment: {anchor, quote}. */
+function hubCommentSelection() {
+  const d = $('out') && $('out').contentDocument;
+  const sel = d && d.getSelection && d.getSelection();
+  if (richHost && sel && sel.rangeCount && !sel.isCollapsed && richHost.contains(sel.anchorNode)) {
+    const quote = sel.toString().replace(/\s+/g, ' ').trim();
+    const anchor = richHost.dataset.slot || richHost.dataset.el || null;
+    if (anchor && quote) return { anchor, quote };
+  }
+  return null;
+}
+/** Start a comment on the words in hand (⌘⌥M, the pill, the strip's button). */
+function hubCommentStart(q) {
+  hubCommentQuote = q || hubCommentSelection();
+  $('cmt-plus').hidden = true;
+  hubCommentsToggle(true);
+  hubCommentsRender();
+  $('cpanel-text').focus();
+}
+function hubCommentKey(e) {
+  if (!docStore() || !(e.metaKey || e.ctrlKey) || !e.altKey || e.code !== 'KeyM') return false;
+  hubCommentStart();
+  return true;
 }
 function hubCommentsBadge() {
   const b = $('comments');
   if (!b || b.hidden) return;
   const open = hubComments.filter(c => !c.resolved).length;
-  b.textContent = open ? `Comments · ${open}` : 'Comments';
+  const sug = hubComments.filter(c => !c.resolved && c.kind === 'suggestion').length;
+  // The count as an EXPONENT, not a sentence. "Comments · 3 · 1 suggested"
+  // spelled out, in the row's own type, what a superscript numeral says in
+  // three characters — and it grew the widest button on a bar that had no
+  // room to give. What the number is made of stays on the tooltip, where a
+  // count you are already looking at can be asked about.
+  b.textContent = 'Comments';
+  if (open) {
+    const n = document.createElement('sup');
+    n.className = 'cmt-n';
+    n.id = 'comments-n';
+    n.textContent = String(open);
+    b.appendChild(n);
+  }
+  const said = !open ? 'Comments on this document'
+    : `${open} open comment${open > 1 ? 's' : ''}`
+      + (sug ? `, ${sug} of them suggested edit${sug > 1 ? 's' : ''}` : '');
+  b.title = said;
+  b.setAttribute('aria-label', said);
 }
 async function hubCommentsLoad() {
   if (!docStore()) return;
   try {
     const r = await fetch(`${docStore()}/comments`, { cache: 'no-store' });
-    if (r.ok) hubComments = await r.json();
-  } catch (e) { return; }
+    const j = await hubJson(r);
+    if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
+    // A card the hub has not answered for yet is not the poll's to take away.
+    const pend = hubComments.filter(c => c.pending && !j.some(x => x.id === c.id));
+    hubComments = j.concat(pend);
+    hubCommentsFailed = null;
+  } catch (e) {
+    // Stale is said, once, where the person is looking - not on every poll.
+    if (hubCommentsFailed !== e.message && $('cpanel') && !$('cpanel').hidden) $('stat').textContent = 'comments not refreshed: ' + e.message;
+    hubCommentsFailed = e.message;
+    return;
+  }
   hubCommentsBadge();
   const d = $('out') && $('out').contentDocument;
   if (d) hubCommentsPaint(d);
+  if (hubCommentLink) {
+    // Opened by a link to one comment: show it, once the store has answered.
+    const id = hubCommentLink; hubCommentLink = null;
+    if (hubComments.some(c => c.id === id)) { hubCommentFocus(id); return; }
+  }
+  if (hubCommentsWant) {
+    // Opened from the list page's "N for you": the panel, on that tab.
+    const w = hubCommentsWant; hubCommentsWant = null;
+    if (w === 'you') hubCommentsTab = 'you';
+    if ($('cpanel') && $('cpanel').hidden) { hubCommentsToggle(true); return; }
+  }
   if ($('cpanel') && !$('cpanel').hidden) hubCommentsRender();
 }
-/** What a new comment is about: the paragraph or element in hand, else the
- *  document. Named so the person can see it before they write. */
+/** When the threads for this person last moved, as the hub's summary
+ *  reckons it (`for_you_at`): the newest of a thread's own time and its
+ *  replies'. Recorded when the For you tab is shown, so the list page and
+ *  the Editor tab's badge can tell new from seen. */
+const hubCommentActivityAt = c => { let at = c.at || ''; for (const r of c.replies || []) if (r.at && r.at > at) at = r.at; return at; };
+function hubMarkSeenYou() {
+  const room = collabRoom();
+  if (!room) return;
+  let at = '';
+  for (const c of hubComments) if (hubCommentForMe(c)) { const a = hubCommentActivityAt(c); if (a > at) at = a; }
+  try { localStorage.setItem('primer-seen-you:' + room, at); } catch (e) { /* private mode */ }
+}
+/** The staff roster, for @-mentions: the same file /api/me reads. Names of
+ *  people already in the room ride along even when the roster is missing. */
+async function hubRosterLoad() {
+  if (hubRoster) return hubRoster;
+  let list = [];
+  try {
+    const r = await fetch(new URL('/data/staff.json', location.origin), { cache: 'no-store' });
+    if (r.ok) list = ((await r.json()).staff || []).filter(s => s.email && s.name).map(s => ({ email: s.email.toLowerCase(), name: s.name }));
+  } catch (e) { /* roster missing: presence and the share list fill in */ }
+  const seen = new Set(list.map(s => s.email));
+  const add = (email, name) => { if (email && !seen.has(email.toLowerCase())) { seen.add(email.toLowerCase()); list.push({ email: email.toLowerCase(), name: name || fmtWho(email) }); } };
+  for (const p of collabPeers) add(p.login, p.name);
+  if (collabInfo.login) add(collabInfo.login, collabInfo.name);
+  if (hubShare && hubShare.people) for (const e of Object.keys(hubShare.people)) add(e, null);
+  hubRoster = list;
+  return list;
+}
+const hubNameOf = email => {
+  if (!email) return 'someone';
+  const rec = hubRoster && hubRoster.find(s => s.email === String(email).toLowerCase());
+  return rec ? rec.name : (collabPeers.find(p => p.login === email) || {}).name || fmtWho(email);
+};
+const hubInitial = name => (name || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+function hubAvatarColor(email) {
+  let h = 0;
+  for (const ch of String(email || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return `hsl(${h % 360} 40% 42%)`;
+}
+/** "1:06 PM" today, "Sep 3" this year, else the date. */
+function fmtWhenShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString();
+}
+/** What a new comment is about: the words in hand from a selection, else the
+ *  paragraph or element in hand, else the document. */
 function hubCommentAnchor() {
+  if (hubCommentQuote) return hubCommentQuote.anchor;
   const t = collabEditTarget();
   if (t) return t;
   if (selIds.size) return [...selIds][0];
   return null;
 }
+/** Where a thread sits in the document, for ordering the cards as the page
+ *  reads: the document itself first, then by position, the lost ones last. */
+function hubCommentPos(d, c) {
+  if (!c.anchor) return -1;
+  const el = hubCommentEl(d, c.anchor);
+  if (!el) return Number.MAX_SAFE_INTEGER;
+  const r = el.getBoundingClientRect();
+  return r.top + (d.defaultView ? d.defaultView.scrollY : 0) + r.left / 1e4;
+}
+const hubIsMe = email => !!email && !!collabInfo.login && email.toLowerCase() === collabInfo.login.toLowerCase();
+/** For you: open threads that name this person (someone else did, in the
+ *  thread or a reply), or their own threads someone else has answered. The
+ *  same rule as the hub's `threadForYou` (assets/docs.js), which the list
+ *  page and the Editor tab's badge count with - the two must agree, or a
+ *  badge would point at a tab that shows nothing. */
+function hubCommentForMe(c) {
+  const me = collabInfo.login && collabInfo.login.toLowerCase();
+  if (!me || c.resolved) return false;
+  const names = r => !hubIsMe(r.by) && (r.mentions || []).includes(me);
+  if (names(c) || (c.replies || []).some(names)) return true;
+  return hubIsMe(c.by) && (c.replies || []).some(r => !hubIsMe(r.by));
+}
+/** Text with @Names emphasised, as safe nodes. */
+function hubCommentTextNodes(text, mentions) {
+  const frag = document.createDocumentFragment();
+  const names = (mentions || []).map(hubNameOf).filter(Boolean).sort((a, b) => b.length - a.length);
+  if (!names.length) { frag.appendChild(document.createTextNode(text)); return frag; }
+  const re = new RegExp('@(' + names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    const b = document.createElement('span'); b.className = 'mention'; b.textContent = m[0];
+    frag.appendChild(b);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  return frag;
+}
+/** Scroll the page to a thread's words and flash them. */
+function hubCommentShow(c) {
+  const d = $('out').contentDocument;
+  const t = hubCommentEl(d, c.anchor);
+  if (!t) { $('stat').textContent = 'that part of the document is not on the page any more'; return false; }
+  t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  // One flash at a time: a thread shown while the last one's words are still
+  // lit takes the light with it, so the page never points two ways at once.
+  clearTimeout(hubCommentFlashTimer);
+  d.querySelectorAll('.ds-comment-flash').forEach(x => x.classList.remove('ds-comment-flash'));
+  t.classList.add('ds-comment-flash');
+  hubCommentFlashTimer = setTimeout(() => t.classList.remove('ds-comment-flash'), 1600);
+  return true;
+}
+let hubCommentFlashTimer = 0;
+/** Bring one thread to hand: darker highlight, raised card, panel open. */
+function hubCommentFocus(id, { scrollPage = true } = {}) {
+  hubCommentActive = id;
+  const c = hubComments.find(x => x.id === id);
+  if ($('cpanel').hidden) hubCommentsToggle(true); else hubCommentsRender();
+  const d = $('out') && $('out').contentDocument;
+  if (d) hubCommentsPaint(d);
+  if (c && c.anchor && scrollPage) hubCommentShow(c);
+  const card = $('cpanel-list') && $('cpanel-list').querySelector(`.cmt[data-id="${CSS.escape(id)}"]`);
+  // In the margin the layout puts the card in hand beside its words, and the
+  // list is a positioning box that must not be scrolled - scrollIntoView
+  // would, and every card with it.
+  if (card && !$('cpanel').classList.contains('margin')) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+/** A ⋮ menu on a card: built when opened, gone on the next click anywhere. */
+function hubCommentMenu(host, items) {
+  host.querySelectorAll('.cmt-menu').forEach(m => m.remove());
+  const menu = document.createElement('div'); menu.className = 'cmt-menu'; menu.setAttribute('role', 'menu');
+  for (const [label, fn, cls] of items) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label; if (cls) b.className = cls;
+    b.onclick = e => { e.stopPropagation(); menu.remove(); fn(); };
+    menu.appendChild(b);
+  }
+  host.appendChild(menu);
+  setTimeout(() => document.addEventListener('mousedown', function off(e) {
+    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('mousedown', off); }
+  }), 0);
+}
+/** The @-mention picker under a box: type "@" and some letters, pick with
+ *  ↑↓ and Enter or a click; the name goes into the words and the email into
+ *  the box's `_mentions`. */
+function hubMentionWire(ta) {
+  ta._mentions = ta._mentions || new Set();
+  let list = null, at = -1, idx = 0, matches = [];
+  const close = () => { if (list) list.remove(); list = null; at = -1; };
+  const pick = m => {
+    const v = ta.value;
+    ta.value = v.slice(0, at) + '@' + m.name + ' ' + v.slice(ta.selectionStart);
+    ta._mentions.add(m.email);
+    ta.selectionStart = ta.selectionEnd = at + m.name.length + 2;
+    close(); ta.focus();
+  };
+  const paint = () => {
+    if (!list) { list = document.createElement('div'); list.className = 'cmt-mentions'; ta.parentNode.appendChild(list); }
+    list.textContent = '';
+    matches.forEach((m, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = i === idx ? 'on' : '';
+      const av = document.createElement('span'); av.className = 'cmt-avatar'; av.style.setProperty('--av', hubAvatarColor(m.email)); av.textContent = hubInitial(m.name);
+      const t = document.createElement('span'); t.append(m.name); const s = document.createElement('small'); s.textContent = m.email; t.appendChild(s);
+      b.append(av, t);
+      b.onmousedown = e => { e.preventDefault(); pick(m); };
+      list.appendChild(b);
+    });
+    list.style.top = (ta.offsetTop + ta.offsetHeight + 2) + 'px';
+  };
+  ta.addEventListener('input', async () => {
+    const v = ta.value.slice(0, ta.selectionStart);
+    const m = v.match(/(^|\s)@([^\s@]*)$/);
+    if (!m) { close(); return; }
+    at = v.length - m[2].length - 1;
+    const q = m[2].toLowerCase();
+    const roster = await hubRosterLoad();
+    matches = roster.filter(s => !q || s.name.toLowerCase().includes(q) || s.email.startsWith(q)).slice(0, 6);
+    if (!matches.length) { close(); return; }
+    idx = 0; paint();
+  });
+  ta.addEventListener('keydown', e => {
+    if (!list) return;
+    if (e.key === 'ArrowDown') { idx = (idx + 1) % matches.length; paint(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { idx = (idx + matches.length - 1) % matches.length; paint(); e.preventDefault(); }
+    else if (e.key === 'Enter' || e.key === 'Tab') { pick(matches[idx]); e.preventDefault(); }
+    else if (e.key === 'Escape') { close(); e.stopPropagation(); }
+  });
+  ta.addEventListener('blur', () => setTimeout(close, 150));
+}
+/** The mentions a box still names: an @Name deleted from the words is not
+ *  a mention. */
+function hubMentionsOf(ta) {
+  const out = [];
+  for (const email of ta._mentions || []) if (ta.value.includes('@' + hubNameOf(email))) out.push(email);
+  return out;
+}
+/** While this is true, the new-comment box is being MOVED between the panel's
+ *  foot and the list — the blur that causes must not ask for another render,
+ *  which was a loop that took the cards out from under every click. */
+let hubComposerMoving = false;
 function hubCommentsRender() {
+  hubComposerMoving = true;
+  try { hubCommentsRenderInner(); } finally { hubComposerMoving = false; }
+}
+function hubCommentsRenderInner() {
   const panel = $('cpanel');
   const list = $('cpanel-list');
   if (!panel || !list) return;
-  list.textContent = '';
-  const anchorLabel = a => (a ? `on ${a}` : 'on the document');
-  const here = hubCommentAnchor();
-  const onIt = c => here && c.anchor === here;
-  const open = hubComments.filter(c => !c.resolved && !onIt(c)), done = hubComments.filter(c => c.resolved);
-  const mine = hubComments.filter(c => !c.resolved && onIt(c));
+  // Not under someone's fingers: a refresh while they type in a reply or an
+  // edit would eat their words. It runs when they are done.
+  // (The new-comment box is exempt: in the margin it lives IN the list, and
+  // it is not rebuilt by a render — it is moved.)
+  const typing = document.activeElement && list.contains(document.activeElement)
+    && document.activeElement.tagName === 'TEXTAREA' && document.activeElement.id !== 'cpanel-text';
+  if (typing) { hubCommentsRenderLater = true; return; }
+  hubCommentsRenderLater = false;
+  // Names fill in when the roster lands: the cards are built again, once.
+  const hadRoster = !!hubRoster;
+  hubRosterLoad().then(() => { if (!hadRoster && hubRoster) hubCommentsRender(); });
+  const d = $('out') && $('out').contentDocument;
+  const composerEl = document.getElementById('cpanel-composer');
+  // The BOX, not the whole card: with the cursor on Cancel the box is being
+  // left, not used, and the card goes back to the panel's foot.
+  const composerHadFocus = document.activeElement === document.getElementById('cpanel-text');
+  const composerSel = composerHadFocus && document.activeElement.selectionStart;
   const me = collabInfo.login;
-  const row = c => {
-    const el = document.createElement('div'); el.className = 'cmt' + (c.resolved ? ' resolved' : '');
-    const head = document.createElement('div'); head.className = 'cmt-head';
-    const who = document.createElement('b'); who.textContent = fmtWho(c.by);
-    const when = document.createElement('span'); when.textContent = ' · ' + fmtWhen(c.at) + ' · ' + anchorLabel(c.anchor);
-    head.append(who, when);
-    const body = document.createElement('p'); body.className = 'cmt-text'; body.textContent = c.text;
-    const btns = document.createElement('div'); btns.className = 'cmt-btns';
-    if (c.anchor) {
-      const go = document.createElement('button'); go.type = 'button'; go.textContent = 'Show';
-      go.onclick = () => {
-        const d = $('out').contentDocument;
-        const t = d && (d.querySelector(`[data-slot="${CSS.escape(c.anchor)}"]`) || d.querySelector(`[data-el="${CSS.escape(c.anchor)}"]`));
-        if (!t) { $('stat').textContent = 'that part of the document is not on the page any more'; return; }
-        t.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        t.classList.add('ds-comment-flash'); setTimeout(() => t.classList.remove('ds-comment-flash'), 1600);
-      };
-      btns.appendChild(go);
-    }
-    const res = document.createElement('button'); res.type = 'button';
-    res.textContent = c.resolved ? 'Reopen' : 'Resolve';
-    res.onclick = () => hubCommentPatch(c.id, { resolved: !c.resolved });
-    btns.appendChild(res);
-    if (c.by === me || hubRole === 'owner') {
-      const del = document.createElement('button'); del.type = 'button'; del.textContent = 'Delete'; del.className = 'danger';
-      del.onclick = async () => { if (await dsConfirm('Delete this comment?', { okLabel: 'Delete', danger: true })) hubCommentDelete(c.id); };
-      btns.appendChild(del);
-    }
-    el.append(head, body, btns);
+  const canWrite = true;   // anyone who may open the document may comment and resolve
+  const here = hubCommentAnchor();
+  const forMe = hubCommentForMe;
+  const shown = hubCommentsTab === 'you' ? hubComments.filter(forMe) : hubComments.slice();
+  if (hubCommentsTab === 'you') hubMarkSeenYou();   // looked at: the list page and the badge may rest
+  const byPos = new Map(shown.map(c => [c.id, hubCommentPos(d, c)]));
+  shown.sort((x, y) => byPos.get(x.id) - byPos.get(y.id) || (x.at < y.at ? -1 : 1));
+  const open = shown.filter(c => !c.resolved), done = shown.filter(c => c.resolved);
+  const onIt = c => here && c.anchor === here && !c.resolved;
+  // In the margin a card's place says what it is on, so the list's "On the
+  // selection" / "Elsewhere" headings would only take room from the cards;
+  // the cards on the selection wear a tag instead.
+  const margin = panel.classList.contains('margin');
+  // The list is not emptied and rebuilt: a card whose thread has not changed
+  // (nor what the card says about it - in hand, on the selection) is KEPT,
+  // so it stays where it is, with whatever is open on it (a reply box, a
+  // menu). A rebuild put every card back at the top of the gutter and let it
+  // glide down again, which read as the cards reshuffling on every click.
+  // Cards are known by thread id, separators by their words; a thread's
+  // signature is everything its card shows.
+  const prev = new Map();
+  for (const el of list.children) {
+    if (el.classList.contains('cmt')) prev.set('cmt:' + el.dataset.id, el);
+    else if (el !== composerEl) prev.set('p:' + el.className + ':' + el.textContent, el);
+  }
+  let next = [];   // the list, in order, as it should be
+  const sigOf = c => JSON.stringify([c, c.id === hubCommentActive, margin && onIt(c), margin, hubViewOnly(), hubRole, !!hubRoster, me, collabPeers.length, new Date().toDateString()],
+    (k, v) => (k.startsWith('__') ? undefined : v));
+  const keep = (key, sig, make, altKey) => {
+    const oldKey = prev.has(key) ? key : altKey && prev.has(altKey) ? altKey : null;
+    const old = oldKey ? prev.get(oldKey) : null;
+    if (oldKey) prev.delete(oldKey);
+    if (old && old.__dsSig === sig) { next.push(old); return old; }
+    const el = make();
+    el.__dsSig = sig;
+    // A card built again in place (its thread changed, it was taken in hand)
+    // starts where the old one stood, so it glides rather than jumps.
+    if (old && margin) { el.style.transform = old.style.transform; el.__dsTop = old.__dsTop; }
+    if (old) hubMarginForget(old);
+    next.push(el);
     return el;
   };
-  if (!open.length && !done.length && !mine.length) {
-    const p = document.createElement('p'); p.className = 'cmt-empty'; p.textContent = 'No comments yet.'; list.appendChild(p);
+  const sep = (cls, text) => keep('p:' + cls + ':' + text, margin + ':' + text, () => { const p = document.createElement('p'); p.className = cls; p.textContent = text; return p; });
+  $('cpanel-tab-all').classList.toggle('on', hubCommentsTab === 'all');
+  $('cpanel-tab-you').classList.toggle('on', hubCommentsTab === 'you');
+  const youN = hubComments.filter(c => !c.resolved && forMe(c)).length;
+  $('cpanel-tab-you').textContent = youN ? `For you · ${youN}` : 'For you';
+  // Accept all / Reject all, for an editor with two or more to decide.
+  const openSug = suggestOpenAll();
+  $('cpanel-bulk').hidden = !(openSug.length >= 2 && !hubViewOnly());
+  $('cpanel-accept-all').textContent = `Accept all ${openSug.length}`;
+  $('cpanel-reject-all').textContent = `Reject all ${openSug.length}`;
+
+  const where = c => {
+    const q = document.createElement('div'); q.className = 'cmt-quote';
+    if (c.quote) { q.append('on '); const qq = document.createElement('q'); qq.textContent = c.quote; q.appendChild(qq); }
+    else q.textContent = c.anchor ? `on ${c.anchor}` : 'on the document';
+    return q;
+  };
+  const msg = (who, at, text, mentions, edited, actions) => {
+    const m = document.createElement('div'); m.className = 'cmt-msg';
+    const av = document.createElement('span'); av.className = 'cmt-avatar'; av.style.setProperty('--av', hubAvatarColor(who)); av.textContent = hubInitial(hubNameOf(who));
+    const meta = document.createElement('div'); meta.className = 'cmt-meta';
+    const nm = document.createElement('b'); nm.textContent = hubNameOf(who);
+    const when = document.createElement('span'); when.textContent = fmtWhenShort(at) + (edited ? ' · edited' : '');
+    meta.append(nm, when);
+    const act = document.createElement('div'); act.className = 'cmt-actions'; for (const b of actions) act.appendChild(b);
+    const body = document.createElement('p'); body.className = 'cmt-text'; body.appendChild(hubCommentTextNodes(text, mentions));
+    m.append(av, meta, act, body);
+    return m;
+  };
+  const textBtn = (label, fn, cls) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label; if (cls) b.className = cls;
+    b.onclick = e => { e.stopPropagation(); fn(e); };
+    return b;
+  };
+  /** Swap a message's words for a box: Save / Cancel. */
+  const editInPlace = (m, text, save) => {
+    const body = m.querySelector('.cmt-text');
+    const ta = document.createElement('textarea'); ta.className = 'cmt-edit'; ta.rows = 3; ta.value = text;
+    const btns = document.createElement('div'); btns.className = 'cmt-btns';
+    const cancel = textBtn('Cancel', () => { const host = m.closest('.cmt'); if (host) host.__dsSig = null; hubCommentsRender(); });
+    const ok = textBtn('Save', async () => { const t = ta.value.trim(); if (!t) return; await save(t, hubMentionsOf(ta)); }, 'primary');
+    btns.append(cancel, ok);
+    body.replaceWith(ta); m.appendChild(btns);
+    hubMentionWire(ta);
+    ta.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') ok.click(); if (e.key === 'Escape') cancel.click(); });
+    ta.addEventListener('blur', () => setTimeout(() => { if (hubCommentsRenderLater && !list.contains(document.activeElement)) hubCommentsRender(); }, 200));
+    ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length;
+  };
+  const card = c => {
+    const el = document.createElement('div');
+    const sug = c.kind === 'suggestion';
+    el.className = 'cmt' + (sug ? ' suggest' : '') + (c.resolved ? ' resolved' : '') + (c.id === hubCommentActive ? ' active' : '') + (c.pending ? ' pending' : '');
+    el.dataset.id = c.id; el.tabIndex = 0;
+    el.addEventListener('click', e => {
+      if (e.target.closest('button, textarea, input, .cmt-menu')) return;
+      hubCommentFocus(c.id);
+    });
+    const wh = where(c);
+    if (margin && onIt(c)) { const t = document.createElement('span'); t.className = 'cmt-here'; t.textContent = 'On the selection · '; wh.prepend(t); }
+    if (sug) { const k = document.createElement('span'); k.className = 'cmt-kind'; k.textContent = c.status === 'open' ? 'Suggests' : c.status; wh.prepend(k); }
+    el.appendChild(wh);
+    // The thread's first message: resolve and ⋮ live here - on a
+    // suggestion, Accept and Reject for an editor, Withdraw for its author.
+    const firstActs = [];
+    if (sug) {
+      if (c.status === 'open') {
+        if (!hubViewOnly()) {
+          const ok = textBtn('Accept', () => suggestAccept(c), 'accept'); ok.title = 'Apply this change to the document';
+          const no = textBtn('Reject', () => suggestReject(c), 'reject'); no.title = 'Leave the document as it is';
+          firstActs.push(ok, no);
+        } else if (hubIsMe(c.by)) {
+          firstActs.push(textBtn('Withdraw', () => suggestReject(c), 'reject'));
+        }
+      } else if (!hubViewOnly() || hubIsMe(c.by)) {
+        firstActs.push(textBtn('Reopen', () => suggestReopen(c)));
+      }
+    }
+    const resolve = textBtn(c.resolved ? 'Reopen' : 'Resolve', () => hubCommentPatch(c.id, { resolved: !c.resolved }));
+    resolve.title = c.resolved ? 'Reopen this thread' : 'Mark as resolved and hide';
+    const more = textBtn('⋮', () => {
+      const items = [];
+      if (hubIsMe(c.by)) items.push(['Edit', () => editInPlace(first, c.text, (t, mentions) => hubCommentPatch(c.id, { text: t, mentions }))]);
+      if (hubIsMe(c.by) || hubRole === 'owner') items.push(['Delete', async () => { if (await dsConfirm('Delete this comment?', { okLabel: 'Delete', danger: true })) hubCommentDelete(c.id); }, 'danger']);
+      if (c.anchor) items.push(['Show', () => { hubCommentActive = c.id; hubCommentShow(c); hubCommentsRender(); }]);
+      if (!sug) items.push([c.resolved ? 'Reopen' : 'Resolve', () => hubCommentPatch(c.id, { resolved: !c.resolved })]);
+      items.push(['Copy link', async () => {
+        const u = new URL(location.href); u.searchParams.set('comment', c.id);
+        try { await navigator.clipboard.writeText(u.href); $('stat').textContent = 'link to this comment copied'; }
+        catch (e) { $('stat').textContent = u.href; }
+      }]);
+      hubCommentMenu(el, items);
+    });
+    more.className = 'cmt-more'; more.setAttribute('aria-label', 'More'); more.title = 'More';
+    const first = msg(c.by, c.at, c.text, c.mentions, c.edited_at, sug ? [...firstActs, more] : [resolve, more]);
+    if (sug && c.change) {
+      // The change itself, as Docs shows it: words to go and words to come.
+      const diff = document.createElement('div'); diff.className = 'cmt-diff';
+      for (const [k, v] of Object.entries(c.change.content || {})) {
+        const { prefix, gone, came } = suggestSplit(suggestPlain(v.before || ''), suggestPlain(v.after || ''));
+        const line = document.createElement('div');
+        const tail = prefix.trim().split(/\s+/).slice(-4).join(' ');
+        if (tail) line.append((prefix.trim().split(/\s+/).length > 4 ? '…' : '') + tail + ' ');
+        if (gone.trim()) { const dl = document.createElement('del'); dl.textContent = suggestShort(gone, 120); line.appendChild(dl); }
+        if (came.trim()) { const ins = document.createElement('ins'); ins.textContent = suggestShort(came, 120); line.appendChild(ins); }
+        if (!gone.trim() && !came.trim()) line.append(`(${k}: spacing only)`);
+        diff.appendChild(line);
+      }
+      for (const e of c.change.layout || []) {
+        const line = document.createElement('span'); line.className = 'lay';
+        const what = e.id || e.section;
+        line.textContent = e.section === 'positions' ? (e.after == null ? `put ${what} back` : `move ${what}`)
+          : e.before == null ? `add ${what}` : e.after == null ? `remove ${what}` : `change ${what}`;
+        diff.appendChild(line);
+      }
+      first.appendChild(diff);
+    }
+    el.appendChild(first);
+    for (const r of c.replies || []) {
+      const mine = hubIsMe(r.by);
+      const acts = [];
+      if (!r.pending && (mine || hubRole === 'owner')) {
+        const rm = textBtn('⋮', () => {
+          const items = [];
+          if (mine) items.push(['Edit', () => editInPlace(rmsg, r.text, (t, mentions) => hubReplyPatch(c.id, r.id, { text: t, mentions }))]);
+          items.push(['Delete', async () => { if (await dsConfirm('Delete this reply?', { okLabel: 'Delete', danger: true })) hubReplyDelete(c.id, r.id); }, 'danger']);
+          hubCommentMenu(el, items);
+        });
+        rm.className = 'cmt-more'; rm.setAttribute('aria-label', 'More');
+        acts.push(rm);
+      }
+      const rmsg = msg(r.by, r.at, r.text, r.mentions, r.edited_at, acts);
+      rmsg.classList.add('reply');
+      el.appendChild(rmsg);
+    }
+    if (c.resolved) {
+      const line = document.createElement('p'); line.className = 'cmt-resolved-line';
+      line.textContent = sug
+        ? `${c.status === 'accepted' ? 'Accepted' : 'Rejected'} by ${hubNameOf(c.decided_by)} · ${fmtWhenShort(c.decided_at)}`
+        : `Marked as resolved by ${hubNameOf(c.resolved_by)} · ${fmtWhenShort(c.resolved_at)}`;
+      el.appendChild(line);
+    }
+    // Reply: one line that opens into a box, as in Docs. On a resolved
+    // thread the placeholder says what a reply does.
+    if (canWrite) {
+      const box = document.createElement('div'); box.className = 'cmt-replybox';
+      const open = draft => {
+        box.textContent = '';
+        const ta = document.createElement('textarea'); ta.rows = 2; ta.placeholder = 'Reply or add others with @'; ta.className = 'cmt-reply-text';
+        const btns = document.createElement('div'); btns.className = 'cmt-btns';
+        const cancel = textBtn('Cancel', () => { el.__dsSig = null; hubCommentsRender(); });
+        const send = textBtn('Reply', async () => { const t = ta.value.trim(); if (!t) { ta.focus(); return; } await hubReplyAdd(c.id, t, hubMentionsOf(ta)); }, 'primary');
+        btns.append(cancel, send);
+        box.append(ta, btns);
+        hubMentionWire(ta);
+        ta.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') send.click(); if (e.key === 'Escape') cancel.click(); });
+        ta.addEventListener('blur', () => setTimeout(() => { if (hubCommentsRenderLater && !list.contains(document.activeElement)) hubCommentsRender(); }, 200));
+        if (draft != null) { ta.value = draft; c.__draft = null; }
+        ta.focus();
+      };
+      const line = document.createElement('input'); line.type = 'text'; line.readOnly = true;
+      line.placeholder = c.resolved && !sug ? 'Adding a reply will reopen this discussion…' : 'Reply or add others with @';
+      line.className = 'cmt-reply-line';
+      line.addEventListener('focus', open); line.addEventListener('click', open);
+      box.appendChild(line);
+      el.appendChild(box);
+      if (c.__draft != null) open(c.__draft);   // the words of a reply the hub refused
+    }
+    return el;
+  };
+  const cardOf = c => keep('cmt:' + c.id, sigOf(c), () => card(c), c.__clientId && 'cmt:' + c.__clientId);
+  if (!open.length && !done.length) {
+    sep('cmt-empty', hubCommentsTab === 'you' ? 'Nothing for you yet — threads that name you, or answer you, show here.' : 'No comments yet. Select some words and press ⌘⌥M, or write below.');
   }
+  const mine = margin ? [] : open.filter(onIt);
   if (mine.length) {
-    const h = document.createElement('p'); h.className = 'cmt-sep cmt-here'; h.textContent = `On the selection (${here})`; list.appendChild(h);
-    for (const c of mine) list.appendChild(row(c));
-    if (open.length) { const h2 = document.createElement('p'); h2.className = 'cmt-sep'; h2.textContent = 'Elsewhere'; list.appendChild(h2); }
+    sep('cmt-sep cmt-here', `On the selection (${here})`);
+    for (const c of mine) cardOf(c);
+    if (open.length > mine.length) sep('cmt-sep', 'Elsewhere');
   }
-  for (const c of open) list.appendChild(row(c));
+  for (const c of open) if (!mine.includes(c)) cardOf(c);
   if (done.length) {
-    const h = document.createElement('p'); h.className = 'cmt-sep'; h.textContent = `${done.length} resolved`; list.appendChild(h);
-    for (const c of done) list.appendChild(row(c));
+    sep('cmt-sep', `${done.length} resolved`);
+    // Resolved threads stay in the margin, trailing the open ones under this
+    // line: they have no words to sit beside any more (hubMarginWant gives
+    // them no place), and the panel is the only place they can be found again.
+    for (const c of done) cardOf(c);
   }
+  // The new comment is a card at its anchor rather than a foot to the panel —
+  // but only once it is IN USE (being typed in, holding words, or quoting a
+  // selection). An empty box that took its place beside the words would push
+  // every card below it down for nothing.
+  const composer = composerEl;
+  const composerInUse = composer && (composerHadFocus || hubCommentQuote || $('cpanel-text').value.trim());
+  if (margin && composerInUse) {
+    const at = hubCommentPos(d, { anchor: hubCommentAnchor() });
+    let i = next.findIndex(el => el.classList.contains('cmt') && byPos.get(el.dataset.id) > at);
+    if (i < 0) i = next.length;
+    next.splice(i, 0, composer);
+    // "No comments yet" has nothing to say while one is being written, and as
+    // a card with no anchor it took the top of the gutter and pushed the box
+    // out of line with its own words.
+    next = next.filter(el => !el.classList.contains('cmt-empty'));
+  }
+  // Put the list in that order, touching only what moved: a node that stays
+  // keeps its place, its glide and its focus. Whatever is left over goes -
+  // the composer back to the panel's foot, the rest away.
+  let cursor = list.firstChild;
+  for (const el of next) {
+    if (el === cursor) { cursor = cursor.nextSibling; continue; }
+    list.insertBefore(el, cursor);
+  }
+  while (cursor) {
+    const nx = cursor.nextSibling;
+    if (cursor === composerEl) panel.appendChild(cursor); else { hubMarginForget(cursor); cursor.remove(); }
+    cursor = nx;
+  }
+  for (const el of prev.values()) hubMarginForget(el);
+  // Moving a node in the DOM blurs whatever is inside it: put the cursor
+  // back where the person left it.
+  if (composerHadFocus) { const ta = $('cpanel-text'); if (document.activeElement !== ta) { ta.focus(); if (composerSel != null) ta.selectionStart = ta.selectionEnd = composerSel; } }
+  if (margin) hubMarginLayout(true);
+  // The new-comment card: who is writing, and about what.
   const on = $('cpanel-anchor');
-  if (on) on.textContent = 'New comment ' + anchorLabel(hubCommentAnchor());
+  if (on) {
+    on.textContent = '';
+    if (hubCommentQuote) {
+      on.append('New comment on '); const q = document.createElement('q'); q.textContent = hubCommentQuote.quote; on.appendChild(q);
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'cmt-unquote'; x.textContent = '×'; x.title = 'Comment on the whole document instead';
+      x.onclick = () => { hubCommentQuote = null; hubCommentsRender(); };
+      on.appendChild(x);
+    } else on.textContent = 'New comment ' + (here ? `on ${here}` : 'on the document');
+  }
+  const av = $('cpanel-me');
+  if (av) { av.style.setProperty('--av', hubAvatarColor(me)); av.textContent = hubInitial(hubNameOf(me)); av.title = hubNameOf(me); }
 }
 const hubCommentsChanged = () => { hubCommentsStamp = Date.now(); };
-async function hubCommentPatch(id, patch) {
+/** The panel and the page, from the threads as they stand now. */
+function hubCommentsShow() {
+  hubCommentsBadge();
+  if ($('cpanel') && !$('cpanel').hidden) hubCommentsRender();
+  const d = $('out') && $('out').contentDocument;
+  if (d) hubCommentsPaint(d);
+}
+/** A thread as the hub answered with it, in place of what was shown - under
+ *  its id, or under the provisional id it wore before the hub had it. */
+function hubCommentsMerge(t, tmpId) {
+  if (!t || !t.id) return;
+  let at = -1;
+  for (let i = hubComments.length - 1; i >= 0; i--) {
+    const c = hubComments[i];
+    if (c.id === t.id || (tmpId && c.id === tmpId)) { hubComments.splice(i, 1); at = i; }
+  }
+  if (tmpId) t.__clientId = tmpId;   // so its card is the same card, not a new one
+  if (at >= 0) hubComments.splice(at, 0, t); else hubComments.push(t);
+  if (tmpId && hubCommentActive === tmpId) hubCommentActive = t.id;
+}
+const hubCopy = c => (c ? JSON.parse(JSON.stringify(c)) : null);
+const hubPut = (id, c) => { const i = hubComments.findIndex(x => x.id === id); if (i >= 0) hubComments[i] = c; else hubComments.push(c); };
+const pendingId = () => 'pending-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+/** One request to the hub. A change to a thread is answered with the thread,
+ *  which takes the place of the one shown - no second round trip to read the
+ *  list back. Null on failure, which is said in the status line. */
+async function hubCommentsCall(url, init, failWord, tmpId) {
   try {
-    const r = await fetch(`${docStore()}/comments/${encodeURIComponent(id)}`, { method: 'PATCH',
-      headers: { 'content-type': 'application/json' }, body: JSON.stringify(patch) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `the hub answered ${r.status}`);
+    const r = await fetch(url, init);
+    const j = await hubJson(r);
+    if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
     hubCommentsChanged();
-  } catch (e) { $('stat').textContent = 'comment not changed: ' + e.message; }
-  await hubCommentsLoad();
+    if (j && j.id && Array.isArray(j.replies)) hubCommentsMerge(j, tmpId);
+    return j;
+  } catch (e) { $('stat').textContent = `${failWord}: ${e.message}`; return null; }
+}
+const jsonInit = (method, body) => ({ method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+// Every change shows AT ONCE, as it will stand once the hub agrees, and the
+// hub is asked after: a comment that took two round trips to appear read as
+// the button not working. A refusal puts things back as they were, and says so.
+async function hubCommentPatch(id, patch) {
+  const c = hubComments.find(x => x.id === id);
+  const was = hubCopy(c);
+  if (c) {
+    const me = collabInfo.login, now = new Date().toISOString();
+    if (typeof patch.text === 'string') { c.text = patch.text; c.edited_at = now; if (Array.isArray(patch.mentions)) c.mentions = patch.mentions; }
+    if (c.kind === 'suggestion' && typeof patch.status === 'string') {
+      const done = patch.status !== 'open';
+      c.status = patch.status; c.decided_by = done ? me : null; c.decided_at = done ? now : null;
+      c.resolved = done; c.resolved_by = done ? me : null; c.resolved_at = done ? now : null;
+    } else if (typeof patch.resolved === 'boolean' && c.kind !== 'suggestion') {
+      c.resolved = patch.resolved; c.resolved_by = patch.resolved ? me : null; c.resolved_at = patch.resolved ? now : null;
+    }
+    hubCommentsShow();
+  }
+  const got = await hubCommentsCall(`${docStore()}/comments/${encodeURIComponent(id)}`, jsonInit('PATCH', patch), 'comment not changed');
+  if (!got && was) hubPut(id, was);
+  hubCommentsShow();
+  return got;
 }
 async function hubCommentDelete(id) {
-  try {
-    const r = await fetch(`${docStore()}/comments/${encodeURIComponent(id)}`, { method: 'DELETE' });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `the hub answered ${r.status}`);
-    hubCommentsChanged();
-  } catch (e) { $('stat').textContent = 'comment not deleted: ' + e.message; }
-  await hubCommentsLoad();
+  const i = hubComments.findIndex(x => x.id === id);
+  const was = i >= 0 ? hubComments[i] : null;
+  if (was) { hubComments.splice(i, 1); if (hubCommentActive === id) hubCommentActive = null; hubCommentsShow(); }
+  const got = await hubCommentsCall(`${docStore()}/comments/${encodeURIComponent(id)}`, { method: 'DELETE' }, 'comment not deleted');
+  if (!got && was) { hubComments.splice(Math.min(i, hubComments.length), 0, was); hubCommentsShow(); }
+  return got;
+}
+async function hubReplyAdd(id, text, mentions) {
+  const c = hubComments.find(x => x.id === id);
+  const was = hubCopy(c);
+  if (c) {
+    c.replies = [...(c.replies || []), { id: pendingId(), text, by: collabInfo.login, at: new Date().toISOString(), edited_at: null, mentions, pending: true }];
+    if (c.resolved) { c.resolved = false; c.resolved_by = null; c.resolved_at = null; }   // a reply reopens the thread, as the hub does
+    hubCommentsShow();
+  }
+  const got = await hubCommentsCall(`${docStore()}/comments/${encodeURIComponent(id)}/replies`, jsonInit('POST', { text, mentions }), 'reply not added');
+  if (!got && was) { was.__draft = text; hubPut(id, was); }   // the words go back into an open box
+  hubCommentsShow();
+  return got;
+}
+async function hubReplyPatch(id, rid, patch) {
+  const c = hubComments.find(x => x.id === id);
+  const was = hubCopy(c);
+  const r = c && (c.replies || []).find(x => x.id === rid);
+  if (r && typeof patch.text === 'string') {
+    r.text = patch.text; r.edited_at = new Date().toISOString(); if (Array.isArray(patch.mentions)) r.mentions = patch.mentions;
+    hubCommentsShow();
+  }
+  const got = await hubCommentsCall(`${docStore()}/comments/${encodeURIComponent(id)}/replies/${encodeURIComponent(rid)}`, jsonInit('PATCH', patch), 'reply not changed');
+  if (!got && was) hubPut(id, was);
+  hubCommentsShow();
+  return got;
+}
+async function hubReplyDelete(id, rid) {
+  const c = hubComments.find(x => x.id === id);
+  const was = hubCopy(c);
+  if (c && c.replies) { c.replies = c.replies.filter(x => x.id !== rid); hubCommentsShow(); }
+  const got = await hubCommentsCall(`${docStore()}/comments/${encodeURIComponent(id)}/replies/${encodeURIComponent(rid)}`, { method: 'DELETE' }, 'reply not deleted');
+  if (!got && was) hubPut(id, was);
+  hubCommentsShow();
+  return got;
 }
 async function hubCommentAdd() {
   const ta = $('cpanel-text');
   const text = (ta.value || '').trim();
   if (!text) { ta.focus(); return; }
+  const q = hubCommentQuote, had = ta._mentions;
   const anchor = hubCommentAnchor();
-  try {
-    const r = await fetch(`${docStore()}/comments`, { method: 'POST',
-      headers: { 'content-type': 'application/json' }, body: JSON.stringify({ anchor, text }) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `the hub answered ${r.status}`);
-    ta.value = '';
-    hubCommentsChanged();
-  } catch (e) { $('stat').textContent = 'comment not added: ' + e.message; }
-  await hubCommentsLoad();
+  const body = { anchor, quote: q && q.anchor === anchor ? q.quote : null, text, mentions: hubMentionsOf(ta) };
+  // A provisional card at once, in hand, and the box cleared for the next;
+  // the hub's answer takes the card's place, a refusal takes it away and
+  // puts the words back in the box.
+  const tmp = { id: pendingId(), kind: 'comment', ...body, by: collabInfo.login, at: new Date().toISOString(), edited_at: null,
+                resolved: false, resolved_by: null, resolved_at: null, replies: [], pending: true };
+  hubComments.push(tmp);
+  hubCommentActive = tmp.id;
+  ta.value = ''; ta._mentions = new Set(); hubCommentQuote = null;
+  hubCommentsShow();
+  const made = await hubCommentsCall(`${docStore()}/comments`, jsonInit('POST', body), 'comment not added', tmp.id);
+  if (!made) {
+    hubComments = hubComments.filter(c => c !== tmp);
+    if (hubCommentActive === tmp.id) hubCommentActive = null;
+    ta.value = text; ta._mentions = had; hubCommentQuote = q;
+  } else if (!made.id) { hubComments = hubComments.filter(c => c !== tmp); hubCommentsLoad(); }
+  hubCommentsShow();
 }
 function hubCommentsToggle(open) {
   const panel = $('cpanel');
   if (!panel) return;
   const show = open == null ? panel.hidden : open;
+  if (show && $('hpanel') && !$('hpanel').hidden) hubHistoryToggle(false);   // one side panel at a time
   panel.hidden = !show;
   $('comments').classList.toggle('on', show);
+  hubCommentsMode();   // the gutter comes with the panel and goes with it
   clearInterval(hubCommentsTimer); hubCommentsTimer = 0;
   if (show) {
     hubCommentsRender();
     hubCommentsLoad();
     hubCommentsTimer = setInterval(hubCommentsLoad, 15000);
+  } else {
+    hubCommentActive = null;
+    const d = $('out') && $('out').contentDocument;
+    if (d) hubCommentsPaint(d);
   }
+}
+
+// --- suggesting (Google Docs' Suggesting mode) ---------------------------------
+// In Suggesting mode an edit is not made, it is proposed: the words a person
+// typed, the element they moved, the box they added, become a thread of
+// kind 'suggestion' beside the comments, with the change recorded as
+// per-paragraph words before and after plus layout entries. The page shows
+// the proposal inline the way Docs does - words to go struck through in
+// red, words to come underlined in green - and an editor accepts or rejects
+// it from the card. Accepting applies the change through the editor's own
+// edit path (one undo step, one render, shared with the room like any
+// edit). Nothing is written to the document until then, so a viewer -
+// whose edits the room drops - can suggest.
+//
+// How an edit becomes a suggestion: every mutation in this file starts with
+// pushHistory() and ends in render(). In Suggesting mode pushHistory()
+// takes a copy of the files (the base), the render shows the change
+// locally without flushing it to the room, and a short quiet spell after
+// the last render turns base -> now into a suggestion and puts the files
+// back the way the room has them.
+let suggesting = false;       // edits become suggestions, not changes
+let suggestBase = null;       // {content, layoutText} before the action in progress
+let suggestTimer = 0;
+let suggestApplying = false;  // accepting one: a real edit, not a new suggestion
+const SUGGEST_QUIET_MS = 700;
+const SUGGEST_CSS = `
+  ::highlight(ds-suggest-del) { text-decoration: line-through; text-decoration-color: #B3412F; color: #B3412F; background: #FBE9E5; }
+  ins.ds-suggest { text-decoration: underline; text-decoration-color: #2D8A4E; color: #1F6B3A; background: #E6F4EA; padding: 0 1px; }
+  .ds-suggested { outline: 2px dashed #2D8A4E !important; outline-offset: 3px; }
+`;
+/** Every slot's markdown, by key, from a content.md body. */
+function slotsOf(src) {
+  const m = new Map();
+  const re = /(?:^|\n)\[\[([^\]]+)\]\]\n([\s\S]*?)(?=\n\[\[|$)/g;
+  let x;
+  while ((x = re.exec(src || ''))) m.set(x[1], x[2].trim());   // trimmed, as readSlot reads and writeSlot writes
+  return m;
+}
+const suggestNow = () => ({ content: source, layoutText: layoutSaid(layout) });
+/** pushHistory()'s half: the files as they are before the action begins.
+ *  A previous action still pending is finished first. */
+function suggestCapture() {
+  if (!suggesting || suggestApplying || !docStore()) return;
+  if (suggestBase) suggestFinalize();
+  suggestBase = suggestNow();
+}
+/** render()'s half: the action is probably over when nothing has rendered
+ *  for a moment (a drag renders as it goes, a paragraph edit renders when
+ *  it closes). */
+function suggestSchedule() {
+  if (!suggesting || !suggestBase || suggestApplying) return;
+  clearTimeout(suggestTimer);
+  suggestTimer = setTimeout(suggestFinalize, SUGGEST_QUIET_MS);
+}
+const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+/** What changed between two copies of the files, as a suggestion's change:
+ *  {content: {key: {before, after}}, layout: [{section, id, arr, before, after}]}, or null. */
+function suggestDiff(base, now) {
+  const content = {};
+  const a = slotsOf(base.content), b = slotsOf(now.content);
+  for (const [k, v] of b) if (a.get(k) !== v) content[k] = { before: a.has(k) ? a.get(k) : null, after: v };
+  for (const [k, v] of a) if (!b.has(k)) content[k] = { before: v, after: null };
+  const out = [];
+  const la = JSON.parse(base.layoutText || '{}'), lb = JSON.parse(now.layoutText || '{}');
+  const same = (x, y) => JSON.stringify(x === undefined ? null : x) === JSON.stringify(y === undefined ? null : y);
+  for (const sec of new Set([...Object.keys(la), ...Object.keys(lb)])) {
+    const va = la[sec], vb = lb[sec];
+    if (same(va, vb)) continue;
+    const arrA = Array.isArray(va), arrB = Array.isArray(vb);
+    if (arrA || arrB) {
+      const idsA = new Map((arrA ? va : []).filter(x => isObj(x) && typeof x.id === 'string').map(x => [x.id, x]));
+      const idsB = new Map((arrB ? vb : []).filter(x => isObj(x) && typeof x.id === 'string').map(x => [x.id, x]));
+      const total = (arrA ? va.length : 0) + (arrB ? vb.length : 0);
+      if (idsA.size + idsB.size === total) {
+        for (const id of new Set([...idsA.keys(), ...idsB.keys()])) {
+          if (!same(idsA.get(id), idsB.get(id))) out.push({ section: sec, id, arr: true, before: idsA.get(id) ?? null, after: idsB.get(id) ?? null });
+        }
+      } else out.push({ section: sec, id: null, arr: false, before: va ?? null, after: vb ?? null });
+    } else if (isObj(va) || isObj(vb)) {
+      const oa = isObj(va) ? va : {}, ob = isObj(vb) ? vb : {};
+      for (const id of new Set([...Object.keys(oa), ...Object.keys(ob)])) {
+        if (!same(oa[id], ob[id])) out.push({ section: sec, id, arr: false, before: oa[id] ?? null, after: ob[id] ?? null });
+      }
+    } else out.push({ section: sec, id: null, arr: false, before: va ?? null, after: vb ?? null });
+  }
+  if (!Object.keys(content).length && !out.length) return null;
+  return { content, layout: out };
+}
+const suggestShort = (s, n = 70) => { const t = String(s ?? '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+/** One line that says what a change does, the way Docs' card does. */
+function suggestSummary(change) {
+  const keys = Object.keys(change.content || {});
+  const lay = change.layout || [];
+  const parts = [];
+  for (const k of keys) {
+    const { before, after } = change.content[k];
+    if (before == null) parts.push(`Add words to ${k}`);
+    else if (after == null) parts.push(`Remove the words of ${k}`);
+    else if (!before.trim()) parts.push(`Add: "${suggestShort(after)}"`);
+    else if (!after.trim()) parts.push(`Delete: "${suggestShort(before)}"`);
+    else parts.push(`Replace: "${suggestShort(before, 40)}" with "${suggestShort(after, 40)}"`);
+  }
+  for (const e of lay) {
+    const what = e.id || e.section;
+    if (e.section === 'positions') parts.push(e.after == null ? `Put ${what} back where it was designed` : `Move ${what}`);
+    else if (e.before == null) parts.push(e.section === 'shapes' ? `Add ${what}` : `Add ${e.section}${e.id ? ' ' + e.id : ''}`);
+    else if (e.after == null) parts.push(`Remove ${what}`);
+    else parts.push(`Change ${what}`);
+  }
+  return parts.length > 3 ? `${parts.slice(0, 2).join('; ')}; and ${parts.length - 2} more` : parts.join('; ');
+}
+/** The one thing a change is about, for the card's anchor and the page mark. */
+function suggestAnchor(change) {
+  const keys = Object.keys(change.content || {});
+  const ids = (change.layout || []).map(e => e.id).filter(Boolean);
+  if (keys.length === 1 && !ids.length) return keys[0];
+  if (!keys.length && ids.length === 1) return ids[0];
+  return keys[0] || ids[0] || null;
+}
+/** The action is over: what it changed becomes a suggestion, and the files
+ *  go back to what the room holds. */
+async function suggestFinalize() {
+  clearTimeout(suggestTimer); suggestTimer = 0;
+  const base = suggestBase;
+  if (!base) return;
+  if (editing) { suggestTimer = setTimeout(suggestFinalize, SUGGEST_QUIET_MS); return; }   // a paragraph is still open
+  suggestBase = null;
+  const change = suggestDiff(base, suggestNow());
+  // Back to the shared document (which has every remote change and none of
+  // this one - nothing was flushed), or to the base when there is no room.
+  const back = collab ? collab.files() : null;
+  source = back ? back.content : base.content;
+  layout = back ? back.layout : JSON.parse(base.layoutText || '{}');
+  layout.positions = layout.positions || {}; layout.shapes = layout.shapes || []; layout.sections = layout.sections || {};
+  syncPageSize();
+  markDirty();
+  await render();
+  if (!change) return;
+  const made = await hubCommentsCall(`${docStore()}/comments`, jsonInit('POST', {
+    kind: 'suggestion', anchor: suggestAnchor(change), text: suggestSummary(change), change, mentions: [],
+  }), 'suggestion not sent');
+  if (made) {
+    hubCommentActive = made.id;
+    hubCommentsToggle(true);
+    $('stat').textContent = 'suggested — an editor can accept or reject it from the Comments panel';
+  }
+}
+/** Accept: the change applied here, as one edit, then recorded as accepted.
+ *  A paragraph rewritten since it was suggested is said first. */
+async function suggestAccept(c) {
+  const ch = c.change;
+  if (!ch || suggestApplying) return;
+  const cur = slotsOf(source);
+  const conflicts = Object.entries(ch.content || {}).filter(([k, v]) => v.before != null && cur.has(k) && cur.get(k) !== v.before).map(([k]) => k);
+  if (conflicts.length && !await dsConfirm(`${conflicts.join(', ')} changed since this was suggested.\n\nApply the suggestion over what is there now?`,
+      { okLabel: 'Apply anyway', danger: true })) return;
+  suggestApplying = true;
+  try {
+    pushHistory();
+    for (const [k, v] of Object.entries(ch.content || {})) {
+      if (v.after == null || !cur.has(k)) continue;   // a slot cannot be removed or invented from here
+      writeSlot(k, v.after);
+    }
+    for (const e of ch.layout || []) suggestApplyLayout(e);
+    syncPageSize();
+    markDirty();
+    await render();
+    await hubCommentPatch(c.id, { status: 'accepted' });
+    $('stat').textContent = 'suggestion accepted — it is on the page for everyone; Save keeps it';
+  } finally { suggestApplying = false; }
+}
+function suggestApplyLayout(e) {
+  const sec = e.section;
+  if (e.id == null) { if (e.after == null) delete layout[sec]; else layout[sec] = e.after; return; }
+  if (e.arr) {
+    if (!Array.isArray(layout[sec])) layout[sec] = [];
+    const i = layout[sec].findIndex(x => isObj(x) && x.id === e.id);
+    if (e.after == null) { if (i >= 0) layout[sec].splice(i, 1); }
+    else if (i >= 0) layout[sec][i] = e.after;
+    else layout[sec].push(e.after);
+    return;
+  }
+  if (!isObj(layout[sec])) layout[sec] = {};
+  if (e.after == null) delete layout[sec][e.id]; else layout[sec][e.id] = e.after;
+}
+const suggestReject = c => hubCommentPatch(c.id, { status: 'rejected' });
+const suggestReopen = c => hubCommentPatch(c.id, { status: 'open' });
+const suggestOpenAll = () => hubComments.filter(c => c.kind === 'suggestion' && c.status === 'open' && !c.resolved);
+/** Docs' Accept all / Reject all: one question, then each through its own
+ *  path - an Accept is one undo step and one render each, and one that
+ *  cannot apply (its paragraph rewritten since) still asks on its own. */
+$('cpanel-accept-all').onclick = async () => {
+  const all = suggestOpenAll();
+  if (!all.length) return;
+  if (!await dsConfirm(`Accept all ${all.length} suggestions?\n\nEach is applied to the document the way Accept does — one undo step each.`, { okLabel: 'Accept all' })) return;
+  for (const c of all) await suggestAccept(c);
+  $('stat').textContent = `${all.length} suggestions accepted — on the page for everyone; Save keeps them`;
+};
+$('cpanel-reject-all').onclick = async () => {
+  const all = suggestOpenAll();
+  if (!all.length) return;
+  if (!await dsConfirm(`Reject all ${all.length} suggestions?\n\nThe document stays as it is.`, { okLabel: 'Reject all', danger: true })) return;
+  for (const c of all) await suggestReject(c);
+  $('stat').textContent = `${all.length} suggestions rejected — the document is as it was`;
+};
+/** Markdown to the plain words the page shows of it, near enough to find. */
+const suggestPlain = md => String(md || '').replace(/\[\[[^\]]*\]\]/g, '').replace(/\[\^[^\]]*\]/g, '')
+  .replace(/[*_`#>]+/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+/** The common prefix and suffix of two strings: what stayed, what went, what came. */
+function suggestSplit(before, after) {
+  const W = /\S/;
+  let p = 0;
+  while (p < before.length && p < after.length && before[p] === after[p]) p++;
+  // Whole words: a split inside one ("S|aved" against "S|uggested") reads as
+  // gibberish on both sides, so back off to the boundary before it.
+  while (p > 0 && W.test(before[p - 1]) && (W.test(before[p] || '') || W.test(after[p] || ''))) p--;
+  let s = 0;
+  while (s < before.length - p && s < after.length - p && before[before.length - 1 - s] === after[after.length - 1 - s]) s++;
+  while (s > 0 && W.test(before[before.length - s]) && (W.test(before[before.length - 1 - s] || '') || W.test(after[after.length - 1 - s] || ''))) s--;
+  return { prefix: before.slice(0, p), gone: before.slice(p, before.length - s), came: after.slice(p, after.length - s) };
+}
+/** The proposals on the page: words to go struck through, words to come
+ *  underlined after them, a dashed outline on an element to move or change. */
+function suggestPaint(d) {
+  if (!d || !d.body) return;
+  if (!d.getElementById('ds-suggest-css')) {
+    const st = d.createElement('style'); st.id = 'ds-suggest-css'; st.textContent = SUGGEST_CSS;
+    d.head.appendChild(st);
+  }
+  suggestUnpaint(d);
+  if (!docStore()) return;
+  const w = d.defaultView;
+  const canHighlight = !!(w && w.Highlight && w.CSS && w.CSS.highlights);
+  const dels = [];
+  // One proposal that cannot be drawn inline (words inside an SVG, a
+  // paragraph rewritten since) gets the dashed outline instead, and never
+  // stops the others from being drawn.
+  const inline = (el, c, v) => {
+    const { prefix, gone, came } = suggestSplit(suggestPlain(v.before), suggestPlain(v.after));
+    let at = null;
+    if (gone.trim() && canHighlight) {
+      // The whole run, else its first words: a footnote mark or a link the
+      // page renders differently should not cost the strike altogether.
+      const r = hubQuoteRange(d, el, gone) || hubQuoteRange(d, el, gone.trim().split(/\s+/).slice(0, 8).join(' '));
+      if (r) { dels.push(r); at = r; }
+    }
+    if (!at && prefix.trim()) {
+      const tail = prefix.trim().split(/\s+/).slice(-6).join(' ');
+      const r = hubQuoteRange(d, el, tail);
+      if (r) { at = d.createRange(); at.setStart(r.endContainer, r.endOffset); at.collapse(true); }
+    }
+    if (!came.trim()) return !!at;
+    if (el.closest('svg')) return false;   // an <ins> inside SVG text draws nothing
+    const ins = d.createElement('ins'); ins.className = 'ds-suggest'; ins.contentEditable = 'false';
+    ins.textContent = came; ins.title = 'suggested by ' + hubNameOf(c.by);
+    if (at) { const r = at.cloneRange(); r.collapse(false); r.insertNode(ins); }
+    else el.appendChild(ins);
+    return true;
+  };
+  for (const c of hubComments) {
+    if (c.kind !== 'suggestion' || c.resolved || !c.change) continue;
+    for (const [k, v] of Object.entries(c.change.content || {})) {
+      const el = hubCommentEl(d, k);
+      if (!el) continue;
+      let drawn = false;
+      if (v.before != null && v.after != null) {
+        try { drawn = inline(el, c, v); } catch (e) { drawn = false; }
+      }
+      if (!drawn) el.classList.add('ds-suggested');
+    }
+    for (const e of c.change.layout || []) {
+      const el = e.id && hubCommentEl(d, e.id);
+      if (el) el.classList.add('ds-suggested');
+    }
+  }
+  if (canHighlight) w.CSS.highlights.set('ds-suggest-del', new w.Highlight(...dels));
+}
+/** Take the proposals off the page - before a paragraph opens for editing,
+ *  so no <ins> rides into its words. */
+function suggestUnpaint(d) {
+  if (!d || !d.body) return;
+  d.querySelectorAll('ins.ds-suggest').forEach(n => n.remove());
+  d.querySelectorAll('.ds-suggested').forEach(n => n.classList.remove('ds-suggested'));
+  const w = d.defaultView;
+  if (w && w.CSS && w.CSS.highlights) w.CSS.highlights.delete('ds-suggest-del');
+}
+/** The Editing / Suggesting switch in the bar. A viewer suggests, and only
+ *  that: the room drops their writes anyway, and this gives them a voice. */
+function suggestSetMode(on, { say = true } = {}) {
+  if (suggestBase) suggestFinalize();
+  suggesting = !!on;
+  const b = $('mode');
+  if (b) {
+    b.textContent = suggesting ? 'Suggesting ▾' : 'Editing ▾';
+    b.classList.toggle('suggesting', suggesting);
+    b.title = suggesting ? 'Your edits are proposed for an editor to accept' : 'Your edits change the document';
+  }
+  if (say) $('stat').textContent = suggesting
+    ? 'suggesting — edits you make are proposed, not made; an editor accepts or rejects them'
+    : 'editing — your edits change the document for everyone';
+}
+function suggestMenu() {
+  const b = $('mode');
+  if (!b || hubViewOnly()) return;
+  document.querySelectorAll('.mode-menu').forEach(m => m.remove());
+  const menu = document.createElement('div'); menu.className = 'cmt-menu mode-menu'; menu.setAttribute('role', 'menu');
+  const r = b.getBoundingClientRect();
+  menu.style.position = 'fixed'; menu.style.left = r.left + 'px'; menu.style.top = (r.bottom + 4) + 'px'; menu.style.right = 'auto';
+  for (const [label, on, hint] of [['Editing', false, 'Your edits change the document'], ['Suggesting', true, 'Your edits are proposed for an editor to accept']]) {
+    const it = document.createElement('button'); it.type = 'button';
+    it.textContent = label + (on === suggesting ? ' ✓' : ''); it.title = hint;
+    it.onclick = e => { e.stopPropagation(); menu.remove(); suggestSetMode(on); };
+    menu.appendChild(it);
+  }
+  document.body.appendChild(menu);
+  setTimeout(() => document.addEventListener('mousedown', function off(e) {
+    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('mousedown', off); }
+  }), 0);
 }
 
 /** The share dialog: a default for everyone through Access, and named
@@ -15574,6 +17448,15 @@ function hubCommentsToggle(open) {
  *  a viewer sees the record and cannot change it. Sharing with someone
  *  outside the staff domains is not a row here — it is a change to the
  *  Access application, and the dialog says so. */
+/** The document's own address on the hub: what a colleague pastes into Slack
+ *  and what opens straight to it. Without the passing parts of this page's
+ *  URL (a comment, a tab) - the link is to the document, not to a moment. */
+function hubDocLink() {
+  const u = new URL(location.href);
+  for (const k of [...u.searchParams.keys()]) if (k !== 'project') u.searchParams.delete(k);
+  u.hash = '';
+  return u.href;
+}
 async function hubShareDialog() {
   const url = hubShareUrl();
   if (!url) return;
@@ -15597,34 +17480,69 @@ async function hubShareDialog() {
     const title = document.createElement('h2'); title.className = 'dsdlg-title';
     title.textContent = 'Share — ' + ((REGISTRY && REGISTRY[PROJECT] && REGISTRY[PROJECT].name) || M.id);
     form.appendChild(title);
+
+    // The link first, as Docs has it: the document's own address, which
+    // anyone signed in to the hub can open straight to this document.
+    const linkRow = document.createElement('div'); linkRow.className = 'hub-share-link';
+    const link = document.createElement('input'); link.type = 'text'; link.readOnly = true; link.value = hubDocLink();
+    link.setAttribute('aria-label', 'Link to this document');
+    link.onfocus = () => link.select();
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'hub-share-copy'; copy.textContent = 'Copy link';
+    copy.onclick = async () => {
+      try { await navigator.clipboard.writeText(link.value); copy.textContent = 'Copied'; setTimeout(() => { copy.textContent = 'Copy link'; }, 1500); $('stat').textContent = 'link copied — anyone signed in to the hub opens straight to this document'; }
+      catch (e) { link.focus(); link.select(); $('stat').textContent = 'select the link and copy it — the clipboard was not allowed'; }
+    };
+    linkRow.append(link, copy); form.appendChild(linkRow);
+
     const msg = document.createElement('p'); msg.className = 'dsdlg-msg';
     msg.textContent = canChange
       ? 'Everyone signed in to the hub gets the default; the people below get what their row says.'
       : 'You can see who this document is shared with, but not change it.';
     form.appendChild(msg);
 
-    const def = document.createElement('label'); def.className = 'dsdlg-field';
-    def.append('Everyone on the hub');
-    const defSel = roleSelect(rec.default, 'hub-share-default');
-    def.appendChild(defSel); form.appendChild(def);
-
+    // Who has access, each with a face: the owner (a label, not a lock), then
+    // the named people, then everyone else on the hub.
     const list = document.createElement('div'); list.className = 'hub-share-people';
+    const avatar = email => {
+      const av = document.createElement('span'); av.className = 'cmt-avatar hub-share-av';
+      const paint = () => { av.style.setProperty('--av', email() ? hubAvatarColor(email()) : '#C9D6CD'); av.textContent = email() ? hubInitial(hubNameOf(email())) : '?'; av.title = email() ? hubNameOf(email()) : ''; };
+      paint(); av.repaint = paint; return av;
+    };
+    if (rec.owner) {
+      const row = document.createElement('div'); row.className = 'hub-share-row hub-share-owner';
+      const who = document.createElement('span'); who.className = 'hub-share-name';
+      who.textContent = hubNameOf(rec.owner) + (hubIsMe(rec.owner) ? ' (you)' : ''); who.title = rec.owner;
+      const tag = document.createElement('span'); tag.className = 'hub-share-role'; tag.textContent = 'Owner';
+      row.append(avatar(() => rec.owner), who, tag); list.appendChild(row);
+    }
+    // Names from the roster offered as you type, the way Docs suggests people.
+    const dl = document.createElement('datalist'); dl.id = 'hub-share-roster';
+    hubRosterLoad().then(roster => { for (const s of roster) { const o = document.createElement('option'); o.value = s.email; o.label = s.name; dl.appendChild(o); } });
+    form.appendChild(dl);
+    // Everyone on the hub closes the list; people added later go above it.
+    const def = document.createElement('div'); def.className = 'hub-share-row hub-share-everyone';
+    const all = document.createElement('span'); all.className = 'cmt-avatar hub-share-av hub-share-all'; all.textContent = '☺'; all.title = 'Everyone signed in to the hub';
+    const allName = document.createElement('span'); allName.className = 'hub-share-name'; allName.textContent = 'Everyone on the hub';
+    const defSel = roleSelect(rec.default, 'hub-share-default');
+    def.append(all, allName, defSel); list.appendChild(def);
     const rows = [];
     const addRow = (email, role) => {
       const row = document.createElement('div'); row.className = 'hub-share-row';
       const inp = document.createElement('input');
       inp.type = 'email'; inp.placeholder = 'name@hiappleseed.org'; inp.value = email || '';
-      inp.disabled = !canChange; inp.spellcheck = false; inp.autocomplete = 'off';
+      inp.disabled = !canChange; inp.spellcheck = false; inp.autocomplete = 'off'; inp.setAttribute('list', 'hub-share-roster');
+      const av = avatar(() => inp.value.trim().toLowerCase());
+      inp.addEventListener('input', av.repaint); inp.addEventListener('change', av.repaint);
       const sel = roleSelect(role || 'editor');
       const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'hub-share-rm';
       rm.textContent = '×'; rm.setAttribute('aria-label', 'Remove this person'); rm.disabled = !canChange;
       rm.onclick = () => { row.remove(); rows.splice(rows.indexOf(r), 1); };
       const r = { inp, sel };
       rows.push(r);
-      row.append(inp, sel, rm); list.appendChild(row);
+      row.append(av, inp, sel, rm); list.insertBefore(row, def);
       return r;
     };
-    for (const [email, role] of Object.entries(rec.people || {})) addRow(email, role);
+    for (const [email, role] of Object.entries(rec.people || {})) if (email !== rec.owner) addRow(email, role);
     form.appendChild(list);
     if (canChange) {
       const add = document.createElement('button'); add.type = 'button'; add.className = 'hub-share-add';
@@ -15668,7 +17586,7 @@ async function hubShareDialog() {
   try {
     const r = await fetch(url, { method: 'PUT', headers: { 'content-type': 'application/json' },
                                  body: JSON.stringify(result) });
-    const j = await r.json().catch(() => ({}));
+    const j = await hubJson(r);
     if (!r.ok) throw new Error(j.error || `the hub answered ${r.status}`);
     const named = Object.keys(result.people).length;
     $('stat').textContent = `sharing saved — everyone ${result.default === 'none' ? 'is kept out' : result.default === 'viewer' ? 'may view' : 'may edit'}`
@@ -15694,7 +17612,7 @@ async function docStorePublish() {
   $('stat').textContent = 'publishing…';
   try {
     const r = await fetch(`${docStore()}/publish`, { method: 'POST' });
-    const j = await r.json().catch(() => ({}));
+    const j = await hubJson(r);
     if (!r.ok) throw new Error(j.error || j.reason || `the hub answered ${r.status}`);
     const sha = String(j.sha || '').slice(0, 7);
     $('stat').textContent = j.status === 'unchanged'
@@ -15707,6 +17625,20 @@ async function docStorePublish() {
   }
 }
 
+/** The hub's answer as JSON — or the reason it is not one. An Access
+ *  session that has expired answers every request with the sign-in page:
+ *  200, HTML. Without this a Save would "succeed" with no version and clear
+ *  the unsaved mark over words the store never got. */
+async function hubJson(r) {
+  const type = r.headers.get('content-type') || '';
+  if (r.redirected || !/json/i.test(type)) {
+    throw new Error(r.redirected || /html/i.test(type) || r.status === 401 || r.status === 403
+      ? 'signed out of the hub — reload this page to sign in again (unsaved edits are kept in this browser)'
+      : `the hub answered ${r.status} with ${type || 'no content type'}`);
+  }
+  return r.json();
+}
+
 /** The stored document over the vendored copy, when the store has one. Runs
  *  where the draft branch's files would have been swapped in: the engine
  *  stays same-origin, only the two authored files come from the store. */
@@ -15714,8 +17646,8 @@ async function docStoreLoad(urls, files) {
   if (!docStore()) return;
   try {
     const r = await fetch(docStore(), { cache: 'no-store' });
-    if (!r.ok) throw new Error(`the store answered ${r.status}`);
-    const m = await r.json();
+    const m = await hubJson(r);
+    if (!r.ok) throw new Error(m.error || `the store answered ${r.status}`);
     if (!m.exists) {
       $('stat').textContent = 'first time on the hub — Save puts this document in the store';
       return;
@@ -15732,13 +17664,14 @@ async function docStoreLoad(urls, files) {
     $('stat').textContent = 'from the hub' + (m.updated_by ? ` — last saved by ${m.updated_by}` : '')
       + (m.updated_at ? ` ${new Date(m.updated_at).toLocaleString()}` : '');
   } catch (e) {
-    $('stat').textContent = 'could not reach the document store — showing the vendored copy; Save will retry';
+    $('stat').textContent = `could not load from the document store (${e.message}) — showing the vendored copy; Save will retry`;
   }
 }
 
 /** Save to the store. `force` after the person has said so to a 409. */
-async function docStoreSave(layoutText, force = false) {
+async function docStoreSave(layoutText, force = false, auto = false) {
   $('save').disabled = true;
+  hubSaveBusy = true;
   $('stat').textContent = 'saving…';
   try {
     const body = { base: (collab && collab.baseSha()) || docVersion, force,
@@ -15751,10 +17684,17 @@ async function docStoreSave(layoutText, force = false) {
     const r = await fetch(docStore(), {
       method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
     });
-    const j = await r.json().catch(() => ({}));
+    const j = await hubJson(r);
     if (r.status === 409) {
       const who = j.updated_by ? ` by ${j.updated_by}` : '';
       const when = j.updated_at ? ` at ${new Date(j.updated_at).toLocaleString()}` : '';
+      if (auto) {
+        // Not a question an automatic Save may answer: hold, and leave the
+        // choice to a press of Save.
+        hubAutosaveHold = true;
+        $('stat').textContent = `not saved — the document changed outside this session${who}; press Save to choose`;
+        markDirty(); return false;
+      }
       const ok = await dsConfirm(`This document was saved outside this session${who}${when}.\n\n`
         + 'Saving replaces that with what everyone here sees.',
         { okLabel: 'Save over it', danger: true });
@@ -15767,15 +17707,75 @@ async function docStoreSave(layoutText, force = false) {
     if (collab) collab.setBaseSha(j.version);   // everyone in the room: this is the saved one
     original = source; layoutOrig = layoutText;
     clearDraftCache();
+    hubAutosaveHold = false;                    // a Save that landed: automatic ones may resume
+    hubSavedAt = Date.now();
     markDirty();
-    $('stat').textContent = 'saved — anyone opening this document gets this version';
+    $('stat').textContent = auto ? 'saved automatically — anyone opening this document gets this version'
+                                 : 'saved — anyone opening this document gets this version';
     return true;
   } catch (e) {
-    $('stat').textContent = 'save failed: ' + e.message;
+    if (auto) { hubAutosaveHold = true; $('stat').textContent = 'autosave paused — save failed: ' + e.message + '; press Save to try again'; }
+    else $('stat').textContent = 'save failed: ' + e.message;
     markDirty();
     return false;
+  } finally {
+    hubSaveBusy = false;
   }
 }
+
+// --- autosave on the hub ----------------------------------------------------------
+// With the store as the record, a quiet two seconds after an edit is a Save:
+// the room already carries the live document, so nothing is lost either way -
+// this only takes the button out of people's minds, the way Docs never has
+// one. Not while a paragraph or box editor is open (a half-typed sentence is
+// not a version), not while a Save is in flight or a dialog is up, and not
+// after a 409 or a failure until a press of Save settles it: an automatic Save
+// must never ask a question or keep failing quietly. The button stays, as
+// "Saved · just now" when there is nothing to save. Per browser, on unless
+// turned off in the File menu (`localStorage['primer-autosave']`).
+let hubAutosaveTimer = 0;
+let hubAutosaveHold = false;   // a 409 or a failure: wait for a press of Save
+let hubSaveBusy = false;       // a store Save in flight
+let hubSavedAt = 0;            // when the last store Save landed
+const AUTOSAVE_QUIET_MS = 2000;
+function hubAutosaveOn() {
+  if (!docStore()) return false;
+  try { return localStorage.getItem('primer-autosave') !== 'off'; } catch (e) { return true; }
+}
+function hubAutosaveSchedule() {
+  clearTimeout(hubAutosaveTimer); hubAutosaveTimer = 0;
+  if (!hubAutosaveOn() || !dirty || hubViewOnly() || hubAutosaveHold) return;
+  hubAutosaveTimer = setTimeout(hubAutosaveTick, AUTOSAVE_QUIET_MS);
+}
+async function hubAutosaveTick() {
+  hubAutosaveTimer = 0;
+  if (!hubAutosaveOn() || !dirty || hubViewOnly() || hubAutosaveHold) return;
+  if (editing || modalOpen || hubSaveBusy) { hubAutosaveSchedule(); return; }   // not mid-word, not mid-Save
+  await docStoreSave(JSON.stringify(layout, null, 2) + '\n', false, true);
+}
+/** The Save button's face on the store path: "Save" with something to save,
+ *  "Saved · just now" right after one landed, "Saved" once that is old news. */
+function hubSaveLabel() {
+  const b = $('save');
+  if (!b || !docStore()) return;
+  if (dirty) b.textContent = 'Save';
+  else if (hubSavedAt && Date.now() - hubSavedAt < 60000) b.textContent = 'Saved · just now';
+  else b.textContent = hubSavedAt ? 'Saved' : 'Save';
+}
+setInterval(hubSaveLabel, 15000);
+function hubAutosaveMenu() {
+  const row = $('file-autosave');
+  if (!row) return;
+  row.hidden = !docStore();
+  row.querySelector('.shp-t').textContent = 'Autosave on the hub: ' + (hubAutosaveOn() ? 'on' : 'off');
+}
+$('file-autosave').onclick = () => {
+  try { localStorage.setItem('primer-autosave', hubAutosaveOn() ? 'off' : 'on'); } catch (e) { /* file: */ }
+  hubAutosaveMenu();
+  hubAutosaveSchedule();
+  $('stat').textContent = hubAutosaveOn() ? 'autosave on — a quiet two seconds after an edit is a Save' : 'autosave off — Save is yours to press';
+  togglePop($('filepop'), $('file'));
+};
 
 // --- drafts: Save draft / Share / Publish ----------------------------------
 // Nothing here writes to main. Save commits your work — prose and layout in
@@ -15939,11 +17939,50 @@ async function saveDraft() {
 
 $('history').onclick = () => hubHistoryDialog();
 $('cpanel-close').onclick = () => hubCommentsToggle(false);
-$('ar-comment').onclick = $('ty-comment').onclick = () => { hubCommentsToggle(true); $('cpanel-text').focus(); };
+$('cpanel-view').onclick = () => {
+  hubCommentsView = hubCommentsView === 'list' ? 'margin' : 'list';
+  try { localStorage.setItem('primer-comments-view', hubCommentsView); } catch (e) { /* file: */ }
+  hubCommentsMode();
+  hubCommentsRender();
+};
+// A window that narrows past the gutter's width falls back to the list, and
+// one that widens gets the margin back; either way the cards find their places.
+window.addEventListener('resize', () => {
+  if ($('cpanel') && !$('cpanel').hidden) { const was = $('cpanel').classList.contains('margin'); hubCommentsMode(); if (was !== $('cpanel').classList.contains('margin')) hubCommentsRender(); else hubMarginQueue(false); }
+  else hubGutterSync();
+});
+$('mode').onclick = () => suggestMenu();
+$('ar-comment').onclick = $('ty-comment').onclick = () => hubCommentStart(null);
+$('cmt-plus').onmousedown = e => { e.preventDefault(); hubCommentStart(); };
+$('cpanel-cancel').onclick = () => { $('cpanel-text').value = ''; $('cpanel-text')._mentions = new Set(); hubCommentQuote = null; hubCommentsRender(); };
+$('cpanel-tab-all').onclick = () => { hubCommentsTab = 'all'; hubCommentsRender(); };
+$('cpanel-tab-you').onclick = () => { hubCommentsTab = 'you'; hubCommentsRender(); };
+hubMentionWire($('cpanel-text'));
+// In the margin the box becomes a card at its anchor the moment it is used,
+// and goes back to the panel's foot when it is left empty — not at the next
+// refresh, whenever that is.
+for (const ev of ['focus', 'blur', 'input']) $('cpanel-text').addEventListener(ev, () => {
+  const panel = $('cpanel');
+  if (!panel || panel.hidden || !panel.classList.contains('margin') || hubComposerMoving) return;
+  const inList = $('cpanel-composer').parentNode === $('cpanel-list');
+  const inUse = document.activeElement === $('cpanel-text') || hubCommentQuote || $('cpanel-text').value.trim();
+  // Only when the two disagree, and never on the blur the move itself causes:
+  // that was a render loop, and it took the cards out from under every click.
+  if (!!inUse !== inList) setTimeout(hubCommentsRender, 0);
+});
+$('cpanel-text').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); hubCommentAdd(); }
+  if (e.key === 'Escape' && !e.defaultPrevented) $('cpanel-cancel').click();
+});
+window.addEventListener('keydown', e => { if (hubCommentKey(e)) e.preventDefault(); });
+// A collaborator's selection ring, the peer marks, and now the comment
+// cards follow the page: re-sort when the panel is open and the page moved.
+window.addEventListener('resize', () => { const d = $('out') && $('out').contentDocument; if (d) hubCommentPlus(d); });
 $('cpanel-add').onclick = () => hubCommentAdd();
 document.addEventListener('ds:selection', () => { if ($('cpanel') && !$('cpanel').hidden) hubCommentsRender(); });
 $('comments').onclick = () => hubCommentsToggle();
 $('share').onclick = async () => {
+  $('filepop').hidden = true;
   if (docStore()) return hubShareDialog();
   if (dirty || !draftBranch) { if (!await saveDraft()) return; }
   const url = draftUrl();

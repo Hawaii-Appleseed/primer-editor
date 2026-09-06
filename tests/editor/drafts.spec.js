@@ -2,7 +2,7 @@
 // mode — /__ping is blocked so local=false and every persistence call goes
 // through gh() against the in-memory FakeGitHub (tests/editor/fixtures/
 // fake-github.js), never the real GitHub API.
-const { hostedTest: test, expect, gotoEditor, fillDialog, submitDialog, submitDialogIfPresent, clickAddSection } = require('./fixtures/editor-test');
+const { hostedTest: test, expect, gotoEditor, fillDialog, submitDialog, submitDialogIfPresent, clickAddSection, openFileMenu } = require('./fixtures/editor-test');
 
 // Every modal here is a native <dialog>: the +Section form, the print-fit-cut
 // confirm on Save, and the publish/discard confirms. submitDialog clicks OK on
@@ -30,7 +30,11 @@ test.describe('drafts: save / share / publish', () => {
   });
 
   test('an edit enables Save draft, Share and Publish (hidden only in local mode)', async ({ page }) => {
+    // Share lives in the File menu now, so look for it there — it is still
+    // the row that hides itself in local mode.
+    await openFileMenu(page);
     await expect(page.locator('#share')).toBeVisible();   // hidden only when local
+    await page.click('#file');                            // put the menu away
     await expect(page.locator('#save')).toHaveText('Save draft');
     await addASection(page);
     await expect(page.locator('#save')).toBeEnabled();

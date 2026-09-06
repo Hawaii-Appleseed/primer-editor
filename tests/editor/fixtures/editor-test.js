@@ -135,6 +135,17 @@ async function openFileMenu(page) {
   await page.locator('#filepop').waitFor({ state: 'visible' });
 }
 
+/** Sources and Share live in the File menu now, not on the bar — so reaching
+ *  either one is two clicks, the way it is for a person. */
+async function openSources(page) {
+  await openFileMenu(page);
+  await page.click('#sources');
+}
+async function openShare(page) {
+  await openFileMenu(page);
+  await page.click('#share');
+}
+
 /** +Section is hidden from the toolbar for now (#add { display:none }), but
  *  still wired. Playwright cannot click a control with no box, so drive it the
  *  way the app does. The day it comes back this becomes page.click again. */
@@ -181,7 +192,7 @@ async function submitDialogIfPresent(page, timeout = 3000) {
 }
 
 module.exports = {
-  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS, UPDATE, openFileMenu, clickAddSection,
+  test, hostedTest, expect: base.expect, gotoEditor, waitForFirstRender, PING, EVENTS, UPDATE, openFileMenu, openSources, openShare, clickAddSection,
   blockDangerousLocalEndpoints, dialog, fillDialog, submitDialog, cancelDialog,
   submitDialogIfPresent,
 };

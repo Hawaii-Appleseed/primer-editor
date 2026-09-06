@@ -10,7 +10,7 @@
 // not: they describe the thing you have SELECTED and exist to be used while
 // working on the canvas — styling a cell, recolouring one shape then the next
 // — so a canvas click must leave them alone.
-const { test, expect, gotoEditor } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, openSources } = require('./fixtures/editor-test');
 
 /** A real mouse click on the report, well clear of the chrome.
  *
@@ -67,7 +67,7 @@ test.describe('clicking away dismisses', () => {
 
   test('the Sources panel closes when the report is clicked', async ({ page }) => {
     await gotoEditor(page);
-    await page.click('#sources');
+    await openSources(page);
     await expect(page.locator('#srcpanel')).toBeVisible();
     // Sources is a floating surface of its own rather than a .pop, so it had
     // to be handled by name — and it is the one the report named.
@@ -142,7 +142,7 @@ test.describe('the collapsed side panel', () => {
 
   test('a dialog opened FROM a panel does not dismiss it', async ({ page }) => {
     await gotoEditor(page);
-    await page.click('#sources');
+    await openSources(page);
     await expect(page.locator('#srcpanel')).toBeVisible();
     // A modal sits on top of everything, so clicking in one is not a click
     // away from what is behind it. The rename dialog opens from this panel,

@@ -2,7 +2,7 @@
 // toolbar button while editing a paragraph, then edit/rename/reorder/delete
 // it from the Sources panel (openSources/renderSources/addSource/
 // updateSource/renameSource/moveSource/deleteSource). Local-mode, no GitHub.
-const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection } = require('./fixtures/editor-test');
+const { test, expect, gotoEditor, fillDialog, submitDialog, clickAddSection, openSources } = require('./fixtures/editor-test');
 
 // toc.author (the "Author: …" byline). Like every movable text in the
 // report it now sits inside a [data-el] object, so a single click selects
@@ -56,7 +56,7 @@ test.describe('sources panel', () => {
   test('adding a source via Cite shows it in the Sources panel as cited', async ({ page }) => {
     await addSourceViaUi(page, 'test-src-1', 'A Test Source, 2026.', 'https://example.com/a');
 
-    await page.click('#sources');
+    await openSources(page);
     const row = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[test-src-1]' }) });
     await expect(row).toBeVisible();
     await expect(row.locator('.srcuse')).toContainText('cited 1');
@@ -69,7 +69,7 @@ test.describe('sources panel', () => {
 
   test('editing the text/url fields commits via updateSource', async ({ page }) => {
     await addSourceViaUi(page, 'test-src-2', 'Original text.', 'https://example.com/orig');
-    await page.click('#sources');
+    await openSources(page);
     const row = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[test-src-2]' }) });
 
     await row.locator('.srctext').fill('Updated text.');
@@ -79,14 +79,14 @@ test.describe('sources panel', () => {
     // openSources() always tears down and rebuilds the panel from scratch —
     // re-clicking #sources confirms the edit round-tripped through `source`
     // (the underlying content.md text), not just the input's DOM value.
-    await page.click('#sources');
+    await openSources(page);
     const rowAfter = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[test-src-2]' }) });
     await expect(rowAfter.locator('.srctext')).toHaveValue('Updated text.');
   });
 
   test('renaming a source id updates it everywhere', async ({ page }) => {
     await addSourceViaUi(page, 'old-id', 'Some source.', 'https://example.com/x');
-    await page.click('#sources');
+    await openSources(page);
     const row = page.locator('#srcpanel .srcrow', { has: page.locator('.srcid', { hasText: '[old-id]' }) });
 
     await row.locator('.srcren', { hasText: 'rename' }).click();
@@ -103,7 +103,7 @@ test.describe('sources panel', () => {
   test('reorders two sources with ↑/↓', async ({ page }) => {
     await addSourceViaUi(page, 'src-a', 'Source A.', 'https://example.com/a');
     await addSourceViaUi(page, 'src-b', 'Source B.', 'https://example.com/b');
-    await page.click('#sources');
+    await openSources(page);
 
     const ids = () => page.locator('#srcpanel .srcid').allTextContents();
     const before = (await ids()).map(t => t.split(']')[0] + ']');
