@@ -1203,6 +1203,88 @@ test('comments: under 1100px the panel is the list again, and it fits a phone', 
   await expect(a.locator('body')).not.toHaveClass(/cmt-margin/);
 });
 
+// Selecting something with a thread on it takes that thread in hand - the
+// card pops and steps out of the column, the highlight darkens - as a click
+// on the card would, with no scroll; selecting something with none lets go.
+test('comments: selecting an element with a thread brings its card to hand, popped; selecting one without lets go', async () => {
+  await clearComments();
+  await a.setViewportSize({ width: 1280, height: 720 });
+  const inv = await a.evaluate('docsync.api.inventory()');
+  const key = inv.pages.flatMap(p => p.slots || []).find(s => s.text && s.text.trim().length > 10).key;
+  // An element with no words in it - an image, a shape, a graphic - so the
+  // two threads are on two different things, not one block and its own slot.
+  const elId = await a.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    const el = [...d.querySelectorAll('[data-el]')].find(x => !x.dataset.slot && !x.querySelector('[data-slot]') && !x.closest('[data-slot]'));
+    return el ? el.dataset.el : null; })()`);
+  test.skip(!elId, 'this project has no element without words');
+  await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: elId, text: 'On the element' } });
+  await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: key, text: 'On the words' } });
+  if (!(await a.locator('#cpanel').isVisible())) await a.locator('#comments').click();
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  await a.evaluate('hubCommentsLoad()');   // an open panel polls every 15s; not waiting on that
+  await expect(cmtRow(a, 'On the words')).toBeVisible({ timeout: 10_000 });
+  // Nothing selected (a test before may have left the element in hand, and
+  // a selection with a thread on it takes that thread - the point of this test).
+  await a.evaluate('docsync.api.select(null); hubCommentActive = null; hubCommentsRender()');
+  await expect(a.locator('#cpanel .cmt.active')).toHaveCount(0);
+  const plainBox = await cmtRow(a, 'On the element').boundingBox();
+  const scrollBefore = await a.evaluate('document.getElementById("out").contentWindow.scrollY');
+  // Select the element, as a click on it would.
+  await a.evaluate(`docsync.api.select(${JSON.stringify(elId)})`);
+  await expect(cmtRow(a, 'On the element')).toHaveClass(/active/);
+  await expect(cmtRow(a, 'On the words')).not.toHaveClass(/active/);
+  // The page did not scroll: what was selected is already in view.
+  expect(await a.evaluate('document.getElementById("out").contentWindow.scrollY')).toBe(scrollBefore);
+  // Popped: warm ground, and in the margin wider than the column - out over the others.
+  await expect.poll(async () => {
+    const b = await cmtRow(a, 'On the element').boundingBox();
+    return b && plainBox && b.width > plainBox.width + 4 && b.x < plainBox.x - 2;
+  }, { message: 'the card in hand steps out of the column' }).toBe(true);
+  // A warm ground once the pop has settled (its first frame starts white).
+  await expect.poll(() => cmtRow(a, 'On the element').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgb(255, 255, 255)');
+  // Its marker on the page carries the count; the other's thread stays plain.
+  await expect(marker(a, elId)).toHaveCount(1);
+  // The paragraph selected instead - a click selects the BLOCK around the
+  // slot, and the thread is on the slot: its thread comes to hand, the element's lets go.
+  const block = await a.evaluate(`(() => { const el = document.getElementById('out').contentDocument.querySelector('[data-slot="${key}"]'); const b = el && el.closest('[data-el]'); return b ? b.dataset.el : null; })()`);
+  expect(block, 'the paragraph sits in a movable block').toBeTruthy();
+  expect(block).not.toBe(elId);
+  expect((await a.evaluate(`docsync.api.select(${JSON.stringify(block)})`)).ok).toBe(true);
+  const dump = await a.evaluate('JSON.stringify({ sel: [...selIds], here: hubCommentAnchor(), inHand: [...hubCommentAnchorsInHand()], on: hubCommentsOnHand().map(c => c.anchor), active: hubCommentActive })');
+  await expect(cmtRow(a, 'On the words'), dump).toHaveClass(/active/);
+  await expect(cmtRow(a, 'On the element')).not.toHaveClass(/active/);
+  // A third thing with no thread on it: nothing in hand.
+  const other = inv.pages.flatMap(p => p.elements).map(e => e.id).find(id => id !== elId && id !== block);
+  if (other) {
+    expect((await a.evaluate(`docsync.api.select(${JSON.stringify(other)})`)).ok).toBe(true);
+    await expect(a.locator('#cpanel .cmt.active')).toHaveCount(0);
+  }
+  // Nothing selected changes nothing: a render clears the selection all the time.
+  await a.evaluate(`docsync.api.select(${JSON.stringify(block)})`);
+  await expect(cmtRow(a, 'On the words')).toHaveClass(/active/);
+  await a.evaluate('docsync.api.select(null)');
+  await a.waitForTimeout(300);
+  await expect(cmtRow(a, 'On the words')).toHaveClass(/active/);
+  // The stage's own scroll band, under the last page, moves the page: the cards follow.
+  await a.evaluate('hubCommentActive = null; hubCommentsRender()');
+  await a.evaluate('const w = document.getElementById("out").contentWindow; w.scrollTo(0, w.document.documentElement.scrollHeight)');
+  await a.waitForTimeout(400);
+  const stageRange = await a.evaluate('document.getElementById("stage").scrollHeight - document.getElementById("stage").clientHeight');
+  if (stageRange > 20) {
+    const before = await marginGeo(a);
+    await a.evaluate('document.getElementById("stage").scrollTop = 40');
+    await a.waitForTimeout(400);
+    const after = await marginGeo(a);
+    const moved = before.cards.filter((c, i) => isFinite(c.anchor) && after.cards[i] && Math.abs(after.cards[i].anchor - c.anchor) > 1);
+    expect(moved.length, JSON.stringify({ before: before.cards, after: after.cards })).toBeGreaterThan(0);
+    for (const [i, c] of before.cards.entries()) if (moved.includes(c)) expect(Math.abs(after.cards[i].top - c.top - (after.cards[i].anchor - c.anchor))).toBeLessThanOrEqual(2);
+    await a.evaluate('document.getElementById("stage").scrollTop = 0');
+  }
+  await a.evaluate('document.getElementById("out").contentWindow.scrollTo(0, 0)');
+  await clearComments();
+  await a.locator('#cpanel-close').click();
+});
+
 test('comments: in the margin the new comment is a card at its anchor, a line joins the card in hand to its words, and a resolved thread trails the rest', async () => {
   await clearComments();
   await a.setViewportSize({ width: 1280, height: 720 });
