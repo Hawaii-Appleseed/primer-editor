@@ -137,7 +137,7 @@ test('the hub lists the project and links into its editor', async () => {
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
   // The nav's own entry, lit.
   await expect(page.locator('.site-nav a[aria-current="page"]')).toHaveText(/Editor/);
-  const tile = page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
   await expect(tile).toBeVisible();
   // Named from docsync.yml (`name:`), not the id.
   await expect(tile).toContainText('Demo report');
@@ -1031,7 +1031,7 @@ test('comments: they survive a reload, and the list page counts the open ones', 
   await expect(page.locator('#cpanel .cmt')).toHaveCount(1);
   await expect(page.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 open comments');
+  await expect(page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 open comments');
   await page.close();
   await clearComments();
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
@@ -1627,7 +1627,7 @@ test('suggestions: Accept all applies every one; the list page and the Editor ta
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 suggested');
+  await expect(page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 suggested');
   await expect(page.locator('#count')).toContainText('2 suggested');
   await page.goto(`${hubAs(ADA_PORT)}/resources.html`);
   await expect(page.locator('#primerBadge')).toBeVisible({ timeout: 10_000 });
@@ -1660,9 +1660,9 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
-  const tile = page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
   await expect(tile.locator('.tag.t-changed')).toBeVisible();
-  await expect(tile).toContainText('saved');
+  await expect(tile).toContainText('modified');   // the door says "modified <date, time> by" since the vendor stamp landed
   await expect(page.locator('#count')).toContainText('changed since you looked');
   // On another page of the hub the Editor tab wears the count.
   await page.goto(`${hubAs(GRACE_PORT)}/resources.html`);
@@ -1672,8 +1672,8 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   // Ada's browser saw the current version in the editor: to her, nothing changed.
   const mine = await ctxA.newPage();
   await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
-  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
+  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
   await mine.close();
 });
 
@@ -1684,7 +1684,7 @@ test('a comment that names you reaches the list page and the Editor tab, and res
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
-  const tile = page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
   await expect(tile.locator('.tag.t-you')).toHaveText('1 for you');
   await expect(tile.locator('.tag.t-you')).toHaveClass(/is-new/);
   await expect(page.locator('#count')).toContainText('1 for you');
@@ -1720,8 +1720,8 @@ test('a comment that names you reaches the list page and the Editor tab, and res
   // Ada wrote it: it is not for her.
   const mine = await ctxA.newPage();
   await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
-  await expect(mine.locator(`a.tile[href="edit.html?project=${PROJECT}"] .tag.t-you`)).toHaveCount(0);
+  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"] .tag.t-you`)).toHaveCount(0);
   await mine.close();
   await clearComments();
 });
@@ -1751,4 +1751,57 @@ test('no GitHub token was asked for or stored', async () => {
     // through the hub's door that state cannot occur.
     expect((await status(page)).status).toBe('live');
   }
+});
+
+test('ask ai: the panel sends the whole document, applies the answer as one undoable batch, and the room sees it', async () => {
+  // The model API is not on the hub's side of this test: /api/ai is answered
+  // here in the shape functions/api/ai.js returns (dev/test_ai.mjs pins that
+  // side), so what is proved is the editor's half - gather, post, apply, undo.
+  const key = await firstSlot(a);
+  const before = (await a.evaluate(`docsync.api.getSlot(${JSON.stringify(key)})`)).md;
+  let asked = null;
+  await a.route('**/api/ai', async route => {
+    asked = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+      ok: true, text: 'Made the first slot say so.', summary: 'Rewrote the first slot.',
+      ops: [{ verb: 'setSlot', args: [key, 'Written by the panel.'] }],
+    }) });
+  });
+  await expect(a.locator('#ai')).toBeVisible();
+  await a.locator('#ai').click();
+  await expect(a.locator('#aipanel')).toBeVisible();
+  await a.locator('#aipanel-ask').fill('rewrite the first slot');
+  await a.locator('#aipanel-ask').press('Enter');
+  await expect(a.locator('#aipanel-log .ai-turn.claude')).toContainText('Made the first slot say so.', { timeout: 20_000 });
+  // What went up: the room, the question, and the document with FULL slot text.
+  expect(asked.room).toBe(`Hawaii-Appleseed~primer-editor~${PROJECT}`);
+  expect(asked.instruction).toBe('rewrite the first slot');
+  const sent = asked.document.slots.find(s => s.key === key);
+  expect(sent.md).toBe(before);
+  expect(asked.document.role).toBe('editor');
+  // What came down was applied through the real path...
+  await expect(a.locator('#aipanel-log .ai-applied')).toContainText('Applied 1 change');
+  expect((await a.evaluate(`docsync.api.getSlot(${JSON.stringify(key)})`)).md).toBe('Written by the panel.');
+  // ...and the room saw it.
+  // (Through the doc, not the page: the demo's first slot is not rendered
+  // inside a section.page, which is exactly why the document is read off the
+  // source above.)
+  await expect.poll(async () => (await b.evaluate(`docsync.api.getSlot(${JSON.stringify(key)})`)).md, { timeout: 20_000 }).toBe('Written by the panel.');
+  // One undo takes the whole thing back.
+  await a.locator('#aipanel-log .ai-applied button').click();
+  expect((await a.evaluate(`docsync.api.getSlot(${JSON.stringify(key)})`)).md).toBe(before);
+  await expect(a.locator('#aipanel-log .ai-applied button')).toHaveText('Undone');
+  // A hub with the route but no key says so in place, and applies nothing.
+  await a.unroute('**/api/ai');
+  await a.route('**/api/ai', route => route.fulfill({ status: 501, contentType: 'application/json',
+    body: JSON.stringify({ ok: false, error: 'AI is not configured on this deployment (ANTHROPIC_API_KEY)' }) }));
+  await a.locator('#aipanel-ask').fill('anything');
+  await a.locator('#aipanel-ask').press('Enter');
+  await expect(a.locator('#aipanel-log .ai-turn.err').last()).toContainText('not set up on this hub yet', { timeout: 20_000 });
+  await a.unroute('**/api/ai');
+  // Opening another side panel closes this one.
+  await a.locator('#history').click();
+  await expect(a.locator('#aipanel')).toBeHidden();
+  await expect(a.locator('#hpanel')).toBeVisible();
+  await a.locator('#hpanel-close').click();
 });
