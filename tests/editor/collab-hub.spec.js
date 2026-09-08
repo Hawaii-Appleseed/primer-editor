@@ -144,6 +144,9 @@ test('the hub lists the project and links into its editor', async () => {
   // Nobody has narrowed this document, so a person through Access may edit it.
   await expect(tile.locator('.tag')).toHaveText(/can edit/);
   await expect(page.locator('#meta')).toContainText(ADA);
+  // The tiles are prerendered on hover (Speculation Rules), the tiles only.
+  const rules = await page.evaluate(() => JSON.parse(document.querySelector('script[type="speculationrules"][data-tiles]').textContent));
+  expect(rules.prerender[0].where.selector_matches).toBe('a.tile');
   await page.close();
 });
 
@@ -219,6 +222,27 @@ test('a fresh editor loads the stored document, not the vendored copy', async ()
   expect(Math.max(...t.content) - Math.min(...t.meta)).toBeLessThan(50);   // together, not meta then the rest
   expect(Math.max(...t.content) - t.engineStart).toBeLessThan(300);        // beside the engine files, not after the boot
   await page.close();
+});
+
+test('prerendered from the list, an editor fetches and paints but joins nobody and marks nothing until it is shown', async () => {
+  const room = `Hawaii-Appleseed~primer-editor~${PROJECT}`;
+  await a.evaluate(k => localStorage.removeItem(k), 'primer-seen:' + room);
+  const page = await ctxA.newPage();
+  // As Chrome would run it: document.prerendering true until activation.
+  await page.addInitScript(() => Object.defineProperty(document, 'prerendering', { value: true, configurable: true }));
+  await page.goto(`${hubAs(ADA_PORT)}/primer/edit.html?project=${PROJECT}`);
+  await waitForFirstRender(page);
+  // Painted, from the store - and a ghost in nobody's room.
+  expect(await page.evaluate('docVersion')).toBe(await a.evaluate('docVersion'));
+  expect(await page.evaluate('collab')).toBeNull();
+  expect((await status(a)).peers).toBe(2);
+  expect(await page.evaluate(k => localStorage.getItem(k), 'primer-seen:' + room)).toBeNull();
+  // Shown: it joins, and the document counts as seen.
+  await page.evaluate(() => { Object.defineProperty(document, 'prerendering', { value: false, configurable: true }); document.dispatchEvent(new Event('prerenderingchange')); });
+  await expect(page.locator('#collab')).toHaveText(/live · 3/, { timeout: 20_000 });
+  await expect.poll(() => page.evaluate(k => localStorage.getItem(k), 'primer-seen:' + room)).not.toBeNull();
+  await page.close();
+  await expect(a.locator('#collab')).toHaveText(/live · 2/, { timeout: 20_000 });
 });
 
 test('an image uploads to the store and is served at the project path', async () => {
