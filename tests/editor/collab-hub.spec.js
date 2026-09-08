@@ -796,7 +796,10 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   expect(marked).toBeGreaterThanOrEqual(0);
   // Resolve from B; A's count drops on its next refresh.
   await b.locator('#cpanel .cmt button', { hasText: 'Resolve' }).first().click();
+  await expect(b.locator('#cpanel-tab-open .cmt, #cpanel .cmt:not(.resolved)')).toHaveCount(0, { timeout: 10_000 });
+  await showResolved(b);
   await expect(b.locator('#cpanel .cmt').first()).toHaveClass(/resolved/, { timeout: 10_000 });
+  await showOpen(b);
   await expect(cmtCount(a)).toHaveCount(0, { timeout: 30_000 });
   await b.locator('#cpanel-close').click();
   await a.locator('#cpanel-close').click();
@@ -835,6 +838,9 @@ const clearComments = async () => {
   for (const c of await allComments()) await a.request.delete(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${c.id}`);
 };
 const cmtRow = (page, text) => page.locator('#cpanel .cmt', { hasText: text });
+// The panel opens on the open threads; the resolved ones are a tab of their own.
+const showResolved = page => page.locator('#cpanel-tab-resolved').click();
+const showOpen = page => page.locator('#cpanel-tab-open').click();
 /** The open-comment count, which the button carries as a superscript numeral
  *  rather than spelling out. Absent entirely when nothing is open. */
 const cmtCount = page => page.locator('#comments .cmt-n');
@@ -902,6 +908,9 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   await b.locator('#comments').click();
   await expect(cmtRow(b, 'runs long')).toBeVisible({ timeout: 10_000 });
   await cmtRow(b, 'runs long').locator('button', { hasText: 'Resolve' }).click();
+  // Resolved, it leaves the open threads for the Resolved tab.
+  await expect(cmtRow(b, 'runs long')).toHaveCount(0, { timeout: 10_000 });
+  await showResolved(b);
   await expect(cmtRow(b, 'runs long')).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(cmtRow(b, 'runs long').locator('button', { hasText: 'Reopen' })).toBeVisible();
   await expect(cmtCount(b)).toHaveText('2');
@@ -911,6 +920,7 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   const t0 = Date.now();
   await expect(cmtCount(a)).toHaveText('2', { timeout: 20_000 });
   expect(Date.now() - t0).toBeLessThan(6_000);
+  await showResolved(a);
   await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
   await a.waitForTimeout(2_500);   // long enough for any poll in flight at the click to answer
   await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
@@ -922,6 +932,7 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   expect(rec.resolved_by).toBe(GRACE);
   // Reopen from A this time.
   await cmtRow(a, 'runs long').locator('button', { hasText: 'Reopen' }).click();
+  await showOpen(a); await showOpen(b);
   await expect(cmtRow(a, 'runs long')).not.toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(marker(a, prose)).toHaveCount(1);
   await expect(marker(b, prose)).toHaveCount(1, { timeout: 20_000 });
@@ -987,12 +998,15 @@ test('comments: a viewer may comment and resolve, and is shown the same panel', 
   await page.locator('#cpanel-add').click();
   await expect(cmtRow(page, 'From a viewer')).toBeVisible({ timeout: 10_000 });
   await cmtRow(page, 'Overall: shorter').locator('button', { hasText: 'Resolve' }).click();
+  await showResolved(page);
   await expect(cmtRow(page, 'Overall: shorter')).toHaveClass(/resolved/, { timeout: 10_000 });
   await ctx.close();
   await a.request.put(`${hubAs(ADA_PORT)}/api/collab/share/Hawaii-Appleseed~primer-editor~${PROJECT}`,
                       { data: { default: 'editor', people: {} } });
   await expect(cmtRow(a, 'From a viewer')).toBeVisible({ timeout: 20_000 });
+  await showResolved(a);
   await expect(cmtRow(a, 'Overall: shorter')).toHaveClass(/resolved/, { timeout: 20_000 });
+  await showOpen(a);
 });
 
 test('comments: they survive a reload, and the list page counts the open ones', async () => {
@@ -1002,7 +1016,12 @@ test('comments: they survive a reload, and the list page counts the open ones', 
   // Two open (runs long, from a viewer), one resolved (overall) - before any panel is opened.
   await expect(cmtCount(page)).toHaveText('2', { timeout: 20_000 });
   await page.locator('#comments').click();
-  await expect(page.locator('#cpanel .cmt')).toHaveCount(3, { timeout: 10_000 });
+  // Open by default, the resolved one under its own tab.
+  await expect(page.locator('#cpanel .cmt')).toHaveCount(2, { timeout: 10_000 });
+  await expect(page.locator('#cpanel-tab-open')).toHaveText('Open · 2');
+  await expect(page.locator('#cpanel-tab-resolved')).toHaveText('Resolved · 1');
+  await showResolved(page);
+  await expect(page.locator('#cpanel .cmt')).toHaveCount(1);
   await expect(page.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
   await expect(page.locator(`a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 open comments');
@@ -1078,15 +1097,18 @@ test('comments: a reply threads under it for everyone; resolved says who; a repl
   await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-msg.reply')).toContainText('Done.', { timeout: 20_000 });
   // Resolve from A: the card greys, says who, the highlight goes.
   await cmtRow(a, 'Rephrase this bit').locator('.cmt-actions button', { hasText: 'Resolve' }).click();
+  await showResolved(a);
   await expect(cmtRow(a, 'Rephrase this bit')).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-resolved-line')).toContainText('Marked as resolved by ada');
   await expect(cmtRow(a, 'Rephrase this bit').locator('.cmt-reply-line')).toHaveAttribute('placeholder', /reopen/);
   await expect.poll(() => highlighted(a)).toBe(0);
+  await showResolved(b);
   await expect(cmtRow(b, 'Rephrase this bit')).toHaveClass(/resolved/, { timeout: 20_000 });
   // B answers anyway: that reopens it, everywhere.
   await cmtRow(b, 'Rephrase this bit').locator('.cmt-reply-line').click();
   await cmtRow(b, 'Rephrase this bit').locator('.cmt-reply-text').fill('Not quite - the second half too.');
   await cmtRow(b, 'Rephrase this bit').locator('button', { hasText: 'Reply' }).click();
+  await showOpen(b); await showOpen(a);
   await expect(cmtRow(b, 'Rephrase this bit')).not.toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(cmtRow(a, 'Rephrase this bit')).not.toHaveClass(/resolved/, { timeout: 20_000 });
   await expect.poll(() => highlighted(a), { timeout: 10_000 }).toBeGreaterThan(0);
@@ -1132,12 +1154,12 @@ test('comments: Edit rewords your own words and says so; @ offers people; For yo
   await b.locator('#cpanel-tab-you').click();
   await expect(b.locator('#cpanel .cmt')).toHaveCount(1);
   await expect(cmtRow(b, 'Ping @grace')).toBeVisible();
-  await b.locator('#cpanel-tab-all').click();
+  await showOpen(b);
   await expect(b.locator('#cpanel .cmt')).toHaveCount(2);
   await a.locator('#cpanel-tab-you').click();
   await expect(a.locator('#cpanel .cmt')).toHaveCount(1);
   await expect(cmtRow(a, 'Rephrase this sentence')).toBeVisible();
-  await a.locator('#cpanel-tab-all').click();
+  await showOpen(a);
 });
 
 test('comments: ⌘⌥M starts one on what is in hand, and a link opens the editor on a thread', async () => {
@@ -1464,6 +1486,8 @@ test('comments: in the margin the new comment is a card at its anchor, a line jo
   // Resolved: it trails the open ones under its line, and the line goes.
   const stored = (await allComments()).find(c => c.text.includes('Joined by a line'));
   await a.request.patch(`${hubAs(ADA_PORT)}${ROOM_URL}/comments/${stored.id}`, { data: { resolved: true } });
+  await expect(cmtRow(a, 'Joined by a line')).toHaveCount(0, { timeout: 15_000 });   // gone from Open
+  await showResolved(a);
   await expect(cmtRow(a, 'Joined by a line')).toHaveClass(/resolved/, { timeout: 15_000 });
   await expect(a.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
   await expect(a.locator('#cmt-leader')).toBeHidden();   // nothing in hand on the page
@@ -1515,11 +1539,13 @@ test("suggesting: a viewer's edit is proposed, shown inline, and an editor accep
   await expect(a.locator('#comments')).toHaveAttribute('title', /1 of them suggested/, { timeout: 20_000 });
   await expect(a.frameLocator('#out').locator('ins.ds-suggest')).toHaveText('Suggested words here.', { timeout: 20_000 });
   if (!(await a.locator('#cpanel').isVisible())) await a.locator('#comments').click();
+  await showOpen(a);
   await expect(suggestRow(a, 'Suggested words here')).toBeVisible({ timeout: 10_000 });
   if (process.env.PRIMER_SHOTS) { await suggestRow(a, 'Suggested words here').hover(); await a.screenshot({ path: 'test-results/suggesting.png' }); }
   await suggestRow(a, 'Suggested words here').locator('button', { hasText: 'Accept' }).click();
   await expect.poll(() => slot(a, key), { timeout: 10_000 }).toBe('Suggested words here.');
   await expect(a.locator('#stat')).toHaveText(/suggestion accepted/);
+  await showResolved(a);
   await expect(suggestRow(a, 'Suggested words here')).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(suggestRow(a, 'Suggested words here').locator('.cmt-resolved-line')).toContainText('Accepted by ada');
   await expect(a.frameLocator('#out').locator('ins.ds-suggest')).toHaveCount(0);
@@ -1554,10 +1580,13 @@ test('suggesting: an editor in Suggesting mode proposes a move; the other reject
   expect(sg.change.layout[0].after.y).toBeCloseTo(4.5, 1);
   // B rejects.
   if (!(await b.locator('#cpanel').isVisible())) await b.locator('#comments').click();
+  await showOpen(b);
   await expect(suggestRow(b, `Move ${id}`)).toBeVisible({ timeout: 20_000 });
   await suggestRow(b, `Move ${id}`).locator('button', { hasText: 'Reject' }).click();
+  await showResolved(b);
   await expect(suggestRow(b, `Move ${id}`)).toHaveClass(/resolved/, { timeout: 10_000 });
   await expect(suggestRow(b, `Move ${id}`).locator('.cmt-resolved-line')).toContainText('Rejected by grace');
+  await showResolved(a);
   await expect(suggestRow(a, `Move ${id}`)).toHaveClass(/resolved/, { timeout: 20_000 });
   expect(await a.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`)).toBe(pos);
   expect(await b.evaluate(`JSON.stringify(layout.positions[${JSON.stringify(id)}] || null)`)).toBe(pos);
