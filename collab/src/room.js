@@ -75,9 +75,14 @@ export class PrimerRoom extends YServer {
    * editor that may write, which applies them through docsync.api.batch() —
    * one undo step, the same validation as typing — and answers with a
    * `pilot-result`. Nothing is written to the Yjs document from here; the
-   * editor that applied the batch syncs it to everyone the ordinary way. An
-   * empty room answers {ok:false, reason:'empty'} so the caller can write the
-   * store instead, which is the right thing when nobody is in the document.
+   * editor that applied the batch syncs it to everyone the ordinary way.
+   *
+   * Two refusals, told apart because the caller should do different things:
+   * `reason:'empty'` — nobody is here, so write the store instead; and
+   * `reason:'no-pilot'` — someone IS here but no connection said it can take
+   * pilot ops (an editor from before this existed, or a socket whose page is
+   * gone). Both fall back to the store, but only the second is worth telling
+   * a person about: their colleague should reload.
    */
   async onRequest(request) {
     const url = new URL(request.url);
@@ -90,8 +95,16 @@ export class PrimerRoom extends YServer {
       const ops = Array.isArray(body?.ops) ? body.ops : [];
       if (!ops.length) return Response.json({ ok: false, error: 'ops is required' }, { status: 400 });
       const all = [...this.getConnections()];
-      const editors = all.filter(c => !this.isReadOnly(c));
-      if (!editors.length) return Response.json({ ok: false, reason: 'empty', connections: all.length });
+      // Only an editor that SAID it can take pilot ops. A read-only one may
+      // not write; one that never said so is either a client from before the
+      // room learned this or a socket whose page is gone, and handing either
+      // the ops buys nothing but the caller's timeout. No such editor is
+      // reported distinctly from an empty room, because the answer differs:
+      // there is a person here, and they need to reload.
+      const editors = [...this.getConnections()].filter(c => !this.isReadOnly(c) && c.state?.pilot === true);
+      if (!editors.length) {
+        return Response.json({ ok: false, reason: all.length ? 'no-pilot' : 'empty', connections: all.length });
+      }
       const id = crypto.randomUUID();
       const answer = new Promise(res => this.#pilots.set(id, res));
       const wait = Math.min(Math.max(+body.timeout || 20000, 1000), 60000);
@@ -158,6 +171,9 @@ export class PrimerRoom extends YServer {
 
     switch (msg?.t) {
       case 'hello':
+        // Whether this client can apply pilot ops, from its own mouth. Kept on
+        // the connection so /pilot is a synchronous choice.
+        connection.setState({ ...connection.state, pilot: msg.pilot === true });
         this.#send(connection, {
           t: 'hello',
           seeded: this.#seeded,

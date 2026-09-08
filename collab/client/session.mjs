@@ -645,7 +645,12 @@ export class CollabSession {
   #onSynced() {
     // A reconnect syncs again; the room cannot need seeding twice.
     if (this.state.phase === 'ready') { this.#drain(); this.#set({ status: 'live' }); this.#emit('remote'); return; }
-    this.#send({ t: 'hello' });
+    // `pilot` tells the room this client can take pilot ops. A client that
+    // cannot (an older bundle, or one built without a handler) must never be
+    // handed them: the room would sit waiting for an answer that no code
+    // exists to send, and the caller would see a timeout instead of "nobody
+    // here can do that".
+    this.#send({ t: 'hello', pilot: !!this.onPilot });
   }
 
   #onMessage(s) {
