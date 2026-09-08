@@ -59,6 +59,53 @@ export class PrimerRoom extends YServer {
    */
   static options = { hibernate: false };
 
+  /** Pilot ops in flight: id -> resolve(result). See onRequest's /pilot. */
+  #pilots = new Map();
+
+  /**
+   * The room's plain-HTTP side, reached only through a Worker that holds the
+   * namespace binding (the hub's Pages Functions do; a browser cannot):
+   *
+   *   GET  …/status   what status() says — is it seeded, who is here
+   *   POST …/pilot    {ops, by?, what?, timeout?} — hand pilot ops to ONE
+   *                   editor in the room to apply, and wait for its answer
+   *
+   * /pilot is how a person's own Claude, talking to the hub's MCP connector,
+   * edits a document that someone has open: the ops are relayed to the first
+   * editor that may write, which applies them through docsync.api.batch() —
+   * one undo step, the same validation as typing — and answers with a
+   * `pilot-result`. Nothing is written to the Yjs document from here; the
+   * editor that applied the batch syncs it to everyone the ordinary way. An
+   * empty room answers {ok:false, reason:'empty'} so the caller can write the
+   * store instead, which is the right thing when nobody is in the document.
+   */
+  async onRequest(request) {
+    const url = new URL(request.url);
+    if (request.method === 'GET' && url.pathname.endsWith('/status')) {
+      return Response.json(await this.status());
+    }
+    if (request.method === 'POST' && url.pathname.endsWith('/pilot')) {
+      let body;
+      try { body = await request.json(); } catch { return Response.json({ ok: false, error: 'a JSON body is required' }, { status: 400 }); }
+      const ops = Array.isArray(body?.ops) ? body.ops : [];
+      if (!ops.length) return Response.json({ ok: false, error: 'ops is required' }, { status: 400 });
+      const all = [...this.getConnections()];
+      const editors = all.filter(c => !this.isReadOnly(c));
+      if (!editors.length) return Response.json({ ok: false, reason: 'empty', connections: all.length });
+      const id = crypto.randomUUID();
+      const answer = new Promise(res => this.#pilots.set(id, res));
+      const wait = Math.min(Math.max(+body.timeout || 20000, 1000), 60000);
+      this.#send(editors[0], { t: 'pilot', id, ops, by: body.by ?? null, what: body.what ?? '' });
+      const r = await Promise.race([
+        answer,
+        new Promise(res => setTimeout(() => res({ ok: false, error: 'the editor did not answer in time' }), wait)),
+      ]);
+      this.#pilots.delete(id);
+      return Response.json({ ...r, via: editors[0].state?.login ?? null, connections: all.length });
+    }
+    return new Response('not found', { status: 404 });
+  }
+
   /** Set synchronously the moment a seed is granted, so two connections
    *  arriving in the same tick cannot both be told to seed. */
   #seedGranted = false;
@@ -140,6 +187,14 @@ export class PrimerRoom extends YServer {
           by: connection.state?.login ?? null,
           baseSha: this.document.getMap('meta').get('baseSha') ?? null,
         }));
+        return;
+      }
+
+      case 'pilot-result': {
+        // The editor's answer to an onRequest /pilot; nobody waiting means
+        // the caller's timeout already spoke, and the answer is dropped.
+        const res = this.#pilots.get(msg.id);
+        if (res) res({ ok: msg.ok === true, error: msg.error ?? null, results: msg.results ?? null });
         return;
       }
 
