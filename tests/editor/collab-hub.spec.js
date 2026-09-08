@@ -764,6 +764,28 @@ test('a comment on a paragraph marks it on the page, and the other editor sees i
   await a.locator('#cpanel-close').click();
 });
 
+test('a wheel over the gutter scrolls the page, as a wheel over the page does', async () => {
+  // Wide, so the panel is a margin beside the page (not the list, which
+  // scrolls itself). Before hubMarginWheel the wheel did nothing here: the
+  // list is overflow:hidden and nothing forwarded, so the page sat still
+  // whenever the pointer crossed the cards.
+  await a.setViewportSize({ width: 1280, height: 720 });
+  await a.locator('#comments').click();
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  const sy = () => a.evaluate("document.getElementById('out').contentWindow.scrollY");
+  await a.evaluate("document.getElementById('out').contentWindow.scrollTo(0, 0)");
+  await expect.poll(sy).toBe(0);
+  const box = await a.locator('#cpanel-list').boundingBox();
+  await a.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await a.mouse.wheel(0, 300);
+  await expect.poll(sy, { timeout: 5_000 }).toBeGreaterThan(100);
+  const down = await sy();
+  await a.mouse.wheel(0, -300);
+  await expect.poll(sy, { timeout: 5_000 }).toBeLessThan(down);
+  await a.locator('#cpanel-close').click();
+});
+
 // --- comments, comprehensively --------------------------------------------------
 // Set on the document, on a paragraph and on an element; resolved and
 // reopened from the OTHER editor; who may delete; a viewer's part; Show;
