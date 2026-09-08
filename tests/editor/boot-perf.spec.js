@@ -35,6 +35,43 @@ test.describe('cold start', () => {
       });
     });
 
+  // The engine's file list is remembered per project; the next open asks for
+  // those files at parse time, ahead of the manifest and Pyodide's block.
+  const engineEntries = (page) => page.evaluate(() => {
+    const r = performance.getEntriesByType('resource');
+    const eng = r.filter(e => /\/engine\/(?!manifest\.json)/.test(e.name));
+    const man = r.find(e => /engine\/manifest\.json/.test(e.name));
+    const counts = {};
+    eng.forEach(e => { const n = e.name.split('/engine/').pop().split('?')[0]; counts[n] = (counts[n] || 0) + 1; });
+    return { counts, firstStart: Math.min(...eng.map(e => e.startTime)), manifestStart: man.startTime, manifestEnd: man.responseEnd,
+             memo: JSON.parse(localStorage.getItem('primer-engine:demo-report') || 'null') };
+  });
+
+  test('the second open asks for the engine files at parse time, each once, and takes them', async ({ page }) => {
+    await gotoEditor(page, DEMO);
+    const first = await engineEntries(page);
+    expect(first.memo && first.memo.files.length).toBeGreaterThan(0);
+    expect(Object.values(first.counts).every(n => n === 1)).toBe(true);
+    expect(first.firstStart).toBeGreaterThan(first.manifestEnd);   // no memo yet: after the manifest, as before
+
+    await gotoEditor(page, DEMO);
+    const second = await engineEntries(page);
+    expect(Object.keys(second.counts).map(k => 'engine/' + k).sort()).toEqual(first.memo.files.slice().sort());
+    expect(Object.values(second.counts).every(n => n === 1)).toBe(true);   // taken, not fetched twice
+    expect(second.firstStart).toBeLessThan(second.manifestEnd);           // out before the manifest is back
+  });
+
+  test('a remembered list the manifest does not match is let go, and the boot is whole', async ({ page }) => {
+    await gotoEditor(page, DEMO);
+    const real = (await engineEntries(page)).memo;
+    await page.evaluate(m => localStorage.setItem('primer-engine:demo-report', JSON.stringify({ base: m.base, files: m.files.concat(['engine/no-such-file.py']) })), real);
+    await gotoEditor(page, DEMO);
+    const e = await engineEntries(page);
+    for (const u of real.files) expect(e.counts[u.replace(/^engine\//, '')]).toBe(2);   // speculated, then fetched for real
+    expect(e.memo.files).toEqual(real.files);   // the list is put right for the next open
+    expect(await page.evaluate('typeof py')).toBe('object');
+  });
+
   test('a boot stores its render as the next boot\'s preview', async ({ page }) => {
     await gotoEditor(page, DEMO);
     await page.waitForTimeout(4000);        // past the store's debounce

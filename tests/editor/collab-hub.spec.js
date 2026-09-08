@@ -214,13 +214,12 @@ test('a fresh editor loads the stored document, not the vendored copy', async ()
     const at = re => performance.getEntriesByType('resource').filter(e => re.test(e.name));
     const store = at(/\/api\/docs\/[^/]+\/(content|layout)$/);
     const meta = at(/\/api\/docs\/[^/?]+$/);
-    const engine = at(/\/engine\/(?!manifest\.json)/);
-    return { content: store.map(e => e.startTime), meta: meta.map(e => e.startTime),
-             engineStart: Math.min(...engine.map(e => e.startTime)) };
+    const live = document.getElementById('out').contentWindow.performance.timeOrigin - performance.timeOrigin;
+    return { content: store.map(e => e.startTime), meta: meta.map(e => e.startTime), live };
   });
   expect(t.content.length).toBe(2);
   expect(Math.max(...t.content) - Math.min(...t.meta)).toBeLessThan(50);   // together, not meta then the rest
-  expect(Math.max(...t.content) - t.engineStart).toBeLessThan(300);        // beside the engine files, not after the boot
+  expect(Math.max(...t.content)).toBeLessThan(t.live);                     // out before the live document, not after the boot
   await page.close();
 });
 
