@@ -625,12 +625,17 @@ test('history: a name given in the panel is kept, shown to the other editor and 
 test('autosave on the hub: a quiet moment after an edit is a Save; not while a paragraph is open; the File menu turns it off', async () => {
   const key = await firstSlot(a);
   const nBefore = (await versions()).length;
-  await a.evaluate("localStorage.setItem('primer-autosave', 'on'); hubAutosaveMenu()");
+  await a.evaluate("localStorage.setItem('primer-autosave', 'on'); hubAutosaveMenu(); hubSaveLabel()");
+  // With autosave on there is nothing to press, so Save is not on the bar at
+  // all and Publish holds the slot beside undo/redo. #stat is what reports the
+  // saving, the whole way through.
+  await expect(a.locator('#save')).toBeHidden();
+  await expect(a.locator('#publish')).toBeVisible();
   await a.evaluate(`docsync.api.setSlot(${JSON.stringify(key)}, "Saved by itself.")`);
-  await expect(a.locator('#save')).toBeEnabled();
+  await expect.poll(() => a.evaluate('dirty'), { timeout: 10_000 }).toBe(true);
   await expect(a.locator('#stat')).toHaveText(/saved automatically/, { timeout: 10_000 });
-  await expect(a.locator('#save')).toBeDisabled();
-  await expect(a.locator('#save')).toHaveText('Saved · just now');
+  await expect.poll(() => a.evaluate('dirty'), { timeout: 10_000 }).toBe(false);
+  await expect(a.locator('#save')).toBeHidden();
   expect((await versions()).length).toBe(nBefore + 1);
   // For the room too: B has it as the saved version, not as unsaved edits.
   await expect.poll(() => slot(b, key), { timeout: 20_000 }).toBe('Saved by itself.');
@@ -642,7 +647,7 @@ test('autosave on the hub: a quiet moment after an edit is a Save; not while a p
   await a.evaluate(`edit(document.getElementById('out').contentDocument, ${JSON.stringify(para)})`);
   await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(true);
   await a.waitForTimeout(3500);
-  await expect(a.locator('#save')).toBeEnabled();
+  await expect.poll(() => a.evaluate('dirty')).toBe(true);
   expect((await versions()).length).toBe(nBefore + 1);
   await a.keyboard.press('Escape');
   await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(false);
@@ -654,6 +659,8 @@ test('autosave on the hub: a quiet moment after an edit is a Save; not while a p
   await a.locator('#file-autosave').click();
   await expect(a.locator('#stat')).toHaveText(/autosave off/);
   expect(await a.evaluate("localStorage.getItem('primer-autosave')")).toBe('off');
+  // …and pressing Save is a real act again, so the button is back on the bar.
+  await expect(a.locator('#save')).toBeVisible();
   // The words put back for the tests after - by hand, autosave being off.
   await a.evaluate(`docsync.api.setSlot(${JSON.stringify(para)}, ${JSON.stringify(was)})`);
   await a.waitForTimeout(2500);
