@@ -1352,6 +1352,69 @@ test('comments: selecting an element with a thread brings its card to hand, popp
   await a.locator('#cpanel-close').click();
 });
 
+// A CLOSED panel opens on a click on something with a thread on it - the
+// badge said there was something to read, the click said "this" - and the
+// card in hand never leaves the gutter: its words scrolled off the top, or
+// not yet up from the bottom, hold it at that edge, in reach.
+test('comments: selecting a thing with a thread opens the closed panel on it, and the card in hand holds at the gutter edge when its words scroll away', async () => {
+  await clearComments();
+  await a.setViewportSize({ width: 1280, height: 720 });
+  const inv = await a.evaluate('docsync.api.inventory()');
+  // A paragraph well down the document, so its words can be scrolled away from.
+  const slots = inv.pages.flatMap(p => p.slots || []).filter(s => s.text && s.text.trim().length > 10);
+  const key = slots[Math.min(slots.length - 1, Math.floor(slots.length / 2))].key;
+  await a.request.post(`${hubAs(ADA_PORT)}${ROOM_URL}/comments`, { data: { anchor: key, text: 'Opens the panel' } });
+  if (await a.locator('#cpanel').isVisible()) await a.locator('#cpanel-close').click();
+  await expect(a.locator('#cpanel')).toBeHidden();
+  await a.evaluate('docsync.api.select(null); hubCommentsLoad()');   // a closed panel polls once a minute; not waiting on that
+  await expect.poll(() => a.evaluate('hubComments.some(c => c.text === "Opens the panel")')).toBe(true);
+  const block = await a.evaluate(`(() => { const el = document.getElementById('out').contentDocument.querySelector('[data-slot="${key}"]'); const b = el && el.closest('[data-el]'); return b ? b.dataset.el : null; })()`);
+  expect(block, 'the paragraph sits in a movable block').toBeTruthy();
+  // Something with no thread on it: the panel stays closed.
+  const other = inv.pages.flatMap(p => p.elements).map(e => e.id).find(id => id !== block);
+  if (other) {
+    expect((await a.evaluate(`docsync.api.select(${JSON.stringify(other)})`)).ok).toBe(true);
+    await a.waitForTimeout(250);
+    await expect(a.locator('#cpanel')).toBeHidden();
+  }
+  // The block with the thread: the panel opens, that card in hand.
+  expect((await a.evaluate(`docsync.api.select(${JSON.stringify(block)})`)).ok).toBe(true);
+  await expect(a.locator('#cpanel')).toBeVisible();
+  await expect(cmtRow(a, 'Opens the panel')).toHaveClass(/active/);
+  await expect(a.locator('#cpanel')).toHaveClass(/margin/);
+  // Where the card in hand stands against the gutter, and its words against the page.
+  const where = () => a.evaluate(`(() => {
+    const el = document.querySelector('#cpanel .cmt.active'); if (!el) return null;
+    const r = el.getBoundingClientRect(), list = document.getElementById('cpanel-list').getBoundingClientRect();
+    const out = document.getElementById('out'), f = out.getBoundingClientRect(), z = f.width / out.clientWidth;
+    const c = hubComments.find(x => x.id === el.dataset.id);
+    const t = hubCommentEl(out.contentDocument, c.anchor).getBoundingClientRect();
+    return { top: r.top, bottom: r.bottom, listTop: list.top, listBottom: list.bottom,
+             wordsTop: f.top + t.top * z, wordsBottom: f.top + t.bottom * z, pageTop: document.getElementById('work').getBoundingClientRect().top, winH: innerHeight };
+  })()`);
+  const inGutter = w => w && w.top >= w.listTop - 1 && w.bottom <= w.listBottom + 1;
+  // The words scrolled off the TOP: the card holds at the top of the gutter.
+  await a.evaluate('const w = document.getElementById("out").contentWindow; w.scrollTo(0, w.document.documentElement.scrollHeight)');
+  await a.waitForTimeout(400);
+  let w = await where();
+  if (w && w.wordsBottom < w.pageTop) {
+    expect(inGutter(w), JSON.stringify(w)).toBe(true);
+    expect(Math.abs(w.top - w.listTop), 'held at the top edge').toBeLessThanOrEqual(2);
+  }
+  // The words not yet up from the BOTTOM: the card holds at the bottom of the gutter.
+  await a.evaluate('document.getElementById("out").contentWindow.scrollTo(0, 0)');
+  await a.waitForTimeout(400);
+  w = await where();
+  if (w && w.wordsTop > w.winH) {
+    expect(inGutter(w), JSON.stringify(w)).toBe(true);
+    expect(Math.abs(w.bottom - w.listBottom), 'held at the bottom edge').toBeLessThanOrEqual(10);
+  }
+  // Still in hand through all of it.
+  await expect(cmtRow(a, 'Opens the panel')).toHaveClass(/active/);
+  await clearComments();
+  await a.locator('#cpanel-close').click();
+});
+
 test('comments: in the margin the new comment is a card at its anchor, a line joins the card in hand to its words, and a resolved thread trails the rest', async () => {
   await clearComments();
   await a.setViewportSize({ width: 1280, height: 720 });
