@@ -203,6 +203,21 @@ test('a fresh editor loads the stored document, not the vendored copy', async ()
   await waitForFirstRender(page);
   expect(await slot(page, key)).toBe(saved);
   expect(await page.evaluate('docVersion')).toBe(await a.evaluate('docVersion'));
+  // The stored files were asked for the moment the store was chosen - all
+  // three at once, beside the engine's own files - not after Pyodide was up,
+  // one after another. (The wasm is no yardstick here: the rig serves it
+  // from cache in tens of milliseconds.)
+  const t = await page.evaluate(() => {
+    const at = re => performance.getEntriesByType('resource').filter(e => re.test(e.name));
+    const store = at(/\/api\/docs\/[^/]+\/(content|layout)$/);
+    const meta = at(/\/api\/docs\/[^/?]+$/);
+    const engine = at(/\/engine\/(?!manifest\.json)/);
+    return { content: store.map(e => e.startTime), meta: meta.map(e => e.startTime),
+             engineStart: Math.min(...engine.map(e => e.startTime)) };
+  });
+  expect(t.content.length).toBe(2);
+  expect(Math.max(...t.content) - Math.min(...t.meta)).toBeLessThan(50);   // together, not meta then the rest
+  expect(Math.max(...t.content) - t.engineStart).toBeLessThan(300);        // beside the engine files, not after the boot
   await page.close();
 });
 
@@ -868,8 +883,15 @@ test('comments: resolved from the other editor, the marker and the count drop ev
   await expect(cmtRow(b, 'runs long').locator('button', { hasText: 'Reopen' })).toBeVisible();
   await expect(cmtCount(b)).toHaveText('2');
   await expect(marker(b, prose)).toHaveCount(0);
-  // A hears it through presence, not a poll.
+  // A hears it through presence, not a poll: within seconds, not at the
+  // fifteen-second poll (and never undone by a poll that was already out).
+  const t0 = Date.now();
   await expect(cmtCount(a)).toHaveText('2', { timeout: 20_000 });
+  expect(Date.now() - t0).toBeLessThan(6_000);
+  await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
+  await a.waitForTimeout(2_500);   // long enough for any poll in flight at the click to answer
+  await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
+  await expect(cmtRow(b, 'runs long')).toHaveClass(/resolved/);
   await expect(marker(a, prose)).toHaveCount(0);
   await expect(cmtRow(a, 'runs long')).toHaveClass(/resolved/);
   const rec = (await allComments()).find(c => c.text.includes('runs long'));
