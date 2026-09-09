@@ -74,9 +74,15 @@ export { deepEqual, toY, docFromY, filesFromY, applyText, syncMap, syncArray, sy
 
 /** Eight colours that stay apart from the editor's own selection green and
  *  from each other; a person keeps theirs across sessions because it hashes
- *  off the login, so "the orange one is Ada" holds from one day to the next. */
+ *  off the login, so "the orange one is Ada" holds from one day to the next.
+ *
+ *  All eight are saturated, on purpose. The set used to end in a brown and a
+ *  blue-grey (#5D4037, #455A64), and the blue-grey is within a shade of the
+ *  slate every Appleseed report is set in: a ring in it around a card drawn
+ *  in that slate was found by reading the DOM, not by looking at the page.
+ *  A presence colour has one job, to be seen against the report. */
 export const PEER_COLORS = [
-  '#D9622B', '#2F6DB5', '#8E44AD', '#C2185B', '#00838F', '#F9A825', '#5D4037', '#455A64',
+  '#D9622B', '#2F6DB5', '#8E44AD', '#C2185B', '#00838F', '#F9A825', '#D32F2F', '#5E35B1',
 ];
 
 export function colorFor(key) {
@@ -98,6 +104,8 @@ function peerOf(clientId, st) {
     slot: st.slot ?? null,      // the slot / element id an inline editor is open on
     drag: !!st.drag,
     cursor: st.cursor ?? null,  // {slot, rel}: a caret in that slot, as a relative position
+    anchor: st.anchor ?? null,  // {slot, rel}: the other end of a text selection, when there is one
+    view: st.view ?? null,      // the page (1-based) in the middle of their window — where they are LOOKING
     agent: st.agent ?? null,    // {by, what, target}: an AI is editing THROUGH this editor right now
     comments: st.comments ?? null,  // when this editor last changed the document's comments (a stamp)
   };
@@ -248,11 +256,16 @@ export class CollabSession {
 
   /* ----------------------------------------------------------- presence */
 
-  /** Publish what this editor is doing: {sel: [ids], page, slot, drag}.
-   *  Only sends when something changed — awareness fans out to everyone. */
+  /** Publish what this editor is doing: {sel: [ids], page, slot, drag, cursor,
+   *  anchor, view, …}. Only sends when something changed — awareness fans out
+   *  to everyone. The fields are named here, not spread, so a stray property
+   *  on the editor's object cannot ride into every collaborator's awareness
+   *  state - which also means a NEW field has to be added here and in peerOf,
+   *  or it is silently dropped at this door (view and anchor were, once). */
   setPresence(p) {
     const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag,
-                   cursor: p.cursor ?? null, agent: p.agent ?? null, comments: p.comments ?? null };
+                   cursor: p.cursor ?? null, anchor: p.anchor ?? null, view: p.view ?? null,
+                   agent: p.agent ?? null, comments: p.comments ?? null };
     const sig = JSON.stringify(next);
     if (sig === this.#lastPresence) return false;
     this.#lastPresence = sig;

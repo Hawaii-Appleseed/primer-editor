@@ -133,6 +133,13 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   owner named, people with faces and roster suggestions, everyone on the
   hub closing the list; fits a phone (primer-editor d2d2446, hub 18c49af).
 
+- 2026-09-09 — Presence where it was blind: a shape or chart a collaborator
+  has in hand is boxed in their colour (it was invisible); a person with
+  nothing selected is "reading page N" in the bar, and a click goes there
+  (they were a bare initial); the words someone has selected are a band, not
+  just a caret; the two neutral peer colours that vanished against the brand
+  slate are gone; name tags 11px on a keyline.
+
 - 2026-09-05 — Presence at a glance: avatars in the bar (initial, colour,
   typing dot, "Ada · typing on page 2" as the title), a click goes to where
   they are, a second click follows them until a gesture, the avatar again,

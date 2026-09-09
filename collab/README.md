@@ -271,9 +271,11 @@ carries what each editor is doing, and every other editor paints it:
 | Field | Set from | Painted as |
 |---|---|---|
 | `login`, `color` | the ticket; colour hashes off the login | a dot per person in the `#collab` chip |
-| `sel` | `selIds` | a ring in their colour on each selected element, with a name tag |
+| `sel` | `selIds` | a ring in their colour on each selected element, with a name tag — an outline on placed HTML, an overlay box (`.ds-peer-box`, as `paintSel` draws one's own) on a shape, chart, icon or line in the page's SVG |
 | `page` | `selPage` (a selected page background) | a halo on that page |
+| `view` | `collabViewPage()` — the page in the middle of their window | nothing on the page; the avatar says *reading page 6* and a click goes there. A person with nothing in hand is still somewhere |
 | `slot` | the inline editor open here (`data-slot` on a paragraph host, `data-el` on a text box, the table cell's id) | `name · typing` on that paragraph, and a coloured bar down its left edge |
+| `cursor`, `anchor` | the caret, and the other end of a text selection when there is one — both as relative positions (Phase 4) | a caret bar; between the two, a translucent band in their colour, one per wrapped line (`.ds-peer-range`) |
 | `drag` | a pointer down on a selection | the tag reads `name · moving` |
 
 The editor publishes from one poll (`collabPresence()`, 4×/s, sent only when
@@ -285,7 +287,11 @@ page-sized viewport (the same reason `paintSel` uses an overlay for shapes).
 
 Colours are **stable, not unique**: a person keeps theirs from one day to
 the next because it hashes off the login, and with eight colours two people
-can share one — the name tag disambiguates. Opening a paragraph a
+can share one — the name tag disambiguates. All eight are saturated: the set
+used to end in a brown and a blue-grey, and the blue-grey was within a shade
+of the slate every Appleseed report is set in — a ring in it was found by
+reading the DOM, not by looking. Name tags are 11px on a pale keyline so a
+word reads over the line of prose it inevitably sits on. Opening a paragraph a
 collaborator is already typing in is allowed (the CRDT merges both) but
 announced in the status row: *grace is also editing this paragraph — both of
 your edits will be kept*. Presence leaves with the person: closing the tab
@@ -294,6 +300,14 @@ for a dropped connection.
 
 `?collabas=<name>` names a local editor in a dev room (two tabs on one
 machine would otherwise both be `local`); local mode only, like `?collab=`.
+
+A new presence field is added in three places or it is silently dropped:
+the editor's `collabPresence()`, the session's `setPresence()` (which names
+the fields it sends, so nothing stray rides into everyone's awareness), and
+`peerOf()`. Tests: `collab.spec.js` — a shape A has in hand is boxed in B and
+goes when she lets go; a reader with nothing in hand is *reading page N* in
+B's bar and a click goes there; the words A selects are a band in B, and a
+caret alone when she collapses it.
 
 ## Phase 4 — the branch underneath, carets, and typing together
 

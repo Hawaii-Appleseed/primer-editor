@@ -238,6 +238,80 @@ test('presence survives a re-render: B\'s ring for A is back after B edits', asy
   await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
 });
 
+test('presence: a shape A has in hand is boxed in B, in her colour, with her name; it goes when she lets go', async () => {
+  // A shape is an SVG child, where a CSS outline would ring the whole page:
+  // the room draws an overlay box at its inch box instead, as paintSel does
+  // for one's own selection. Before this a collaborator resizing a chart was
+  // invisible except for the chart moving on its own.
+  const id = await a.evaluate(`(async () => {
+    const d = document.getElementById('out').contentDocument;
+    pushHistory();
+    const id = freeShapeId('rect');
+    layout.shapes.push({ id, page: visiblePageId(), kind: 'rect', x: 1, y: 1, w: 2, h: 1, z: 3, fill: '#D9622B' });
+    markDirty(); await render();
+    setSel(document.getElementById('out').contentDocument, [id]);
+    return id; })()`);
+  const box = b.frameLocator('#out').locator(`.ds-peer-box[data-for="${id}"]`);
+  await expect(box).toHaveCount(1, { timeout: 10_000 });
+  await expect(box).toHaveAttribute('data-peer', 'ada');
+  const color = await box.evaluate(el => el.style.getPropertyValue('--peer'));
+  expect(color).toMatch(/^#[0-9A-F]{6}$/i);
+  // Sized to the shape: two inches by one, where it was put.
+  expect(await box.evaluate(el => [el.style.left, el.style.top, el.style.width, el.style.height])).toEqual(['1in', '1in', '2in', '1in']);
+  // And the bar can say where she is, and go there - a shape is a place.
+  await expect(b.locator('#collab i[title^="ada"]')).toHaveAttribute('title', /on page \d+\. Click to go there/, { timeout: 10_000 });
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+  await expect(b.frameLocator('#out').locator('.ds-peer-box')).toHaveCount(0, { timeout: 10_000 });
+  // The shape itself goes too, so the tests after this one see the fixture
+  // they were written against.
+  await a.evaluate(`(async () => { layout.shapes = layout.shapes.filter(s => s.id !== ${JSON.stringify(id)}); markDirty(); await render(); })()`);
+});
+
+test('presence: a person with nothing in hand is still somewhere - the page they are reading, and a click goes there', async () => {
+  // Nothing selected, scrolled to the last page: B's avatar used to say
+  // "ada" and nothing else, with nowhere to go. Presence now carries the
+  // page in the middle of her window.
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+  const pages = await a.evaluate(`document.getElementById('out').contentDocument.querySelectorAll('section.page').length`);
+  test.skip(pages < 2, 'this project has one page');
+  await a.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    d.defaultView.scrollTo(0, d.documentElement.scrollHeight); })()`);
+  await expect.poll(() => a.evaluate("collabViewPage(document.getElementById('out').contentDocument)"), { timeout: 5_000 }).toBe(pages);
+  const av = b.locator('#collab i[title^="ada"]');
+  await expect(av).toHaveAttribute('title', new RegExp(`^ada · reading page ${pages}\\. Click to go there`), { timeout: 10_000 });
+  await b.evaluate('document.getElementById("out").contentWindow.scrollTo(0, 0)');
+  await av.click();
+  await expect.poll(() => b.evaluate('document.getElementById("out").contentWindow.scrollY'), { timeout: 10_000 }).toBeGreaterThan(0);
+  await expect(b.locator('#stat')).toHaveText(new RegExp(`ada is reading on page ${pages}`));
+  // Back at the top with something in hand, the sentence changes with her.
+  await a.evaluate(`(() => { const d = document.getElementById('out').contentDocument; d.defaultView.scrollTo(0, 0);
+    setSel(d, ['cover.logo']); })()`);
+  await expect(av).toHaveAttribute('title', /^ada on page 1\. Click to go there/, { timeout: 10_000 });
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+});
+
+test('presence: the words A has selected are a band in her colour in B; a caret alone when she collapses it', async () => {
+  await a.evaluate(`edit(document.getElementById('out').contentDocument, ${JSON.stringify(SLOT)})`);
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  // edit() opens with everything selected: one band (or several, one per
+  // line) in B, and a caret at the focus end.
+  const bands = b.frameLocator('#out').locator(`.ds-peer-range[data-slot="${SLOT}"]`);
+  await expect.poll(() => bands.count(), { timeout: 10_000 }).toBeGreaterThan(0);
+  const first = await bands.first().evaluate(el => ({ peer: el.dataset.peer, color: el.style.getPropertyValue('--peer'), w: parseFloat(el.style.width), h: parseFloat(el.style.height) }));
+  expect(first.peer).toBe('ada');
+  expect(first.color).toMatch(/^#[0-9A-F]{6}$/i);
+  expect(first.w).toBeGreaterThan(0.1);
+  expect(first.h).toBeGreaterThan(0.05);
+  await expect(b.frameLocator('#out').locator(`.ds-peer-caret[data-slot="${SLOT}"]`)).toHaveCount(1);
+  // Collapsed to a caret: the band goes, the caret stays.
+  await collapse(a, 'end');
+  await expect(bands).toHaveCount(0, { timeout: 10_000 });
+  await expect(b.frameLocator('#out').locator(`.ds-peer-caret[data-slot="${SLOT}"]`)).toHaveCount(1);
+  await a.keyboard.press('Escape');
+  await expect.poll(() => a.evaluate('editing'), { timeout: 10_000 }).toBe(false);
+  await expect(b.frameLocator('#out').locator('.ds-peer-caret')).toHaveCount(0, { timeout: 10_000 });
+});
+
 test('typing in a paragraph reaches A while B\'s editor is still open, with B\'s caret; Escape takes it back', async () => {
   const before = await slot(b);
   const el = b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`).first();
