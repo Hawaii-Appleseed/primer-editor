@@ -69,6 +69,8 @@ export class PrimerRoom extends YServer {
    *   GET  …/status   what status() says — is it seeded, who is here
    *   POST …/pilot    {ops, by?, what?, timeout?} — hand pilot ops to ONE
    *                   editor in the room to apply, and wait for its answer
+   *   POST …/ask      {what:'inventory', timeout?} — ask ONE editor about the
+   *                   page it has rendered: where each slot sits, what is cut
    *
    * /pilot is how a person's own Claude, talking to the hub's MCP connector,
    * edits a document that someone has open: the ops are relayed to the first
@@ -115,6 +117,30 @@ export class PrimerRoom extends YServer {
       ]);
       this.#pilots.delete(id);
       return Response.json({ ...r, via: editors[0].state?.login ?? null, connections: all.length });
+    }
+    if (request.method === 'POST' && url.pathname.endsWith('/ask')) {
+      // A question, not a change. The editor is the only thing in the system
+      // that has the page laid out in inches — where a slot sits, what is
+      // falling off the bottom — so the hub asks it rather than guessing.
+      // Answered by any editor here, read-only included: it renders the same
+      // page. Same waiting map as /pilot; the answer is a pilot-result.
+      let body;
+      try { body = await request.json(); } catch { return Response.json({ ok: false, error: 'a JSON body is required' }, { status: 400 }); }
+      const what = typeof body?.what === 'string' ? body.what : '';
+      if (what !== 'inventory') return Response.json({ ok: false, error: `nothing here answers '${what}'` }, { status: 400 });
+      const all = [...this.getConnections()];
+      const who = all.filter(c => c.state?.pilot === true);
+      if (!who.length) return Response.json({ ok: false, reason: all.length ? 'no-pilot' : 'empty', connections: all.length });
+      const id = crypto.randomUUID();
+      const answer = new Promise(res => this.#pilots.set(id, res));
+      const wait = Math.min(Math.max(+body.timeout || 10000, 1000), 30000);
+      this.#send(who[0], { t: 'ask', id, what });
+      const r = await Promise.race([
+        answer,
+        new Promise(res => setTimeout(() => res({ ok: false, error: 'the editor did not answer in time' }), wait)),
+      ]);
+      this.#pilots.delete(id);
+      return Response.json({ ...r, via: who[0].state?.login ?? null, connections: all.length });
     }
     return new Response('not found', { status: 404 });
   }

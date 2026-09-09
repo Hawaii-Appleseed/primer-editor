@@ -392,6 +392,7 @@ export class CollabSession {
     // behalf of a person's own Claude): (msg) => {ok, error?, results?}. When
     // unset, such a message is answered as refused rather than left hanging.
     this.onPilot = o.onPilot || null;
+    this.onAsk = o.onAsk || null;      // answers questions about the rendered page (see 'ask')
     this.presence = o.presence || null;     // polled: () => {sel, page, slot, drag}
     this.debug = !!o.debug;
     this.color = o.color || colorFor(this.login ?? Math.random());
@@ -674,6 +675,16 @@ export class CollabSession {
         this.#set({ seededBy: msg.by ?? null });
         this.#adopt();
         return;
+      case 'ask': {
+        // A question the room relays to one editor — the same waiting map as
+        // /pilot (an ask is a pilot request with nothing to apply), so the
+        // answer comes back as a pilot-result on the same id.
+        const reply = r => this.#send({ t: 'pilot-result', id: msg.id, ...(r || { ok: false, error: 'no answer' }) });
+        if (!this.onAsk) { reply({ ok: false, error: 'this editor does not answer questions' }); return; }
+        Promise.resolve().then(() => this.onAsk(msg)).then(reply,
+          e => reply({ ok: false, error: String((e && e.message) || e) }));
+        return;
+      }
       case 'pilot': {
         // Answer every one, even a refusal: the room is holding a caller on
         // this id and a silence costs them the full timeout.
