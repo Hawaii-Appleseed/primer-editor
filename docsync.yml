@@ -122,6 +122,10 @@ bindings:
     outputs:
       - projects/demo-report/index.html
     editor:
+      # Pages whose renderer calls C.extras() — where a whole new
+      # section may be added. Kept in step with render_report.py by hand.
+      pages:
+        - ["page1", "Page 1"]
       dir: docs/demo
       render: projects/demo-report/render_report.py
       out: projects/demo-report/index.html
@@ -241,6 +245,10 @@ bindings:
     outputs:
       - projects/rxkids-fiscal/index.html
     editor:
+      # Pages whose renderer calls C.extras() — where a whole new
+      # section may be added. Kept in step with render_report.py by hand.
+      pages:
+        - ["page1", "Page 1"]
       dir: docs/rxkids-fiscal
       render: projects/rxkids-fiscal/render_report.py
       out: projects/rxkids-fiscal/index.html
@@ -274,6 +282,10 @@ bindings:
     outputs:
       - projects/dotax-itep/index.html
     editor:
+      # Pages whose renderer calls C.extras() — where a whole new
+      # section may be added. Kept in step with render_report.py by hand.
+      pages:
+        - ["page1", "Page 1"]
       dir: docs/dotax-itep
       render: projects/dotax-itep/render_report.py
       out: projects/dotax-itep/index.html
@@ -371,6 +383,13 @@ bindings:
     outputs:
       - projects/retitc/index.html
     editor:
+      # Pages whose renderer calls C.extras() — where a whole new
+      # section may be added. Kept in step with render_report.py by hand.
+      pages:
+        - ["page1", "Page 1"]
+        - ["page2", "Page 2"]
+        - ["page3", "Page 3"]
+        - ["page4", "Page 4"]
       dir: docs/retitc
       render: projects/retitc/render_report.py
       out: projects/retitc/index.html
