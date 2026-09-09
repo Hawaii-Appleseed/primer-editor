@@ -133,6 +133,16 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   owner named, people with faces and roster suggestions, everyone on the
   hub closing the list; fits a phone (primer-editor d2d2446, hub 18c49af).
 
+- 2026-09-09 — The two edits that could not merge, and the one nobody could
+  see. A text box, a table cell or a chart label changed by two people at once
+  is settled by a person — both versions shown, whose the other is named —
+  instead of by whoever saved last, silently, over words the editor had held
+  back from them (`collab.netFiles()`, and `drainNow()` so that keeping your
+  own writes it after theirs rather than racing it). And on the hub an editor
+  now says WHERE a document changed since this browser last looked: the seen
+  version out of the store's history, diffed, the paragraphs marked, an amber
+  chip that walks them.
+
 - 2026-09-09 — Presence that keeps up: a thing being moved is drawn where the
   person moving it has it, not where the document still has it (the document
   changes at the drop); taking hold of something somebody else has selected

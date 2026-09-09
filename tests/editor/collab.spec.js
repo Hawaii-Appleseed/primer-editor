@@ -373,6 +373,80 @@ test('presence: a tab nobody has touched goes away - dimmed, named as idle, and 
   await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
 });
 
+test('a text box two people edited at once is settled by a person, not by whoever saved last', async () => {
+  // A paragraph merges character by character. A text box's words are a whole
+  // string in layout.json, and the editor holds a collaborator's change back
+  // while such an editor is open (collabBusy) — so B's commit used to write
+  // over words B had never been shown. It cannot merge, so it is asked.
+  const id = await a.evaluate(`(async () => {
+    const d = document.getElementById('out').contentDocument;
+    const b = { id: 'ct' + Date.now().toString(36).slice(-4), page: visiblePageId(),
+                x: 1, y: 4, w: 3, z: 2, md: 'Words we both mean to change' };
+    (layout.boxes = layout.boxes || []).push(b);
+    markDirty(); await render();
+    return b.id; })()`);
+  const boxOf = page => page.evaluate(`((layout.boxes || []).find(x => x.id === ${JSON.stringify(id)}) || {}).md`);
+  await expect.poll(() => boxOf(b), { timeout: 10_000 }).toBe('Words we both mean to change');
+
+  // B opens it and types. While that editor is open B is `busy`: nothing
+  // remote lands.
+  await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    editBox(d, d.querySelector('[data-el="text.${id}"]')); })()`);
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await b.keyboard.press('ControlOrMeta+a');
+  await b.keyboard.type('B rewrote this');
+  // A changes the same box and saves it into the document.
+  await a.evaluate(`(async () => {
+    (layout.boxes || []).find(x => x.id === ${JSON.stringify(id)}).md = 'A rewrote this';
+    markDirty(); await render(); })()`);
+  // A's words are in the room, and B has not seen them: that is the trap.
+  await expect.poll(() => b.evaluate(`(collab.netFiles().layout.boxes.find(x => x.id === ${JSON.stringify(id)}) || {}).md`),
+                    { timeout: 10_000 }).toBe('A rewrote this');
+  expect(await boxOf(b)).toBe('Words we both mean to change');
+
+  // B commits. The question names the other version instead of overwriting it.
+  await b.evaluate("document.getElementById('out').contentDocument.querySelector('.ds-edit').blur()");
+  const dlg = b.locator('.dsdlg-msg');
+  await expect(dlg).toBeVisible({ timeout: 10_000 });
+  await expect(dlg).toHaveText(/changed this text box while you had it open/);
+  await expect(dlg).toHaveText(/A rewrote this/);
+  await expect(dlg).toHaveText(/B rewrote this/);
+  // Keep theirs: B's words are dropped and A's stand, in both editors.
+  await b.locator('.dsdlg-cancel').click();
+  await expect(b.locator('#stat')).toHaveText(/your version was not saved/, { timeout: 10_000 });
+  await expect.poll(() => boxOf(b), { timeout: 15_000 }).toBe('A rewrote this');
+  await expect.poll(() => boxOf(a), { timeout: 15_000 }).toBe('A rewrote this');
+
+  // And the other way: B wins when B says so.
+  await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    editBox(d, d.querySelector('[data-el="text.${id}"]')); })()`);
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await b.keyboard.press('ControlOrMeta+a');
+  await b.keyboard.type('B insisted');
+  await a.evaluate(`(async () => {
+    (layout.boxes || []).find(x => x.id === ${JSON.stringify(id)}).md = 'A moved again';
+    markDirty(); await render(); })()`);
+  await expect.poll(() => b.evaluate(`(collab.netFiles().layout.boxes.find(x => x.id === ${JSON.stringify(id)}) || {}).md`),
+                    { timeout: 10_000 }).toBe('A moved again');
+  await b.evaluate("document.getElementById('out').contentDocument.querySelector('.ds-edit').blur()");
+  await expect(b.locator('.dsdlg-msg')).toBeVisible({ timeout: 10_000 });
+  await b.locator('.dsdlg-ok').click();
+  await expect.poll(() => boxOf(a), { timeout: 15_000 }).toBe('B insisted');
+
+  // A box nobody else touched is committed without a question at all.
+  await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    editBox(d, d.querySelector('[data-el="text.${id}"]')); })()`);
+  await expect.poll(() => b.evaluate('editing'), { timeout: 10_000 }).toBe(true);
+  await b.keyboard.press('ControlOrMeta+a');
+  await b.keyboard.type('Nobody else was here');
+  await b.evaluate("document.getElementById('out').contentDocument.querySelector('.ds-edit').blur()");
+  await expect.poll(() => boxOf(b), { timeout: 10_000 }).toBe('Nobody else was here');
+  await expect(b.locator('.dsdlg-msg')).toHaveCount(0);
+
+  await a.evaluate(`(async () => { layout.boxes = (layout.boxes || []).filter(x => x.id !== ${JSON.stringify(id)});
+    markDirty(); await render(); })()`);
+});
+
 test('typing in a paragraph reaches A while B\'s editor is still open, with B\'s caret; Escape takes it back', async () => {
   const before = await slot(b);
   const el = b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`).first();

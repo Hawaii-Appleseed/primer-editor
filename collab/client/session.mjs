@@ -302,6 +302,41 @@ export class CollabSession {
   /** The document as the two file bodies (+ the parsed layout). */
   files() { return filesFromY(this.shadow); }
 
+  /**
+   * What the ROOM holds right now, including updates still held back from the
+   * shadow because the editor is busy (an open text box, a table cell, a
+   * dialog — see `busy`). `files()` is what the EDITOR is looking at; this is
+   * what everybody else has already agreed on.
+   *
+   * The difference is the whole point: an inline editor whose words live in
+   * layout.json cannot merge a collaborator's edit character by character the
+   * way a paragraph does, so before it writes its value over theirs it has to
+   * be able to SEE theirs — and while it is open, the shadow is by design the
+   * one place that does not have it.
+   */
+  netFiles() { return filesFromY(this.net); }
+
+  /**
+   * Let held updates land NOW, and resolve when nothing is waiting (or the
+   * wait runs out).
+   *
+   * For the moment a person has chosen to write their value over a
+   * collaborator's: theirs has to land FIRST, because two concurrent writes
+   * to one key are resolved by the document and not by the person — whichever
+   * Yjs happens to order last wins, which is exactly the coin toss the
+   * question was asked to replace. Applied after theirs, the choice is the
+   * later write and it stands.
+   */
+  async drainNow(timeoutMs = 3000) {
+    const until = Date.now() + timeoutMs;
+    while (this.#pending.length && Date.now() < until) {
+      this.#drain();
+      if (!this.#pending.length) break;
+      await new Promise(r => setTimeout(r, 30));
+    }
+    return !this.#pending.length;
+  }
+
   /** Start a new undo step at the next local write. */
   mark() { this.undoManager.stopCapturing(); }
   canUndo() { return this.undoManager.canUndo(); }

@@ -401,15 +401,68 @@ undone as this editor's own step (`collabDiscardLive()`), which leaves a
 collaborator's words in the same paragraph standing.
 
 Every other inline editor — a text box, a table cell, a chart label — holds
-its words in layout.json, where a remote edit is a whole-string replace. Those
-still wait. The sources slot waits too: `writeSlot()` validates it line by
-line at the commit, and a half-typed line must not reach the room.
+its words in layout.json, where the smallest thing the document holds is the
+WHOLE string. Those still wait (`collabBusy`), and they cannot merge: the
+second write replaces the first.
+
+**So they are settled by a person rather than by whoever saved last.** That
+loss used to be silent, and doubly so: the editor holds a collaborator's
+change back while such an editor is open, so the person typing was never shown
+the words their commit was about to replace. At the commit the value the ROOM
+holds is compared with the value this editor opened on — `collab.netFiles()`,
+which is `files()`'s twin for exactly this case: the shadow deliberately does
+not have the held update, and the net does. If somebody changed it meanwhile,
+the question names both versions and whose the other one is, and the person
+keeps one (`collabFieldOpen` / `collabFieldSettle` / `collabFieldNote`, which
+says whose words won *after* the render that adopted them — markDirty's own
+line would otherwise be the last word on the row). Opening one of these now
+says "words here cannot be merged, so you will be asked which version to
+keep", where it used to promise both edits would be kept: true of a paragraph,
+and never true here.
+
+**Keeping your own means writing it AFTER theirs**, not instead of theirs: two
+concurrent writes to one key are resolved by the document and not by the
+person, so a write issued while their change was still held could lose to it —
+the very coin toss the question replaced. `collab.drainNow()` lands the held
+update first and the choice goes on top; every caller re-finds what it is
+writing into, because a landed change replaces `layout` wholesale. Caught by
+the full spec run and not by that test on its own: with one test in flight the
+ordering happened to fall the right way.
+
+The sources slot waits too: `writeSlot()` validates it line by line at the
+commit, and a half-typed line must not reach the room.
+
+### What changed while you were away
+
+Two people in one document at the same moment is the exception here; the
+collaboration this staff actually has is asynchronous, and the editor said
+nothing about it. The hub's list page could say a document had CHANGED since
+this browser last looked (it compares the store's version with
+`primer-seen:<room>`) — and inside a forty-paragraph report that fact was
+unusable.
+
+So on the hub, an editor whose `primer-seen:<room>` names a version older than
+the one it just loaded fetches that version's content from the store's
+history, diffs it against what is on screen with the history panel's own
+`hubHistoryDiff()`, and marks the paragraphs that moved. An amber chip in the
+bar counts them, walks them one click at a time, and clears them with its ✕
+(`hubSinceLoad`, `.ds-since`). Silent when there is nothing to say: a first
+visit, a version already seen, a change that was not in the words, or a
+history the store can no longer produce.
+
+Its own class, not the history panel's `.ds-hist-changed`: that one is cleared
+wholesale whenever the panel repaints, and the two marks answer different
+questions.
 
 Tests: `client.test.mjs` — a cursor holds through inserts and deletes around
 it and dies with its slot; `beforeRemote` runs just before a remote update,
 with the old text still in place; a collaborator's Save is announced and our
 own is not; a cursor published by A resolves in B and moves with B's edits.
-`collab.spec.js` — words reach A while B's editor is still open, with B's
+`collab.spec.js` — a text box two people edited at once is settled by a
+person: B is shown both versions and whose the other is, keeping theirs drops
+B's words in both editors, keeping mine writes B's over the change that landed
+meanwhile, and a box nobody else touched commits with no question at all.
+Words reach A while B's
 caret drawn at their end, and Escape takes them back; both editors type in
 the same paragraph at once, each sees the other's words land around its own
 caret, and both keep theirs; a remote edit to another slot lands in B's
