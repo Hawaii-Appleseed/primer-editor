@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Neither Manrope nor Poppins encodes U+02BB, so every ʻokina would fall
+     back to the OS UI font. These one-glyph faces re-encode each family's own
+     U+2018 outline at U+02BB; they must come FIRST in a stack. */
+
+  @font-face { font-family:'OkinaManrope'; font-weight:200 800;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAMAABIAAAAAByQAAAKdAASBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMD9IVkFSNgZgP1NUQVSBAgA0L2oRCAowSTBSATYCJAMICwYABCAFhSwHIAwHG/0FSL4EcIe14O6gCINqRdPe1Ahlo7zcU87Os/rOGdhEBPkXX/W8WfCDPig6x2BOM6LjDS8Eo4uJNWzO+7JjXeEqPDjiAbKe9c1knaweAd46m2CK0kQhGZuAqn1I4TsALXB3AwyA9m8AkyBY+c9ZWELWWQBoWnioPs/NOOL6Vlukl1gvgqX54jlsTI8kD/iELvEbxAeGp5tD5fHgg4jIgmFY/lRB31LL5eBD/RyCClOAoG+r7Rrke9rxn+se+hmT+xE6/j0ImEt991AwX4T9mVBEwN9iPV2tRWtufR0PxfPysd3KLVzhGq0jb+DgV35S3aP+i/By5QOBuk/rGaxURXQFc3WwVLn45PWdwNhi6+3lQKEuAokJAinZigYlTe6hfIxAan7NaJXjYN/G7uw0K0FBg7kawVzVSlRVKB9NqeQbgWCmIuRWn/ofR40JzUqIBBPSTSFbSS8NuYf0U8mvZJAW5TjIMG3Kx2SUDs1KMhaZUkABFcEQMwEVkOHlb2egf82zr+xd6n7/nLkav5X5glVAELBYAYvB0muCvm3X2B/2VzUnrK+Gyqe54EwbXy97+5r9/a9teg33fT8vvPDATTfcdL2gXtu+YJ9njcT+W6rzGXz17jfAD/f0hEti82NraCsgfIffmrjkqRsBs7TkJHmTxVAOwh/Nz1gjtScWklGMLdw33b4K2rZbv58p1CxzHUULQ6fIExR9F6AxthDV0FVomek2tHU9ho7ZnkPXduvRs9bb6NvocwysDwxtznqMrM5hP+TY1pwnsrNxNBGYOLo6OVtILaw87E2AQsMh3u6u130bK2v32mlZWP8SQXdu4+EgE+LQtJ3szaM+qJczifTxmdg66/p8M0GdfJkuhKbW2jTXms5u8u9n2vVOAAAA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:300;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGMAAwAAAAAAygAAAFAAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBLgcgG2sCIC4KY2PZeImq+GNqZRfO1Mslqwjq78W9e5dSK6UDl4qhSt8oFOBMxMIBD1BEPwgw5nYRKUGsPptqS08v1aA0Ot45ERoAo/Zf7mJpFGCqLU8zefEIu8swSjDQALTAAm02mw48ZEGQbILtxajAqHWb4jIYzyNX0A8gMOrIiYZEczc4+tgMdTK8B9XiAgcD5EcOHvI+3vFFCCi66u4pmOI5per/TFcr4Q4E5K7wim2FRMO8JjCvbKOUIH/6dfFfEAGABIVAYQhQgKiasqQav2aKL35AoEKa/jHd0gV+5SLRN/D3/QL+P51YjjfOQhiSIDhxZDzQni8CAJDxAL/sAqkECGnTIDoAhjwTiVIQlplIk5bRLMMLg/YdYtoy1Rmj7qXMTCx1pK2srf3bTtbAyMFcxxZ0p8chR8b2JlKtjwsA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:400;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAF0AAwAAAAAAwgAAAEmAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBEAcgG00CYJ4JdqyWadFs4NF4+G/s230zs6KGWVaTRiikDYVGKWKl4A0/fYnLL8DUREAUrdr/D27FmdLlUpVY6Zc4sZyzwEMWBMkm2V6UCtQbNCw2bt55UK0ClYBAvUWWyIDuvHjp8QrDgXMWnIOSD8S0KtLTdBQ7ch+nrYitUEVbbTu4eY/36VV6Vfr/72K5kx4gIE2mlxhVkJDRKQt0KkZRFEF6VanFs5sFgAQKAgU1gAKIcqL+SMOTD5fPfF8HBEpUL1gw25mWlf/k/Bc+P/8Wfk97pjc+epFeoEYCwYWRMaPXuBcCAJBiBt/0CiRFgJAMq8ZFAFXWy6LUCb0MSpr1UtYLFmHV5pljjxuuue2cve64666/PbDfJVc8ctM59zFvsSUrV2EFAAAA) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:500;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGQAAwAAAAAAywAAAFCAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBMgcgG28CYC4KYyJzHusKrkX24mq+ZaKI9tdFUOz327t3iEkSLUm8kUxaIjaGUKCSCIkhW4Tv85zrb20VAs3jUV5zN51AahTBvTM/W2tg3e4qwNSq/bflaSYvHnmGEQUagBZYnIVJNx3oxuAG02FJWLFUoNusebG9G1fBK2gFBLpt2NIIVn3o7gLzpaYn56Ca8ygw5GMKjvo+rgRxCLTDqIPTKMOXPC/+Xzo1zzUIyOV8AosKiQajGoFRZRGlBPncOov/IgSABIVAoQNQgKjz7kbP5WU/+OcABCra/3afZ6+F8Jenmk94//wBHwdXWPHqjQx0SBC8cI6CZdEbAjozfsAXSyCVACHNa8cDADqcoUR1CZMcSP0m0ZiEF9otWcKgSaJDeh3LjA3NNOXmFhb721pZV9/WRNNKu9tOdHUMbU2jFKQWAQAAAA==) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:600;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAGUAAwAAAAAAzQAAAFGAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBOgcgG3cCYJ4FjnPiVHH1ItFWkQdH+OvH8//ct9/ndpuxlscJD5PGUUahthIPKLCPvwcP/Lh8HwchQVNeYpJQMisU0qIU8kJlvN4DTN1Xtf+2PE0g0BePPMOIAs0tDjDQstlsN3COBYNpYDqsvFVgIS5J7A6tvZhpMAQEFkqqKMH7H3P7dZLQVCRn0KPpGmRAPWFc7+euLq1gio0631o6eJH3dd/R35XZ3qgdCKhtPcKGhoIRrCkC1rQ0NE2gXsMc/N9CAFBAQ6BhCtAA6ZHFwPL2fbLyFCDQMX79uE+46v/MSn3D56ZP+B54SipP/uUdTEkgeGFlKlKy/gkAQKWCrKQIKJoAQkoywgOAqWGKaAtCGAckpzCUMKSGUUEGbmFUPdw6dVixZN2UThs2bfa3Hd3mLNizasq29r6sx5w1SxpsWDWLKdMG6gAAAAA=) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaPoppins'; font-weight:700;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,d09GMgABAAAAAAF0AAwAAAAAAvwAAAEpAAQBBgAAAAAAAAAAAAAAAAAAAAAAAAAAGyAcMAZgADQKHDgBNgIkAwgLBgAEIAWBBAcgG0ECQC8KbFukNzTis868eNV4qB/739m993n8LkmQyJBcmpiVQOgeGlS8MV1DYpj+ifA6QQNrV/7XPiRg6mtBkj49DawlEFMGQUSBJpxagQVadrvH2DAsZTsMowJdk6bFjl0HTmir0AcIdK1YUxo/eOnyk82mBeejVQ9quZ7vNcinGfbrf5yxOQ5BG6/ae2LXYS/zvPr/tUv1bj5EQK7lF8yqSBQMKgKDqllUVZDv+vDwv10CQIKKQEULUAFRT3ZP9r69+W7vIRCo0Rx4tP/z2bb+bZfyB37tK/zmmeV4G+RHoSVB8P1krFu2KToCAJCxTmyxLJCqACFNa+ISgIZtiqgdYZTk1DbKxShYlTXNm3XYTdfdcd4Rd91zj/TQttwtlxpdpRWW+tsM) format('woff2');
+    unicode-range:U+02BB; }
+  @font-face { font-family:'OkinaOpenSans'; font-weight:300 800;
+    font-style:normal; font-display:block;
+    src:url(data:font/woff2;base64,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) format('woff2');
+    unicode-range:U+02BB; }
+
+  body { margin:0; background:#D6E0D2;
+          font:13.5px/1.6 OkinaPoppins, Poppins, system-ui, -apple-system,
+               Arial, sans-serif;
+          color:rgba(47,62,70,.80); }
+
+  /* position:relative is load-bearing: every placed object is absolute
+     against its page, so the page must be the containing block or the whole
+     document stacks at the window's origin. isolation:isolate equally so —
+     it keeps a send-to-back shape above the page's own background. */
+  .page { width:8.5in; min-height:11in; margin:24px auto; background:#FFFFFF;
+           box-shadow:0 4px 18px rgba(0,0,0,.12); padding:0.75in 0.62in;
+           box-sizing:border-box; position:relative; isolation:isolate;
+           overflow:hidden; }
+
+  /* --- Headings. Manrope has no true italic on Google Fonts, so nothing
+         here ever sets font-style:italic on it. ------------------------- */
+  h1, h2, .eyebrow, .klabel, .figcap, .cnum, .pnum {
+      font-family:OkinaManrope, Manrope, system-ui, sans-serif; }
+  .eyebrow { font-size:11px; font-weight:800; letter-spacing:1.6px;
+              text-transform:uppercase; color:#6B9E78; margin:0 0 10px; }
+  h1 { font-size:26px; line-height:1.14; font-weight:800; color:#52796F;
+        margin:0 0 10px; letter-spacing:-.3px; }
+  .cover-h1 { font-size:52px; line-height:1.02; letter-spacing:-1.4px;
+               color:#354F52; margin:0 0 14px; }
+  h2 { font-size:16px; font-weight:800; color:#354F52; margin:20px 0 7px; }
+  .rule { height:4px; width:1.5in; background:#6B9E78; border-radius:2px;
+           margin:0 0 16px; }
+  .deck { font-size:16px; line-height:1.45; font-weight:500; color:#52796F;
+           margin:0 0 16px; max-width:6in; }
+  .lead { font-size:14px; margin:0 0 16px; }
+  .body { font-size:13.5px; margin:0 0 12px; }
+  .lead p, .body p { margin:0 0 9px; }
+  .lead p:last-child, .body p:last-child { margin-bottom:0; }
+  .psub { font-size:14.5px; line-height:1.4; font-weight:500; color:#6B9E78;
+           margin:0 0 15px; max-width:5.4in; }
+  .phead { border-bottom:1px solid #E8EDE6; padding-bottom:11px;
+            margin-bottom:15px; }
+  .klabel { font-size:11px; font-weight:800; letter-spacing:1.4px;
+             text-transform:uppercase; color:#52796F; margin:0 0 9px; }
+
+  /* --- Figures: caption above, source below --------------------------- */
+  .figure { margin:16px 0 18px; }
+  .figcap { font-size:13.5px; font-weight:800; color:#354F52; margin:0 0 9px; }
+  .figsrc { font-size:11.5px; line-height:1.4; color:rgba(47,62,70,.62);
+             margin:9px 0 0; }
+  .figsrc p { margin:0; }
+
+  /* --- The cover's lower band ----------------------------------------- */
+  .twocol { display:flex; gap:18px; align-items:flex-start; margin:18px 0 0; }
+  .twocol > * { flex:1 1 0; min-width:0; }
+  .crow { display:flex; gap:11px; align-items:baseline;
+           padding:7px 0; border-top:1px solid #E8EDE6; }
+  .cnum { font-size:13px; font-weight:800; color:#6B9E78; min-width:20px; }
+  .ctxt { font-size:13px; line-height:1.35; color:#2F3E46; }
+  .cstamp { position:absolute; left:0.62in; bottom:0.55in; font-size:11px;
+             font-weight:600; letter-spacing:1.2px; text-transform:uppercase;
+             color:rgba(47,62,70,.62); }
+
+  /* --- Footers and endnotes ------------------------------------------- */
+  .pfoot { position:absolute; left:0.62in; right:0.62in; bottom:0.5in;
+            display:flex; justify-content:space-between; align-items:baseline;
+            gap:14px; border-top:1px solid #E8EDE6; padding-top:8px; }
+  .pfoot-t { font-size:11.5px; color:rgba(47,62,70,.62); margin:0; }
+  .pfoot-t p { margin:0; }
+  .pnum { font-size:11px; font-weight:800; letter-spacing:1.2px;
+           text-transform:uppercase; color:#52796F; white-space:nowrap; }
+  .endnotes { margin:20px 0 0; padding-top:12px; border-top:1px solid #E8EDE6; }
+  .ds-endnotes { font-size:11.5px; line-height:1.45; color:rgba(47,62,70,.62); }
+  .ds-endnotes a { color:#52796F; text-decoration:none; }
+  .ds-endnotes a:hover { text-decoration:underline; }
+
+  /* --- Prose details --------------------------------------------------- */
+  strong { font-weight:700; color:#2F3E46; }
+  code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size:.92em; background:#E8EDE6; color:#354F52;
+          padding:1px 4px; border-radius:4px; }
+  a { color:#52796F; }
+  sup { font-size:10.5px; line-height:0; }
+  sup a.fn { color:#52796F; text-decoration:none; font-weight:700; }
+  .extra-section h2 { margin-top:18px; }
+  .ds-textbox p { margin:0 0 .5em; }
+  .ds-textbox p:last-child { margin-bottom:0; }
+  .ds-table { border-collapse:collapse; font-size:11.5px; }
+  .ds-table td, .ds-table th { border:1px solid #CAD2C5; padding:4px 7px;
+          text-align:left; }
+
+  /* The sheet is the breakpoint, not a device: below its own width the page
+     can no longer show the design at the size it was composed at. */
+  @media screen and (max-width:8.5in) {
+    .page { width:100%; min-height:0; margin:0; box-shadow:none;
+             padding:26px 20px; }
+    .cover-h1 { font-size:38px; letter-spacing:-.9px; }
+    .twocol { flex-direction:column; gap:14px; }
+    .pfoot, .cstamp { position:static; left:auto; right:auto; bottom:auto;
+                       margin-top:22px; }
+  }
+</style>
+</head>
+<body>
+<style>@page{size:8.5in 11in;margin:0}@media print{*,*::before,*::after{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}body{background:#fff}.noprint{display:none !important}.page{margin:0;box-shadow:none;max-width:none;height:11in;page-break-after:always}.page:last-child{page-break-after:auto}}</style><button type="button" class="noprint" onclick="window.print()" title="Opens your browser's print dialog — choose Save as PDF" style="position:fixed;top:18px;right:18px;z-index:60;background:#52796F;color:#FFFFFF;border:0;border-radius:8px;padding:9px 15px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)">↓&nbsp;Download PDF</button>
+<style>@media screen and (max-width:8.5in){.ds-chart-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;background:linear-gradient(to right,var(--ds-chart-bg,#fff) 30%,rgba(255,255,255,0)) left/22px 100% no-repeat local,linear-gradient(to left,var(--ds-chart-bg,#fff) 30%,rgba(255,255,255,0)) right/22px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(47,62,70,.17),rgba(47,62,70,0)) left/11px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(47,62,70,.17),rgba(47,62,70,0)) right/11px 100% no-repeat scroll}.ds-chart-scroll>svg{min-width:var(--ds-chart-min);margin:0}}</style>
+<section class="page" data-page="1">
+  <div class="eyebrow">HAWAIʻI APPLESEED · STAFF HUB</div>
+  <h1 class="cover-h1">The Toolkit</h1>
+  <div class="rule"></div>
+  <p class="deck">Every tool on the staff hub — what each one is for, how to use it, and why a single Google sign-in covers all of them.</p>
+  <p class="lead">THE STAFF HUB IS ONE WEBSITE with five tabs, and everything in this guide lives on it. There is nothing to install, no second password, and no separate account: you reach it at <b>staff-updates-internal.pages.dev</b>, sign in with your Hawaiʻi Appleseed or Hawaiʻi Budget and Policy Center Google account, and that session lasts about a month.<sup><a class="fn" href="#en1">1</a></sup> The diagram below is the whole system on one page. It is worth two minutes before the tool-by-tool part, because almost every question staff ask about the hub — why did this change appear on its own, why can I edit this, where did my checkbox go — is answered by which half of the diagram the thing lives in.</p>
+  <div class="contents">
+    <div class="klabel">What is in here</div>
+    <div class="crow"><span class="cnum">02</span><span class="ctxt">How it fits together</span></div><div class="crow"><span class="cnum">03</span><span class="ctxt">Updates</span></div><div class="crow"><span class="cnum">04</span><span class="ctxt">Calendar and Tasks</span></div><div class="crow"><span class="cnum">05</span><span class="ctxt">Library, Resources, and search</span></div><div class="crow"><span class="cnum">06</span><span class="ctxt">The report editor</span></div><div class="crow"><span class="cnum">07</span><span class="ctxt">Your own Claude, and what to do when something breaks</span></div>
+  </div>
+  <div class="cstamp">September 2026 · Internal</div>
+</section><section class="page" data-page="2">
+  <div class="phead"><div class="eyebrow">HOW IT FITS TOGETHER</div><h1>One gate, and two speeds</h1><div class="psub">Where the pages come from, where everything you click is kept, and why that distinction is the one worth carrying around.</div></div>
+  <div class="figure"><div class="figcap">Figure 1. How GitHub And Cloudflare Fit Together</div><span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.26in"><div class="ds-chart-scroll" style="--ds-chart-min:687px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 720 316" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="You, in a browser, reach Cloudflare through a Google sign-in gate. Cloudflare serves the pages, answers the API, and stores the live state. GitHub holds the files and a push rebuilds the site.">
+<defs><marker id="d1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#2F3E46"/></marker></defs>
+
+<text x="6" y="15" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#52796F" text-anchor="start" letter-spacing="1.3">YOU</text>
+<text x="168" y="15" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#52796F" text-anchor="start" letter-spacing="1.3">CLOUDFLARE</text>
+<text x="554" y="15" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#52796F" text-anchor="start" letter-spacing="1.3">GITHUB</text>
+
+<rect x="6" y="112" width="110" height="68" rx="8" fill="#CAD2C5"/>
+<text x="61" y="142" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#2F3E46" text-anchor="middle">You, in a</text>
+<text x="61" y="159" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#2F3E46" text-anchor="middle">browser</text>
+
+<line x1="120" y1="146" x2="164" y2="146" stroke="#2F3E46" stroke-width="2"
+      marker-start="url(#d1a)" marker-end="url(#d1a)"/>
+
+<rect x="168" y="24" width="336" height="278" rx="10" fill="#E8EDE6" stroke="#52796F" stroke-width="1.2"/>
+<path d="M 202,24 H 178 A 10,10 0 0 0 168,34 V 292 A 10,10 0 0 0 178,302 H 202 Z" fill="#354F52"/>
+<g transform="rotate(-90 185 163)">
+<text x="185" y="167" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.2">GOOGLE SIGN-IN</text>
+</g>
+
+<rect x="216" y="40" width="276" height="64" rx="8" fill="#FFFFFF" stroke="#95B7A2" stroke-width="1.2"/>
+<text x="230" y="61" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#52796F" text-anchor="start">Cloudflare Pages</text>
+<text x="230" y="79" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="start">Serves every page, script and</text>
+<text x="230" y="94" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="start">image on the hub.</text>
+
+<rect x="216" y="116" width="276" height="58" rx="8" fill="#FFFFFF" stroke="#95B7A2" stroke-width="1.2"/>
+<text x="230" y="137" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#52796F" text-anchor="start">Pages Functions</text>
+<text x="230" y="155" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="start">Answer everything under /api.</text>
+
+<text x="216" y="194" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="700" fill="#52796F" text-anchor="start" letter-spacing="1">WHAT IT REMEMBERS</text>
+<rect x="216" y="200" width="276" height="30" rx="6" fill="#CAD2C5"/><text x="228" y="219.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="#2F3E46" text-anchor="start">KV — checkboxes, tasks, the board</text><rect x="216" y="234" width="276" height="30" rx="6" fill="#CAD2C5"/><text x="228" y="253.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="#2F3E46" text-anchor="start">R2 — every version of every report</text><rect x="216" y="268" width="276" height="30" rx="6" fill="#CAD2C5"/><text x="228" y="287.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="400" fill="#2F3E46" text-anchor="start">Durable Object — the room you co-edit in</text>
+
+<text x="529" y="62" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="700" fill="#2F3E46" text-anchor="middle">push</text>
+<line x1="548" y1="72" x2="508" y2="72" stroke="#2F3E46" stroke-width="2"
+      marker-end="url(#d1a)"/>
+
+<rect x="554" y="24" width="160" height="278" rx="10" fill="#2F3E46"/><text x="566" y="48" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF" text-anchor="start">staff-updates-internal</text><text x="566" y="64" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">private</text><rect x="566" y="76" width="136" height="28" rx="5" fill="#FFFFFF" opacity=".12"/><text x="574" y="94.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="start">The pages you open</text><rect x="566" y="110" width="136" height="28" rx="5" fill="#FFFFFF" opacity=".12"/><text x="574" y="128.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="start">functions/ — the /api</text><rect x="566" y="144" width="136" height="28" rx="5" fill="#FFFFFF" opacity=".12"/><text x="574" y="162.5" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="start">data/*.json</text><line x1="566" y1="190" x2="702" y2="190" stroke="#FFFFFF" stroke-width="1" opacity=".25"/><text x="566" y="212" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">Three more repos feed</text><text x="566" y="227" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">in: the report engine,</text><text x="566" y="242" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">the voting record,</text><text x="566" y="257" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">and the research</text><text x="566" y="272" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#95B7A2" text-anchor="start">corpus.</text>
+</svg></div></span><p class="figsrc">Source: the hub's own README, which documents each binding and the Access policy in full.<sup><a class="fn" href="#en2">2</a></sup></p></div>
+  <h2>What the diagram is saying</h2>
+  <p class="body"><b>GitHub holds the files. Cloudflare serves them and remembers what you do.</b> The pages you open, the code behind them, and the data files they read are all committed to a private GitHub repository. Cloudflare Pages watches that repository and rebuilds the site whenever someone pushes to it, which is why a new feature can appear without anyone sending you a link. Cloudflare also runs the small programs behind `/api` — those are the same files, committed in the repository under `functions/` — and it keeps the things that have to be live: your checkboxes, the task board, the comms board, and every version of every report in the editor. Nothing you click gets committed to GitHub, and nothing in GitHub waits on you.</p>
+  <div style="background:#52796F;color:#fff;position:relative;border-radius:16px;padding:16px 18px;min-height:1.5in"><h4 class="ds-detachable" style="font-size:15px;margin:0 0 8px">Two things worth remembering</h4><div class="ds-detachable"><ul style="margin:0;padding-left:17px"><li style="font-weight:600;margin:4px 0"><b>One gate covers all of it.</b> Cloudflare Access checks your Google sign-in before any page or any `/api` call is answered. That is why nothing here has its own login, and why a link you paste into Slack is safe to paste.</li><li style="font-weight:600;margin:4px 0"><b>Two speeds, on purpose.</b> Pages and code arrive by a push and a rebuild. Checkboxes, tasks, board cards and report edits are saved live and are on everyone else's screen in seconds.</li></ul></div></div>
+  <div class="pfoot"><p class="pfoot-t"><i>How it fits together</i></p><span class="pnum">02 · THE TOOLKIT</span></div>
+</section><section class="page" data-page="3">
+  <div class="phead"><div class="eyebrow">THE FIRST TAB</div><h1>Updates</h1><div class="psub">The all-staff meeting, turned into something you can search and check off — without anyone copying anything across.</div></div>
+  <p class="lead">UPDATES IS THE FIRST TAB and it is the all-staff notes doc, rearranged by topic. Nobody copies anything across. You edit the notes doc as you always have; the hub notices within about a minute and re-renders itself. Bullets are grouped into cards by team, and a heading the parser has not seen before is never dropped — it publishes as its own card in amber, with a note, so drift in the notes doc shows up on the page instead of quietly losing content.</p>
+  <div class="figure"><div class="figcap">Figure 2. How An Edit To The Notes Doc Reaches The Page</div><span class="ds-graphic" style="display:inline-block;vertical-align:middle;line-height:0;width:7.26in"><div class="ds-chart-scroll" style="--ds-chart-min:687px"><svg style="display:block;width:100%;height:auto" viewBox="0 0 720 172" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An edit to the all-staff notes doc is picked up by Apps Script, which both commits it to GitHub and mirrors it live into Cloudflare KV. The Updates page reads whichever arrives first.">
+<defs><marker id="d2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#52796F"/></marker></defs>
+
+<rect x="6" y="56" width="132" height="58" rx="8" fill="#CAD2C5"/>
+<text x="72" y="80" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#2F3E46" text-anchor="middle">The all-staff</text>
+<text x="72" y="96" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#2F3E46" text-anchor="middle">notes doc</text>
+
+<line x1="142" y1="85" x2="172" y2="85" stroke="#52796F" stroke-width="2"
+      marker-end="url(#d2a)"/>
+
+<rect x="176" y="48" width="126" height="74" rx="8" fill="#FFFFFF" stroke="#95B7A2" stroke-width="1.2"/>
+<text x="239" y="76" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#52796F" text-anchor="middle">Apps Script</text>
+<text x="239" y="93" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="middle">watches the doc</text>
+<text x="239" y="108" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="middle">and pushes</text>
+
+<text x="331" y="37" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="rgba(47,62,70,.62)" text-anchor="middle">committed</text>
+<path d="M 306,74 C 330,52 336,44 360,42" fill="none" stroke="#52796F"
+      stroke-width="2" marker-end="url(#d2a)"/>
+<text x="331" y="149" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="rgba(47,62,70,.62)" text-anchor="middle">live</text>
+<path d="M 306,96 C 330,118 336,126 360,128" fill="none" stroke="#52796F"
+      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#d2a)"/>
+
+<rect x="364" y="14" width="160" height="54" rx="8" fill="#2F3E46"/>
+<text x="444" y="36" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#95B7A2" text-anchor="middle">GitHub</text>
+<text x="444" y="53" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="#FFFFFF" text-anchor="middle">data/staff-updates.json</text>
+
+<rect x="364" y="104" width="160" height="54" rx="8" fill="#E8EDE6" stroke="#52796F" stroke-width="1.2"/>
+<text x="444" y="126" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#52796F" text-anchor="middle">Cloudflare KV</text>
+<text x="444" y="143" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="11" font-weight="400" fill="rgba(47,62,70,.80)" text-anchor="middle">the live mirror</text>
+
+<path d="M 528,41 C 548,52 544,68 556,80" fill="none" stroke="#52796F"
+      stroke-width="2" marker-end="url(#d2a)"/>
+<path d="M 528,131 C 548,120 544,104 556,92" fill="none" stroke="#52796F"
+      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#d2a)"/>
+
+<rect x="560" y="56" width="154" height="58" rx="8" fill="#52796F"/>
+<text x="637" y="80" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">The Updates</text>
+<text x="637" y="97" font-family="OkinaManrope, Manrope, system-ui, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">page</text>
+</svg></div></span><p class="figsrc">Source: the README's "live updates mirror" and "Why syncNow takes a lock". The committed copy reaches the page on the next rebuild; the live mirror reaches it in seconds, which is why you rarely wait.<sup><a class="fn" href="#en2">2</a></sup></p></div>
+  <h2>What to do on this page</h2>
+  <p class="body"><b>Check off a bullet</b> and it is checked off for everyone — the box is shared state, not a note to yourself, so use it to mean the thing is done rather than to mark your own place. <b>Open Coming up</b> to see what is dated in the next couple of weeks without leaving the page. <b>Press Command-K</b> (Control-K on Windows) anywhere on the hub for the search palette, which searches meeting bullets, resources, certificates, media, published work, testimony and positions at the same time. If a bullet is worth acting on beyond the meeting, put it on the board rather than leaving it in the notes.</p>
+  <div class="pfoot"><p class="pfoot-t"><i>Updates</i></p><span class="pnum">03 · THE TOOLKIT</span></div>
+</section><section class="page" data-page="4">
+  <div class="phead"><div class="eyebrow">DATES AND WHO IS DOING WHAT</div><h1>Calendar and Tasks</h1><div class="psub">One board, four views, and the dated bullets from the notes arriving on it without anyone entering them twice.</div></div>
+  <h2>One page, four views</h2>
+  <p class="lead">The Calendar tab is one page in four views. <b>Board</b> is To do, In progress and Done; <b>Week</b>, <b>Month</b> and <b>List</b> are the same cards by due date, and every dated or timed bullet from the notes appears there on its own, with no one entering it twice. Underneath the board is the <b>Publishing pipeline</b> — report rollouts and blog posts, live, so a date moving there does not need a rebuild. Drag a card between columns or across days and it moves for everyone.</p>
+  <div style="background:#E8EDE6;color:#2F3E46;position:relative;border-radius:16px;padding:16px 18px;min-height:1.3in"><h4 class="ds-detachable" style="font-size:15px;margin:0 0 8px">Getting the board into your own calendar</h4><div class="ds-detachable"><ul style="margin:0;padding-left:17px"><li style="font-weight:600;margin:4px 0">Open a task and use <b>Add to my Google</b> — it copies into your own Google Calendar or Google Tasks and stays in step, both directions.</li><li style="font-weight:600;margin:4px 0">It is not instant. A change on the board reaches your Google copy on the next tick, up to fifteen minutes later.</li><li style="font-weight:600;margin:4px 0">The <b>Subscribe</b> button hands you a feed URL for the whole board or just your own tasks, for anything that reads calendar subscriptions.</li></ul></div></div>
+  <h2>Calendar subscriptions</h2>
+  <p class="body">The hub can hand out two subscribable calendars — every dated bullet from the notes, and the task board by due date, optionally just your own tasks. Both are off unless switched on, each has its own token, and the Subscribe button only lists the ones that are live. A subscription URL carries its token, so treat it the way you would treat a private calendar link and do not post one in a public channel.</p>
+  <div class="pfoot"><p class="pfoot-t"><i>Calendar and Tasks</i> · <i>Subscriptions</i></p><span class="pnum">04 · THE TOOLKIT</span></div>
+</section><section class="page" data-page="5">
+  <div class="phead"><div class="eyebrow">FINDING THINGS</div><h1>Library, Resources, and search</h1><div class="psub">Everything we have published, everything we have filed, and the one search box that covers both.</div></div>
+  <p class="lead">LIBRARY IS EVERYTHING WE HAVE PUBLISHED and everything we have filed, in one list — the live site feeds plus the research corpus. It replaced two separate tabs that carried the same reports and blog posts at different depths, which meant guessing which one to open. Filter pills narrow the list and always carry their count; jump pills move you down the page. If you are looking for a specific publication, start here.</p>
+  <h2>Resources</h2>
+  <p class="body">Resources is the Drive side: staff documents, the most-linked files, and the <b>Brand and media</b> band — the brand kit, event media and the blog pipeline. The old Media tab redirects here, anchors and search terms intact. Thumbnails for the brand kit are fetched only when you open that fold, so the page stays quick.</p>
+  <h2>Two different searches, and when to use which</h2>
+  <p class="body"><b>Command-K</b> is the fast one: it matches titles and text across every source on the hub at once and is the right reflex when you half-remember something. <b>Content search</b> is the careful one — a hybrid of keyword, meaning and a reranking pass over testimony, blog posts and publications, with a browsable library and positions directory when you type nothing. Use Command-K to find a document you know exists; use content search when you need every place we have said something about a subject.</p>
+  <div style="background:#CAD2C5;color:#2F3E46;position:relative;border-radius:16px;padding:16px 18px;min-height:1.5in"><h4 class="ds-detachable" style="font-size:15px;margin:0 0 8px">Also on the hub, off the nav</h4><div class="ds-detachable"><ul style="margin:0;padding-left:17px"><li style="font-weight:600;margin:4px 0"><b>The voting record</b> — per-legislator Hawaiʻi tax votes, 2022 to 2026, built from the Legislative Research Tool.<sup><a class="fn" href="#en3">3</a></sup> Deliberately not in the nav; it is reachable by its link, and Access gates it like every other page.</li><li style="font-weight:600;margin:4px 0"><b>The certificate and positions data</b> behind the search palette, which is why a Command-K result can be something no tab shows you directly.</li></ul></div></div>
+  <div class="pfoot"><p class="pfoot-t"><i>Library</i> · <i>Resources</i> · <i>Search</i></p><span class="pnum">05 · THE TOOLKIT</span></div>
+</section><section class="page" data-page="6">
+  <div class="phead"><div class="eyebrow">WRITING AND DESIGNING</div><h1>The report editor</h1><div class="psub">Reports, briefs and one-pagers, edited in the browser, by more than one person at a time.</div></div>
+  <p class="lead">THE EDITOR TAB IS A REPORT EDITOR, and the documents in it are real designed sheets rather than flowing pages: 8.5 by 11 inches, with a text column, a figure that can be dragged, and a page count. You edit the words in place, and you move things by selecting them. It runs on this hub rather than somewhere else specifically so that it inherits your Google sign-in — the editor's own authentication is GitHub, and most of the people who need to use it have no GitHub account.<sup><a class="fn" href="#en2">2</a></sup> The engine itself, and the repository a brand-new report gets built in, is primer-editor.<sup><a class="fn" href="#en4">4</a></sup></p>
+  <div style="background:#354F52;color:#fff;position:relative;border-radius:16px;padding:16px 18px;min-height:1.9in"><h4 class="ds-detachable" style="font-size:15px;margin:0 0 8px">The five things to know</h4><div class="ds-detachable"><ul style="margin:0;padding-left:17px"><li style="font-weight:600;margin:4px 0"><b>New document asks what to start from</b>, because a report is its renderer as much as its text. The copy borrows the engine of whatever you pick.</li><li style="font-weight:600;margin:4px 0"><b>Save is a version, and every version is kept.</b> If a document moved underneath you, the save is refused rather than overwriting someone.</li><li style="font-weight:600;margin:4px 0"><b>Command-G groups, Command-Shift-G ungroups.</b> A card's title and bullets move as one until you pull them apart.</li><li style="font-weight:600;margin:4px 0"><b>A folder is only a label.</b> Filing a document does not move it and deleting a folder does not take its documents with it.</li><li style="font-weight:600;margin:4px 0"><b>Take off the list is reversible; Delete for good is not.</b> The Removed shelf at the foot of the page puts anything back.</li></ul></div></div>
+  <h2>Editing at the same time as someone else</h2>
+  <p class="body">Every document has a room, and everyone in it types into the same copy — the way a Google Doc works, cursors and all. The hub shows you who is in a document before you open it. There is no lock and no check-out, so the honest advice is to look at who else is in there before you rearrange pages.</p>
+  <h2>Who can open what</h2>
+  <p class="body"><b>A document nobody has narrowed is editable by everyone who gets through Access</b>, and that is deliberate: the share record exists to restrict a document, never to be the thing that grants access in the first place. Anyone who can edit can also re-share. Sharing outside the two staff domains is not something the dialog can do — a partner organization or a consultant needs a Cloudflare change, so ask rather than assuming it will cover it.</p>
+  <div class="pfoot"><p class="pfoot-t"><i>The report editor</i></p><span class="pnum">06 · THE TOOLKIT</span></div>
+</section><section class="page" data-page="7">
+  <div class="phead"><div class="eyebrow">THE REST</div><h1>Your own Claude, and what to do when something breaks</h1><div class="psub">The thing here that saves the most time, and what to check before reporting something as broken.</div></div>
+  <p class="lead">THE HUB IS AN MCP SERVER, which means your own Claude can read and edit the reports in the editor as you. Nothing gets installed and the hub holds no model key — the subscription you already have does the thinking. It is the fastest way to draft into a report: ask for a section and watch it land, with everyone else in the room watching too.</p>
+  <div style="background:#52796F;color:#fff;position:relative;border-radius:16px;padding:16px 18px;min-height:1.7in"><h4 class="ds-detachable" style="font-size:15px;margin:0 0 8px">Adding it</h4><div class="ds-detachable"><ul style="margin:0;padding-left:17px"><li style="font-weight:600;margin:4px 0"><b>On claude.ai</b> (Pro, Max or Team): Settings, then Connectors, then Add custom connector, and give it the hub's `/api/mcp` address.<sup><a class="fn" href="#en5">5</a></sup></li><li style="font-weight:600;margin:4px 0"><b>In Claude Code</b>: `claude mcp add --transport http hub` followed by the same address.</li><li style="font-weight:600;margin:4px 0"><b>On a Team plan</b> an administrator can add it once for everyone.</li><li style="font-weight:600;margin:4px 0">You will be sent through the ordinary Google sign-in, and everything Claude then does is done as you — it can only reach the documents you can.</li></ul></div></div>
+  <h2>When something looks wrong</h2>
+  <p class="body"><b>If a page will not let you in</b>, the question is almost never permission — everyone on either staff domain is allowed automatically — so check which Google account the browser used first. A stuck session can serve a stale refusal after the cause is fixed; signing out of Access and retrying in a private window clears it. <b>If the Updates page looks stale</b>, give it a minute — there is a five-minute safety net behind the instant path. <b>If a data file looks wrong, do not fix it by hand</b>: the files under `data/` are generated and overwritten. Say something instead, because the fix belongs in the hub's README.<sup><a class="fn" href="#en2">2</a></sup></p>
+  <div class="endnotes">
+    <div class="klabel">Where this is written down</div>
+    <ol class="ds-endnotes" style="padding-left:1.4em;margin:0"><li id="en1" style="margin-bottom:.6em">The staff hub <a href="https://staff-updates-internal.pages.dev" style="word-break:break-all">https://staff-updates-internal.pages.dev</a></li><li id="en2" style="margin-bottom:.6em">Staff Updates (internal) — the hub's README, where every section named in this guide is a heading <a href="https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md" style="word-break:break-all">https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md</a></li><li id="en3" style="margin-bottom:.6em">Legislative-Research-Tool — the source of the voting record <a href="https://github.com/Hawaii-Appleseed/Legislative-Research-Tool" style="word-break:break-all">https://github.com/Hawaii-Appleseed/Legislative-Research-Tool</a></li><li id="en4" style="margin-bottom:.6em">primer-editor — the report engine the Editor tab runs, and the repository new reports are built in <a href="https://github.com/Hawaii-Appleseed/primer-editor" style="word-break:break-all">https://github.com/Hawaii-Appleseed/primer-editor</a></li><li id="en5" style="margin-bottom:.6em">Ask your own Claude — the README section covering the connector, the seven tools, and how an edit lands <a href="https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md" style="word-break:break-all">https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md</a></li></ol>
+  </div>
+  <div class="pfoot"><p class="pfoot-t"><i>Your own Claude</i> · <i>When something breaks</i></p><span class="pnum">07 · THE TOOLKIT</span></div>
+</section>
+</body>
+</html>

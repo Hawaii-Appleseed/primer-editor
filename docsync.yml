@@ -416,3 +416,40 @@ bindings:
       # Must match the .page padding in render_report.py, or the editor's guides
       # sit where the text no longer does.
       margins: [0.55, 0.5]
+
+  # The Toolkit — the internal guide to the staff hub's tools. Not a research
+  # report: documentation of our own tools, so no org boilerplate and the
+  # endnotes point at where each thing is written down.
+  - id: staff-toolkit
+    name: "The Toolkit — staff hub guide"
+    content: projects/staff-toolkit/content.md
+    # The stage half is required: without it the watcher rebuilds the
+    # published page but leaves the staged docs/staff-toolkit/engine/ copy
+    # the in-browser editor actually reads from stale.
+    build: python3 projects/staff-toolkit/render_report.py && python3 -m docsync.stage --id staff-toolkit
+    outputs:
+      - projects/staff-toolkit/index.html
+    editor:
+      # Pages whose renderer calls C.extras() — where a whole new
+      # section may be added. Kept in step with render_report.py by hand.
+      pages:
+        - ["page1", "Cover"]
+        - ["page2", "How it fits together"]
+        - ["page3", "Updates"]
+        - ["page4", "Calendar & Tasks"]
+        - ["page5", "Library, Resources, search"]
+        - ["page6", "The report editor"]
+        - ["page7", "Claude & breakage"]
+      dir: docs/staff-toolkit
+      render: projects/staff-toolkit/render_report.py
+      out: projects/staff-toolkit/index.html
+      layout: projects/staff-toolkit/layout.json
+      # The nine Appleseed brand colours, offered before anything custom —
+      # the palette constants in render_report.py, so a recolour in the
+      # editor stays inside the brand system.
+      palette: ["#FFFFFF", "#6B9E78", "#95B7A2", "#CAD2C5", "#E8EDE6",
+                "#D6E0D2", "#52796F", "#354F52", "#2F3E46"]
+      page: [8.5, 11]
+      # Must match the .page padding in render_report.py, or the editor's
+      # guides sit where the text no longer does.
+      margins: [0.62, 0.75]
