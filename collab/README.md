@@ -276,7 +276,8 @@ carries what each editor is doing, and every other editor paints it:
 | `view` | `collabViewPage()` — the page in the middle of their window | nothing on the page; the avatar says *reading page 6* and a click goes there. A person with nothing in hand is still somewhere |
 | `slot` | the inline editor open here (`data-slot` on a paragraph host, `data-el` on a text box, the table cell's id) | `name · typing` on that paragraph, and a coloured bar down its left edge |
 | `cursor`, `anchor` | the caret, and the other end of a text selection when there is one — both as relative positions (Phase 4) | a caret bar; between the two, a translucent band in their colour, one per wrapped line (`.ds-peer-range`) |
-| `drag` | a pointer down on a selection | the tag reads `name · moving` |
+| `drag`, `boxes` | a pointer down on a selection; the live inch box of each thing being moved | the tag reads `name · moving`, and the box is drawn WHERE THEY HAVE IT — the document does not change until the drop, so without this a two-second drag was two seconds of nothing and then a jump |
+| `idle` | no key, pointer or wheel anywhere in this editor for five minutes | the avatar dims and reads `name · away`, their marks fade, and the chip counts the people who are actually at the document (the title still says the tab is open) |
 
 The editor publishes from one poll (`collabPresence()`, 4×/s, sent only when
 something changed) rather than from hooks at every selection and edit site;
@@ -300,6 +301,12 @@ for a dropped connection.
 
 `?collabas=<name>` names a local editor in a dev room (two tabs on one
 machine would otherwise both be `local`); local mode only, like `?collab=`.
+
+A **move** is the one gesture that cannot merge: both sides write a whole
+value into layout.json, so the last drop wins and the other is simply gone.
+Taking hold of something a collaborator has selected says so
+(`collabWarnHeld`) at the moment it can still be undone. Blocking it would be
+wrong — two people nudging the same figure is ordinary — but silence was too.
 
 A new presence field is added in three places or it is silently dropped:
 the editor's `collabPresence()`, the session's `setPresence()` (which names

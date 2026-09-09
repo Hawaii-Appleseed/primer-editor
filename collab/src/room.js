@@ -329,6 +329,12 @@ export class PrimerRoom extends YServer {
       name: this.name ?? null,
       seeded: this.#seedKnown ? this.#seeded : (await this.ctx.storage.get(KEY_SEEDED)) === true,
       connections: [...this.getConnections()].length,
+      // WHO is here, not just how many: the hub's list page draws a face per
+      // person on a document's tile, and a count cannot say whose. Logins,
+      // deduped (one person with two tabs is one person on the list), and
+      // whatever the door set on the connection - never anything a client
+      // said about itself.
+      here: [...new Set([...this.getConnections()].map(c => c.state?.login).filter(Boolean))],
       blocks: this.document.getArray('blocks').length,
       baseSha: this.document.getMap('meta').get('baseSha') ?? null,
       snapshot: await snapshotMeta(this.ctx.storage),

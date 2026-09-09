@@ -133,6 +133,14 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   owner named, people with faces and roster suggestions, everyone on the
   hub closing the list; fits a phone (primer-editor d2d2446, hub 18c49af).
 
+- 2026-09-09 — Presence that keeps up: a thing being moved is drawn where the
+  person moving it has it, not where the document still has it (the document
+  changes at the drop); taking hold of something somebody else has selected
+  says that a move cannot merge; a tab nobody has touched for five minutes
+  goes idle — dimmed, named as away, and out of the count of who is here.
+  The hub's list page draws a face per person who is in a document right now
+  (`/api/docs?live=1`, one question per room, asked by that page only).
+
 - 2026-09-09 — Presence where it was blind: a shape or chart a collaborator
   has in hand is boxed in their colour (it was invisible); a person with
   nothing selected is "reading page N" in the bar, and a click goes there

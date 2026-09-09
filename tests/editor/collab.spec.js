@@ -312,6 +312,67 @@ test('presence: the words A has selected are a band in her colour in B; a caret 
   await expect(b.frameLocator('#out').locator('.ds-peer-caret')).toHaveCount(0, { timeout: 10_000 });
 });
 
+test('presence: while A moves something, B sees it where A has it - not where the document still has it', async () => {
+  // The document does not change until the drop (renderOnce flushes it), so
+  // before this a two-second drag was two seconds of nothing at the other end
+  // followed by a jump. Presence carries the live geometry instead.
+  const id = await a.evaluate(`(async () => {
+    const d = document.getElementById('out').contentDocument;
+    pushHistory();
+    const id = freeShapeId('rect');
+    layout.shapes.push({ id, page: visiblePageId(), kind: 'rect', x: 1, y: 1.5, w: 2, h: 1, z: 3, fill: '#D9622B' });
+    markDirty(); await render();
+    setSel(document.getElementById('out').contentDocument, [id]);
+    return id; })()`);
+  const box = b.frameLocator('#out').locator(`.ds-peer-box[data-for="${id}"]`);
+  await expect(box).toHaveCount(1, { timeout: 10_000 });
+  // A takes hold and moves it, as startDrag does: inches into layout, painted
+  // as it goes, nothing committed.
+  await a.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    collabPointerAt = Date.now();
+    const sh = layout.shapes.find(s => s.id === ${JSON.stringify(id)});
+    sh.x = 3.5; sh.y = 2.5; paintShape(d, ${JSON.stringify(id)}); })()`);
+  await expect(box).toHaveAttribute('data-peer', /· moving$/, { timeout: 10_000 });
+  await expect.poll(() => box.evaluate(el => [el.style.left, el.style.top]), { timeout: 10_000 })
+    .toEqual(['3.5in', '2.5in']);
+  // B's own copy of the document has NOT moved: that is the point.
+  expect(await b.evaluate(`(layout.shapes.find(s => s.id === ${JSON.stringify(id)}) || {}).x`)).toBe(1);
+  // B reaching for the same thing is told what a move means, since it cannot merge.
+  await b.evaluate(`(() => { const d = document.getElementById('out').contentDocument;
+    setSel(d, [${JSON.stringify(id)}]); collabWarnHeld(${JSON.stringify(id)}); })()`);
+  await expect(b.locator('#stat')).toHaveText(/ada has this selected too — a move is not merged/);
+  // The drop: the document moves, and the box stays where the shape now is.
+  await a.evaluate(`(async () => { collabPointerAt = 0; markDirty(); await render(); })()`);
+  await expect.poll(() => b.evaluate(`(layout.shapes.find(s => s.id === ${JSON.stringify(id)}) || {}).x`), { timeout: 10_000 }).toBe(3.5);
+  await expect(box).toHaveAttribute('data-peer', 'ada', { timeout: 10_000 });
+  await a.evaluate(`(async () => { layout.shapes = layout.shapes.filter(s => s.id !== ${JSON.stringify(id)});
+    clearSel(document.getElementById('out').contentDocument); markDirty(); await render(); })()`);
+  await b.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+});
+
+test('presence: a tab nobody has touched goes away - dimmed, named as idle, and out of the count', async () => {
+  await a.evaluate(`setSel(document.getElementById('out').contentDocument, ['cover.logo'])`);
+  const av = b.locator('#collab i[title^="ada"]');
+  await expect(av).toHaveCount(1, { timeout: 10_000 });
+  await expect(b.locator('#collab')).toHaveText(/● live · 2/, { timeout: 10_000 });
+  // Five minutes without a key, a pointer or a wheel. Reached by moving the
+  // clock this editor keeps, which is what those events set.
+  await a.evaluate('collabActiveAt = Date.now() - COLLAB_IDLE_MS - 1000');
+  await expect(av).toHaveClass(/idle/, { timeout: 10_000 });
+  await expect(av).toHaveAttribute('title', /^ada · away/);
+  // The count is of people who are AT it; the title still says the tab is open.
+  await expect(b.locator('#collab')).toHaveText(/● live · 1/);
+  await expect(b.locator('#collab')).toHaveAttribute('title', /ada has it open, with no input for five minutes/);
+  // Their ring is still there - "ada has this open" is worth knowing - and dimmed.
+  await expect(b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer.ds-peer-idle')).toHaveCount(1);
+  await expect(b.frameLocator('#out').locator('[data-el="cover.logo"].ds-peer')).toHaveAttribute('data-peer', 'ada · away');
+  // A keystroke brings them back.
+  await a.evaluate("window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }))");
+  await expect(av).not.toHaveClass(/idle/, { timeout: 10_000 });
+  await expect(b.locator('#collab')).toHaveText(/● live · 2/);
+  await a.evaluate(`clearSel(document.getElementById('out').contentDocument)`);
+});
+
 test('typing in a paragraph reaches A while B\'s editor is still open, with B\'s caret; Escape takes it back', async () => {
   const before = await slot(b);
   const el = b.frameLocator('#out').locator(`[data-slot="${SLOT}"]`).first();

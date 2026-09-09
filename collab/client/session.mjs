@@ -106,6 +106,8 @@ function peerOf(clientId, st) {
     cursor: st.cursor ?? null,  // {slot, rel}: a caret in that slot, as a relative position
     anchor: st.anchor ?? null,  // {slot, rel}: the other end of a text selection, when there is one
     view: st.view ?? null,      // the page (1-based) in the middle of their window — where they are LOOKING
+    idle: !!st.idle,            // no input for a while: present, but not at the desk
+    boxes: Array.isArray(st.boxes) ? st.boxes : [],  // [{id,x,y,w,h}] in inches: where they are moving something TO
     agent: st.agent ?? null,    // {by, what, target}: an AI is editing THROUGH this editor right now
     comments: st.comments ?? null,  // when this editor last changed the document's comments (a stamp)
   };
@@ -265,6 +267,7 @@ export class CollabSession {
   setPresence(p) {
     const next = { sel: p.sel || [], page: p.page ?? null, slot: p.slot ?? null, drag: !!p.drag,
                    cursor: p.cursor ?? null, anchor: p.anchor ?? null, view: p.view ?? null,
+                   idle: !!p.idle, boxes: p.boxes || [],
                    agent: p.agent ?? null, comments: p.comments ?? null };
     const sig = JSON.stringify(next);
     if (sig === this.#lastPresence) return false;
