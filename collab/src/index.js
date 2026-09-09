@@ -54,11 +54,15 @@ export default {
       return handleAuth(request, env, cors);
     }
 
-    // Everything else is a room. onBeforeConnect runs here, in the Worker,
-    // before any Durable Object is touched — an unauthenticated attempt costs
-    // no DO time at all.
+    // Everything else is a room. The gate runs here, in the Worker, before
+    // any Durable Object is touched — an unauthenticated attempt costs no DO
+    // time at all. BOTH hooks: partyserver runs onBeforeConnect for a
+    // websocket upgrade and onBeforeRequest for plain HTTP, and with only
+    // the first set the room's HTTP side (status, pilot, ask, files) was
+    // open to anyone who could spell a room name.
     const routed = await routePartykitRequest(request, env, {
       onBeforeConnect: (req) => gateConnection(req, env),
+      onBeforeRequest: (req) => gateConnection(req, env),
     });
     if (routed) return routed;
 
@@ -184,7 +188,11 @@ async function handleAuth(request, env, cors) {
  */
 async function gateConnection(req, env) {
   const url = new URL(req.url);
-  const roomName = url.pathname.split('/').filter(Boolean).pop();
+  // /parties/primer-room/<room>[/<route>]: the room is the third segment,
+  // not the last — the room's plain-HTTP side (status, files, pilot, ask)
+  // sits under it, and taking the last segment read "files" as a room name.
+  const parts = url.pathname.split('/').filter(Boolean);
+  const roomName = parts[2];
 
   if (!parseRoom(roomName)) {
     return new Response('bad room name', { status: 400 });
@@ -194,6 +202,14 @@ async function gateConnection(req, env) {
   const payload = await verifyTicket(signingSecret(env), ticket, roomName);
   if (!payload) {
     return new Response('a valid ticket is required — POST /auth first', { status: 401 });
+  }
+  // The HTTP side reads the document as files and hands ops to an editor;
+  // a read-only ticket gets the websocket (it sees the document there too)
+  // and nothing else. The hub reaches these routes through its binding, as
+  // the person Access verified, and never comes this way.
+  const upgrade = (req.headers.get('Upgrade') || '').toLowerCase() === 'websocket';
+  if (!upgrade && payload.ro) {
+    return new Response('a read-only ticket may open the document, not its routes', { status: 403 });
   }
 
   // Hand the verdict to the Durable Object as headers. A received Request has

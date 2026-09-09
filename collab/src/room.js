@@ -30,6 +30,11 @@
 import { YServer } from 'y-partyserver';
 import * as Y from 'yjs';
 import { readSnapshot, writeSnapshot, snapshotMeta } from './persist.js';
+import { filesFromY, writeFiles } from '../ydoc.mjs';
+
+/** The origin of a write the hub makes to a sleeping room (below). Not
+ *  ORIGIN.LOCAL, so no client's UndoManager ever treats it as an undo step. */
+const ORIGIN_STORE = 'collab:store';
 
 const KEY_SEEDED = 'seeded';
 
@@ -71,6 +76,16 @@ export class PrimerRoom extends YServer {
    *                   editor in the room to apply, and wait for its answer
    *   POST …/ask      {what:'inventory', timeout?} — ask ONE editor about the
    *                   page it has rendered: where each slot sits, what is cut
+   *   GET  …/files    the document AS FILES: {content, layout, baseSha, …} —
+   *                   what the room holds, which is the truth whenever it is
+   *                   seeded (the store only ever holds what a room saved)
+   *   POST …/files    {content?, layout?, baseSha?, expect?} — write a room
+   *                   that NOBODY is in, so a Save made straight to the store
+   *                   (the hub's connector, a restore) reaches the copy the
+   *                   next person will be handed. Refused while anyone is
+   *                   connected (`occupied` — use /pilot, an editor is there
+   *                   to apply it) and when `expect.content` is not what the
+   *                   room holds (`moved` — the caller read a stale copy)
    *
    * /pilot is how a person's own Claude, talking to the hub's MCP connector,
    * edits a document that someone has open: the ops are relayed to the first
@@ -113,7 +128,7 @@ export class PrimerRoom extends YServer {
       this.#send(editors[0], { t: 'pilot', id, ops, by: body.by ?? null, what: body.what ?? '' });
       const r = await Promise.race([
         answer,
-        new Promise(res => setTimeout(() => res({ ok: false, error: 'the editor did not answer in time' }), wait)),
+        new Promise(res => setTimeout(() => res({ ok: false, reason: 'timeout', error: 'the editor did not answer in time' }), wait)),
       ]);
       this.#pilots.delete(id);
       return Response.json({ ...r, via: editors[0].state?.login ?? null, connections: all.length });
@@ -137,12 +152,68 @@ export class PrimerRoom extends YServer {
       this.#send(who[0], { t: 'ask', id, what });
       const r = await Promise.race([
         answer,
-        new Promise(res => setTimeout(() => res({ ok: false, error: 'the editor did not answer in time' }), wait)),
+        new Promise(res => setTimeout(() => res({ ok: false, reason: 'timeout', error: 'the editor did not answer in time' }), wait)),
       ]);
       this.#pilots.delete(id);
       return Response.json({ ...r, via: who[0].state?.login ?? null, connections: all.length });
     }
+    if (request.method === 'GET' && url.pathname.endsWith('/files')) {
+      return Response.json({ ok: true, ...this.#files() });
+    }
+    if (request.method === 'POST' && url.pathname.endsWith('/files')) {
+      // A write to a room nobody is in. Why this exists: the room's snapshot
+      // outlives every session, and the first client into a seeded room
+      // ADOPTS what the room holds — so a version saved straight to the
+      // store while the room slept was never seen by anyone, and the next
+      // person's Save (409, then "save over it") destroyed it. The store is
+      // written first by the caller; this brings the room up to it, with
+      // the version as baseSha so that person's next Save carries the right
+      // base. Check-and-set on the content the caller read, and no await
+      // between the checks and the write: a Durable Object runs one task at
+      // a time, so nobody can connect in between.
+      let body;
+      try { body = await request.json(); } catch { return Response.json({ ok: false, error: 'a JSON body is required' }, { status: 400 }); }
+      const all = [...this.getConnections()];
+      if (all.length) return Response.json({ ok: false, reason: 'occupied', connections: all.length });
+      const cur = this.#files();
+      if (!cur.blocks) {
+        // Nothing here to bring up to date: whoever seeds next seeds from
+        // the store, which the caller has already written.
+        return Response.json({ ok: true, applied: false, reason: 'unseeded', ...cur });
+      }
+      const expect = body?.expect && typeof body.expect === 'object' ? body.expect : null;
+      if (expect && typeof expect.content === 'string' && expect.content !== cur.content) {
+        return Response.json({ ok: false, reason: 'moved', ...cur });
+      }
+      const content = typeof body?.content === 'string' ? body.content : cur.content;
+      const layout = typeof body?.layout === 'string' ? body.layout : cur.layout;
+      const baseSha = typeof body?.baseSha === 'string' && body.baseSha ? body.baseSha : null;
+      try {
+        this.document.transact(() => {
+          writeFiles(this.document, { content, layout });
+          if (baseSha) this.document.getMap('meta').set('baseSha', baseSha);
+        }, ORIGIN_STORE);
+      } catch (e) {
+        return Response.json({ ok: false, error: 'the files could not be written: ' + String((e && e.message) || e) }, { status: 400 });
+      }
+      // Persist now rather than trusting the debounce: the whole point is
+      // that the next person, whenever they come, is handed this.
+      await this.onSave();
+      return Response.json({ ok: true, applied: true, ...this.#files() });
+    }
     return new Response('not found', { status: 404 });
+  }
+
+  /** The document as the two files, plus what a caller deciding whether to
+   *  trust them needs: whether the room was ever seeded, how many blocks it
+   *  holds (0 = nothing here, the store is the truth), who is in it. */
+  #files() {
+    const blocks = this.document.getArray('blocks').length;
+    const base = { seeded: this.#seeded, blocks, connections: [...this.getConnections()].length,
+                   baseSha: this.document.getMap('meta').get('baseSha') ?? null };
+    if (!blocks) return { ...base, content: null, layout: null };
+    const f = filesFromY(this.document);
+    return { ...base, content: f.content, layout: f.layoutText };
   }
 
   /** Set synchronously the moment a seed is granted, so two connections

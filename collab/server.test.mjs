@@ -18,6 +18,7 @@ import http from 'node:http';
 import * as Y from 'yjs';
 import YProvider from 'y-partyserver/provider';
 import { mintTicket, verifyTicket, parseRoom, formatRoom } from './src/auth.js';
+import { writeFiles, filesFromY } from './ydoc.mjs';
 import { startDev } from './devserver.mjs';
 
 const DEV_SECRET = 'dev-only-insecure-secret';
@@ -284,6 +285,76 @@ describe('end to end', { skip: E2E ? false : 'COLLAB_E2E=0' }, () => {
       await disconnect(b);
     });
 
+    test('the room reads and writes its document as files while it sleeps', async () => {
+      // The store-side fix: a Save made straight to the hub's store while
+      // nobody is in the room has to reach the room's copy, or the next
+      // person in adopts the older one and their Save destroys it.
+      const room = uniqueRoom('files');
+      const content = '[[cover.title]]\nBudget Primer\n\n[[page1.intro]]\nAn introduction.\n\n[[sources]]\n[a]: A source. — https://e.org/\n';
+      const layout = { positions: {}, shapes: [], sections: {} };
+
+      // Nothing here yet: the store is the truth, and the room says so.
+      let r = await roomHttp(room, 'files');
+      assert.equal(r.status, 200);
+      let j = await r.json();
+      assert.equal(j.ok, true);
+      assert.equal(j.blocks, 0);
+      assert.equal(j.content, null);
+
+      // A writer seeds it, as the first browser does.
+      const a = await connect(room, 'ada');
+      a.doc.transact(() => {
+        writeFiles(a.doc, { content, layout });
+        a.doc.getMap('meta').set('baseSha', 'v1');
+      });
+      await waitFor(async () => (await (await roomHttp(room, 'files')).json()).blocks === 3, 10_000,
+        'the room never showed the seeded blocks');
+      j = await (await roomHttp(room, 'files')).json();
+      assert.equal(j.content, content, 'the room hands back the file byte for byte');
+      assert.equal(j.baseSha, 'v1');
+      assert.equal(j.connections, 1);
+
+      // While someone is in it, a write is refused: an editor is there to apply it.
+      r = await roomHttp(room, 'files', { content: content.replace('An introduction.', 'Changed.'), baseSha: 'v2' });
+      j = await r.json();
+      assert.equal(j.ok, false);
+      assert.equal(j.reason, 'occupied');
+
+      await disconnect(a);
+      await sleep(800);
+
+      // Written against a stale read: refused, and the current copy comes back.
+      r = await roomHttp(room, 'files', { content: 'x', expect: { content: 'not what it holds' } });
+      j = await r.json();
+      assert.equal(j.ok, false);
+      assert.equal(j.reason, 'moved');
+      assert.equal(j.content, content);
+
+      // Written against what it holds: applied, persisted, and the next
+      // person in is handed it, base and all.
+      const next = content.replace('An introduction.', 'A better introduction.');
+      r = await roomHttp(room, 'files', { content: next, baseSha: 'v2', expect: { content } });
+      j = await r.json();
+      assert.equal(j.ok, true);
+      assert.equal(j.applied, true);
+      assert.equal(j.content, next);
+      const b = await connect(room, 'grace');
+      await waitFor(() => b.doc.getArray('blocks').length === 3, 15_000, 'grace never received the document');
+      assert.equal(filesFromY(b.doc).content, next);
+      assert.equal(b.doc.getMap('meta').get('baseSha'), 'v2');
+      await disconnect(b);
+
+      // A read-only ticket gets the socket, not the routes; no ticket gets
+      // nothing — the HTTP side is gated exactly like the upgrade.
+      const ro = await ticketFor(room, { login: 'guest', ro: true });
+      r = await fetch(`http://${HOST}/parties/primer-room/${room}/files?ticket=${encodeURIComponent(ro)}`);
+      assert.equal(r.status, 403);
+      r = await fetch(`http://${HOST}/parties/primer-room/${room}/files`);
+      assert.equal(r.status, 401);
+      r = await fetch(`http://${HOST}/parties/primer-room/${room}/status`);
+      assert.equal(r.status, 401);
+    });
+
     test('a read-only ticket cannot change the document', async () => {
       const room = uniqueRoom('readonly');
       const writer = await connect(room, 'ada');
@@ -347,6 +418,15 @@ function rawUpgrade(path) {
   });
 }
 
+/** The room's plain-HTTP side through the Worker, as a writer: GET with no
+ *  body, POST with one. */
+async function roomHttp(room, route, body) {
+  const t = await ticketFor(room);
+  return fetch(`http://${HOST}/parties/primer-room/${room}/${route}?ticket=${encodeURIComponent(t)}`, body
+    ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }
+    : {});
+}
+
 const ticketFor = (room, over = {}) =>
   mintTicket(DEV_SECRET, { room, login: 'tester', ro: false, exp: now() + 120, ...over });
 
@@ -402,7 +482,7 @@ const slotText2 = (doc, key) => doc.getText(key);
 async function waitFor(pred, ms, message) {
   const deadline = Date.now() + ms;
   while (Date.now() < deadline) {
-    if (pred()) return;
+    if (await pred()) return;
     await sleep(100);
   }
   throw new Error(message || 'condition never became true');
