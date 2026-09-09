@@ -308,6 +308,12 @@ Taking hold of something a collaborator has selected says so
 (`collabWarnHeld`) at the moment it can still be undone. Blocking it would be
 wrong — two people nudging the same figure is ordinary — but silence was too.
 
+The room says WHO is in it (`status.here`), not only how many: the hub's list
+page draws a face per person on a document's tile, and a count cannot say
+whose. It asks `/api/collab/here?rooms=…` there — never the document store,
+which enumerates only what has been SAVED and so would have left out the
+documents somebody is most likely to be in.
+
 A new presence field is added in three places or it is silently dropped:
 the editor's `collabPresence()`, the session's `setPresence()` (which names
 the fields it sends, so nothing stray rides into everyone's awareness), and

@@ -139,7 +139,11 @@ Ground rules for whoever picks this up (a person or the 6 am session):
   says that a move cannot merge; a tab nobody has touched for five minutes
   goes idle — dimmed, named as away, and out of the count of who is here.
   The hub's list page draws a face per person who is in a document right now
-  (`/api/docs?live=1`, one question per room, asked by that page only).
+  (`/api/collab/here?rooms=…`, one question per room, asked by that page only),
+  which wanted `status.here` from the room — deployed. And the service
+  worker's shell rule now matches Pages' clean URLs, without which every open
+  of `/primer/edit` was answered from cache: the fix that made all of this
+  visible on the hub at all.
 
 - 2026-09-09 — Presence where it was blind: a shape or chart a collaborator
   has in hand is boxed in their colour (it was invisible); a person with
