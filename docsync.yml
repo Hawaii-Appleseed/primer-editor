@@ -442,6 +442,7 @@ bindings:
         - ["page7", "Library, Resources, search"]
         - ["page8", "The report editor"]
         - ["page9", "Claude & breakage"]
+        - ["page10", "Connectors, CLI, MCP, plugins"]
       dir: docs/staff-toolkit
       render: projects/staff-toolkit/render_report.py
       out: projects/staff-toolkit/index.html

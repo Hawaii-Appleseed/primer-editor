@@ -429,6 +429,100 @@ Cloudflare KV. The Updates page reads whichever arrives first.">
 </svg>"""
 
 
+# ── Figure 5: connectors, the CLI, MCP servers and plugins ─────────────────
+# Four words people use as if they were four alternatives. They are not, and
+# the geometry is the argument: the server is ONE box on the right, both
+# doors point at it, and the plugin is a container drawn underneath rather
+# than a fourth door — because it is not one.
+#
+# The `.mcp.json` chip is filled rather than outlined for the same reason the
+# Access gate is filled in Figure 3: it is the one part of the bundle that is
+# the same thing as the box above it, and that overlap is the whole confusion
+# the figure exists to end.
+PLUGIN_PARTS = ["skills", "agents", "hooks", "commands",
+                ".mcp.json", "LSP servers", "monitors"]
+
+
+def _chips(x0, y, parts) -> str:
+    out, x = [], x0
+    for p in parts:
+        w = 5.6 * len(p) + 22
+        overlap = p == ".mcp.json"
+        out.append(_box(x, y, w, 24, fill=DEEP if overlap else WHITE,
+                        stroke="" if overlap else MID, r=5))
+        out.append(_t(x + 11, y + 16.5, p, size=11,
+                      fill=WHITE if overlap else INK,
+                      weight="700" if overlap else "400"))
+        x += w + 8
+    return "".join(out)
+
+
+def diagram_stack() -> str:
+    return f"""<svg viewBox="0 0 720 344" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="One MCP server with two doors onto it. claude.ai \
+reaches it through a Connector added in Settings; Claude Code, the CLI, \
+reaches the same server with claude mcp add --transport http. Both arrows \
+point at a single box: the MCP server, one address and one protocol, which \
+for this hub is slash api slash mcp. Signing in to Claude Code with a \
+claude.ai account makes your connectors appear there too. Underneath, a \
+plugin is drawn as a container rather than a third door: it is Claude Code \
+only, installed from a marketplace, and it bundles skills, agents, hooks, \
+commands, an .mcp.json, LSP servers and monitors — the .mcp.json inside it \
+being itself an MCP server.">
+<defs>{_marker("f5a", INK)}{_marker("f5b", DEEP)}</defs>
+
+{_t(6, 16, "ONE SERVER, AND TWO DOORS ONTO IT", size=12, fill=DEEP,
+    weight="700", track=1.3)}
+
+{_box(6, 36, 164, 58, fill=SAGE, r=8)}
+{_t(88, 58, "claude.ai", size=12, fill=INK, weight="700", anchor="middle")}
+{_t(88, 76, "Pro, Max or Team", size=11, fill=INK, anchor="middle")}
+
+{_box(6, 116, 164, 58, fill=SAGE, r=8)}
+{_t(88, 138, "Claude Code", size=12, fill=INK, weight="700", anchor="middle")}
+{_t(88, 156, "the CLI, in a terminal", size=11, fill=INK, anchor="middle")}
+
+<line x1="174" y1="65" x2="202" y2="65" stroke="{INK}" stroke-width="2"
+      marker-end="url(#f5a)"/>
+<line x1="174" y1="145" x2="202" y2="145" stroke="{INK}" stroke-width="2"
+      marker-end="url(#f5a)"/>
+
+{_box(206, 36, 190, 58, fill=WHITE, stroke=MID, r=8)}
+{_t(218, 58, "A Connector", size=12, fill=DEEP, weight="700")}
+{_t(218, 76, "Settings, then Connectors", size=11, fill=BODY_INK)}
+
+{_box(206, 116, 190, 58, fill=WHITE, stroke=MID, r=8)}
+{_t(218, 138, "claude mcp add", size=12, fill=DEEP, weight="700")}
+{_t(218, 156, "--transport http", size=11, fill=BODY_INK)}
+
+<path d="M 400,65 C 418,65 418,88 430,88" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f5b)"/>
+<path d="M 400,145 C 418,145 418,122 430,122" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f5b)"/>
+
+{_box(434, 56, 280, 98, fill=DEEP, r=10)}
+{_t(574, 86, "The MCP server", size=13, fill=WHITE, weight="700",
+    anchor="middle")}
+{_t(574, 106, "one address, one protocol", size=11, fill=PALE,
+    anchor="middle")}
+{_t(574, 128, "this hub: /api/mcp", size=11, fill=PALE, anchor="middle")}
+
+{_t(206, 192, "Sign in to Claude Code with your claude.ai account and your \
+connectors appear there too.", size=11, fill=MUTE_INK)}
+
+{_t(6, 218, "A PLUGIN IS NOT A DOOR — IT IS A BUNDLE", size=12, fill=DEEP,
+    weight="700", track=1.3)}
+{_box(6, 234, 708, 104, fill=PALE, stroke=DEEP, r=10)}
+{_t(20, 258, "Claude Code only, and installed from a marketplace", size=12,
+    fill=DEEP, weight="700")}
+{_chips(20, 272, PLUGIN_PARTS)}
+{_t(20, 316, "The .mcp.json inside it is an MCP server — that is the whole \
+overlap. A plugin can carry one,", size=11, fill=MUTE_INK)}
+{_t(20, 332, "along with everything a connector cannot.", size=11,
+    fill=MUTE_INK)}
+</svg>"""
+
+
 # ── Sheet furniture ─────────────────────────────────────────────────────────
 def head(pre: str, page_no: int) -> str:
     """A content page's eyebrow, title and standfirst."""
@@ -464,7 +558,7 @@ def contents_rows() -> str:
         f'<div class="crow"{L.attr(f"cover.contents.{n}")}>'
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
-        for n in ("02", "03", "04", "05", "06", "07", "08", "09"))
+        for n in ("02", "03", "04", "05", "06", "07", "08", "09", "10"))
 
 
 PAGE1 = f"""
@@ -565,19 +659,28 @@ PAGE9 = f"""
   {foot("p7.foot", 9)}
 """
 
+PAGE10 = f"""
+  {head("pmcp", 10)}
+  {figure("figstack.h", "figstack.note", "fig.stack", diagram_stack())}
+  <h2{L.attr("stack.read.h")}>{C.t("stack.read.h")}</h2>
+  {C.html("stack.read.p", "body")}
+  {foot("pmcp.foot", 10)}
+"""
+
 # The endnotes get their own sheet. Seven of them plus two sections no longer
 # fit on page 9, and the alternative was shaving real sentences to buy a
 # quarter inch — see primer/CLAUDE.md on measuring, not guessing.
-PAGE10 = f"""
+PAGE11 = f"""
   <div class="endnotes endnotes-own">
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("pend.foot", 10)}
+  {foot("pend.foot", 11)}
 """
 
 DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
-            6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10}
+            6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10,
+            11: PAGE11}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in

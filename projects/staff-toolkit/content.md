@@ -392,6 +392,52 @@ instead.[^readme]
 [[p7.foot]]
 *Your own Claude* · *When something breaks*
 
+[[pmcp.eyebrow]]
+FOUR WORDS FOR NEARLY ONE THING
+
+[[pmcp.h1]]
+Connectors, the CLI, MCP servers and plugins
+
+[[pmcp.sub]]
+Three of these are the same machinery seen from different places. The fourth
+is a bundle that can contain it.
+
+[[pmcp.foot]]
+*Connectors, the CLI, MCP servers and plugins*
+
+[[figstack.h]]
+Figure 5. What Each Of The Four Actually Is
+
+[[figstack.note]]
+Sources: Anthropic's own documentation on custom connectors, on MCP in Claude
+Code, and on creating plugins.[^connectors][^ccmcp][^plugins]
+
+[[stack.read.h]]
+### Telling them apart
+
+[[stack.read.p]]
+**The MCP server is the thing itself** — one address speaking one protocol.
+This hub is one, at `/api/mcp`, and everything below is a way of reaching it.
+
+**A connector and `claude mcp add` are two doors onto that same server.** On
+claude.ai you add a connector under Settings; in Claude Code you run `claude
+mcp add --transport http`. Same server, same address, different app — and if
+you signed in to Claude Code with your claude.ai account, the connectors you
+added there are already available. Anthropic verifies the pre-built
+connectors, Google Workspace and the like; a **custom** connector is any
+remote MCP server that has not been through that, which is what this hub is.
+
+**A plugin is not a door.** It is a bundle, it is Claude Code only, and it is
+installed from a marketplace: skills, agents, hooks, commands, LSP servers,
+background monitors — and, if it wants one, an `.mcp.json`. That last part is
+an MCP server, which is the whole reason these four words get muddled. The
+useful test: if you are trying to reach one service, you want a connector or
+`claude mcp add`. If you are trying to hand somebody a working setup, you want
+a plugin.
+
+[[cover.contents.10]]
+Connectors, the CLI, MCP servers and plugins
+
 [[pend.foot]]
 *Where this is written down*
 
@@ -408,4 +454,7 @@ Where this is written down
 [legis]: Legislative-Research-Tool — https://github.com/Hawaii-Appleseed/Legislative-Research-Tool
 [models]: Anthropic, Models overview — https://platform.claude.com/docs/en/models/overview
 [cost]: Anthropic, Optimizing for cost and intelligence — https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence
+[connectors]: Anthropic, About custom connectors — https://support.claude.com/en/articles/11175166-about-custom-connectors-remote-mcp
+[ccmcp]: Anthropic, MCP in Claude Code — https://code.claude.com/docs/en/mcp
+[plugins]: Anthropic, Create plugins — https://code.claude.com/docs/en/plugins
 [mcp]: "Ask your own Claude", in the README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
