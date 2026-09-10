@@ -95,7 +95,106 @@ def _marker(mid, fill) -> str:
             f'<path d="M0,1 L9,5 L0,9 z" fill="{fill}"/></marker>')
 
 
-# ── Figure 1: GitHub — the repositories, a project, and the public one ──────
+# ── Figure 1: the three models, and what effort buys ───────────────────────
+# Every number here is Anthropic's published measurement, not ours, and the
+# two panels are the whole reason the figure exists: effort is a real
+# accuracy/cost tradeoff on long coding work and very nearly a no-op on
+# research work, so "turn it up" is not general advice.
+#
+# The accuracy axis runs 0-100 and is NOT truncated. A zoomed axis would make
+# 84.0 against 91.7 look like a chasm; the honest picture is two bars of
+# similar length beside a cost that quadrupled, and the takeaway line under
+# each panel carries the point the bars are too close to shout.
+#
+# Opus 5's medium row is the one derived figure: the source gives "about 2
+# points at medium for half the cost" against a 91.7% / $1.01 default, so it
+# is shown as approximate and figmodels.note says where it comes from.
+MODELS = [
+    (6, "Claude Fable 5.1", "$10 / $50 per MTok", "slower",
+     "Demanding reasoning and", "long-horizon agentic work", False),
+    (246, "Claude Opus 5", "$5 / $25 per MTok", "moderate",
+     "Complex agentic coding —", "start here for most work", True),
+    (486, "Claude Sonnet 5", "$2 / $10 per MTok", "fast",
+     "The best combination of", "speed and intelligence", False),
+]
+
+# label, percent, percent label, cost label, is_default
+CODING = [("low", 84.0, "84.0%", "$0.25", False),
+          ("medium", 89.7, "≈90%", "≈$0.50", False),
+          ("high", 91.7, "91.7%", "$1.01", True)]
+RESEARCH = [("low", 66.0, "66%", "$4.66", False),
+            ("medium", 66.0, "≈66%", "—", False),
+            ("high", 66.0, "≈66%", "$7.12", True)]
+
+
+def _model_card(x, name, price, speed, use1, use2, default) -> str:
+    ink = WHITE if default else DEEP
+    body = PALE if default else BODY_INK
+    mute = PALE if default else MUTE_INK
+    use = WHITE if default else BODY_INK
+    box = (_box(x, 34, 228, 112, fill=DEEP, r=8) if default
+           else _box(x, 34, 228, 112, fill=WHITE, stroke=MID, r=8))
+    tx = x + 14
+    return "".join([
+        box,
+        _t(tx, 58, name, size=12.5, fill=ink, weight="700"),
+        _t(tx, 78, price, size=11, fill=body),
+        _t(tx, 94, speed, size=11, fill=mute),
+        _t(tx, 116, use1, size=11, fill=use),
+        _t(tx, 132, use2, size=11, fill=use),
+    ])
+
+
+def _effort_panel(x, title, claim, source, rows, takeaway) -> str:
+    tx = x + 14
+    track_x = x + 84
+    out = [_box(x, 182, 346, 172, fill=PALE, stroke=DEEP, r=8),
+           _t(tx, 204, title, size=12, fill=DEEP, weight="700"),
+           _t(tx, 221, claim, size=11, fill=BODY_INK),
+           _t(tx, 237, source, size=11, fill=MUTE_INK)]
+    for i, (label, pct, pct_s, cost, is_default) in enumerate(rows):
+        y = 250 + i * 26
+        out += [
+            _t(tx, y + 13, label, size=11, fill=INK,
+               weight="700" if is_default else "400"),
+            _box(track_x, y, 152, 18, fill=WHITE, r=4),
+            _box(track_x, y, 152 * pct / 100.0, 18,
+                 fill=DEEP if is_default else TEAL, r=4),
+            _t(track_x + 166, y + 13, pct_s, size=11, fill=INK),
+            _t(x + 338, y + 13, cost, size=11, fill=MUTE_INK, anchor="end"),
+        ]
+    out.append(_t(tx, 338, takeaway, size=11, fill=DEEP, weight="700"))
+    return "".join(out)
+
+
+def diagram_models() -> str:
+    return f"""<svg viewBox="0 0 720 366" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="Three Claude models with their prices and what each is \
+for: Fable 5.1 at ten and fifty dollars per million tokens for demanding \
+reasoning and long-horizon agentic work, Opus 5 at five and twenty-five for \
+complex agentic coding and the place to start for most work, and Sonnet 5 at \
+two and ten for the best combination of speed and intelligence. Below, two \
+panels show what raising the effort level buys. On long coding work, Opus 5 \
+scores 84.0 percent at low effort for 25 cents a task and 91.7 percent at the \
+default for a dollar one — eight points and four times the cost. On research \
+work, Fable 5.1 scores about 66 percent at low, medium and high alike while \
+the cost per task rises from 4 dollars 66 to 7 dollars 12.">
+
+{_t(6, 16, "THE THREE MODELS", size=12, fill=DEEP, weight="700", track=1.3)}
+{"".join(_model_card(*m) for m in MODELS)}
+
+{_t(6, 172, "EFFORT, AND WHAT IT BUYS", size=12, fill=DEEP, weight="700",
+    track=1.3)}
+{_effort_panel(6, "Long coding work", "effort buys accuracy",
+               "SWE-bench Pro subset · Opus 5", CODING,
+               "8 points and 4× the cost, low to default")}
+{_effort_panel(368, "Research work", "it buys almost nothing",
+               "DeepResearch Bench II · Fable 5.1", RESEARCH,
+               "the same score, $4.66 → $7.12 a task")}
+</svg>"""
+
+
+# ── Figure 2: GitHub — the repositories, a project, and the public one ──────
 # One figure per provider, because the combined three-column version made the
 # reader hold GitHub and Cloudflare in their head at once to answer either
 # question. This one answers "where does the code live and what does Claude
@@ -201,7 +300,7 @@ Publish commits an edited report back onto a hub branch.">
 </svg>"""
 
 
-# ── Figure 2: Cloudflare — the gate, and the four things it keeps ───────────
+# ── Figure 3: Cloudflare — the gate, and the four things it keeps ───────────
 # Access is drawn as a NODE both arrows pass through, not as a band down the
 # side of the Cloudflare box: a band would also have been crossed by the
 # rebuild that Pages pulls from GitHub, and that pull carries no Access check
@@ -283,7 +382,7 @@ of them, and a Durable Object is the room where live co-editing happens.">
 </svg>"""
 
 
-# ── Figure 3: the notes pipeline ────────────────────────────────────────────
+# ── Figure 4: the notes pipeline ────────────────────────────────────────────
 def diagram_notes() -> str:
     return f"""<svg viewBox="0 0 720 172" xmlns="http://www.w3.org/2000/svg" \
 role="img" aria-label="An edit to the all-staff notes doc is picked up by \
@@ -365,7 +464,7 @@ def contents_rows() -> str:
         f'<div class="crow"{L.attr(f"cover.contents.{n}")}>'
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
-        for n in ("02", "03", "04", "05", "06", "07", "08"))
+        for n in ("02", "03", "04", "05", "06", "07", "08", "09"))
 
 
 PAGE1 = f"""
@@ -382,52 +481,58 @@ PAGE1 = f"""
   <div class="cstamp"{L.attr("cover.stamp")}>{C.t("cover.stamp")}</div>
 """
 
+# The models sheet, first after the cover. Slots are prefixed `peval`/`eval`
+# and the figure is `figmodels`, not `fig1` — same rule as the Cloudflare
+# sheet below: a slot key is an identity, and the CAPTION carries the figure
+# number. So fig1.h reads "Figure 2." and that is correct, not a leftover.
 PAGE2 = f"""
-  {head("p2", 2)}
+  {head("peval", 2)}
+  {figure("figmodels.h", "figmodels.note", "fig.models", diagram_models())}
+  <h2{L.attr("eval.read.h")}>{C.t("eval.read.h")}</h2>
+  {C.html("eval.read.p", "body")}
+  {foot("peval.foot", 2)}
+"""
+
+PAGE3 = f"""
+  {head("p2", 3)}
   {figure("fig1.h", "fig1.note", "fig.github", diagram_github())}
   <h2{L.attr("cover.read.h")}>{C.t("cover.read.h")}</h2>
   {C.html("cover.read.p", "body")}
-  {foot("p2.foot", 2)}
+  {foot("p2.foot", 3)}
 """
 
-# The Cloudflare sheet. Its slots are prefixed `pcf`/`cf` and not `p3`,
-# deliberately: a slot key is an IDENTITY, the way sheet()'s data-page is, and
-# renaming p3..p7 to p4..p8 to insert one page would have renamed twenty-odd
-# keys in a document people already have open — every one of them a slot the
-# live room would no longer recognise. The page NUMBER is the argument to
-# head() and foot(), and that is the only place it belongs.
-PAGE3 = f"""
-  {head("pcf", 3)}
+PAGE4 = f"""
+  {head("pcf", 4)}
   {figure("fig2.h", "fig2.note", "fig.cloudflare", diagram_cloudflare())}
   <h2{L.attr("cf.read.h")}>{C.t("cf.read.h")}</h2>
   {C.html("cf.read.p", "body")}
   {card(C, L, "cover.card.title", "cover.card.bullets", DEEP,
         detachable=True, min_h=1.4)}
-  {foot("pcf.foot", 3)}
+  {foot("pcf.foot", 4)}
 """
 
-PAGE4 = f"""
-  {head("p3", 4)}
+PAGE5 = f"""
+  {head("p3", 5)}
   {C.html("updates.p", "lead")}
   {figure("fig3.h", "fig3.note", "fig.notes", diagram_notes())}
   <h2{L.attr("updates.how.h")}>{C.t("updates.how.h")}</h2>
   {C.html("updates.how.p", "body")}
-  {foot("p3.foot", 4)}
+  {foot("p3.foot", 5)}
 """
 
-PAGE5 = f"""
-  {head("p4", 5)}
+PAGE6 = f"""
+  {head("p4", 6)}
   <h2{L.attr("cal.h")}>{C.t("cal.h")}</h2>
   {C.html("cal.p", "lead")}
   {card(C, L, "cal.card.title", "cal.card.bullets", PALE,
         detachable=True, min_h=1.3)}
   <h2{L.attr("subs.h")}>{C.t("subs.h")}</h2>
   {C.html("subs.p", "body")}
-  {foot("p4.foot", 5)}
+  {foot("p4.foot", 6)}
 """
 
-PAGE6 = f"""
-  {head("p5", 6)}
+PAGE7 = f"""
+  {head("p5", 7)}
   {C.html("lib.p", "lead")}
   <h2{L.attr("res.h")}>{C.t("res.h")}</h2>
   {C.html("res.p", "body")}
@@ -435,11 +540,11 @@ PAGE6 = f"""
   {C.html("search.p", "body")}
   {card(C, L, "search.card.title", "search.card.bullets", SAGE,
         detachable=True, min_h=1.5)}
-  {foot("p5.foot", 6)}
+  {foot("p5.foot", 7)}
 """
 
-PAGE7 = f"""
-  {head("p6", 7)}
+PAGE8 = f"""
+  {head("p6", 8)}
   {C.html("ed.p", "lead")}
   {card(C, L, "ed.card.title", "ed.card.bullets", DARK,
         detachable=True, min_h=1.9)}
@@ -447,25 +552,32 @@ PAGE7 = f"""
   {C.html("ed.rooms.p", "body")}
   <h2{L.attr("ed.share.h")}>{C.t("ed.share.h")}</h2>
   {C.html("ed.share.p", "body")}
-  {foot("p6.foot", 7)}
+  {foot("p6.foot", 8)}
 """
 
-PAGE8 = f"""
-  {head("p7", 8)}
+PAGE9 = f"""
+  {head("p7", 9)}
   {C.html("mcp.p", "lead")}
   {card(C, L, "mcp.card.title", "mcp.card.bullets", DEEP,
         detachable=True, min_h=1.7)}
   <h2{L.attr("broke.h")}>{C.t("broke.h")}</h2>
   {C.html("broke.p", "body")}
-  <div class="endnotes">
+  {foot("p7.foot", 9)}
+"""
+
+# The endnotes get their own sheet. Seven of them plus two sections no longer
+# fit on page 9, and the alternative was shaving real sentences to buy a
+# quarter inch — see primer/CLAUDE.md on measuring, not guessing.
+PAGE10 = f"""
+  <div class="endnotes endnotes-own">
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("p7.foot", 8)}
+  {foot("pend.foot", 10)}
 """
 
 DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
-            6: PAGE6, 7: PAGE7, 8: PAGE8}
+            6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in

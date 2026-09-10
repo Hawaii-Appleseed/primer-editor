@@ -32,15 +32,12 @@ THE STAFF HUB IS ONE WEBSITE with five tabs, and everything in this guide
 lives on it. There is nothing to install, no second password, and no separate
 account: you reach it at **staff-updates-internal.pages.dev**, sign in with
 your Hawaiʻi Appleseed or Hawaiʻi Budget and Policy Center Google account, and
-that session lasts about a month.[^hub] The next two pages draw the whole
-system: GitHub, where the code and the reports are kept, and Cloudflare, which
-serves them and remembers what you do. They are worth two minutes before the
-tool-by-tool part, because almost every question anyone asks about the hub —
-why did this change appear on its own, why can I edit this, why has the
-repository not got my edit in it — is answered by which of the two the thing
-lives in.
+that session lasts about a month.[^hub] The next page is about choosing a
+Claude model, because that is the decision most of us make most often. The two
+after it draw the hub itself: GitHub, where the code and the reports are kept,
+and Cloudflare, which serves them and remembers what you do.
 [[fig1.h]]
-Figure 1. What Is In GitHub, And What Of It Is Public
+Figure 2. What Is In GitHub, And What Of It Is Public
 [[fig1.note]]
 Fifteen of the sixteen repositories are private. The public one is the
 website's, and the two feeds GitHub Pages serves from it are what the hub's
@@ -81,8 +78,7 @@ The gate in front of everything, and the four places your work is kept.
 *Where it all runs*
 
 [[fig2.h]]
-Figure 2. Cloudflare — One Gate, And Four Stores Behind It
-
+Figure 3. Cloudflare — One Gate, And Four Stores Behind It
 [[fig2.note]]
 Nothing in this diagram touches GitHub: Pages is rebuilt by a push, but every
 other arrow here is live. Source: the README's "Shared checkboxes", "The live
@@ -100,6 +96,47 @@ version of every one of them; and **the room**, where two people editing the
 same report see each other type. One gate covers all of it: Access checks your
 Google sign-in before anything is answered, including the call your own Claude
 makes over MCP, which is why that needs no GitHub account.
+[[peval.eyebrow]]
+CHOOSING A MODEL
+
+[[peval.h1]]
+Three models, and what effort costs
+
+[[peval.sub]]
+Start with Opus 5. Turn the effort up for long coding work, and leave it alone
+for everything else.
+
+[[peval.foot]]
+*Choosing a model*
+
+[[figmodels.h]]
+Figure 1. The Three Models, And What Raising The Effort Buys
+
+[[figmodels.note]]
+Every figure is Anthropic's own published measurement. The SWE-bench Pro
+scores are a subset both models largely saturate and are not comparable to the
+public leaderboard. Opus 5's `medium` row is derived from the source's "about
+2 points at `medium` for half the cost" against its 91.7% / $1.01 default, and
+is marked approximate for that reason.[^models][^cost]
+
+[[eval.read.h]]
+### What to take from this
+
+[[eval.read.p]]
+**Start with Opus 5.** It is the one to reach for on most work, and on the
+coding subset above it matched Fable 5.1 at the default — 91.7% against 92.1%,
+inside run-to-run noise — for about 15% less per solved task. Go to **Fable
+5.1** for demanding reasoning and long-horizon agentic work, or when Opus 5 at
+a higher effort still falls short. Go to **Sonnet 5** when speed and volume
+matter more than the last few points.
+
+**Effort is not a dial to leave turned up.** On long coding work it buys real
+accuracy: Opus 5 gives up about 8 points at `low` and about 2 at `medium`, for
+a quarter and a half of the cost. On research and knowledge work the curve is
+nearly flat — Fable 5.1 scored about the same at `low`, `medium` and `high`
+while the cost per task went from $4.66 to $7.12. The default is `high` on all
+three models, so the saving is in turning it **down** where it buys nothing.
+
 [[cover.contents.h]]
 ### What is in here
 
@@ -113,18 +150,20 @@ the one public repository is the one the Library is built from.
 [[p2.foot]]
 *Where the work is kept*
 [[cover.contents.02]]
-What is in GitHub, and what is public
+Three models, and what effort costs
 [[cover.contents.03]]
-What Cloudflare keeps
+What is in GitHub, and what is public
 [[cover.contents.04]]
-Updates
+What Cloudflare keeps
 [[cover.contents.05]]
-Calendar and Tasks
+Updates
 [[cover.contents.06]]
-Library, Resources, and search
+Calendar and Tasks
 [[cover.contents.07]]
-The report editor
+Library, Resources, and search
 [[cover.contents.08]]
+The report editor
+[[cover.contents.09]]
 Your own Claude, and what to do when something breaks
 
 [[p3.eyebrow]]
@@ -146,8 +185,7 @@ never dropped — it publishes as its own card in amber, with a note, so drift
 in the notes doc shows up on the page instead of quietly losing content.
 
 [[fig3.h]]
-Figure 3. How An Edit To The Notes Doc Reaches The Page
-
+Figure 4. How An Edit To The Notes Doc Reaches The Page
 [[fig3.note]]
 Source: the README's "live updates mirror" and "Why syncNow takes a lock". The
 committed copy reaches the page on the next rebuild; the live mirror reaches it
@@ -325,11 +363,9 @@ everyone else in the room watching too.
 ### Adding it
 
 [[mcp.card.bullets]]
-- **On claude.ai** (Pro, Max or Team): Settings, then Connectors, then Add custom connector, and give it the hub's `/api/mcp` address.[^mcp]
+- **On claude.ai** (Pro, Max or Team): Settings, then Connectors, then Add custom connector, and give it the hub's `/api/mcp` address — on a Team plan an administrator can add it once for everyone.[^mcp]
 - **In Claude Code**: `claude mcp add --transport http hub` followed by the same address.
-- **On a Team plan** an administrator can add it once for everyone.
 - You will be sent through the ordinary Google sign-in, and everything Claude then does is done as you — it can only reach the documents you can.
-
 [[subs.h]]
 ### Calendar subscriptions
 
@@ -347,16 +383,17 @@ channel.
 [[broke.p]]
 **If a page will not let you in**, the question is almost never permission —
 everyone on either staff domain is allowed automatically — so check which
-Google account the browser used first. A stuck session can serve a stale
-refusal after the cause is fixed; signing out of Access and retrying in a
-private window clears it. **If the Updates page looks stale**, give it a
-minute — there is a five-minute safety net behind the instant path. **If a
-data file looks wrong, do not fix it by hand**: the files under `data/` are
-generated and overwritten. Say something instead, because the fix belongs in
-the hub's README.[^readme]
-
+Google account the browser used. A stuck session can serve a stale refusal
+after the cause is fixed; sign out of Access and retry in a private window.
+**If Updates looks stale**, give it a minute: there is a five-minute safety
+net behind the instant path. **If a data file looks wrong, do not fix it by
+hand** — everything under `data/` is generated and overwritten. Say something
+instead.[^readme]
 [[p7.foot]]
 *Your own Claude* · *When something breaks*
+
+[[pend.foot]]
+*Where this is written down*
 
 [[foot.running]]
 THE TOOLKIT
@@ -366,7 +403,9 @@ Where this is written down
 
 [[sources]]
 [hub]: The staff hub — https://staff-updates-internal.pages.dev
-[readme]: Staff Updates (internal) — the hub's README, where every section named in this guide is a heading — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
-[primer-editor]: primer-editor — the report engine the Editor tab runs, and the repository new reports are built in — https://github.com/Hawaii-Appleseed/primer-editor
-[legis]: Legislative-Research-Tool — the source of the voting record — https://github.com/Hawaii-Appleseed/Legislative-Research-Tool
-[mcp]: Ask your own Claude — the README section covering the connector, the seven tools, and how an edit lands — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
+[readme]: The hub's README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
+[primer-editor]: primer-editor, the report engine — https://github.com/Hawaii-Appleseed/primer-editor
+[legis]: Legislative-Research-Tool — https://github.com/Hawaii-Appleseed/Legislative-Research-Tool
+[models]: Anthropic, Models overview — https://platform.claude.com/docs/en/models/overview
+[cost]: Anthropic, Optimizing for cost and intelligence — https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence
+[mcp]: "Ask your own Claude", in the README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
