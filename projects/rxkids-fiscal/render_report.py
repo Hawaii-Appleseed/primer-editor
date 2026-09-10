@@ -421,8 +421,7 @@ def linkify_footnotes(markup: str, count: int) -> str:
     return re.sub(r"<sup>(.*?)</sup>", repl, markup, flags=re.S)
 
 
-page = f"""
-<section class="page">
+INNER = f"""
   <div class="eyebrow"{L.attr("hero.eyebrow")}>{C.t("hero.eyebrow")}</div>
   {L.spacer("hero.h1")}<h1{L.attr("hero.h1")}>{C.t("hero.h1")}</h1>
   {C.html("hero.standfirst", "standfirst")}
@@ -457,9 +456,33 @@ page = f"""
   {C.html("footer.note", "foot")}
 
   <div class="endnotes"><span class="srch"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</span>{ENDNOTES_SLOT}</div>
-{C.extras("page1")} {L.layer(1)}{L.text_boxes(1)}{L.tables_html(1)}
-</section>
-"""
+{C.extras("page1")}"""
+
+# Every sheet, in order: this page, then any blank page added in the editor.
+# Going through L.page_order() plus L.pagemeta() is what lets the page strip
+# offer "+ Page" and reordering — the editor withholds both from a renderer
+# that never declared its pages, since an order nothing reads draws nothing.
+DESIGNED_PAGES = 1
+
+
+def sheet(pid):
+    """One <section class="page">: this report's markup for the designed page,
+    empty for a blank page added in the editor.
+
+    data-page carries the page's IDENTITY, which stops matching its position
+    the moment the order can be changed.
+    """
+    inner = INNER if pid == DESIGNED_PAGES else ""
+    return (f'<section class="page" data-page="{pid}"{L.fill_attr(f"page.{pid}")}>'
+            f'{inner}'
+            # Inside the section: .page is the positioning context every placed
+            # element is measured against, so as siblings they sat a box out.
+            f'{L.layer(pid)}{L.text_boxes(pid)}{L.tables_html(pid)}'
+            f'</section>')
+
+
+page = ("".join(sheet(pid) for pid in L.page_order(DESIGNED_PAGES))
+        + L.pagemeta(range(1, DESIGNED_PAGES + 1)))
 
 body = C.fn.resolve(page)
 en = "".join(endnote_link(i + 1, sid, txt, url)

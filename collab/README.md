@@ -588,6 +588,15 @@ What differs for an editor served there, and nothing else does:
   nothing. Measured warm on 2026-09-05 (Chrome, fast link): the demo report
   is live 4.7s after navigation, the budget primer 3.7s; every network fetch
   is done by ~3.5s and the rest is Pyodide's start and the first render.
+  **`/api/` is network-only there** (since 2026-09-10, `primer-shell-v8`), and
+  so is any request that says `{cache:'no-store'}`. Before, the hub's API fell
+  through to the worker's generic same-origin branch — cache-first,
+  revalidated behind — so every poll of a document's comments answered with
+  the poll before it: a suggestion showed up on the other editors a poll
+  late (fifteen seconds with the panel open, a minute without), and a thread
+  resolved a moment ago came back open from the stale copy until the poll
+  after cleared it again. The hub's own pages had been evicting the entry by
+  hand before each `hubFetch` GET; the editor never did.
 - Its registry entry says `"collab": {"path": "/api/collab", "me": "/api/me"}`
   instead of `"url"`. `collabDoor()` in `edit.html` returns the one or the
   other; on a path the editor mints no ticket and asks for no token — the
@@ -825,7 +834,15 @@ letting people change it:
   paragraph editor strips before it opens), a dashed outline on an element
   to move or change — and the card says "Replace … with …" / "Move X"
   with Accept and Reject for an editor, Withdraw for whoever suggested it.
-  Accepting applies the change through the editor's own path (`writeSlot`,
+  The card and the marks appear the moment the quiet spell ends — drawn from
+  what was done here, as a `.pending` card the way a new comment's is, while
+  the POST runs alongside the revert render; the hub's answer takes the
+  card's place (a refusal takes it away and says so), and the panel is not
+  polled for what it was just handed. A proposal whose change already stands
+  in the document is not drawn: an Accept reaches the other editors through
+  the room before the hub says the thread is decided, and in that gap the
+  new words would have shown twice, once as the paragraph and once more in
+  green after it. Accepting applies the change through the editor's own path (`writeSlot`,
   the layout entry, one `pushHistory`, one render, so it is one ⌘Z and
   reaches the room like any edit), after saying so when the paragraph was
   rewritten since. A **viewer** is put in Suggesting and kept there: the

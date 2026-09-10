@@ -137,7 +137,7 @@ test('the hub lists the project and links into its editor', async () => {
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
   // The nav's own entry, lit.
   await expect(page.locator('.site-nav a[aria-current="page"]')).toHaveText(/Editor/);
-  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href$="project=${PROJECT}"]`);
   await expect(tile).toBeVisible();
   // Named from docsync.yml (`name:`), not the id.
   await expect(tile).toContainText('Demo report');
@@ -1031,7 +1031,7 @@ test('comments: they survive a reload, and the list page counts the open ones', 
   await expect(page.locator('#cpanel .cmt')).toHaveCount(1);
   await expect(page.locator('#cpanel .cmt-sep', { hasText: '1 resolved' })).toBeVisible();
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 open comments');
+  await expect(page.locator(`#list a.tile[href$="project=${PROJECT}"]`)).toContainText('2 open comments');
   await page.close();
   await clearComments();
   for (const p of [a, b]) { if (await p.locator('#cpanel').isVisible()) await p.locator('#cpanel-close').click(); }
@@ -1627,7 +1627,7 @@ test('suggestions: Accept all applies every one; the list page and the Editor ta
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toContainText('2 suggested');
+  await expect(page.locator(`#list a.tile[href$="project=${PROJECT}"]`)).toContainText('2 suggested');
   await expect(page.locator('#count')).toContainText('2 suggested');
   await page.goto(`${hubAs(ADA_PORT)}/resources.html`);
   await expect(page.locator('#primerBadge')).toBeVisible({ timeout: 10_000 });
@@ -1660,7 +1660,7 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
-  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href$="project=${PROJECT}"]`);
   await expect(tile.locator('.tag.t-changed')).toBeVisible();
   await expect(tile).toContainText('modified');   // the door says "modified <date, time> by" since the vendor stamp landed
   await expect(page.locator('#count')).toContainText('changed since you looked');
@@ -1672,8 +1672,8 @@ test('the list says what changed since you looked, and the Editor tab counts it'
   // Ada's browser saw the current version in the editor: to her, nothing changed.
   const mine = await ctxA.newPage();
   await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
-  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
+  await expect(mine.locator(`#list a.tile[href$="project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`#list a.tile[href$="project=${PROJECT}"] .tag.t-changed`)).toHaveCount(0);
   await mine.close();
 });
 
@@ -1684,7 +1684,7 @@ test('a comment that names you reaches the list page and the Editor tab, and res
   const fresh = await browser.newContext();
   const page = await fresh.newPage();
   await page.goto(`${hubAs(GRACE_PORT)}/primer/index.html`);
-  const tile = page.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`);
+  const tile = page.locator(`#list a.tile[href$="project=${PROJECT}"]`);
   await expect(tile.locator('.tag.t-you')).toHaveText('1 for you');
   await expect(tile.locator('.tag.t-you')).toHaveClass(/is-new/);
   await expect(page.locator('#count')).toContainText('1 for you');
@@ -1720,8 +1720,8 @@ test('a comment that names you reaches the list page and the Editor tab, and res
   // Ada wrote it: it is not for her.
   const mine = await ctxA.newPage();
   await mine.goto(`${hubAs(ADA_PORT)}/primer/index.html`);
-  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"]`)).toBeVisible();
-  await expect(mine.locator(`#list a.tile[href="edit.html?project=${PROJECT}"] .tag.t-you`)).toHaveCount(0);
+  await expect(mine.locator(`#list a.tile[href$="project=${PROJECT}"]`)).toBeVisible();
+  await expect(mine.locator(`#list a.tile[href$="project=${PROJECT}"] .tag.t-you`)).toHaveCount(0);
   await mine.close();
   await clearComments();
 });

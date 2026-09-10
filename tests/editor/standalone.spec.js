@@ -59,8 +59,23 @@ test.describe('installable shell', () => {
     // pages now wait for the network and use the cache only as the offline
     // fallback; the version bump evicts every existing stale shell.
     expect(swSource).toMatch(/isShellPage/);
-    expect(swSource).toMatch(/\(edit\|start\)\\\.html/);
+    // Both spellings: Pages answers /primer/edit.html with a 301 to /primer/edit,
+    // and the redirect is a second request through the worker.
+    expect(swSource).toMatch(/\(edit\|start\)\(\\\.html\)\?/);
     expect(swSource).not.toMatch(/primer-shell-v1/);
+  });
+
+  test('the hub API is never answered from the shell cache', async ({ page }) => {
+    const swSource = await (await page.request.get('sw.js')).text();
+    // /api/docs/<room>/comments fell through to the generic same-origin branch
+    // and was served cache-first: every poll answered with the poll before it,
+    // so a suggestion reached the other editors a poll late and a thread
+    // resolved a moment ago came back open until the next poll. /api/ is
+    // network-only, and so is any request that says {cache:'no-store'} — the
+    // page knows which of its reads are liveness signals; the worker does not.
+    expect(swSource).toMatch(/\^\\\/api\\\//);
+    expect(swSource).toMatch(/req\.cache === 'no-store'/);
+    expect(swSource).not.toMatch(/primer-shell-v7'/);
   });
 
   test('start.html renders a project card per registry entry, linking into the editor', async ({ page }) => {
