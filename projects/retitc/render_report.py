@@ -759,6 +759,44 @@ html = f"""<!DOCTYPE html>
   sup {{ font-size:10.6px; line-height:0; }}
   sup a.fn {{ color:{PRIMARY_DARK}; text-decoration:none; font-weight:700; }}
   a {{ color:{PRIMARY_DARK}; }}
+
+  /* --- The phone ------------------------------------------------------ */
+  /* There was no mobile layout here at all: .page was a fixed 8.5in with
+     max-width:none, so a phone shrank the whole SHEET — HTML text and SVG
+     labels together — to roughly 0.46x, which put the chart labels near 5px.
+     chart_scroll() could not help, because its breakpoint tests the layout
+     width and that still measured 816px. Making the page fluid is what arms
+     it. Screen only, so print and File > Download > PDF are untouched. */
+  @media screen and (max-width:8.5in) {{
+    .page {{ width:100%; max-width:100%; min-height:0; margin:0;
+             box-shadow:none; padding:26px 20px; }}
+    .cover {{ padding-left:30px; }}
+    .cover::before {{ width:6px; }}
+    /* The hero wash's 3.16in is measured against the deck at 8.5in — the rule
+       above says so. Reflowed narrower the deck grows and the band ends
+       mid-card, cutting the figures in half. It is decoration, so it goes
+       rather than lands in the wrong place. */
+    .cover::after {{ display:none; }}
+    /* graphic() pins each chart at CHART_W_IN on an inline-block span, and
+       Layout.mobile_css() cannot reach it: that release matches [data-placed]
+       and position:absolute, and an un-dragged graphic is neither. Handing
+       the width back is what lets chart_scroll's own scroller work — the
+       frame narrows to the page, the svg keeps its min-width, and the chart
+       scrolls at full size instead of shrinking under the 10.5px floor. */
+    .ds-graphic {{ width:auto !important; max-width:100% !important; }}
+    /* Furniture this report hangs off the bottom of a sheet lands in the
+       middle of the text once .page collapses to its content. */
+    .cover-foot, .pfoot {{ position:static; left:auto; right:auto;
+                           bottom:auto; margin-top:22px; }}
+    /* Three-up rows do not fit a 335px column. */
+    .figs, .ccards, .stats {{ flex-direction:column; }}
+    .cover-h1, .deck, .psub {{ max-width:100%; }}
+    /* pdf_button() pins itself top-right, which floats over the grey gutter
+       on a desktop and over the page title on a phone. */
+    body > button {{ top:auto !important; bottom:14px !important;
+                     right:14px !important; padding:8px 13px !important;
+                     font-size:13.5px !important; }}
+  }}
 </style>
 </head>
 <body>
