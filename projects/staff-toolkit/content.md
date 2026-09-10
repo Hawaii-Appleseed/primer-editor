@@ -44,22 +44,25 @@ website's, and the two feeds GitHub Pages serves from it are what the hub's
 Library is built out of — read straight, with no auth and no copy kept here.
 Source: the README's "The Library" and "Making a document on the hub".[^readme]
 [[cover.read.h]]
-### What the first diagram is saying
+### What GitHub is for
 [[cover.read.p]]
-**GitHub holds the files, and Claude Code is how they get there.** It edits
-real files in a checkout on somebody's laptop, commits them, and pushes; a
-push to the hub's own repository is what makes the site rebuild, which is why
-a new feature can appear without anyone sending you a link. A report is a
-**project** — one directory inside `primer-editor` holding its words, its
-layout and the Python that draws it — and that directory is what `?project=`
-opens and what **Publish** commits back onto a `hub/` branch.
+**GitHub is the filing cabinet that never forgets.** Nothing in it is
+overwritten. A change is saved as a **commit** — a snapshot with a date, an
+author and a sentence saying why — and a **repository** is one project's
+folder plus every commit ever made to it. You edit on your own laptop and
+then **push**, which sends your commits to the shared copy. That is the
+point: any version can be brought back, and you can always see who changed
+what.
 
-**Almost none of this is public.** One repository of the sixteen is, the
-website's, and it earns its place here: GitHub Pages serves two files out of
-it to anyone who asks, and the Library reads them straight rather than keeping
-a second copy that could drift. Everything with our own work in it —
-attendance, strategy, the notes — is in a private repository behind the
-gate.
+**A report is one folder in a repository.** Its words, its layout and the
+Python that draws it sit together in `primer-editor` — the folder the editor
+opens — and Publish sends an edited report back as a commit of its own. A
+push to the hub's own repository is what rebuilds the site, which is why a
+new feature can appear without anyone sending you a link. **Almost none of it
+is public.** One of the sixteen is: the website's, whose two feeds GitHub
+Pages serves to anyone who asks, and the Library is built from them.
+Everything carrying our own work — attendance, strategy, the notes — is
+private, behind the gate.
 [[cover.card.title]]
 ### Two things worth remembering
 
@@ -84,8 +87,7 @@ Nothing in this diagram touches GitHub: Pages is rebuilt by a push, but every
 other arrow here is live. Source: the README's "Shared checkboxes", "The live
 updates mirror", "The documents, on R2" and "The primer editor's rooms".[^readme]
 [[cf.read.h]]
-### What the second diagram is saying
-
+### What Cloudflare is for
 [[cf.read.p]]
 **Cloudflare serves the hub and remembers what you do.** Pages puts the pages
 in front of you and rebuilds them whenever GitHub is pushed to; everything
@@ -113,12 +115,13 @@ for everything else.
 Figure 1. The Three Models, And What Raising The Effort Buys
 
 [[figmodels.note]]
-Every figure is Anthropic's own published measurement. The SWE-bench Pro
-scores are a subset both models largely saturate and are not comparable to the
-public leaderboard. Opus 5's `medium` row is derived from the source's "about
-2 points at `medium` for half the cost" against its 91.7% / $1.01 default, and
-is marked approximate for that reason.[^models][^cost]
-
+Every price here is an API list rate, per million tokens or per task. On a
+claude.ai or Claude Code subscription nobody is billed that way, so read them
+as ratios: which model, and which effort, costs several times another. The
+SWE-bench Pro scores are a subset both models largely saturate and are not
+comparable to the public leaderboard, and Opus 5's `medium` row is derived
+from the source's "about 2 points at `medium` for half the cost" against its
+91.7% / $1.01 default.[^models][^cost]
 [[eval.read.h]]
 ### What to take from this
 
@@ -143,10 +146,11 @@ three models, so the saving is in turning it **down** where it buys nothing.
 [[p2.eyebrow]]
 WHERE THE WORK IS KEPT
 [[p2.h1]]
-Sixteen repositories, one of them public
+What GitHub remembers
 [[p2.sub]]
-Claude Code commits and pushes; a report is a directory in a repository. And
-the one public repository is the one the Library is built from.
+Every change to the code and the reports is kept, with a name on it. Fifteen
+of the sixteen repositories are private; the one that is not feeds the
+Library.
 [[p2.foot]]
 *Where the work is kept*
 [[cover.contents.02]]
