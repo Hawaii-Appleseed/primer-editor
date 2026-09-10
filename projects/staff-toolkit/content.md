@@ -32,81 +32,99 @@ THE STAFF HUB IS ONE WEBSITE with five tabs, and everything in this guide
 lives on it. There is nothing to install, no second password, and no separate
 account: you reach it at **staff-updates-internal.pages.dev**, sign in with
 your Hawaiʻi Appleseed or Hawaiʻi Budget and Policy Center Google account, and
-that session lasts about a month.[^hub] The diagram on the next page is the
-whole system on one page, Claude included. It is worth two minutes before the
+that session lasts about a month.[^hub] The next two pages draw the whole
+system: GitHub, where the code and the reports are kept, and Cloudflare, which
+serves them and remembers what you do. They are worth two minutes before the
 tool-by-tool part, because almost every question anyone asks about the hub —
 why did this change appear on its own, why can I edit this, why has the
-repository not got my edit in it — is answered by which door the change came
-through.
-
+repository not got my edit in it — is answered by which of the two the thing
+lives in.
 [[fig1.h]]
-Figure 1. How Claude, GitHub And Cloudflare Divide The Work
-
+Figure 1. What Is In GitHub, And What Of It Is Public
 [[fig1.note]]
-The barred arrow is the whole point: nothing on the Cloudflare side flows back
-to GitHub. Git seeds a document once, and the store keeps it from then on.
-Source: the README's "The documents, on R2" and "Ask your own Claude" — no
-GitHub token is involved on that path at all.[^readme]
-
+Fifteen of the sixteen repositories are private. The public one is the
+website's, and the two feeds GitHub Pages serves from it are what the hub's
+Library is built out of — read straight, with no auth and no copy kept here.
+Source: the README's "The Library" and "Making a document on the hub".[^readme]
 [[cover.read.h]]
-### Which door a change came through
-
+### What the first diagram is saying
 [[cover.read.p]]
-**Claude Code works the way anyone with a checkout works.** It edits real
-files on a laptop, commits them, and pushes. A push to the hub's own
-repository is what makes Cloudflare rebuild the site, which is why a new
-feature can appear without anyone sending you a link. A push to
-`primer-editor` publishes nothing by itself: the report engine has to be
-carried across into the hub's repository first, and that second commit is the
-one that deploys.
+**GitHub holds the files, and Claude Code is how they get there.** It edits
+real files in a checkout on somebody's laptop, commits them, and pushes; a
+push to the hub's own repository is what makes the site rebuild, which is why
+a new feature can appear without anyone sending you a link. A report is a
+**project** — one directory inside `primer-editor` holding its words, its
+layout and the Python that draws it — and that directory is what `?project=`
+opens and what **Publish** commits back onto a `hub/` branch.
 
-**Your own Claude does none of that.** It signs in through Access the way a
-browser does and edits the reports directly — no GitHub account, no token, no
-commit anywhere. It writes into the room when somebody has the document open,
-and into the document store when nobody does. The shared state that is not a
-report — your checkboxes, the task board, the comms board — is kept live at
-Cloudflare in the same way, so none of it waits on a rebuild either.
-
+**Almost none of this is public.** One repository of the sixteen is, the
+website's, and it earns its place here: GitHub Pages serves two files out of
+it to anyone who asks, and the Library reads them straight rather than keeping
+a second copy that could drift. Everything with our own work in it —
+attendance, strategy, the notes — is in a private repository behind the
+gate.
 [[cover.card.title]]
 ### Two things worth remembering
 
 [[cover.card.bullets]]
-- **Git seeds a document; the store keeps it.** The committed copy is what you see until the first Save. After that the store is what staff read, and carrying a fresh copy across will not change it.
-- **Nothing flows back to GitHub.** A report edited on the hub drifts away from its repository, so treat the hub copy as the draft and not as the published one.
-- **One gate covers both doors.** Access checks your Google sign-in before any page or any `/api` call is answered, which is why nothing here has its own login and why a link pasted into Slack is safe to paste.
+- **Git seeds a document; the store keeps it.** The committed copy is what you see until the first Save. After that R2 is what staff read, and carrying a fresh copy across from GitHub will not change it.
+- **Two speeds, on purpose.** Pages and code arrive by a push and a rebuild. Checkboxes, tasks, board cards and report edits are saved live, and are on everyone else's screen in seconds.
+[[pcf.eyebrow]]
+WHERE IT ALL RUNS
 
+[[pcf.h1]]
+What Cloudflare keeps
+
+[[pcf.sub]]
+The gate in front of everything, and the four places your work is kept.
+[[pcf.foot]]
+*Where it all runs*
+
+[[fig2.h]]
+Figure 2. Cloudflare — One Gate, And Four Stores Behind It
+
+[[fig2.note]]
+Nothing in this diagram touches GitHub: Pages is rebuilt by a push, but every
+other arrow here is live. Source: the README's "Shared checkboxes", "The live
+updates mirror", "The documents, on R2" and "The primer editor's rooms".[^readme]
+[[cf.read.h]]
+### What the second diagram is saying
+
+[[cf.read.p]]
+**Cloudflare serves the hub and remembers what you do.** Pages puts the pages
+in front of you and rebuilds them whenever GitHub is pushed to; everything
+under `/api` is a small program committed beside them. Behind those sit the
+things that have to be live — **KV** for your checkboxes, the task board, the
+comms board and the notes; **R2** for the documents in the editor and every
+version of every one of them; and **the room**, where two people editing the
+same report see each other type. One gate covers all of it: Access checks your
+Google sign-in before anything is answered, including the call your own Claude
+makes over MCP, which is why that needs no GitHub account.
 [[cover.contents.h]]
 ### What is in here
 
 [[p2.eyebrow]]
-HOW THE WORK GETS IN
-
+WHERE THE WORK IS KEPT
 [[p2.h1]]
-Two doors, and only one goes through GitHub
-
+Sixteen repositories, one of them public
 [[p2.sub]]
-Claude Code commits and pushes. Your own Claude edits the hub directly. Which
-door a change came through is what tells you where it now lives.
-
+Claude Code commits and pushes; a report is a directory in a repository. And
+the one public repository is the one the Library is built from.
 [[p2.foot]]
-*How the work gets in*
-
+*Where the work is kept*
 [[cover.contents.02]]
-Two doors, and only one is git
-
+What is in GitHub, and what is public
 [[cover.contents.03]]
-Updates
-
+What Cloudflare keeps
 [[cover.contents.04]]
-Calendar and Tasks
-
+Updates
 [[cover.contents.05]]
-Library, Resources, and search
-
+Calendar and Tasks
 [[cover.contents.06]]
-The report editor
-
+Library, Resources, and search
 [[cover.contents.07]]
+The report editor
+[[cover.contents.08]]
 Your own Claude, and what to do when something breaks
 
 [[p3.eyebrow]]
@@ -127,10 +145,10 @@ grouped into cards by team, and a heading the parser has not seen before is
 never dropped — it publishes as its own card in amber, with a note, so drift
 in the notes doc shows up on the page instead of quietly losing content.
 
-[[fig2.h]]
-Figure 2. How An Edit To The Notes Doc Reaches The Page
+[[fig3.h]]
+Figure 3. How An Edit To The Notes Doc Reaches The Page
 
-[[fig2.note]]
+[[fig3.note]]
 Source: the README's "live updates mirror" and "Why syncNow takes a lock". The
 committed copy reaches the page on the next rebuild; the live mirror reaches it
 in seconds, which is why you rarely wait.[^readme]

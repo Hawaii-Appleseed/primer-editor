@@ -95,143 +95,208 @@ def _marker(mid, fill) -> str:
             f'<path d="M0,1 L9,5 L0,9 z" fill="{fill}"/></marker>')
 
 
-# ── Figure 1: Claude, GitHub and Cloudflare ─────────────────────────────────
-# Two doors, and only the top one is git. The lower path passes UNDER the
-# GitHub box rather than through it: an MCP edit needs no GitHub account and
-# no token, and the geometry is what says so.
+# ── Figure 1: GitHub — the repositories, a project, and the public one ──────
+# One figure per provider, because the combined three-column version made the
+# reader hold GitHub and Cloudflare in their head at once to answer either
+# question. This one answers "where does the code live and what does Claude
+# do with it"; Figure 2 answers "what does Cloudflare keep".
 #
-# Access is a gate NODE on the MCP path, not a band down the Cloudflare box's
-# edge. A band would have been crossed by the push arrow too, and that is
-# wrong — Cloudflare's build pulls from GitHub with no Access check. It is
-# filled DEEP (Cloudflare's accent) and offset right of the GitHub column,
-# because sitting square under that column read as GitHub's own gate.
+# The right-hand column is the whole reason this figure is not just a repo
+# list: exactly one of the sixteen repositories is public, and the Library
+# every staff member reads is built from files that repository serves to
+# anyone. That asymmetry is the thing people get wrong.
 #
-# Gaps between columns are 50-54 units because the arrow labels live in them.
-# Manrope bold at 11u runs about 6.5 units a character, not the 5.5 a first
-# pass assumed, and "commit" spilled onto the repos box.
+# Gaps between columns are 26-40 units and carry no labels, so they can be
+# tighter than Figure 2's. Manrope bold at 11u runs about 6.5 units a
+# character and regular about 5.6 — that is what every width below is
+# checked against.
+REPOS = [("staff-updates-internal", "private"),
+         ("primer-editor", "public"),
+         ("Legislative-Research-Tool", "private"),
+         ("Hawaii-Appleseed-website", "public"),
+         ("and twelve more", "")]
+
+
 def fig_repos() -> str:
-    rows = [("staff-updates-internal", 72),
-            ("primer-editor", 100),
-            ("and three more", 128)]
-    out = [_box(206, 40, 166, 120, fill=INK, r=10),
-           _t(218, 62, "the repos", size=11, fill=MID, weight="700")]
-    for label, y in rows:
-        out.append(_box(218, y, 142, 24, fill=WHITE, r=5, opacity=".12"))
-        out.append(_t(224, y + 16.5, label, size=11, fill=WHITE))
+    """The repository list, with the visibility tag right-aligned in the row.
+    The tag is the load-bearing column, not decoration."""
+    out = [_box(196, 40, 274, 152, fill=INK, r=10),
+           _t(208, 62, "the repositories", size=11, fill=MID, weight="700")]
+    for i, (label, vis) in enumerate(REPOS):
+        y = 70 + i * 24
+        muted = not vis
+        out.append(_box(208, y, 250, 20, fill=WHITE, r=5,
+                        opacity=".08" if muted else ".12"))
+        out.append(_t(216, y + 14.5, label, size=11, fill=WHITE,
+                      opacity=".65" if muted else None))
+        if vis:
+            out.append(_t(450, y + 14.5, vis, size=11,
+                          fill=TEAL if vis == "public" else MID,
+                          weight="700", anchor="end"))
     return "".join(out)
 
 
-def fig_cloudflare() -> str:
-    """Pages, the store and the room — plus the one-way seed between the first
-    two, which is the fact the whole figure exists to carry."""
-    return "".join([
-        _box(426, 32, 288, 320, fill=PALE, stroke=DEEP, r=10),
-
-        _box(442, 48, 256, 62, fill=WHITE, stroke=MID, r=8),
-        _t(454, 70, "Cloudflare Pages", size=12.5, fill=DEEP, weight="700"),
-        _t(454, 90, "serves the hub, rebuilt on a push", size=11.5,
-           fill=BODY_INK),
-
-        f'<line x1="510" y1="110" x2="510" y2="142" stroke="{INK}" '
-        f'stroke-width="2" marker-end="url(#d1a)"/>',
-        _t(522, 131, "seeds it, once", size=11, fill=MUTE_INK),
-
-        _box(442, 146, 256, 72, fill=WHITE, stroke=MID, r=8),
-        _t(454, 168, "The document store", size=12.5, fill=DEEP, weight="700"),
-        _t(454, 187, "every version kept —", size=11.5, fill=BODY_INK),
-        _t(454, 202, "what staff actually read", size=11.5, fill=BODY_INK),
-
-        f'<line x1="510" y1="222" x2="510" y2="250" stroke="{DEEP}" '
-        f'stroke-width="2" stroke-dasharray="5 4" marker-start="url(#d1b)" '
-        f'marker-end="url(#d1b)"/>',
-        _t(522, 240, "Save", size=11, fill=MUTE_INK),
-
-        _box(442, 254, 256, 62, fill=WHITE, stroke=MID, r=8),
-        _t(454, 276, "The room", size=12.5, fill=DEEP, weight="700"),
-        _t(454, 296, "live co-editing, one shared copy", size=11.5,
-           fill=BODY_INK),
-
-        _t(442, 338, "Access gates every request", size=11, fill=DEEP,
-           weight="700"),
-    ])
-
-
-def diagram_system() -> str:
-    # The store does not write back to the repo. An X rather than a single
-    # bar: one stroke read as a tick on the line at this size. Unlabelled,
-    # because a sentence drawn inside the SVG would be one only this file
-    # could change (docsync.check's editability pass) — it is in fig1.note.
-    valve = (f'<line x1="420" y1="182" x2="390" y2="182" stroke="{DEEP}" '
-             f'stroke-width="2" stroke-dasharray="4 3" '
-             f'marker-end="url(#d1b)"/>'
-             f'<path d="M398,175 L410,189 M410,175 L398,189" '
-             f'stroke="{DARK}" stroke-width="2.4" fill="none"/>')
-    return f"""<svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" \
-role="img" aria-label="Claude Code works in a local checkout, commits to the \
-GitHub repos, and a push makes Cloudflare Pages rebuild the hub. Your own \
-Claude takes a second path that skips GitHub entirely: through the Access \
-sign-in over MCP, into the co-editing room and the document store. Pages \
-seeds the store once, and an X on the return arrow marks that nothing flows \
-back to GitHub.">
-<defs>{_marker("d1a", INK)}{_marker("d1b", DEEP)}</defs>
+def diagram_github() -> str:
+    return f"""<svg viewBox="0 0 720 352" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="Claude Code works in a local checkout and pushes to \
+the Hawaiʻi Appleseed repositories on GitHub. Fifteen of the sixteen are \
+private; only Hawaii-Appleseed-website is public, and GitHub Pages serves its \
+publications.json and news.json to anyone, which is what the hub's Library is \
+built from. Inside primer-editor, one report is one project directory, and \
+Publish commits an edited report back onto a hub branch.">
+<defs>{_marker("f1a", INK)}{_marker("f1b", DEEP)}</defs>
 
 {_t(6, 18, "CLAUDE", size=12, fill=DEEP, weight="700", track=1.3)}
-{_t(206, 18, "GITHUB", size=12, fill=DEEP, weight="700", track=1.3)}
-{_t(426, 18, "CLOUDFLARE", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(196, 18, "GITHUB", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(500, 18, "PUBLIC", size=12, fill=DEEP, weight="700", track=1.3)}
 
-{_box(6, 52, 150, 66, fill=SAGE, r=8)}
-{_t(81, 78, "Claude Code", size=12.5, fill=INK, weight="700", anchor="middle")}
-{_t(81, 96, "in a local checkout", size=11, fill=INK, anchor="middle")}
+{_box(6, 60, 150, 70, fill=SAGE, r=8)}
+{_t(81, 88, "Claude Code", size=12.5, fill=INK, weight="700", anchor="middle")}
+{_t(81, 106, "in a local checkout", size=11, fill=INK, anchor="middle")}
 
-{_t(181, 74, "commit", size=11, fill=INK, weight="700", anchor="middle")}
-<line x1="160" y1="85" x2="202" y2="85" stroke="{INK}" stroke-width="2"
-      marker-end="url(#d1a)"/>
+{_t(176, 84, "push", size=11, fill=INK, weight="700", anchor="middle")}
+<line x1="160" y1="95" x2="192" y2="95" stroke="{INK}" stroke-width="2"
+      marker-end="url(#f1a)"/>
 
 {fig_repos()}
 
-{_t(399, 68, "push", size=11, fill=INK, weight="700", anchor="middle")}
-<line x1="376" y1="79" x2="438" y2="79" stroke="{INK}" stroke-width="2"
-      marker-end="url(#d1a)"/>
+<path d="M 81,130 L 81,280 L 188,280" fill="none" stroke="{INK}"
+      stroke-width="2" marker-end="url(#f1a)"/>
+{_t(92, 272, "edits its files", size=11, fill=MUTE_INK)}
 
-{valve}
+<line x1="333" y1="192" x2="333" y2="218" stroke="{INK}" stroke-width="2"
+      marker-end="url(#f1a)"/>
 
-{_box(6, 254, 150, 62, fill=SAGE, r=8)}
-{_t(81, 278, "Your own Claude", size=12.5, fill=INK, weight="700",
+{_box(196, 222, 274, 116, fill=WHITE, stroke=MID, r=8)}
+{_t(208, 246, "One report is one project", size=12.5, fill=DEEP,
+    weight="700")}
+{_t(208, 267, "projects/staff-toolkit/ in primer-editor:", size=11,
+    fill=BODY_INK)}
+{_t(208, 284, "content.md, layout.json, render_report.py", size=11,
+    fill=BODY_INK)}
+{_t(208, 305, "the id that ?project= opens", size=11, fill=MUTE_INK)}
+{_t(208, 322, "Publish commits it back onto a hub/ branch", size=11,
+    fill=MUTE_INK)}
+
+{_t(500, 42, "One repository of the", size=11, fill=BODY_INK)}
+{_t(500, 58, "sixteen is public — and", size=11, fill=BODY_INK)}
+{_t(500, 74, "it feeds the hub.", size=11, fill=BODY_INK)}
+
+<line x1="470" y1="152" x2="496" y2="152" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#f1b)"/>
+
+{_box(500, 108, 214, 88, fill=PALE, stroke=DEEP, r=8)}
+{_t(512, 132, "GitHub Pages", size=12.5, fill=DEEP, weight="700")}
+{_t(512, 152, "publications.json,", size=11, fill=BODY_INK)}
+{_t(512, 168, "news.json", size=11, fill=BODY_INK)}
+{_t(512, 186, "nightly, open to anyone", size=11, fill=MUTE_INK)}
+
+<line x1="607" y1="196" x2="607" y2="222" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#f1b)"/>
+
+{_box(500, 226, 214, 60, fill=DEEP, r=8)}
+{_t(607, 250, "The hub's Library", size=12, fill=WHITE, weight="700",
     anchor="middle")}
-{_t(81, 296, "claude.ai or Claude Code", size=11, fill=INK, anchor="middle")}
-
-{_t(196, 274, "MCP", size=11, fill=DEEP, weight="700", anchor="middle")}
-<line x1="160" y1="285" x2="232" y2="285" stroke="{DEEP}" stroke-width="2"
-      marker-end="url(#d1b)"/>
-
-{_box(236, 254, 160, 62, fill=DEEP, r=8)}
-{_t(316, 278, "Access", size=12.5, fill=WHITE, weight="700", anchor="middle")}
-{_t(316, 296, "Google sign-in", size=11, fill=PALE, anchor="middle")}
-
-<line x1="400" y1="285" x2="438" y2="285" stroke="{DEEP}" stroke-width="2"
-      marker-end="url(#d1b)"/>
-
-{_t(201, 340, "skips GitHub entirely", size=11, fill=MUTE_INK,
-    anchor="middle")}
-
-{fig_cloudflare()}
+{_t(607, 268, "reads them straight", size=11, fill=PALE, anchor="middle")}
 </svg>"""
 
 
-# ── Figure 2: the notes pipeline ────────────────────────────────────────────
+# ── Figure 2: Cloudflare — the gate, and the four things it keeps ───────────
+# Access is drawn as a NODE both arrows pass through, not as a band down the
+# side of the Cloudflare box: a band would also have been crossed by the
+# rebuild that Pages pulls from GitHub, and that pull carries no Access check
+# at all. Nothing in this figure touches GitHub, which is the point of
+# splitting it out — the rebuild arrow lives in Figure 1's story, not here.
+#
+# The stores are nested inside the Cloudflare box rather than wired to it with
+# arrows. Nesting says "these are all one provider" in a way six more arrows
+# would only have made harder to read.
+def diagram_cloudflare() -> str:
+    return f"""<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="A browser and a staff member's own Claude both reach \
+the hub through one gate, Cloudflare Access, which checks a Google sign-in \
+before anything is answered. Behind it Cloudflare Pages serves the pages, \
+Pages Functions answer everything under slash api, KV keeps the checkboxes, \
+tasks, comms board and live notes, R2 keeps the documents and every version \
+of them, and a Durable Object is the room where live co-editing happens.">
+<defs>{_marker("f2a", DEEP)}</defs>
+
+{_t(6, 14, "WHO IS ASKING", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(390, 14, "CLOUDFLARE", size=12, fill=DEEP, weight="700", track=1.3)}
+
+{_box(6, 40, 164, 54, fill=SAGE, r=8)}
+{_t(88, 62, "You, in a browser", size=12, fill=INK, weight="700",
+    anchor="middle")}
+{_t(88, 80, "any page on the hub", size=11, fill=INK, anchor="middle")}
+
+{_box(6, 122, 164, 54, fill=SAGE, r=8)}
+{_t(88, 144, "Your own Claude", size=12, fill=INK, weight="700",
+    anchor="middle")}
+{_t(88, 162, "over MCP", size=11, fill=INK, anchor="middle")}
+{_t(88, 196, "no GitHub account,", size=11, fill=MUTE_INK, anchor="middle")}
+{_t(88, 212, "no second password", size=11, fill=MUTE_INK, anchor="middle")}
+
+<path d="M 170,67 C 190,67 190,92 206,92" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f2a)"/>
+<path d="M 170,149 C 190,149 190,122 206,122" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f2a)"/>
+
+{_box(210, 68, 140, 78, fill=DEEP, r=8)}
+{_t(280, 96, "Access", size=13, fill=WHITE, weight="700", anchor="middle")}
+{_t(280, 115, "Google sign-in", size=11, fill=PALE, anchor="middle")}
+{_t(280, 132, "one gate, all of it", size=11, fill=PALE, anchor="middle")}
+{_t(280, 170, "nothing is answered", size=11, fill=MUTE_INK, anchor="middle")}
+{_t(280, 186, "before this", size=11, fill=MUTE_INK, anchor="middle")}
+
+<path d="M 350,92 C 370,92 370,59 386,59" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f2a)"/>
+<path d="M 350,122 C 370,122 370,117 386,117" fill="none" stroke="{DEEP}"
+      stroke-width="2" marker-end="url(#f2a)"/>
+
+{_box(390, 24, 324, 272, fill=PALE, stroke=DEEP, r=10)}
+
+{_box(404, 34, 296, 50, fill=WHITE, stroke=MID, r=8)}
+{_t(416, 55, "Pages", size=12.5, fill=DEEP, weight="700")}
+{_t(416, 74, "the pages themselves, rebuilt on a push", size=11,
+    fill=BODY_INK)}
+
+{_box(404, 92, 296, 50, fill=WHITE, stroke=MID, r=8)}
+{_t(416, 113, "Pages Functions", size=12.5, fill=DEEP, weight="700")}
+{_t(416, 132, "everything under /api", size=11, fill=BODY_INK)}
+
+<line x1="552" y1="142" x2="552" y2="158" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#f2a)"/>
+
+{_box(404, 162, 142, 70, fill=WHITE, stroke=MID, r=8)}
+{_t(416, 183, "KV", size=12.5, fill=DEEP, weight="700")}
+{_t(416, 201, "checkboxes, tasks,", size=11, fill=BODY_INK)}
+{_t(416, 217, "the board, the notes", size=11, fill=BODY_INK)}
+
+{_box(558, 162, 142, 70, fill=WHITE, stroke=MID, r=8)}
+{_t(570, 183, "R2", size=12.5, fill=DEEP, weight="700")}
+{_t(570, 201, "the documents, and", size=11, fill=BODY_INK)}
+{_t(570, 217, "every version kept", size=11, fill=BODY_INK)}
+
+{_box(404, 242, 296, 44, fill=DEEP, r=8)}
+{_t(416, 263, "The room", size=12.5, fill=WHITE, weight="700")}
+{_t(416, 280, "a Durable Object — live co-editing", size=11, fill=PALE)}
+</svg>"""
+
+
+# ── Figure 3: the notes pipeline ────────────────────────────────────────────
 def diagram_notes() -> str:
     return f"""<svg viewBox="0 0 720 172" xmlns="http://www.w3.org/2000/svg" \
 role="img" aria-label="An edit to the all-staff notes doc is picked up by \
 Apps Script, which both commits it to GitHub and mirrors it live into \
 Cloudflare KV. The Updates page reads whichever arrives first.">
-<defs>{_marker("d2a", DEEP)}</defs>
+<defs>{_marker("f3a", DEEP)}</defs>
 
 {_box(6, 56, 132, 58, fill=SAGE, r=8)}
 {_t(72, 80, "The all-staff", size=11.5, fill=INK, weight="700", anchor="middle")}
 {_t(72, 96, "notes doc", size=11.5, fill=INK, weight="700", anchor="middle")}
 
 <line x1="142" y1="85" x2="172" y2="85" stroke="{DEEP}" stroke-width="2"
-      marker-end="url(#d2a)"/>
+      marker-end="url(#f3a)"/>
 
 {_box(176, 48, 126, 74, fill=WHITE, stroke=MID, r=8)}
 {_t(239, 76, "Apps Script", size=12, fill=DEEP, weight="700", anchor="middle")}
@@ -240,10 +305,10 @@ Cloudflare KV. The Updates page reads whichever arrives first.">
 
 {_t(331, 37, "committed", size=11, fill=MUTE_INK, anchor="middle")}
 <path d="M 306,74 C 330,52 336,44 360,42" fill="none" stroke="{DEEP}"
-      stroke-width="2" marker-end="url(#d2a)"/>
+      stroke-width="2" marker-end="url(#f3a)"/>
 {_t(331, 149, "live", size=11, fill=MUTE_INK, anchor="middle")}
 <path d="M 306,96 C 330,118 336,126 360,128" fill="none" stroke="{DEEP}"
-      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#d2a)"/>
+      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#f3a)"/>
 
 {_box(364, 14, 160, 54, fill=INK, r=8)}
 {_t(444, 36, "GitHub", size=11.5, fill=MID, weight="700", anchor="middle")}
@@ -255,9 +320,9 @@ Cloudflare KV. The Updates page reads whichever arrives first.">
 {_t(444, 143, "the live mirror", size=11, fill=BODY_INK, anchor="middle")}
 
 <path d="M 528,41 C 548,52 544,68 556,80" fill="none" stroke="{DEEP}"
-      stroke-width="2" marker-end="url(#d2a)"/>
+      stroke-width="2" marker-end="url(#f3a)"/>
 <path d="M 528,131 C 548,120 544,104 556,92" fill="none" stroke="{DEEP}"
-      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#d2a)"/>
+      stroke-width="2" stroke-dasharray="5 4" marker-end="url(#f3a)"/>
 
 {_box(560, 56, 154, 58, fill=DEEP, r=8)}
 {_t(637, 80, "The Updates", size=12, fill=WHITE, weight="700", anchor="middle")}
@@ -300,7 +365,7 @@ def contents_rows() -> str:
         f'<div class="crow"{L.attr(f"cover.contents.{n}")}>'
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
-        for n in ("02", "03", "04", "05", "06", "07"))
+        for n in ("02", "03", "04", "05", "06", "07", "08"))
 
 
 PAGE1 = f"""
@@ -319,36 +384,50 @@ PAGE1 = f"""
 
 PAGE2 = f"""
   {head("p2", 2)}
-  {figure("fig1.h", "fig1.note", "fig.system", diagram_system())}
+  {figure("fig1.h", "fig1.note", "fig.github", diagram_github())}
   <h2{L.attr("cover.read.h")}>{C.t("cover.read.h")}</h2>
   {C.html("cover.read.p", "body")}
-  {card(C, L, "cover.card.title", "cover.card.bullets", DEEP,
-        detachable=True, min_h=1.5)}
   {foot("p2.foot", 2)}
 """
 
+# The Cloudflare sheet. Its slots are prefixed `pcf`/`cf` and not `p3`,
+# deliberately: a slot key is an IDENTITY, the way sheet()'s data-page is, and
+# renaming p3..p7 to p4..p8 to insert one page would have renamed twenty-odd
+# keys in a document people already have open — every one of them a slot the
+# live room would no longer recognise. The page NUMBER is the argument to
+# head() and foot(), and that is the only place it belongs.
 PAGE3 = f"""
-  {head("p3", 3)}
-  {C.html("updates.p", "lead")}
-  {figure("fig2.h", "fig2.note", "fig.notes", diagram_notes())}
-  <h2{L.attr("updates.how.h")}>{C.t("updates.how.h")}</h2>
-  {C.html("updates.how.p", "body")}
-  {foot("p3.foot", 3)}
+  {head("pcf", 3)}
+  {figure("fig2.h", "fig2.note", "fig.cloudflare", diagram_cloudflare())}
+  <h2{L.attr("cf.read.h")}>{C.t("cf.read.h")}</h2>
+  {C.html("cf.read.p", "body")}
+  {card(C, L, "cover.card.title", "cover.card.bullets", DEEP,
+        detachable=True, min_h=1.4)}
+  {foot("pcf.foot", 3)}
 """
 
 PAGE4 = f"""
-  {head("p4", 4)}
+  {head("p3", 4)}
+  {C.html("updates.p", "lead")}
+  {figure("fig3.h", "fig3.note", "fig.notes", diagram_notes())}
+  <h2{L.attr("updates.how.h")}>{C.t("updates.how.h")}</h2>
+  {C.html("updates.how.p", "body")}
+  {foot("p3.foot", 4)}
+"""
+
+PAGE5 = f"""
+  {head("p4", 5)}
   <h2{L.attr("cal.h")}>{C.t("cal.h")}</h2>
   {C.html("cal.p", "lead")}
   {card(C, L, "cal.card.title", "cal.card.bullets", PALE,
         detachable=True, min_h=1.3)}
   <h2{L.attr("subs.h")}>{C.t("subs.h")}</h2>
   {C.html("subs.p", "body")}
-  {foot("p4.foot", 4)}
+  {foot("p4.foot", 5)}
 """
 
-PAGE5 = f"""
-  {head("p5", 5)}
+PAGE6 = f"""
+  {head("p5", 6)}
   {C.html("lib.p", "lead")}
   <h2{L.attr("res.h")}>{C.t("res.h")}</h2>
   {C.html("res.p", "body")}
@@ -356,11 +435,11 @@ PAGE5 = f"""
   {C.html("search.p", "body")}
   {card(C, L, "search.card.title", "search.card.bullets", SAGE,
         detachable=True, min_h=1.5)}
-  {foot("p5.foot", 5)}
+  {foot("p5.foot", 6)}
 """
 
-PAGE6 = f"""
-  {head("p6", 6)}
+PAGE7 = f"""
+  {head("p6", 7)}
   {C.html("ed.p", "lead")}
   {card(C, L, "ed.card.title", "ed.card.bullets", DARK,
         detachable=True, min_h=1.9)}
@@ -368,11 +447,11 @@ PAGE6 = f"""
   {C.html("ed.rooms.p", "body")}
   <h2{L.attr("ed.share.h")}>{C.t("ed.share.h")}</h2>
   {C.html("ed.share.p", "body")}
-  {foot("p6.foot", 6)}
+  {foot("p6.foot", 7)}
 """
 
-PAGE7 = f"""
-  {head("p7", 7)}
+PAGE8 = f"""
+  {head("p7", 8)}
   {C.html("mcp.p", "lead")}
   {card(C, L, "mcp.card.title", "mcp.card.bullets", DEEP,
         detachable=True, min_h=1.7)}
@@ -382,11 +461,11 @@ PAGE7 = f"""
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("p7.foot", 7)}
+  {foot("p7.foot", 8)}
 """
 
 DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
-            6: PAGE6, 7: PAGE7}
+            6: PAGE6, 7: PAGE7, 8: PAGE8}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in
@@ -431,7 +510,7 @@ body = ("".join(sheet(pid) for pid in L.page_order(DESIGNED_PAGES))
         + L.pagemeta(range(1, DESIGNED_PAGES + 1))
         + L.notices(NOTICES))
 # resolve() walks the body assigning numbers and fills the endnotes mount on
-# page 5 as it goes; only after that is the count known, so linkify runs last.
+# the last sheet as it goes; only after that is the count known, so linkify runs last.
 body = C.fn.resolve(body)
 body = linkify_footnotes(body, len(C.fn.endnotes()))
 
