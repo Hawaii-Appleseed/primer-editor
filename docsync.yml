@@ -434,12 +434,13 @@ bindings:
       # section may be added. Kept in step with render_report.py by hand.
       pages:
         - ["page1", "Cover"]
-        - ["page2", "How it fits together"]
-        - ["page3", "Updates"]
-        - ["page4", "Calendar & Tasks"]
-        - ["page5", "Library, Resources, search"]
-        - ["page6", "The report editor"]
-        - ["page7", "Claude & breakage"]
+        - ["page2", "What is in GitHub"]
+        - ["page3", "What Cloudflare keeps"]
+        - ["page4", "Updates"]
+        - ["page5", "Calendar & Tasks"]
+        - ["page6", "Library, Resources, search"]
+        - ["page7", "The report editor"]
+        - ["page8", "Claude & breakage"]
       dir: docs/staff-toolkit
       render: projects/staff-toolkit/render_report.py
       out: projects/staff-toolkit/index.html
