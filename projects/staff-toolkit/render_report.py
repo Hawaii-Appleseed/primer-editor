@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Toolkit — the internal guide to the staff hub's tools.
 
-Five designed sheets on the shared engine, in the Appleseed brand system.
+Seven designed sheets on the shared engine, in the Appleseed brand system.
 Every heading and paragraph is a content.md slot; the two diagrams go through
 graphic(), so they can be moved and resized in the draft editor and their
 placement sticks across rebuilds.
@@ -95,90 +95,126 @@ def _marker(mid, fill) -> str:
             f'<path d="M0,1 L9,5 L0,9 z" fill="{fill}"/></marker>')
 
 
-# ── Figure 1: GitHub and Cloudflare ─────────────────────────────────────────
-# Three columns, left to right in the direction a request actually travels:
-# you -> Cloudflare <- GitHub. GitHub is on the RIGHT because your browser
-# never talks to it; it is upstream of Cloudflare, not on the path.
-def fig_stack() -> str:
-    rows = [
-        ("KV", "checkboxes, tasks, the board", 200),
-        ("R2", "every version of every report", 234),
-        ("Durable Object", "the room you co-edit in", 268),
-    ]
-    out = []
-    for label, what, y in rows:
-        out.append(_box(216, y, 276, 30, fill=SAGE, r=6))
-        out.append(_t(228, y + 19.5, f"{label} — {what}", size=11.5, fill=INK))
-    return "".join(out)
-
-
-def fig_github() -> str:
-    rows = [("The pages you open", 76),
-            ("functions/ — the /api", 110),
-            ("data/*.json", 144)]
-    out = [_box(554, 24, 160, 278, fill=INK, r=10)]
-    out.append(_t(566, 48, "staff-updates-internal", size=11.5,
-                  fill=WHITE, weight="700"))
-    out.append(_t(566, 64, "private", size=11, fill=MID))
+# ── Figure 1: Claude, GitHub and Cloudflare ─────────────────────────────────
+# Two doors, and only the top one is git. The lower path passes UNDER the
+# GitHub box rather than through it: an MCP edit needs no GitHub account and
+# no token, and the geometry is what says so.
+#
+# Access is a gate NODE on the MCP path, not a band down the Cloudflare box's
+# edge. A band would have been crossed by the push arrow too, and that is
+# wrong — Cloudflare's build pulls from GitHub with no Access check. It is
+# filled DEEP (Cloudflare's accent) and offset right of the GitHub column,
+# because sitting square under that column read as GitHub's own gate.
+#
+# Gaps between columns are 50-54 units because the arrow labels live in them.
+# Manrope bold at 11u runs about 6.5 units a character, not the 5.5 a first
+# pass assumed, and "commit" spilled onto the repos box.
+def fig_repos() -> str:
+    rows = [("staff-updates-internal", 72),
+            ("primer-editor", 100),
+            ("and three more", 128)]
+    out = [_box(206, 40, 166, 120, fill=INK, r=10),
+           _t(218, 62, "the repos", size=11, fill=MID, weight="700")]
     for label, y in rows:
-        out.append(_box(566, y, 136, 28, fill=WHITE, r=5, opacity=".12"))
-        out.append(_t(574, y + 18.5, label, size=11, fill=WHITE))
-    out.append('<line x1="566" y1="190" x2="702" y2="190" '
-               f'stroke="{WHITE}" stroke-width="1" opacity=".25"/>')
-    for i, line in enumerate(["Three more repos feed", "in: the report engine,",
-                              "the voting record,", "and the research",
-                              "corpus."]):
-        out.append(_t(566, 212 + i * 15, line, size=11, fill=MID))
+        out.append(_box(218, y, 142, 24, fill=WHITE, r=5, opacity=".12"))
+        out.append(_t(224, y + 16.5, label, size=11, fill=WHITE))
     return "".join(out)
+
+
+def fig_cloudflare() -> str:
+    """Pages, the store and the room — plus the one-way seed between the first
+    two, which is the fact the whole figure exists to carry."""
+    return "".join([
+        _box(426, 32, 288, 320, fill=PALE, stroke=DEEP, r=10),
+
+        _box(442, 48, 256, 62, fill=WHITE, stroke=MID, r=8),
+        _t(454, 70, "Cloudflare Pages", size=12.5, fill=DEEP, weight="700"),
+        _t(454, 90, "serves the hub, rebuilt on a push", size=11.5,
+           fill=BODY_INK),
+
+        f'<line x1="510" y1="110" x2="510" y2="142" stroke="{INK}" '
+        f'stroke-width="2" marker-end="url(#d1a)"/>',
+        _t(522, 131, "seeds it, once", size=11, fill=MUTE_INK),
+
+        _box(442, 146, 256, 72, fill=WHITE, stroke=MID, r=8),
+        _t(454, 168, "The document store", size=12.5, fill=DEEP, weight="700"),
+        _t(454, 187, "every version kept —", size=11.5, fill=BODY_INK),
+        _t(454, 202, "what staff actually read", size=11.5, fill=BODY_INK),
+
+        f'<line x1="510" y1="222" x2="510" y2="250" stroke="{DEEP}" '
+        f'stroke-width="2" stroke-dasharray="5 4" marker-start="url(#d1b)" '
+        f'marker-end="url(#d1b)"/>',
+        _t(522, 240, "Save", size=11, fill=MUTE_INK),
+
+        _box(442, 254, 256, 62, fill=WHITE, stroke=MID, r=8),
+        _t(454, 276, "The room", size=12.5, fill=DEEP, weight="700"),
+        _t(454, 296, "live co-editing, one shared copy", size=11.5,
+           fill=BODY_INK),
+
+        _t(442, 338, "Access gates every request", size=11, fill=DEEP,
+           weight="700"),
+    ])
 
 
 def diagram_system() -> str:
-    # The Access strip is the left EDGE of the Cloudflare box, so every arrow
-    # entering Cloudflare visibly crosses it. That is the diagram's one real
-    # argument and it is carried by the geometry, not by a label.
-    access = ('<path d="M 202,24 H 178 A 10,10 0 0 0 168,34 V 292 '
-              f'A 10,10 0 0 0 178,302 H 202 Z" fill="{DARK}"/>')
-    return f"""<svg viewBox="0 0 720 316" xmlns="http://www.w3.org/2000/svg" \
-role="img" aria-label="You, in a browser, reach Cloudflare through a Google \
-sign-in gate. Cloudflare serves the pages, answers the API, and stores the \
-live state. GitHub holds the files and a push rebuilds the site.">
-<defs>{_marker("d1a", INK)}</defs>
+    # The store does not write back to the repo. An X rather than a single
+    # bar: one stroke read as a tick on the line at this size. Unlabelled,
+    # because a sentence drawn inside the SVG would be one only this file
+    # could change (docsync.check's editability pass) — it is in fig1.note.
+    valve = (f'<line x1="420" y1="182" x2="390" y2="182" stroke="{DEEP}" '
+             f'stroke-width="2" stroke-dasharray="4 3" '
+             f'marker-end="url(#d1b)"/>'
+             f'<path d="M398,175 L410,189 M410,175 L398,189" '
+             f'stroke="{DARK}" stroke-width="2.4" fill="none"/>')
+    return f"""<svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="Claude Code works in a local checkout, commits to the \
+GitHub repos, and a push makes Cloudflare Pages rebuild the hub. Your own \
+Claude takes a second path that skips GitHub entirely: through the Access \
+sign-in over MCP, into the co-editing room and the document store. Pages \
+seeds the store once, and an X on the return arrow marks that nothing flows \
+back to GitHub.">
+<defs>{_marker("d1a", INK)}{_marker("d1b", DEEP)}</defs>
 
-{_t(6, 15, "YOU", size=12, fill=DEEP, weight="700", track=1.3)}
-{_t(168, 15, "CLOUDFLARE", size=12, fill=DEEP, weight="700", track=1.3)}
-{_t(554, 15, "GITHUB", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(6, 18, "CLAUDE", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(206, 18, "GITHUB", size=12, fill=DEEP, weight="700", track=1.3)}
+{_t(426, 18, "CLOUDFLARE", size=12, fill=DEEP, weight="700", track=1.3)}
 
-{_box(6, 112, 110, 68, fill=SAGE, r=8)}
-{_t(61, 142, "You, in a", size=12.5, fill=INK, weight="700", anchor="middle")}
-{_t(61, 159, "browser", size=12.5, fill=INK, weight="700", anchor="middle")}
+{_box(6, 52, 150, 66, fill=SAGE, r=8)}
+{_t(81, 78, "Claude Code", size=12.5, fill=INK, weight="700", anchor="middle")}
+{_t(81, 96, "in a local checkout", size=11, fill=INK, anchor="middle")}
 
-<line x1="120" y1="146" x2="164" y2="146" stroke="{INK}" stroke-width="2"
-      marker-start="url(#d1a)" marker-end="url(#d1a)"/>
-
-{_box(168, 24, 336, 278, fill=PALE, stroke=DEEP, r=10)}
-{access}
-<g transform="rotate(-90 185 163)">
-{_t(185, 167, "GOOGLE SIGN-IN", size=11.5, fill=WHITE, weight="700",
-    anchor="middle", track=1.2)}
-</g>
-
-{_box(216, 40, 276, 64, fill=WHITE, stroke=MID, r=8)}
-{_t(230, 61, "Cloudflare Pages", size=12.5, fill=DEEP, weight="700")}
-{_t(230, 79, "Serves every page, script and", size=11.5, fill=BODY_INK)}
-{_t(230, 94, "image on the hub.", size=11.5, fill=BODY_INK)}
-
-{_box(216, 116, 276, 58, fill=WHITE, stroke=MID, r=8)}
-{_t(230, 137, "Pages Functions", size=12.5, fill=DEEP, weight="700")}
-{_t(230, 155, "Answer everything under /api.", size=11.5, fill=BODY_INK)}
-
-{_t(216, 194, "WHAT IT REMEMBERS", size=11, fill=DEEP, weight="700", track=1)}
-{fig_stack()}
-
-{_t(529, 62, "push", size=11, fill=INK, weight="700", anchor="middle")}
-<line x1="548" y1="72" x2="508" y2="72" stroke="{INK}" stroke-width="2"
+{_t(181, 74, "commit", size=11, fill=INK, weight="700", anchor="middle")}
+<line x1="160" y1="85" x2="202" y2="85" stroke="{INK}" stroke-width="2"
       marker-end="url(#d1a)"/>
 
-{fig_github()}
+{fig_repos()}
+
+{_t(399, 68, "push", size=11, fill=INK, weight="700", anchor="middle")}
+<line x1="376" y1="79" x2="438" y2="79" stroke="{INK}" stroke-width="2"
+      marker-end="url(#d1a)"/>
+
+{valve}
+
+{_box(6, 254, 150, 62, fill=SAGE, r=8)}
+{_t(81, 278, "Your own Claude", size=12.5, fill=INK, weight="700",
+    anchor="middle")}
+{_t(81, 296, "claude.ai or Claude Code", size=11, fill=INK, anchor="middle")}
+
+{_t(196, 274, "MCP", size=11, fill=DEEP, weight="700", anchor="middle")}
+<line x1="160" y1="285" x2="232" y2="285" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#d1b)"/>
+
+{_box(236, 254, 160, 62, fill=DEEP, r=8)}
+{_t(316, 278, "Access", size=12.5, fill=WHITE, weight="700", anchor="middle")}
+{_t(316, 296, "Google sign-in", size=11, fill=PALE, anchor="middle")}
+
+<line x1="400" y1="285" x2="438" y2="285" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#d1b)"/>
+
+{_t(201, 340, "skips GitHub entirely", size=11, fill=MUTE_INK,
+    anchor="middle")}
+
+{fig_cloudflare()}
 </svg>"""
 
 
@@ -508,6 +544,22 @@ html = f"""<!DOCTYPE html>
     .page {{ width:100%; min-height:0; margin:0; box-shadow:none;
              padding:26px 20px; }}
     .cover-h1 {{ font-size:38px; letter-spacing:-.9px; }}
+    /* graphic() pins a figure at its inch width on an inline-block span, and
+       Layout.mobile_css() cannot reach it: that release matches [data-placed]
+       and position:absolute, and an un-dragged graphic is neither. So a 7.26in
+       figure stayed 697px wide inside a 375px page and .page's overflow:hidden
+       ate the right-hand third of it — clipped, with nothing to scroll. Handing
+       the width back lets chart_scroll's own scroller do its job: the wrapper
+       narrows to the page, the svg keeps its 687px min-width, and the figure
+       scrolls at full size instead of shrinking under the legibility floor. */
+    .ds-graphic {{ width:auto !important; max-width:100% !important; }}
+    /* pdf_button() pins itself top-right, which on a desktop floats over the
+       grey gutter beside the sheet. At 375px there is no gutter and it sat on
+       top of the page title. Bottom-right corner instead — !important because
+       the button's geometry is inline styles from docsync.blocks. */
+    body > button {{ top:auto !important; bottom:14px !important;
+                     right:14px !important; padding:8px 13px !important;
+                     font-size:13px !important; }}
     .twocol {{ flex-direction:column; gap:14px; }}
     .pfoot, .cstamp {{ position:static; left:auto; right:auto; bottom:auto;
                        margin-top:22px; }}
