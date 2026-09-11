@@ -558,7 +558,8 @@ def contents_rows() -> str:
         f'<div class="crow"{L.attr(f"cover.contents.{n}")}>'
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
-        for n in ("02", "03", "04", "05", "06", "07", "08", "09", "10"))
+        for n in ("02", "03", "04", "05", "06", "07", "08", "09", "10",
+                  "11", "12"))
 
 
 PAGE1 = f"""
@@ -667,20 +668,42 @@ PAGE10 = f"""
   {foot("pmcp.foot", 10)}
 """
 
+PAGE11 = f"""
+  {head("pgh", 11)}
+  {C.html("gh.p", "lead")}
+  {card(C, L, "gh.card.title", "gh.card.bullets", DARK,
+        detachable=True, min_h=2.4)}
+  <h2{L.attr("gh.after.h")}>{C.t("gh.after.h")}</h2>
+  {C.html("gh.after.p", "body")}
+  {foot("pgh.foot", 11)}
+"""
+
+# The glossary runs in two columns. .twocol has been in this stylesheet since
+# the first draft and unused until now; a seventeen-term list down one column
+# would have run past the foot of the sheet.
+PAGE12 = f"""
+  {head("pgloss", 12)}
+  <div class="twocol">
+    <div>{C.html("gloss.a", "gloss")}</div>
+    <div>{C.html("gloss.b", "gloss")}</div>
+  </div>
+  {foot("pgloss.foot", 12)}
+"""
+
 # The endnotes get their own sheet. Seven of them plus two sections no longer
 # fit on page 9, and the alternative was shaving real sentences to buy a
 # quarter inch — see primer/CLAUDE.md on measuring, not guessing.
-PAGE11 = f"""
+PAGE13 = f"""
   <div class="endnotes endnotes-own">
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("pend.foot", 11)}
+  {foot("pend.foot", 13)}
 """
 
 DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
             6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10,
-            11: PAGE11}
+            11: PAGE11, 12: PAGE12, 13: PAGE13}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in
@@ -777,6 +800,12 @@ html = f"""<!DOCTYPE html>
            margin:0 0 16px; max-width:6in; }}
   .lead {{ font-size:14px; margin:0 0 16px; }}
   .body {{ font-size:13.5px; margin:0 0 12px; }}
+  /* The glossary: one paragraph per term, tighter than body prose so a
+     column of seventeen reads as a list without being one. Bold is <b>
+     (docsync's inline grammar emits <b>, never <strong>), so the term
+     itself is what takes the accent colour. */
+  .gloss {{ font-size:12px; line-height:1.45; margin:0 0 9px; }}
+  .gloss b {{ color:{DEEP}; }}
   .lead p, .body p {{ margin:0 0 9px; }}
   .lead p:last-child, .body p:last-child {{ margin-bottom:0; }}
   .psub {{ font-size:14.5px; line-height:1.4; font-weight:500; color:{TEAL};

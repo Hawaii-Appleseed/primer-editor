@@ -443,6 +443,8 @@ bindings:
         - ["page8", "The report editor"]
         - ["page9", "Claude & breakage"]
         - ["page10", "Connectors, CLI, MCP, plugins"]
+        - ["page11", "Setting up the GitHub CLI"]
+        - ["page12", "What the words mean"]
       dir: docs/staff-toolkit
       render: projects/staff-toolkit/render_report.py
       out: projects/staff-toolkit/index.html

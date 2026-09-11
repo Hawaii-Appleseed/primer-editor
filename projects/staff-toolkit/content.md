@@ -156,7 +156,7 @@ Library.
 [[cover.contents.02]]
 Three models, and what effort costs
 [[cover.contents.03]]
-What is in GitHub, and what is public
+What GitHub remembers
 [[cover.contents.04]]
 What Cloudflare keeps
 [[cover.contents.05]]
@@ -442,6 +442,129 @@ a plugin.
 [[cover.contents.10]]
 Connectors, the CLI, MCP servers and plugins
 
+[[pgh.eyebrow]]
+IF YOU NEED THE REPOSITORIES
+
+[[pgh.h1]]
+Setting up the GitHub CLI
+
+[[pgh.sub]]
+Most people never need this. If you do, it is three commands — and one thing
+only somebody else can do for you.
+
+[[pgh.foot]]
+*Setting up the GitHub CLI*
+
+[[gh.p]]
+THE EDITOR LIVES ON THIS HUB precisely so that nobody needs a GitHub account
+to write a report. You need one only if you are going to work with the files
+themselves — reading the code, running the renderer, letting Claude Code
+commit and push the way Figure 2 draws it. **gh** is GitHub's own command-line
+tool, and it is the shortest path from nothing to a copy of a repository on
+your laptop.
+
+[[gh.card.title]]
+### From nothing to a checkout
+
+[[gh.card.bullets]]
+- **Ask to be added first.** Every repository with our work in it is private, so nothing below will find them until somebody with access has added you to the Hawaiʻi Appleseed organization on GitHub. This is the only step you cannot do yourself.
+- **Install it.** On a Mac, `brew install gh`. Windows and Linux instructions are on the GitHub CLI site.[^ghcli]
+- **Sign in.** `gh auth login`, then choose GitHub.com and HTTPS. It opens a browser to finish, and keeps the token in your system keychain rather than a file on disk.
+- **Check it took.** `gh auth status` names the account you are signed in as and what it is allowed to do.
+- **Take a copy.** `gh repo clone Hawaii-Appleseed/staff-updates-internal` puts the hub's own files in a folder on your laptop.
+
+[[gh.after.h]]
+### What that gets you
+
+[[gh.after.p]]
+A folder you can point Claude Code at. From there the loop in Figure 2 is
+real: it edits files, commits them, and pushes, and the push is what rebuilds
+the site. Nothing else in this guide depends on it — the hub, the editor, the
+board and your own Claude all work with no GitHub account at all, which is the
+whole reason they were built the way they were.
+
+[[pgloss.eyebrow]]
+THE WORDS
+
+[[pgloss.h1]]
+What the words mean
+
+[[pgloss.sub]]
+Every term in this guide that is not plain English, in one place.
+
+[[pgloss.foot]]
+*What the words mean*
+
+[[gloss.a]]
+**Access** — Cloudflare's gate. It checks your Google sign-in before any page
+or any `/api` call on the hub is answered.
+
+**API** — a small program a page calls to fetch or save something. Everything
+under `/api` on this hub is one.
+
+**branch** — a line of commits kept apart from the main one, so work in
+progress does not change what is deployed.
+
+**checkout** — the copy of a repository sitting on your own machine, which you
+edit and then push from.
+
+**CLI** — a program you type commands at instead of clicking. Claude Code is
+one; so is `gh`.
+
+**commit** — one saved change in GitHub: a snapshot with a date, an author and
+a sentence saying why.
+
+**connector** — how claude.ai attaches to an MCP server. You add one under
+Settings.
+
+**deploy** — Cloudflare rebuilding and re-serving the site after a push. It
+takes a minute or two.
+
+**Durable Object** — the piece of Cloudflare that holds one live thing for
+everybody at once. Each document's room is one.
+
+**effort** — how hard you ask a Claude model to think. Five settings, `low` to
+`max`; the default is `high`.
+
+**KV** — Cloudflare's fast store for small things: checkboxes, tasks, the
+comms board, the live notes.
+[[gloss.b]]
+**marketplace** — the list a Claude Code plugin is installed from. Anthropic
+runs two; a team can host its own.
+
+**MCP** — the protocol Claude uses to reach a tool outside itself. This hub
+speaks it at `/api/mcp`.
+
+**Pages** — the Cloudflare service that serves this site and rebuilds it
+whenever GitHub is pushed to.
+
+**plugin** — a bundle for Claude Code, installed from a marketplace: skills,
+agents, hooks, and sometimes an MCP server.
+
+**push** — sending your commits from your laptop to the shared copy on GitHub.
+
+**R2** — Cloudflare's file store. The editor's documents, and every version of
+them, live here.
+
+**repository** — one project's folder on GitHub, together with every commit
+ever made to it.
+
+**the room** — the live shared copy of a document open in the editor.
+Everyone in it types into the same thing.
+
+**SSO** — signing in once with your Google account and being recognised
+everywhere after that. Access uses it.
+
+**terminal** — the text window on your own computer where a CLI runs.
+
+**token** — a long secret string that stands in for a password. Treat one the
+way you would treat a password.
+[[cover.contents.11]]
+Setting up the GitHub CLI
+
+[[cover.contents.12]]
+What the words mean
+
 [[pend.foot]]
 *Where this is written down*
 
@@ -461,4 +584,5 @@ Where this is written down
 [connectors]: Anthropic, About custom connectors — https://support.claude.com/en/articles/11175166-about-custom-connectors-remote-mcp
 [ccmcp]: Anthropic, MCP in Claude Code — https://code.claude.com/docs/en/mcp
 [plugins]: Anthropic, Create plugins — https://code.claude.com/docs/en/plugins
+[ghcli]: GitHub CLI — installation for every platform — https://cli.github.com
 [mcp]: "Ask your own Claude", in the README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
