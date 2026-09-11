@@ -1,13 +1,14 @@
 {
  "schema": 1,
  "session": 2026,
- "generated_at": "2026-08-31T20:26:06Z",
+ "generated_at": "2026-09-11T02:02:22Z",
  "source": {
   "repo": "Legislative-Research-Tool",
-  "rev": "f71eddf",
+  "rev": "cb625c4",
   "command": "python -m testimony export  (~/repos/Legislative-Research-Tool)",
   "records": 1285,
-  "excluded": "see exclusions.yml"
+  "excluded": "see exclusions.yml",
+  "themes": "themes/2026/tax-fairness.yml"
  },
  "bills": [
   {
