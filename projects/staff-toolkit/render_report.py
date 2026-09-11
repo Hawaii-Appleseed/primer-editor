@@ -109,13 +109,17 @@ def _marker(mid, fill) -> str:
 # Opus 5's medium row is the one derived figure: the source gives "about 2
 # points at medium for half the cost" against a 91.7% / $1.01 default, so it
 # is shown as approximate and figmodels.note says where it comes from.
+# The use lines say what to REACH FOR each one for, in tasks a reader
+# recognises — not what the marketing says. "The best combination of speed and
+# intelligence" told nobody when to pick Sonnet. Two lines, and the widths are
+# checked against the 200-unit card interior at 5.6 units a character.
 MODELS = [
     (6, "Claude Fable 5.1", "$10 / $50 per MTok", "slower",
-     "Demanding reasoning and", "long-horizon agentic work", False),
+     "The hardest problems, and", "work that runs for hours", False),
     (246, "Claude Opus 5", "$5 / $25 per MTok", "moderate",
-     "Complex agentic coding —", "start here for most work", True),
+     "Start here — drafting,", "analysis, and most coding", True),
     (486, "Claude Sonnet 5", "$2 / $10 per MTok", "fast",
-     "The best combination of", "speed and intelligence", False),
+     "Simple work in bulk, when", "speed matters most", False),
 ]
 
 # label, percent, percent label, cost label, is_default
@@ -194,25 +198,35 @@ the cost per task rises from 4 dollars 66 to 7 dollars 12.">
 </svg>"""
 
 
-# ── Figure 2: GitHub — the repositories, a project, and the public one ──────
+# ── Figure 2: GitHub — the repositories, and the public half ────────────────
 # One figure per provider, because the combined three-column version made the
 # reader hold GitHub and Cloudflare in their head at once to answer either
 # question. This one answers "where does the code live and what does Claude
-# do with it"; Figure 2 answers "what does Cloudflare keep".
+# do with it"; Figure 3 answers "what does Cloudflare keep".
 #
 # The right-hand column is the whole reason this figure is not just a repo
-# list: exactly one of the sixteen repositories is public, and the Library
-# every staff member reads is built from files that repository serves to
-# anyone. That asymmetry is the thing people get wrong.
+# list: the Library every staff member reads is built from files one public
+# repository serves to anyone. The split is eight public and eight private —
+# checked against `gh repo list Hawaii-Appleseed` — so the thing people get
+# wrong is not the count but WHICH half holds our own work. The panel header
+# carries the count; the rows carry the examples. Hawaii-Appleseed-website is
+# row 1 because the arrow to GitHub Pages leaves that row at its centre —
+# reorder REPOS and the arrow points at the wrong repository.
+#
+# ONE story: Claude Code pushes, and the public half feeds the Library. The
+# project-directory box that used to hang below the repo panel was a second
+# story with a second arrow back out of Claude Code, and the triangle those
+# made was this figure's main legibility cost. Sheet 11 addresses the handful
+# of people who clone; that detail belongs there, in prose, if anywhere.
 #
 # Gaps between columns are 26-40 units and carry no labels, so they can be
 # tighter than Figure 2's. Manrope bold at 11u runs about 6.5 units a
 # character and regular about 5.6 — that is what every width below is
 # checked against.
 REPOS = [("staff-updates-internal", "private"),
+         ("Hawaii-Appleseed-website", "public"),
          ("primer-editor", "public"),
          ("Legislative-Research-Tool", "private"),
-         ("Hawaii-Appleseed-website", "public"),
          ("and twelve more", "")]
 
 
@@ -220,7 +234,9 @@ def fig_repos() -> str:
     """The repository list, with the visibility tag right-aligned in the row.
     The tag is the load-bearing column, not decoration."""
     out = [_box(196, 40, 274, 152, fill=INK, r=10),
-           _t(208, 62, "the repositories", size=11, fill=MID, weight="700")]
+           _t(208, 62, "the repositories", size=11, fill=MID, weight="700"),
+           _t(458, 62, "8 public, 8 private", size=11, fill=MID,
+              weight="700", anchor="end")]
     for i, (label, vis) in enumerate(REPOS):
         y = 70 + i * 24
         muted = not vis
@@ -236,13 +252,13 @@ def fig_repos() -> str:
 
 
 def diagram_github() -> str:
-    return f"""<svg viewBox="0 0 720 352" xmlns="http://www.w3.org/2000/svg" \
+    return f"""<svg viewBox="0 0 720 248" xmlns="http://www.w3.org/2000/svg" \
 role="img" aria-label="Claude Code works in a local checkout and pushes to \
-the Hawaiʻi Appleseed repositories on GitHub. Fifteen of the sixteen are \
-private; only Hawaii-Appleseed-website is public, and GitHub Pages serves its \
-publications.json and news.json to anyone, which is what the hub's Library is \
-built from. Inside primer-editor, one report is one project directory, and \
-Publish commits an edited report back onto a hub branch.">
+the Hawaiʻi Appleseed repositories on GitHub. There are sixteen, eight public \
+and eight private, and the private half is the half with our own work in it, \
+starting with staff-updates-internal. Hawaii-Appleseed-website is public, and \
+GitHub Pages serves its publications.json and news.json to anyone, nightly, \
+which is what the hub's Library is built from.">
 <defs>{_marker("f1a", INK)}{_marker("f1b", DEEP)}</defs>
 
 {_t(6, 18, "CLAUDE", size=12, fill=DEEP, weight="700", track=1.3)}
@@ -259,44 +275,22 @@ Publish commits an edited report back onto a hub branch.">
 
 {fig_repos()}
 
-<path d="M 81,130 L 81,280 L 188,280" fill="none" stroke="{INK}"
-      stroke-width="2" marker-end="url(#f1a)"/>
-{_t(92, 272, "edits its files", size=11, fill=MUTE_INK)}
-
-<line x1="333" y1="192" x2="333" y2="218" stroke="{INK}" stroke-width="2"
-      marker-end="url(#f1a)"/>
-
-{_box(196, 222, 274, 116, fill=WHITE, stroke=MID, r=8)}
-{_t(208, 246, "One report is one project", size=12.5, fill=DEEP,
-    weight="700")}
-{_t(208, 267, "projects/staff-toolkit/ in primer-editor:", size=11,
-    fill=BODY_INK)}
-{_t(208, 284, "content.md, layout.json, render_report.py", size=11,
-    fill=BODY_INK)}
-{_t(208, 305, "the id that ?project= opens", size=11, fill=MUTE_INK)}
-{_t(208, 322, "Publish commits it back onto a hub/ branch", size=11,
-    fill=MUTE_INK)}
-
-{_t(500, 42, "One repository of the", size=11, fill=BODY_INK)}
-{_t(500, 58, "sixteen is public — and", size=11, fill=BODY_INK)}
-{_t(500, 74, "it feeds the hub.", size=11, fill=BODY_INK)}
-
-<line x1="470" y1="152" x2="496" y2="152" stroke="{DEEP}" stroke-width="2"
+<line x1="470" y1="104" x2="496" y2="104" stroke="{DEEP}" stroke-width="2"
       marker-end="url(#f1b)"/>
 
-{_box(500, 108, 214, 88, fill=PALE, stroke=DEEP, r=8)}
-{_t(512, 132, "GitHub Pages", size=12.5, fill=DEEP, weight="700")}
-{_t(512, 152, "publications.json,", size=11, fill=BODY_INK)}
-{_t(512, 168, "news.json", size=11, fill=BODY_INK)}
-{_t(512, 186, "nightly, open to anyone", size=11, fill=MUTE_INK)}
+{_box(500, 60, 214, 88, fill=PALE, stroke=DEEP, r=8)}
+{_t(512, 84, "GitHub Pages", size=12.5, fill=DEEP, weight="700")}
+{_t(512, 104, "publications.json,", size=11, fill=BODY_INK)}
+{_t(512, 120, "news.json", size=11, fill=BODY_INK)}
+{_t(512, 138, "nightly, open to anyone", size=11, fill=MUTE_INK)}
 
-<line x1="607" y1="196" x2="607" y2="222" stroke="{DEEP}" stroke-width="2"
+<line x1="607" y1="148" x2="607" y2="174" stroke="{DEEP}" stroke-width="2"
       marker-end="url(#f1b)"/>
 
-{_box(500, 226, 214, 60, fill=DEEP, r=8)}
-{_t(607, 250, "The hub's Library", size=12, fill=WHITE, weight="700",
+{_box(500, 178, 214, 60, fill=DEEP, r=8)}
+{_t(607, 202, "The hub's Library", size=12, fill=WHITE, weight="700",
     anchor="middle")}
-{_t(607, 268, "reads them straight", size=11, fill=PALE, anchor="middle")}
+{_t(607, 220, "reads them straight", size=11, fill=PALE, anchor="middle")}
 </svg>"""
 
 
@@ -622,7 +616,7 @@ def contents_rows() -> str:
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
         for n in ("02", "03", "04", "05", "06", "07", "08", "09", "10",
-                  "11", "12", "13"))
+                  "11", "12", "13", "14"))
 
 
 PAGE1 = f"""
@@ -652,45 +646,45 @@ PAGE2 = f"""
 """
 
 PAGE3 = f"""
-  {head("p2", 3)}
+  {head("p2", 4)}
   {figure("fig1.h", "fig1.note", "fig.github", diagram_github())}
   <h2{L.attr("cover.read.h")}>{C.t("cover.read.h")}</h2>
   {C.html("cover.read.p", "body")}
-  {foot("p2.foot", 3)}
+  {foot("p2.foot", 4)}
 """
 
 PAGE4 = f"""
-  {head("pcf", 4)}
+  {head("pcf", 8)}
   {figure("fig2.h", "fig2.note", "fig.cloudflare", diagram_cloudflare())}
   <h2{L.attr("cf.read.h")}>{C.t("cf.read.h")}</h2>
   {C.html("cf.read.p", "body")}
   {card(C, L, "cover.card.title", "cover.card.bullets", DEEP,
         detachable=True, min_h=1.4)}
-  {foot("pcf.foot", 4)}
+  {foot("pcf.foot", 8)}
 """
 
 PAGE5 = f"""
-  {head("p3", 5)}
+  {head("p3", 9)}
   {C.html("updates.p", "lead")}
   {figure("fig3.h", "fig3.note", "fig.notes", diagram_notes())}
   <h2{L.attr("updates.how.h")}>{C.t("updates.how.h")}</h2>
   {C.html("updates.how.p", "body")}
-  {foot("p3.foot", 5)}
+  {foot("p3.foot", 9)}
 """
 
 PAGE6 = f"""
-  {head("p4", 6)}
+  {head("p4", 10)}
   <h2{L.attr("cal.h")}>{C.t("cal.h")}</h2>
   {C.html("cal.p", "lead")}
   {card(C, L, "cal.card.title", "cal.card.bullets", PALE,
         detachable=True, min_h=1.3)}
   <h2{L.attr("subs.h")}>{C.t("subs.h")}</h2>
   {C.html("subs.p", "body")}
-  {foot("p4.foot", 6)}
+  {foot("p4.foot", 10)}
 """
 
 PAGE7 = f"""
-  {head("p5", 7)}
+  {head("p5", 11)}
   {C.html("lib.p", "lead")}
   <h2{L.attr("res.h")}>{C.t("res.h")}</h2>
   {C.html("res.p", "body")}
@@ -698,11 +692,11 @@ PAGE7 = f"""
   {C.html("search.p", "body")}
   {card(C, L, "search.card.title", "search.card.bullets", SAGE,
         detachable=True, min_h=1.5)}
-  {foot("p5.foot", 7)}
+  {foot("p5.foot", 11)}
 """
 
 PAGE8 = f"""
-  {head("p6", 8)}
+  {head("p6", 12)}
   {C.html("ed.p", "lead")}
   {card(C, L, "ed.card.title", "ed.card.bullets", DARK,
         detachable=True, min_h=1.9)}
@@ -710,57 +704,57 @@ PAGE8 = f"""
   {C.html("ed.rooms.p", "body")}
   <h2{L.attr("ed.share.h")}>{C.t("ed.share.h")}</h2>
   {C.html("ed.share.p", "body")}
-  {foot("p6.foot", 8)}
+  {foot("p6.foot", 12)}
 """
 
 PAGE9 = f"""
-  {head("p7", 9)}
+  {head("p7", 13)}
   {C.html("mcp.p", "lead")}
   {card(C, L, "mcp.card.title", "mcp.card.bullets", DEEP,
         detachable=True, min_h=1.7)}
   <h2{L.attr("broke.h")}>{C.t("broke.h")}</h2>
   {C.html("broke.p", "body")}
-  {foot("p7.foot", 9)}
+  {foot("p7.foot", 13)}
 """
 
 PAGE10 = f"""
-  {head("pmcp", 10)}
+  {head("pmcp", 7)}
   {figure("figstack.h", "figstack.note", "fig.stack", diagram_stack())}
   <h2{L.attr("stack.read.h")}>{C.t("stack.read.h")}</h2>
   {C.html("stack.read.p", "body")}
-  {foot("pmcp.foot", 10)}
+  {foot("pmcp.foot", 7)}
 """
 
 PAGE11 = f"""
-  {head("pgh", 11)}
+  {head("pgh", 5)}
   {C.html("gh.p", "lead")}
   {card(C, L, "gh.card.title", "gh.card.bullets", DARK,
         detachable=True, min_h=2.4)}
   <h2{L.attr("gh.after.h")}>{C.t("gh.after.h")}</h2>
   {C.html("gh.after.p", "body")}
-  {foot("pgh.foot", 11)}
+  {foot("pgh.foot", 5)}
 """
 
 PAGE12 = f"""
-  {head("pdesk", 12)}
+  {head("pdesk", 6)}
   {figure("figroutes.h", "figroutes.note", "fig.routes", diagram_routes())}
   <h2{L.attr("routes.h")}>{C.t("routes.h")}</h2>
   {C.html("routes.p", "body")}
   <h2{L.attr("pr.h")}>{C.t("pr.h")}</h2>
   {C.html("pr.p", "body")}
-  {foot("pdesk.foot", 12)}
+  {foot("pdesk.foot", 6)}
 """
 
 # The glossary runs in two columns. .twocol has been in this stylesheet since
 # the first draft and unused until now; a seventeen-term list down one column
 # would have run past the foot of the sheet.
 PAGE13 = f"""
-  {head("pgloss", 13)}
+  {head("pgloss", 14)}
   <div class="twocol">
     <div>{C.html("gloss.a", "gloss")}</div>
     <div>{C.html("gloss.b", "gloss")}</div>
   </div>
-  {foot("pgloss.foot", 13)}
+  {foot("pgloss.foot", 14)}
 """
 
 # The endnotes get their own sheet. Seven of them plus two sections no longer
@@ -771,12 +765,31 @@ PAGE14 = f"""
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("pend.foot", 14)}
+  {foot("pend.foot", 15)}
 """
 
-DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
-            6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10,
-            11: PAGE11, 12: PAGE12, 13: PAGE13, 14: PAGE14}
+PAGEWHY = f"""
+  {head("pwhy", 3)}
+  {C.html("why.p", "lead")}
+  {card(C, L, "why.card.title", "why.card.bullets", DEEP,
+        detachable=True, min_h=2.4)}
+  <h2{L.attr("why.gh.h")}>{C.t("why.gh.h")}</h2>
+  {C.html("why.gh.p", "body")}
+  {foot("pwhy.foot", 3)}
+"""
+
+# Position -> sheet. The GitHub trio (what GitHub remembers, the CLI, the two
+# routes) now runs together at 4-6 instead of being split across the guide,
+# and PAGEWHY opens the whole block at 3. Sheets 2-7 are the basics — choosing
+# a model, why a hub at all, GitHub, and the four words for reaching a tool;
+# 8-13 are this hub specifically, starting with what Cloudflare keeps. The
+# PAGEn NAMES are identities and
+# deliberately no longer match their positions: renaming them would be a much
+# larger diff than reordering this one map, and every page number a reader
+# sees comes from the foot() call inside each sheet.
+DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGEWHY, 4: PAGE3, 5: PAGE11,
+            6: PAGE12, 7: PAGE10, 8: PAGE4, 9: PAGE5, 10: PAGE6,
+            11: PAGE7, 12: PAGE8, 13: PAGE9, 14: PAGE13, 15: PAGE14}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in

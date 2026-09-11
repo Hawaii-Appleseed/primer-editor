@@ -32,37 +32,41 @@ THE STAFF HUB IS ONE WEBSITE with five tabs, and everything in this guide
 lives on it. There is nothing to install, no second password, and no separate
 account: you reach it at **staff-updates-internal.pages.dev**, sign in with
 your Hawaiʻi Appleseed or Hawaiʻi Budget and Policy Center Google account, and
-that session lasts about a month.[^hub] The next page is about choosing a
-Claude model, because that is the decision most of us make most often. The two
-after it draw the hub itself: GitHub, where the code and the reports are kept,
-and Cloudflare, which serves them and remembers what you do.
+that session lasts about a month.[^hub] The first half is the groundwork:
+choosing a Claude model, why there is a hub at all rather than just Claude,
+what GitHub is for, and the four words people muddle for reaching a tool. The
+second half is this hub itself, tab by tab, starting with what Cloudflare
+keeps.
+
 [[fig1.h]]
 Figure 2. What Is In GitHub, And What Of It Is Public
 [[fig1.note]]
-Fifteen of the sixteen repositories are private. The public one is the
-website's, and the two feeds GitHub Pages serves from it are what the hub's
-Library is built out of — read straight, with no auth and no copy kept here.
-Source: the README's "The Library" and "Making a document on the hub".[^readme]
+Eight of the sixteen repositories are public — but not the ones with our own
+work in them. The website's is public, and the two files GitHub Pages serves
+from it are what the hub's Library is built from: read directly, with no
+sign-in and no second copy kept here. Source: the README's "The Library" and
+"Making a document on the hub".[^readme]
+
 [[cover.read.h]]
 ### What GitHub is for
 [[cover.read.p]]
 **GitHub is the filing cabinet that never forgets.** Nothing in it is
 overwritten. A change is saved as a **commit** — a snapshot with a date, an
-author and a sentence saying why — and a **repository** is one project's
-folder plus every commit ever made to it. You edit on your own laptop and
-then **push**, which sends your commits to the shared copy. That is the
-point: any version can be brought back, and you can always see who changed
-what.
+author, and a sentence saying why — and a **repository** is one project's
+folder plus every commit ever made to it. You edit on your own laptop, then
+**push**, which sends your commits to the shared copy. That is the point: any
+version can be brought back, and you can always see who changed what. These
+words, and the rest of the vocabulary in this guide, are in the glossary at
+the back.
 
 **A report is one folder in a repository.** Its words, its layout and the
-Python that draws it sit together in `primer-editor` — the folder the editor
+Python that draws it sit together in primer-editor — the folder the editor
 opens — and Publish sends an edited report back as a commit of its own. A
 push to the hub's own repository is what rebuilds the site, which is why a
-new feature can appear without anyone sending you a link. **Almost none of it
-is public.** One of the sixteen is: the website's, whose two feeds GitHub
-Pages serves to anyone who asks, and the Library is built from them.
-Everything carrying our own work — attendance, strategy, the notes — is
-private, behind the gate.
+new feature can appear without anyone sending you a link. That repository is
+private: everything carrying our own work — attendance, strategy, the notes —
+sits behind the gate.
+
 [[cover.card.title]]
 ### Two things worth remembering
 
@@ -81,7 +85,8 @@ The gate in front of everything, and the four places your work is kept.
 *Where it all runs*
 
 [[fig2.h]]
-Figure 3. Cloudflare — One Gate, And Four Stores Behind It
+Figure 5. Cloudflare — One Gate, And Four Stores Behind It
+
 [[fig2.note]]
 Nothing in this diagram touches GitHub: Pages is rebuilt by a push, but every
 other arrow here is live. Source: the README's "Shared checkboxes", "The live
@@ -91,7 +96,7 @@ updates mirror", "The documents, on R2" and "The primer editor's rooms".[^readme
 [[cf.read.p]]
 **Cloudflare serves the hub and remembers what you do.** Pages puts the pages
 in front of you and rebuilds them whenever GitHub is pushed to; everything
-under `/api` is a small program a page calls to fetch or save something.
+under /api is a small program a page calls to fetch or save something.
 Behind those sit the things that have to be live — **KV** for your checkboxes,
 the task board, the comms board and the notes; **R2** for the documents in the
 editor and every version of every one of them; and **the room**, where two
@@ -120,8 +125,8 @@ Every price here is an API list rate, per million tokens or per task. On a
 claude.ai or Claude Code subscription nobody is billed that way, so read them
 as ratios: which model, and which effort, costs several times another. The
 SWE-bench Pro scores are a subset both models largely saturate and are not
-comparable to the public leaderboard, and Opus 5's `medium` row is derived
-from the source's "about 2 points at `medium` for half the cost" against its
+comparable to the public leaderboard, and Opus 5's medium row is derived
+from the source's "about 2 points at medium for half the cost" against its
 91.7% / $1.01 default.[^models][^cost]
 [[eval.read.h]]
 ### What to take from this
@@ -130,15 +135,15 @@ from the source's "about 2 points at `medium` for half the cost" against its
 **Start with Opus 5.** It is the one to reach for on most work, and on the
 coding subset above it matched Fable 5.1 at the default — 91.7% against 92.1%,
 inside run-to-run noise — for about 15% less per solved task. Go to **Fable
-5.1** for demanding reasoning and long-horizon agentic work, or when Opus 5 at
-a higher effort still falls short. Go to **Sonnet 5** when speed and volume
-matter more than the last few points.
+5.1** for the hardest reasoning, for a job you expect to run for hours, or
+when Opus 5 at a higher effort still falls short. Go to **Sonnet 5** for
+simple work in bulk, when speed and cost matter more than the last few points.
 
 **Effort is not a dial to leave turned up.** On long coding work it buys real
-accuracy: Opus 5 gives up about 8 points at `low` and about 2 at `medium`, for
+accuracy: Opus 5 gives up about 8 points at low and about 2 at medium, for
 a quarter and a half of the cost. On research and knowledge work the curve is
-nearly flat — Fable 5.1 scored about the same at `low`, `medium` and `high`
-while the cost per task went from $4.66 to $7.12. The default is `high` on all
+nearly flat — Fable 5.1 scored about the same at low, medium and high
+while the cost per task went from $4.66 to $7.12. The default is high on all
 three models, so the saving is in turning it **down** where it buys nothing.
 
 [[cover.contents.h]]
@@ -149,27 +154,35 @@ WHERE THE WORK IS KEPT
 [[p2.h1]]
 What GitHub remembers
 [[p2.sub]]
-Every change to the code and the reports is kept, with a name on it. Fifteen
-of the sixteen repositories are private; the one that is not feeds the
-Library.
+Every change to the code and the reports is saved, with a name on it. The
+repository holding our own work is private. The website's is public, and the
+Library reads from it.
+
 [[p2.foot]]
 *Where the work is kept*
 [[cover.contents.02]]
 Three models, and what effort costs
+
 [[cover.contents.03]]
-What GitHub remembers
+Why a hub, and not just Claude
+
 [[cover.contents.04]]
-What Cloudflare keeps
+What GitHub remembers
+
 [[cover.contents.05]]
-Updates
+Setting up the GitHub CLI
+
 [[cover.contents.06]]
-Calendar and Tasks
+Two routes, and only one of them writes
+
 [[cover.contents.07]]
-Library, Resources, and search
+Connectors, the CLI, MCP servers and plugins
+
 [[cover.contents.08]]
-The report editor
+What Cloudflare keeps
+
 [[cover.contents.09]]
-Your own Claude, and what to do when something breaks
+Updates
 
 [[p3.eyebrow]]
 THE FIRST TAB
@@ -190,7 +203,8 @@ never dropped — it publishes as its own card in amber, with a note, so drift
 in the notes doc shows up on the page instead of quietly losing content.
 
 [[fig3.h]]
-Figure 4. How An Edit To The Notes Doc Reaches The Page
+Figure 6. How An Edit To The Notes Doc Reaches The Page
+
 [[fig3.note]]
 Source: the README's "live updates mirror" and "Why syncNow takes a lock". The
 committed copy reaches the page on the next rebuild; the live mirror reaches it
@@ -368,9 +382,10 @@ everyone else in the room watching too.
 ### Adding it
 
 [[mcp.card.bullets]]
-- **On claude.ai** (Pro, Max or Team): Settings, then Connectors, then Add custom connector, and give it the hub's `/api/mcp` address — on a Team plan an administrator can add it once for everyone.[^mcp]
-- **In Claude Code**: `claude mcp add --transport http hub` followed by the same address.
+- **On claude.ai** (Pro, Max or Team): Settings, then Connectors, then Add custom connector, and give it the hub's /api/mcp address — on a Team plan an administrator can add it once for everyone.[^mcp]
+- **In Claude Code**: run claude mcp add --transport http hub followed by the same address.
 - You will be sent through the ordinary Google sign-in, and everything Claude then does is done as you — it can only reach the documents you can.
+
 [[subs.h]]
 ### Calendar subscriptions
 
@@ -392,7 +407,7 @@ Google account the browser used. A stuck session can serve a stale refusal
 after the cause is fixed; sign out of Access and retry in a private window.
 **If Updates looks stale**, give it a minute: there is a five-minute safety
 net behind the instant path. **If a data file looks wrong, do not fix it by
-hand** — everything under `data/` is generated and overwritten. Say something
+hand** — everything under data/ is generated and overwritten. Say something
 instead.[^readme]
 [[p7.foot]]
 *Your own Claude* · *When something breaks*
@@ -411,7 +426,7 @@ is a bundle that can contain it.
 *Connectors, the CLI, MCP servers and plugins*
 
 [[figstack.h]]
-Figure 5. What Each Of The Four Actually Is
+Figure 4. What Each Of The Four Actually Is
 
 [[figstack.note]]
 Sources: Anthropic's own documentation on custom connectors, on MCP in Claude
@@ -422,11 +437,11 @@ Code, and on creating plugins.[^connectors][^ccmcp][^plugins]
 
 [[stack.read.p]]
 **The MCP server is the thing itself** — one address speaking one protocol.
-This hub is one, at `/api/mcp`, and everything below is a way of reaching it.
+This hub is one, at /api/mcp, and everything below is a way of reaching it.
 
-**A connector and `claude mcp add` are two doors onto that same server.** On
+**A connector and claude mcp add are two doors onto that same server.** On
 claude.ai you add a connector under Settings; in Claude Code — a program you
-type commands at, in a terminal — you run `claude mcp add --transport http`.
+type commands at, in a terminal — you run claude mcp add --transport http.
 Same server, same address, different app — and if you signed in to Claude Code
 with your claude.ai account, the connectors you added there are already
 available. Anthropic verifies the pre-built connectors, Google Workspace and
@@ -435,12 +450,13 @@ through that, which is what this hub is.
 
 **A plugin is not a door.** It is a bundle, it is Claude Code only, and it is
 installed from a marketplace: skills, agents, hooks, commands, LSP servers,
-background monitors — and, if it wants one, an `.mcp.json`. That last part is
-an MCP server, which is why these four words get muddled. The test: to reach
-one service you want a connector or `claude mcp add`; to hand somebody a
+background monitors — and, if it wants one, an .mcp.json file. That last part
+is an MCP server, which is why these four words get muddled. The test: to reach
+one service you want a connector or claude mcp add; to hand somebody a
 working setup, you want a plugin.
+
 [[cover.contents.10]]
-Connectors, the CLI, MCP servers and plugins
+Calendar and Tasks
 
 [[pgh.eyebrow]]
 IF YOU NEED THE REPOSITORIES
@@ -449,39 +465,38 @@ IF YOU NEED THE REPOSITORIES
 Setting up the GitHub CLI
 
 [[pgh.sub]]
-Most people never need this. If you do, it is three commands — and one thing
+Most people never need this. If you do, it is a few commands — and one step
 only somebody else can do for you.
 
 [[pgh.foot]]
 *Setting up the GitHub CLI*
 
 [[gh.p]]
-THE EDITOR LIVES ON THIS HUB precisely so that nobody needs a GitHub account
-to write a report. You need one only if you are going to work with the files
-themselves — reading the code, running the renderer, letting Claude Code
-commit and push the way Figure 2 draws it. **gh** is GitHub's own command-line
-tool, and it is the shortest path from nothing to a copy of a repository on
-your laptop.
+THE EDITOR LIVES ON THIS HUB so that nobody needs a GitHub account to write a
+report. You need one only if you are going to work with the files themselves —
+reading the code, running the renderer, or letting Claude Code commit and push
+the way Figure 2 draws it. **gh** is GitHub's own command-line tool, and it is
+the shortest path from nothing to a copy of a repository on your laptop.
 
 [[gh.card.title]]
 ### From nothing to a checkout
 
 [[gh.card.bullets]]
 - **Ask to be added first.** Every repository with our work in it is private, so nothing below will find them until somebody with access has added you to the Hawaiʻi Appleseed organization on GitHub. This is the only step you cannot do yourself.
-- **Install it.** On a Mac, `brew install gh`. Windows and Linux instructions are on the GitHub CLI site.[^ghcli]
-- **Sign in.** `gh auth login`, then choose GitHub.com and HTTPS. It opens a browser to finish, and keeps the token in your system keychain rather than a file on disk.
-- **Check it took.** `gh auth status` names the account you are signed in as and what it is allowed to do.
-- **Take a copy.** `gh repo clone Hawaii-Appleseed/staff-updates-internal` puts the hub's own files in a folder on your laptop.
+- **Install it.** On a Mac, run brew install gh. Windows and Linux instructions are on the GitHub CLI site.[^ghcli]
+- **Sign in.** Run gh auth login, then choose GitHub.com and HTTPS. It opens a browser to finish, and keeps the token in your system keychain rather than a file on disk.
+- **Check it took.** Run gh auth status. It names the account you are signed in as, and what it is allowed to do.
+- **Take a copy.** Run gh repo clone Hawaii-Appleseed/staff-updates-internal. That puts the hub's own files in a folder on your laptop.
 
 [[gh.after.h]]
 ### What that gets you
 
 [[gh.after.p]]
-A folder you can point Claude Code at. From there the loop in Figure 2 is
-real: it edits files, commits them, and pushes, and the push is what rebuilds
-the site. Nothing else in this guide depends on it — the hub, the editor, the
-board and your own Claude all work with no GitHub account at all, which is the
-whole reason they were built the way they were.
+A folder you can point Claude Code at. From there it can edit files, commit
+them, and push — and the push is what rebuilds the site. Nothing else in this
+guide depends on it: the hub, the editor, the board and your own Claude all
+work with no GitHub account at all, which is the whole reason they were built
+this way.
 
 [[pdesk.eyebrow]]
 GITHUB FROM THE CLAUDE APP
@@ -490,19 +505,19 @@ GITHUB FROM THE CLAUDE APP
 Two routes, and only one of them writes
 
 [[pdesk.sub]]
-One route reads a repository and cannot change it. The other has your
-checkout, and is where a pull request comes from.
+One route can read a repository but not change it. The other works on your own
+copy, where a pull request comes from.
 
 [[pdesk.foot]]
 *GitHub from the Claude app*
 
 [[figroutes.h]]
-Figure 6. Reading A Repository, And Changing One
+Figure 3. Reading A Repository, And Changing One
 
 [[figroutes.note]]
 Drawn rather than screenshotted on purpose: a picture of the app is right
 until its next release, and cannot be recoloured when the palette moves.
-Sources: Anthropic on the GitHub connector, and `gh` itself.[^ghconn][^ghcli]
+Sources: Anthropic on the GitHub connector, and gh itself.[^ghconn][^ghcli]
 
 [[routes.h]]
 ### Which route you want
@@ -510,27 +525,29 @@ Sources: Anthropic on the GitHub connector, and `gh` itself.[^ghconn][^ghcli]
 [[routes.p]]
 **To read a repository, use a connector.** In a chat or a Project, the plus
 button offers **Add from GitHub**, and you pick the files or folders you want.
-Claude then has their names and contents and can answer questions about them.
-That is the whole of it: the connector retrieves no commit history, no issues
-and no pull requests, and it cannot write anything back. People lose time
-waiting for it to open a pull request it cannot open.
+Claude then has their names and contents, and can answer questions about them.
+That is all it does: no commit history, no issues, no pull requests, and
+nothing written back. People lose time waiting for it to open a pull request
+it cannot open.
 
-**To change a repository, use Claude Code.** The Code tab has a real checkout
-on your own machine — the one sheet 11 sets up — so it can branch, commit and
-push the way Figure 2 draws it, and open a pull request when the work is
-ready. Anything ending in a change to the files goes this way.
+**To change a repository, use Claude Code.** The Code tab works on a real copy
+on your machine — the one the GitHub CLI sheet sets up — so it can branch,
+commit and push the way Figure 2 draws it, and open a pull request when the
+work is ready. Anything that ends in a change to the files goes this way.
+
 [[pr.h]]
 ### What a pull request is
 
 [[pr.p]]
 **A pull request is a set of commits offered for review before they join the
 main line.** It sits on its own branch, so nothing in it changes what is
-deployed until somebody merges it — which is the point: a change can be read
-and argued with while it is still cheap to change. From the Code tab, `gh pr
-create` opens one from the branch you are on and prints its address; `gh pr
-diff` shows what is in it, `gh pr review` records an opinion, and `gh pr
-merge` finishes it. **Merging stays a person's act** — nothing in this guide
-merges anything on your behalf.
+deployed until somebody merges it. That is the point: a change can be read and
+argued with while it is still cheap to change. From the Code tab, gh pr create
+opens one from the branch you are on and prints its address; gh pr diff shows
+what is in it, gh pr review records an opinion, and gh pr merge finishes it.
+**Merging stays a person's act** — nothing in this guide merges anything on
+your behalf.
+
 [[pgloss.eyebrow]]
 THE WORDS
 
@@ -545,10 +562,10 @@ Every term in this guide that is not plain English, in one place.
 
 [[gloss.a]]
 **Access** — Cloudflare's gate. It checks your Google sign-in before any page
-or any `/api` call on the hub is answered.
+or any /api call on the hub is answered.
 
 **API** — a small program a page calls to fetch or save something. Everything
-under `/api` on this hub is one.
+under /api on this hub is one.
 
 **branch** — a line of commits kept apart from the main one, so work in
 progress does not change what is deployed.
@@ -557,7 +574,7 @@ progress does not change what is deployed.
 edit and then push from.
 
 **CLI** — a program you type commands at instead of clicking. Claude Code is
-one; so is `gh`.
+one; so is gh.
 
 **commit** — one saved change in GitHub: a snapshot with a date, an author and
 a sentence saying why.
@@ -571,8 +588,8 @@ takes a minute or two.
 **Durable Object** — the piece of Cloudflare that holds one live thing for
 everybody at once. Each document's room is one.
 
-**effort** — how hard you ask a Claude model to think. Five settings, `low` to
-`max`; the default is `high`.
+**effort** — how hard you ask a Claude model to think. Five settings, low to
+max; the default is high.
 
 **KV** — Cloudflare's fast store for small things: checkboxes, tasks, the
 comms board, the live notes.
@@ -581,7 +598,7 @@ comms board, the live notes.
 runs two; a team can host its own.
 
 **MCP** — the protocol Claude uses to reach a tool outside itself. This hub
-speaks it at `/api/mcp`.
+speaks it at /api/mcp.
 
 **Pages** — the Cloudflare service that serves this site and rebuilds it
 whenever GitHub is pushed to.
@@ -608,12 +625,13 @@ everywhere after that. Access uses it.
 **token** — a long secret string that stands in for a password. Treat one the
 way you would treat a password.
 [[cover.contents.11]]
-Setting up the GitHub CLI
+Library, Resources, and search
 
 [[cover.contents.12]]
-Two routes, and only one of them writes
+The report editor
+
 [[cover.contents.13]]
-What the words mean
+Your own Claude, and what to do when something breaks
 
 [[pend.foot]]
 *Where this is written down*
@@ -637,3 +655,55 @@ Where this is written down
 [ghconn]: Anthropic, Using the GitHub connector with Claude — https://support.claude.com/en/articles/10167454-using-the-github-connector-with-claude
 [ghcli]: GitHub CLI — installation for every platform — https://cli.github.com
 [mcp]: "Ask your own Claude", in the README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md
+
+[[cover.contents.14]]
+What the words mean
+
+[[pwhy.eyebrow]]
+WHY ANY OF THIS EXISTS
+
+[[pwhy.h1]]
+Why a hub, and not just Claude
+
+[[pwhy.sub]]
+Claude does the thinking. The hub is where the shared things live — and where
+the people who never open Claude can still see them.
+
+[[pwhy.foot]]
+*Why a hub, and not just Claude*
+
+[[why.p]]
+A FAIR QUESTION, and worth answering before any of the machinery: if we all
+have Claude, why is there a website at all? Because most of what follows is
+shared — one board, one calendar, one set of checkboxes that everybody sees
+change at the same moment. A Claude Project is a good place to keep the
+context for a conversation. It is not a place the whole staff can stand in
+front of at once.
+
+[[why.card.title]]
+### What the hub has that a Claude Project does not
+
+[[why.card.bullets]]
+- **A board everyone sees at once.** To do, In progress and Done, with due dates and four views of the same cards. Drag one and it moves for everybody, in seconds.
+- **A calendar other apps can subscribe to.** The dated bullets and the task board hand out feed URLs that Google Calendar reads. You cannot subscribe to a conversation.
+- **Checkboxes that mean the thing is done.** They are shared across staff, not a note to yourself about where you got to.
+- **A way in for people who do not open Claude.** The hub is a website behind a Google sign-in. Everyone on either staff domain gets in, whether they use Claude or not.
+- **A record that outlives the chat.** Every document is versioned in the store and every version is kept.
+
+[[why.gh.h]]
+### Where GitHub comes in
+
+[[why.gh.p]]
+**GitHub is not what runs the board** — that is Cloudflare's, and its own
+sheet draws it. GitHub's job is narrower, and it is about the code: every
+change to the site and to the report engine is saved with a name, a date and
+a reason, nothing is ever overwritten, and any version can be brought back.
+Its second job is the deploy. A push to the hub's own repository is what
+rebuilds the site, which is how a change one person makes becomes the page
+everybody else opens.
+
+**And Claude still reaches all of it.** The hub is an MCP server, so your own
+Claude can read and write the reports as you. The choice was never Claude or
+the hub. It is Claude, plus a shared place for the things a conversation
+cannot hold.
+
