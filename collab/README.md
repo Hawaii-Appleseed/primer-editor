@@ -749,7 +749,14 @@ letting people change it:
   not while a Save is in flight or a dialog is up (it re-arms), and not
   after a 409 or a failure until a press of Save settles it — an automatic
   Save must never ask a question or keep failing quietly, so it holds and
-  the status line says "press Save". The button stays, reading "Saved ·
+  the status line says "press Save". One 409 is not that: two editors in a
+  room both autosave two seconds after the same change, and the one that
+  lost the race used to be told the document "changed outside this
+  session" and had its autosave paused (seen on rxkids-fiscal, 2026-09-10:
+  two Saves of one state, 70 ms apart, by two people). A version the room
+  already records as saved, or whose saver is in the roster, is adopted as
+  saved instead (`collabSavedByPeer`, waiting up to 1.5 s for the room's
+  record to catch the answer up). The button stays, reading "Saved ·
   just now" after one lands and "Saved" once that is old news. Per
   browser, on unless turned off in the File menu
   (`localStorage['primer-autosave']`); the hub spec runs with it off, since
