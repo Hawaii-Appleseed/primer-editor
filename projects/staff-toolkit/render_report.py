@@ -523,6 +523,69 @@ overlap. A plugin can carry one,", size=11, fill=MUTE_INK)}
 </svg>"""
 
 
+# ── Figure 6: the two routes from the Claude app to GitHub ─────────────────
+# Drawn rather than screenshotted on purpose. A screenshot of the app is
+# right until the app's next release and cannot be recoloured when the
+# palette moves — the same reason every other figure here is code.
+#
+# The two lanes are separated because the difference between them is the
+# whole point: the top one cannot write, and people wait for it to open a
+# pull request that it will never open. The read-only sentence therefore sits
+# UNDER the top lane, where someone tracing that route meets it, rather than
+# in the figure note where it would be read last or not at all.
+def _lane(y, a1, a2, b1, b2, c1, c2) -> str:
+    return "".join([
+        _box(6, y, 150, 50, fill=SAGE, r=8),
+        _t(81, y + 21, a1, size=12, fill=INK, weight="700", anchor="middle"),
+        _t(81, y + 38, a2, size=11, fill=INK, anchor="middle"),
+        f'<line x1="160" y1="{y + 25}" x2="192" y2="{y + 25}" stroke="{INK}" '
+        f'stroke-width="2" marker-end="url(#f6a)"/>',
+        _box(196, y, 200, 50, fill=WHITE, stroke=MID, r=8),
+        _t(208, y + 21, b1, size=12, fill=DEEP, weight="700"),
+        _t(208, y + 38, b2, size=11, fill=BODY_INK),
+        f'<line x1="400" y1="{y + 25}" x2="432" y2="{y + 25}" stroke="{DEEP}" '
+        f'stroke-width="2" marker-end="url(#f6b)"/>',
+        _box(436, y, 278, 50, fill=DEEP, r=8),
+        _t(450, y + 21, c1, size=12, fill=WHITE, weight="700"),
+        _t(450, y + 38, c2, size=11, fill=PALE),
+    ])
+
+
+def diagram_routes() -> str:
+    return f"""<svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" \
+role="img" aria-label="Two routes from the Claude app to GitHub. The reading \
+route: a Connector, added with the plus button and Add from GitHub, brings \
+the files of a repository — names and contents only — into a chat or a \
+Project, where you can ask questions about the code. That route is read-only: \
+no commit history, no issues and no pull requests. The changing route: Claude \
+Code in the Code tab works in your checkout, where it branches, commits and \
+pushes, and opens a pull request with gh pr create. The pull request is then \
+reviewed and merged, and merging is a person's act.">
+<defs>{_marker("f6a", INK)}{_marker("f6b", DEEP)}</defs>
+
+{_t(6, 14, "READING — A CONNECTOR", size=12, fill=DEEP, weight="700",
+    track=1.3)}
+{_lane(28, "A Connector", "Add from GitHub",
+       "The files of a repo", "names and contents only",
+       "Into a chat or a Project", "ask it about the code")}
+{_t(6, 96, "Read-only. No commit history, no issues, and no pull requests — \
+so do not wait for one.", size=11, fill=MUTE_INK)}
+
+{_t(6, 120, "CHANGING — CLAUDE CODE", size=12, fill=DEEP, weight="700",
+    track=1.3)}
+{_lane(136, "Claude Code", "the Code tab",
+       "Your checkout", "branch, commit, push",
+       "A pull request", "gh pr create")}
+
+<line x1="575" y1="186" x2="575" y2="206" stroke="{DEEP}" stroke-width="2"
+      marker-end="url(#f6b)"/>
+
+{_box(436, 210, 278, 46, fill=PALE, stroke=DEEP, r=8)}
+{_t(450, 232, "Read, then merged", size=12, fill=DEEP, weight="700")}
+{_t(450, 248, "merging stays a person's act", size=11, fill=BODY_INK)}
+</svg>"""
+
+
 # ── Sheet furniture ─────────────────────────────────────────────────────────
 def head(pre: str, page_no: int) -> str:
     """A content page's eyebrow, title and standfirst."""
@@ -559,7 +622,7 @@ def contents_rows() -> str:
         f'<span class="cnum">{n}</span>'
         f'<span class="ctxt">{C.t(f"cover.contents.{n}")}</span></div>'
         for n in ("02", "03", "04", "05", "06", "07", "08", "09", "10",
-                  "11", "12"))
+                  "11", "12", "13"))
 
 
 PAGE1 = f"""
@@ -678,32 +741,42 @@ PAGE11 = f"""
   {foot("pgh.foot", 11)}
 """
 
+PAGE12 = f"""
+  {head("pdesk", 12)}
+  {figure("figroutes.h", "figroutes.note", "fig.routes", diagram_routes())}
+  <h2{L.attr("routes.h")}>{C.t("routes.h")}</h2>
+  {C.html("routes.p", "body")}
+  <h2{L.attr("pr.h")}>{C.t("pr.h")}</h2>
+  {C.html("pr.p", "body")}
+  {foot("pdesk.foot", 12)}
+"""
+
 # The glossary runs in two columns. .twocol has been in this stylesheet since
 # the first draft and unused until now; a seventeen-term list down one column
 # would have run past the foot of the sheet.
-PAGE12 = f"""
-  {head("pgloss", 12)}
+PAGE13 = f"""
+  {head("pgloss", 13)}
   <div class="twocol">
     <div>{C.html("gloss.a", "gloss")}</div>
     <div>{C.html("gloss.b", "gloss")}</div>
   </div>
-  {foot("pgloss.foot", 12)}
+  {foot("pgloss.foot", 13)}
 """
 
 # The endnotes get their own sheet. Seven of them plus two sections no longer
 # fit on page 9, and the alternative was shaving real sentences to buy a
 # quarter inch — see primer/CLAUDE.md on measuring, not guessing.
-PAGE13 = f"""
+PAGE14 = f"""
   <div class="endnotes endnotes-own">
     <div class="klabel"{L.attr("endnotes.h2")}>{C.t("endnotes.h2")}</div>
     {C.fn.MOUNT}
   </div>
-  {foot("pend.foot", 13)}
+  {foot("pend.foot", 14)}
 """
 
 DESIGNED = {1: PAGE1, 2: PAGE2, 3: PAGE3, 4: PAGE4, 5: PAGE5,
             6: PAGE6, 7: PAGE7, 8: PAGE8, 9: PAGE9, 10: PAGE10,
-            11: PAGE11, 12: PAGE12, 13: PAGE13}
+            11: PAGE11, 12: PAGE12, 13: PAGE13, 14: PAGE14}
 
 # Derived from the layout rather than hardcoded: Save commits layout.json but
 # NOT this file, so a hardcoded count goes stale the moment a page is added in

@@ -483,6 +483,54 @@ the site. Nothing else in this guide depends on it — the hub, the editor, the
 board and your own Claude all work with no GitHub account at all, which is the
 whole reason they were built the way they were.
 
+[[pdesk.eyebrow]]
+GITHUB FROM THE CLAUDE APP
+
+[[pdesk.h1]]
+Two routes, and only one of them writes
+
+[[pdesk.sub]]
+One route reads a repository and cannot change it. The other has your
+checkout, and is where a pull request comes from.
+
+[[pdesk.foot]]
+*GitHub from the Claude app*
+
+[[figroutes.h]]
+Figure 6. Reading A Repository, And Changing One
+
+[[figroutes.note]]
+Drawn rather than screenshotted on purpose: a picture of the app is right
+until its next release, and cannot be recoloured when the palette moves.
+Sources: Anthropic on the GitHub connector, and `gh` itself.[^ghconn][^ghcli]
+
+[[routes.h]]
+### Which route you want
+
+[[routes.p]]
+**To read a repository, use a connector.** In a chat or a Project, the plus
+button offers **Add from GitHub**, and you pick the files or folders you want.
+Claude then has their names and contents and can answer questions about them.
+That is the whole of it: the connector retrieves no commit history, no issues
+and no pull requests, and it cannot write anything back. People lose time
+waiting for it to open a pull request it cannot open.
+
+**To change a repository, use Claude Code.** The Code tab has a real checkout
+on your own machine — the one sheet 11 sets up — so it can branch, commit and
+push the way Figure 2 draws it, and open a pull request when the work is
+ready. Anything ending in a change to the files goes this way.
+[[pr.h]]
+### What a pull request is
+
+[[pr.p]]
+**A pull request is a set of commits offered for review before they join the
+main line.** It sits on its own branch, so nothing in it changes what is
+deployed until somebody merges it — which is the point: a change can be read
+and argued with while it is still cheap to change. From the Code tab, `gh pr
+create` opens one from the branch you are on and prints its address; `gh pr
+diff` shows what is in it, `gh pr review` records an opinion, and `gh pr
+merge` finishes it. **Merging stays a person's act** — nothing in this guide
+merges anything on your behalf.
 [[pgloss.eyebrow]]
 THE WORDS
 
@@ -563,6 +611,8 @@ way you would treat a password.
 Setting up the GitHub CLI
 
 [[cover.contents.12]]
+Two routes, and only one of them writes
+[[cover.contents.13]]
 What the words mean
 
 [[pend.foot]]
@@ -584,5 +634,6 @@ Where this is written down
 [connectors]: Anthropic, About custom connectors — https://support.claude.com/en/articles/11175166-about-custom-connectors-remote-mcp
 [ccmcp]: Anthropic, MCP in Claude Code — https://code.claude.com/docs/en/mcp
 [plugins]: Anthropic, Create plugins — https://code.claude.com/docs/en/plugins
+[ghconn]: Anthropic, Using the GitHub connector with Claude — https://support.claude.com/en/articles/10167454-using-the-github-connector-with-claude
 [ghcli]: GitHub CLI — installation for every platform — https://cli.github.com
 [mcp]: "Ask your own Claude", in the README — https://github.com/Hawaii-Appleseed/staff-updates-internal/blob/main/README.md

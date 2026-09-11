@@ -444,7 +444,8 @@ bindings:
         - ["page9", "Claude & breakage"]
         - ["page10", "Connectors, CLI, MCP, plugins"]
         - ["page11", "Setting up the GitHub CLI"]
-        - ["page12", "What the words mean"]
+        - ["page12", "GitHub from the Claude app"]
+        - ["page13", "What the words mean"]
       dir: docs/staff-toolkit
       render: projects/staff-toolkit/render_report.py
       out: projects/staff-toolkit/index.html
