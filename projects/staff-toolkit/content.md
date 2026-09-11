@@ -91,13 +91,14 @@ updates mirror", "The documents, on R2" and "The primer editor's rooms".[^readme
 [[cf.read.p]]
 **Cloudflare serves the hub and remembers what you do.** Pages puts the pages
 in front of you and rebuilds them whenever GitHub is pushed to; everything
-under `/api` is a small program committed beside them. Behind those sit the
-things that have to be live — **KV** for your checkboxes, the task board, the
-comms board and the notes; **R2** for the documents in the editor and every
-version of every one of them; and **the room**, where two people editing the
-same report see each other type. One gate covers all of it: Access checks your
-Google sign-in before anything is answered, including the call your own Claude
-makes over MCP, which is why that needs no GitHub account.
+under `/api` is a small program a page calls to fetch or save something.
+Behind those sit the things that have to be live — **KV** for your checkboxes,
+the task board, the comms board and the notes; **R2** for the documents in the
+editor and every version of every one of them; and **the room**, where two
+people editing the same report see each other type. One gate covers all of it:
+Access checks your Google sign-in before anything is answered, including the
+call your own Claude makes over MCP, which is why that needs no GitHub
+account.
 [[peval.eyebrow]]
 CHOOSING A MODEL
 
@@ -424,21 +425,20 @@ Code, and on creating plugins.[^connectors][^ccmcp][^plugins]
 This hub is one, at `/api/mcp`, and everything below is a way of reaching it.
 
 **A connector and `claude mcp add` are two doors onto that same server.** On
-claude.ai you add a connector under Settings; in Claude Code you run `claude
-mcp add --transport http`. Same server, same address, different app — and if
-you signed in to Claude Code with your claude.ai account, the connectors you
-added there are already available. Anthropic verifies the pre-built
-connectors, Google Workspace and the like; a **custom** connector is any
-remote MCP server that has not been through that, which is what this hub is.
+claude.ai you add a connector under Settings; in Claude Code — a program you
+type commands at, in a terminal — you run `claude mcp add --transport http`.
+Same server, same address, different app — and if you signed in to Claude Code
+with your claude.ai account, the connectors you added there are already
+available. Anthropic verifies the pre-built connectors, Google Workspace and
+the like; a **custom** connector is any remote MCP server that has not been
+through that, which is what this hub is.
 
 **A plugin is not a door.** It is a bundle, it is Claude Code only, and it is
 installed from a marketplace: skills, agents, hooks, commands, LSP servers,
 background monitors — and, if it wants one, an `.mcp.json`. That last part is
-an MCP server, which is the whole reason these four words get muddled. The
-useful test: if you are trying to reach one service, you want a connector or
-`claude mcp add`. If you are trying to hand somebody a working setup, you want
-a plugin.
-
+an MCP server, which is why these four words get muddled. The test: to reach
+one service you want a connector or `claude mcp add`; to hand somebody a
+working setup, you want a plugin.
 [[cover.contents.10]]
 Connectors, the CLI, MCP servers and plugins
 
